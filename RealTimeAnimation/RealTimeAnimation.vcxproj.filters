@@ -23,9 +23,15 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
     <None Include="fragment.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragmentYellow.frag" />
   </ItemGroup>
 </Project>
