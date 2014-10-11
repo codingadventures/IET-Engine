@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "SOIL.h"
 #include "Camera.h"
+#include "Model.h"
 //#include "Mesh.h" 
 bool keys[1024];
 bool firstMouse = true;
@@ -73,15 +74,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 // Moves/alters the camera positions based on user input
 void Do_Movement()
 {
-    // Camera controls
-    if(keys[GLFW_KEY_W])
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if(keys[GLFW_KEY_S])
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if(keys[GLFW_KEY_A])
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if(keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+	// Camera controls
+	if(keys[GLFW_KEY_W])
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if(keys[GLFW_KEY_S])
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if(keys[GLFW_KEY_A])
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if(keys[GLFW_KEY_D])
+		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 #pragma endregion
 
@@ -247,7 +248,7 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(1024, 768, "Hello Open GL", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(viewportWidth, viewportHeight, "Hello Open GL", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	glewExperimental = GL_TRUE;
@@ -261,60 +262,46 @@ int main(int argc, char* argv[])
 	glfwSetScrollCallback(window, scroll_callback); 
 
 	Shader shader("vertex.vert","fragment.frag");
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f, 0.0f, 0.0f), 
-		glm::vec3(2.0f, 5.0f, -15.0f), 
-		glm::vec3(-1.5f, -2.2f, -2.5f),  
-		glm::vec3(-3.8f, -2.0f, -12.3f),  
-		glm::vec3(2.4f, -0.4f, -3.5f),  
-		glm::vec3(-1.7f, 3.0f, -7.5f),  
-		glm::vec3(1.3f, -2.0f, -2.5f),  
-		glm::vec3(1.5f, 2.0f, -2.5f), 
-		glm::vec3(1.5f, 0.2f, -1.5f), 
-		glm::vec3(-1.3f, 1.0f, -1.5f)  
-	};
 
-	GLuint VAO1,VAO2,container,face;
-	generate_buffer_object(&VAO1,&VAO2);
 
-	load_texture("textures\\container.jpg",&container);
-	load_texture("textures\\awesomeface.png",&face);
+	/*GLuint VAO1,VAO2,container,face;
+	generate_buffer_object(&VAO1,&VAO2);*/
+
+	/*load_texture("textures\\container.jpg",&container);
+	load_texture("textures\\awesomeface.png",&face);*/
 
 	glEnable(GL_DEPTH_TEST);
+	Model nanosuitModel("models\\hand(2).dae");
 
 	//cout << vec.x << vec.y << vec.z << vec.w <<endl;
 	//Game loop
 	while(!glfwWindowShouldClose(window))
 	{
 		// Set frame time
-        GLfloat currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
 		glfwPollEvents();
 		Do_Movement();  
 
-		glm::mat4 model,projection;
-		/*model = glm::rotate(model, -55.0f, glm::vec3(1.0f, 0.0f, 0.0f));*/
-		//view = glm::translate(view,glm::vec3(0.0f,0.0f,-6.0f));
+		glm::mat4 model,projection,view;
 
-		glm::mat4 view;
+		
 		view = camera.GetViewMatrix();
-		//	view = glm::rotate(view,45.0f*(float)glfwGetTime(),glm::vec3(-1.0f,1.0f,-1.0f));
-		projection = projection = glm::perspective(camera.Zoom, (float)viewportWidth/(float)viewportHeight, 0.1f, 1000.0f);  
-		model = glm::rotate(model, (float)glfwGetTime() * 50.0f, glm::vec3(0.5f, 1.0f, 0.0f)); 
 
-		//trans = glm::translate(trans, glm::vec3(0.2f, 0.2f, 0.0f));
+		projection = projection = glm::perspective(camera.Zoom, (float)viewportWidth/(float)viewportHeight, 0.1f, 1000.0f);  
+		//model = glm::rotate(model, (float)glfwGetTime() * 50.0f, glm::vec3(0.5f, 1.0f, 0.0f)); 
+
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
 		GLfloat timeValue = glfwGetTime();
-		GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
-		GLfloat redValue = (cos(timeValue)/2 ) + 0.5;
+		/*	GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+		GLfloat redValue = (cos(timeValue)/2 ) + 0.5;*/
 
-		GLint offsetUniform = glGetUniformLocation(shader.Program, "offset"); 
-		GLint transformLocation = glGetUniformLocation(shader.Program, "transform");
+
 		GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 		GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 		GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
@@ -323,49 +310,54 @@ int main(int argc, char* argv[])
 #pragma region First Shader
 		// 5. Draw our object
 		shader.Use();
-
+		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		//model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		model = glm::rotate(model,90.0f,glm::vec3(1.0f,0.0f,0.0f));
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		glUniform2f(offsetUniform, .5f, 0.0f);
+		
 
+		
+		nanosuitModel.Draw(shader);
+		/*
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, container);
 		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture1"), 0);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, face);
 		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture2"), 1);
+		*/
 
-
-		glBindVertexArray(VAO1);
+		//glBindVertexArray(VAO1);
 
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		for(GLuint i = 0; i < 10; i++)
+		/*for(GLuint i = 0; i < 10; i++)
 		{
-			glm::mat4 model;
-			GLfloat angle = 20.0f * i; 
+		glm::mat4 model;
+		GLfloat angle = 20.0f * i; 
 
-			model = glm::translate(model, cubePositions[i]);
-			if (i % 3 == 0)
-			{
-				model = glm::rotate(model, angle*(float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+		model = glm::translate(model, cubePositions[i]);
+		if (i % 3 == 0)
+		{
+		model = glm::rotate(model, angle*(float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
-			}
-			else
-			{
-				model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+		}
+		else
+		{
+		model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
 
-			}
-
-			glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		glBindVertexArray(0);
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		}*/
+
+		//glBindVertexArray(0);
 #pragma endregion 
 
 #pragma region Second Shader
