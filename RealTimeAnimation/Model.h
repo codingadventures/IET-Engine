@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "Skeleton.h"
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
@@ -28,6 +29,7 @@ public:
 	Model(GLchar* path)
 	{
 		this->loadModel(path);
+		skeleton = new Skeleton();
 	}
 
 	// Draws the model, and thus all its meshes
@@ -36,7 +38,7 @@ public:
 		for(GLuint i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].Draw(shader);
 	}
-
+	Skeleton* skeleton;
 private:
 	/*  Model Data  */
 	vector<Mesh> meshes;
@@ -49,7 +51,7 @@ private:
 	{
 		// Read file via ASSIMP
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs  | aiProcess_GenSmoothNormals);
 		// Check for errors
 		if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
@@ -72,6 +74,10 @@ private:
 			// The node object only contains indices to index the actual objects in the scene. 
 			// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]]; 
+			
+			if (mesh->HasBones())
+				LoadBones(0,mesh);
+
 			this->meshes.push_back(this->processMesh(mesh, scene));			
 		}
 		// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
@@ -82,6 +88,10 @@ private:
 
 	}
 
+	void LoadBones(glm::uint MeshIndex, const aiMesh* pMesh)
+	{
+		
+	}
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		// Data to fill

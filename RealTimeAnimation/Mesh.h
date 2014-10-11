@@ -6,28 +6,14 @@
 #include <iostream>
 #include <vector>
 #include "Shader.h"
+#include "Vertex.h"
+#include "Texture.h"
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
  
-
-
-struct Vertex {
-    // Position
-    glm::vec3 Position;
-    // Normal
-    glm::vec3 Normal;
-    // TexCoords
-    glm::vec2 TexCoords;
-};
-
-struct Texture {
-    GLuint id;
-    string type;
-    aiString path;
-};
 
 class Mesh {
 public:
@@ -82,7 +68,7 @@ public:
 private:
     /*  Render data  */
     GLuint VAO, VBO, EBO;
-
+	int weightJoints;
     /*  Functions    */
     // Initializes all the buffer objects/arrays
     void setupMesh()

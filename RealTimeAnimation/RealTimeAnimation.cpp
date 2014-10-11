@@ -86,126 +86,83 @@ void Do_Movement()
 }
 #pragma endregion
 
-GLfloat vertices[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
-void generate_buffer_object(GLuint* VAO1, GLuint* VAO2)
-{
-
-	//GLfloat texCoords[] = {
-	//	0.0f, 0.0f, 	// Lower-left corner  
-	//	1.0f, 0.0f,	// Lower-right corner
-	//	0.5f, 1.0f	// Top-center corner
-	//};
-
-	//GLfloat vertices1[] = {
-	//	// First triangle
-	//	0.5f, 0.5f,		// Top Right
-	//	0.5f, -0.5f,	// Bottom Right
-	//	-0.5f, 0.5f,	// Top Left 
-	//}; 
-	//GLfloat vertices1[] = {
-	//	// Positions	// Colors
-	//	0.5f, -0.5f,	 		1.0f, 0.0f, 0.0f,	// Bottom Right
-	//	-0.5f, -0.5f,	 	0.0f, 1.0f, 0.0f,	// Bottom Left
-	//	0.0f, 0.5f,		0.0f, 0.0f, 1.0f	// Top 
-	//};    
-
-	//GLfloat vertices1[] = {
-	//	// Positions		// Colors		// Texture Coords
-	//	0.5f, 0.5f,			1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 	// Top Right
-	//	0.5f, -0.5f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f, 	// Bottom Right
-	//	-0.5f, -0.5f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f, 	// Bottom Left
-	//	-0.5f, 0.5f,		1.0f, 1.0f, 0.0f,	0.0f, 1.0f	// Top Left 
-	//};
-
-	//GLfloat vertices2[] = {
-	//	// Second triangle
-	//	0.5f, -0.5f, 	// Bottom Right
-	//	-0.5f, -0.5f, 	// Bottom Left
-	//	-0.5f, 0.5f 	// Top Left
-	//}; 
-
-	/*GLfloat triangleVertices[] = {
-	-1.0f,0.0f,
-	0.5f,1.0f,
-	0.0f,0.0f
-	};
-	*/
-	GLuint indices[] = {  // Note that we start from 0!
-		0, 1, 3,	// First Triangle
-		1, 2, 3	// Second Triangle
-	};
-
-
-	GLuint VBO1,VBO2;
-	GLuint EBO1,EBO2;
-
-	glGenVertexArrays(1, VAO1); 
-	// 1. Bind our Vertex Array Object
-	glBindVertexArray(*VAO1);
-	glGenBuffers(1, &VBO1);  
-	glBindBuffer(GL_ARRAY_BUFFER, VBO1);  
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),&vertices[0],GL_STATIC_DRAW);
-
-	/*glGenBuffers(1,&EBO1);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO1);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),&indices[0],GL_STATIC_DRAW);*/
-
-
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5*sizeof(GLfloat),(GLvoid*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5*sizeof(GLfloat),(GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	//glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,7*sizeof(GLfloat),(GLvoid*)(5 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(2);
-
-	//4. Unbind our VAO (NOR the VBO NEITHER THE EBO)
-	glBindVertexArray(0);
-}
+ 
+//void generate_buffer_object(GLuint* VAO1, GLuint* VAO2)
+//{
+//
+//	//GLfloat texCoords[] = {
+//	//	0.0f, 0.0f, 	// Lower-left corner  
+//	//	1.0f, 0.0f,	// Lower-right corner
+//	//	0.5f, 1.0f	// Top-center corner
+//	//};
+//
+//	//GLfloat vertices1[] = {
+//	//	// First triangle
+//	//	0.5f, 0.5f,		// Top Right
+//	//	0.5f, -0.5f,	// Bottom Right
+//	//	-0.5f, 0.5f,	// Top Left 
+//	//}; 
+//	//GLfloat vertices1[] = {
+//	//	// Positions	// Colors
+//	//	0.5f, -0.5f,	 		1.0f, 0.0f, 0.0f,	// Bottom Right
+//	//	-0.5f, -0.5f,	 	0.0f, 1.0f, 0.0f,	// Bottom Left
+//	//	0.0f, 0.5f,		0.0f, 0.0f, 1.0f	// Top 
+//	//};    
+//
+//	//GLfloat vertices1[] = {
+//	//	// Positions		// Colors		// Texture Coords
+//	//	0.5f, 0.5f,			1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 	// Top Right
+//	//	0.5f, -0.5f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f, 	// Bottom Right
+//	//	-0.5f, -0.5f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f, 	// Bottom Left
+//	//	-0.5f, 0.5f,		1.0f, 1.0f, 0.0f,	0.0f, 1.0f	// Top Left 
+//	//};
+//
+//	//GLfloat vertices2[] = {
+//	//	// Second triangle
+//	//	0.5f, -0.5f, 	// Bottom Right
+//	//	-0.5f, -0.5f, 	// Bottom Left
+//	//	-0.5f, 0.5f 	// Top Left
+//	//}; 
+//
+//	/*GLfloat triangleVertices[] = {
+//	-1.0f,0.0f,
+//	0.5f,1.0f,
+//	0.0f,0.0f
+//	};
+//	*/
+//	GLuint indices[] = {  // Note that we start from 0!
+//		0, 1, 3,	// First Triangle
+//		1, 2, 3	// Second Triangle
+//	};
+//
+//
+//	GLuint VBO1,VBO2;
+//	GLuint EBO1,EBO2;
+//
+//	glGenVertexArrays(1, VAO1); 
+//	// 1. Bind our Vertex Array Object
+//	glBindVertexArray(*VAO1);
+//	glGenBuffers(1, &VBO1);  
+//	glBindBuffer(GL_ARRAY_BUFFER, VBO1);  
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),&vertices[0],GL_STATIC_DRAW);
+//
+//	/*glGenBuffers(1,&EBO1);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO1);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),&indices[0],GL_STATIC_DRAW);*/
+//
+//
+//	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5*sizeof(GLfloat),(GLvoid*)0);
+//	glEnableVertexAttribArray(0);
+//
+//	glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5*sizeof(GLfloat),(GLvoid*)(3 * sizeof(GLfloat)));
+//	glEnableVertexAttribArray(1);
+//
+//	//glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,7*sizeof(GLfloat),(GLvoid*)(5 * sizeof(GLfloat)));
+//	//glEnableVertexAttribArray(2);
+//
+//	//4. Unbind our VAO (NOR the VBO NEITHER THE EBO)
+//	glBindVertexArray(0);
+//}
 
 void load_texture(string path, GLuint *texture)
 {
