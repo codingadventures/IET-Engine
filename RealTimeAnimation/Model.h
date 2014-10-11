@@ -58,6 +58,8 @@ private:
 			cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 			return;
 		}
+
+
 		// Retrieve the directory path of the filepath
 		this->directory = path.substr(0, path.find_last_of('/'));
 
@@ -67,18 +69,23 @@ private:
 
 	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 	void processNode(aiNode* node, const aiScene* scene)
-	{
+	{ 
+
 		// Process each mesh located at the current node
 		for(GLuint i = 0; i < node->mNumMeshes; i++)
 		{
 			// The node object only contains indices to index the actual objects in the scene. 
 			// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]]; 
-			
-			if (mesh->HasBones())
-				LoadBones(0,mesh);
+			aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
+			Mesh mesh = this->processMesh(ai_mesh, scene);
 
-			this->meshes.push_back(this->processMesh(mesh, scene));			
+			mesh.globalInverseTransform = aiMatrix4x4ToGlm(scene->mRootNode->mTransformation);
+			mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
+
+			if (ai_mesh->HasBones())
+				LoadBones(0, ai_mesh);
+
+			this->meshes.push_back(mesh);			
 		}
 		// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
 		for(GLuint i = 0; i < node->mNumChildren; i++)
@@ -90,7 +97,17 @@ private:
 
 	void LoadBones(glm::uint MeshIndex, const aiMesh* pMesh)
 	{
-		
+		for (glm::uint i = 0 ; i < pMesh->mNumBones ; i++)
+		{
+			Bone bone;
+			glm::uint boneIndex = 0; 
+			string BoneName(pMesh->mBones[i]->mName.data);
+			bone.name = BoneName;
+
+
+
+		}
+
 	}
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
 	{

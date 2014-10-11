@@ -4,6 +4,7 @@
 #include "Skeleton.h"
 #include "BonePose.h"
 #include "glm/glm.hpp"
+#include <map>
 
 class SkeletonPose {
 	public:

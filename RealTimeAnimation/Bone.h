@@ -9,4 +9,5 @@ struct Bone {
 	std::string name;
 	Bone* parent; 
 	std::vector<Bone*> children;
+	bool isVisited;
 };

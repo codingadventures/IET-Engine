@@ -7,14 +7,16 @@ class Skeleton
 {
 public:
 	Bone* rootBone;
+
+	Bone* currentBone;
 	//std::map<std::string, Bone*> bones;
-	Skeleton();
+	Skeleton(){}
 	Skeleton(Bone* rootBone): rootBone(rootBone)
 	{
 		
 	}
 
 private:
-	vector<Bone*> bones;
+	//vector<Bone*> bones;
 
 };
