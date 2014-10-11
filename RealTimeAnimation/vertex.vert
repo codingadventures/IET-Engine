@@ -13,8 +13,14 @@ out vec2 TexCoords;
 
 void main() 
 { 
+//	mat4 BoneTransform = bones[BoneIDs[0]] * Weights[0];
+  //  BoneTransform     += bones[BoneIDs[1]] * Weights[1];
+    //BoneTransform     += bones[BoneIDs[2]] * Weights[2];
+    //BoneTransform     += bones[BoneIDs[3]] * Weights[3];
 	
-	gl_Position =  projection * view * model * vec4(position,1.0f); 
+	//vec4 PosL    = BoneTransform * vec4(position, 1.0);
+
+	gl_Position =  projection * view * model * vec4(position,1.0f) ;//* PosL; 
 	 
 	TexCoords = texCoord;
 }

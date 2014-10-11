@@ -10,4 +10,5 @@ struct Bone {
 	Bone* parent; 
 	std::vector<Bone*> children;
 	bool isVisited;
+	glm::mat4 OffsetMatrix;
 };

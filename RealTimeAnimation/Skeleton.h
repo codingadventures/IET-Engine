@@ -7,13 +7,12 @@ class Skeleton
 {
 public:
 	Bone* rootBone;
-
-	Bone* currentBone;
+	std::map<std::string, glm::uint> boneMapping;
 	//std::map<std::string, Bone*> bones;
 	Skeleton(){}
 	Skeleton(Bone* rootBone): rootBone(rootBone)
 	{
-		
+		 
 	}
 
 private:

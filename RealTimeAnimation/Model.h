@@ -28,8 +28,8 @@ public:
 	// Constructor, expects a filepath to a 3D model.
 	Model(GLchar* path)
 	{
-		this->loadModel(path);
 		skeleton = new Skeleton();
+		this->loadModel(path);
 	}
 
 	// Draws the model, and thus all its meshes
@@ -82,8 +82,6 @@ private:
 			mesh.globalInverseTransform = aiMatrix4x4ToGlm(scene->mRootNode->mTransformation);
 			mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
 
-			if (ai_mesh->HasBones())
-				LoadBones(0, ai_mesh);
 
 			this->meshes.push_back(mesh);			
 		}
@@ -95,21 +93,8 @@ private:
 
 	}
 
-	void LoadBones(glm::uint MeshIndex, const aiMesh* pMesh)
-	{
-		for (glm::uint i = 0 ; i < pMesh->mNumBones ; i++)
-		{
-			Bone bone;
-			glm::uint boneIndex = 0; 
-			string BoneName(pMesh->mBones[i]->mName.data);
-			bone.name = BoneName;
 
-
-
-		}
-
-	}
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene)
 	{
 		// Data to fill
 		vector<Vertex> vertices;
@@ -117,31 +102,31 @@ private:
 		vector<Texture> textures;
 
 		// Walk through each of the mesh's vertices
-		for(GLuint i = 0; i < mesh->mNumVertices; i++)
+		for(GLuint i = 0; i < ai_mesh->mNumVertices; i++)
 		{
 			Vertex vertex;
 			glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 			// Positions
-			vector.x = mesh->mVertices[i].x;
-			vector.y = mesh->mVertices[i].y;
-			vector.z = mesh->mVertices[i].z;
+			vector.x = ai_mesh->mVertices[i].x;
+			vector.y = ai_mesh->mVertices[i].y;
+			vector.z = ai_mesh->mVertices[i].z;
 			vertex.Position = vector;
 			// Normals
-			if (mesh->HasNormals())
+			if (ai_mesh->HasNormals())
 			{
-				vector.x = mesh->mNormals[i].x;
-				vector.y = mesh->mNormals[i].y;
-				vector.z = mesh->mNormals[i].z;
+				vector.x = ai_mesh->mNormals[i].x;
+				vector.y = ai_mesh->mNormals[i].y;
+				vector.z = ai_mesh->mNormals[i].z;
 				vertex.Normal = vector;
 			}
 			// Texture Coordinates
-			if(mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+			if(ai_mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 			{
 				glm::vec2 vec;
 				// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 				// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-				vec.x = mesh->mTextureCoords[0][i].x; 
-				vec.y = mesh->mTextureCoords[0][i].y;
+				vec.x = ai_mesh->mTextureCoords[0][i].x; 
+				vec.y = ai_mesh->mTextureCoords[0][i].y;
 				vertex.TexCoords = vec;
 			}
 			else
@@ -149,17 +134,17 @@ private:
 			vertices.push_back(vertex);
 		}
 		// Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-		for(GLuint i = 0; i < mesh->mNumFaces; i++)
+		for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
 		{
-			aiFace face = mesh->mFaces[i];
+			aiFace face = ai_mesh->mFaces[i];
 			// Retrieve all indices of the face and store them in the indices vector
 			for(GLuint j = 0; j < face.mNumIndices; j++)
 				indices.push_back(face.mIndices[j]);
 		}
 		// Process materials
-		if(mesh->mMaterialIndex >= 0)
+		if(ai_mesh->mMaterialIndex >= 0)
 		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			aiMaterial* material = scene->mMaterials[ai_mesh->mMaterialIndex];
 			// We assume a convention for sampler names in the shaders. Each diffuse texture should be named
 			// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 			// Same applies to other texture as the following list summarizes:
@@ -174,9 +159,48 @@ private:
 			vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
+		glm::uint numBones = 0;
+		vector<Bone> bones;
+		vector<VertexBoneData> boneWeights;
+		boneWeights.resize(ai_mesh->mNumVertices);
+
+		if(ai_mesh->HasBones())
+		{
+			for (int i = 0 ; i < ai_mesh->mNumBones ; i++) {                
+				int BoneIndex = 0;        
+				string BoneName(ai_mesh->mBones[i]->mName.data);
+
+				if (!skeleton->boneMapping.empty() && skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
+					// Allocate an index for a new bone
+					BoneIndex =  numBones;
+					numBones++;            
+					Bone bi;			
+					bones.push_back(bi);
+					bones[BoneIndex].OffsetMatrix = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);  
+
+					skeleton->boneMapping[BoneName] = BoneIndex;
+				}
+				else {
+					BoneIndex = skeleton->boneMapping[BoneName];
+				}                      
+
+				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
+					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
+					float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
+					for (glm::uint i = 0 ; i < 4 ; i++) {
+						if (boneWeights[VertexID].Weights[i] == 0.0) {
+							boneWeights[VertexID].IDs[i]     = BoneIndex;
+							boneWeights[VertexID].Weights[i] = Weight;
+							break;
+						}        
+					}
+
+				}
+			}    
+		}
 
 		// Return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, textures);
+		return Mesh(vertices, indices, textures,bones,boneWeights);
 	}
 
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
