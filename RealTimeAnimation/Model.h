@@ -81,7 +81,7 @@ private:
 
 			mesh.globalInverseTransform = aiMatrix4x4ToGlm(scene->mRootNode->mTransformation);
 			mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
-
+			
 
 			this->meshes.push_back(mesh);			
 		}

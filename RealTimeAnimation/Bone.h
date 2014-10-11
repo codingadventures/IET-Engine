@@ -11,4 +11,6 @@ struct Bone {
 	std::vector<Bone*> children;
 	bool isVisited;
 	glm::mat4 OffsetMatrix;
+	glm::mat4 parentTransformation;
+	glm::mat4 FinalTransformation;
 };

@@ -39,8 +39,46 @@ public:
 		this->setupMesh();
 	}
 
+	void BoneTransform(float TimeInSeconds, vector<glm::mat4> transforms)
+	{
+		glm::mat4 identity;
+		float TicksPerSecond = 25.0f;
+		float TimeInTicks = TimeInSeconds * TicksPerSecond;
+
+		//read node Hierarchy
+
+
+
+		transforms.resize(bones.size());
+
+		for (glm::uint i = 0 ; i < bones.size() ; i++) {
+			transforms[i] = bones[i].FinalTransformation;
+		}
+	}
+
+	void Mesh::Traverse(  const aiNode* pNode, const glm::mat4 ParentTransform)
+	{    
+		string NodeName(pNode->mName.data);
+
+
+		glm::mat4 NodeTransformation(pNode->mTransformation);
+
+
+
+		glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+		if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
+			uint BoneIndex = m_BoneMapping[NodeName];
+			m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * m_BoneInfo[BoneIndex].BoneOffset;
+		}
+
+		for (glm::uint i = 0 ; i < pNode->mNumChildren ; i++) {
+			ReadNodeHeirarchy( pNode->mChildren[i], GlobalTransformation);
+		}
+	}
+
 	// Render the mesh
-	void Draw(Shader shader) 
+	void Draw(Shader shader ) 
 	{
 		// Bind appropriate textures
 		GLuint diffuseNr = 1;
