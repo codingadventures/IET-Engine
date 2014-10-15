@@ -5,7 +5,7 @@ layout (location = 1) in vec2 texCoord;
 layout (location = 3) in ivec4 BoneIDs;
 layout (location = 4) in vec4 Weights;
 
-const int MAX_BONES = 100;
+const int MAX_BONES = 32;
 
 
 const vec3 colorMap[16] = vec3[16](
@@ -38,15 +38,15 @@ out vec3 colour;
 void main() 
 { 
 
-//	mat4 BoneTransform = bones[int(BoneIDs[0])] * Weights[0];
-  //  BoneTransform     += bones[BoneIDs[1]] * Weights[1];
-    //BoneTransform     += bones[BoneIDs[2]] * Weights[2];
-    //BoneTransform     += bones[BoneIDs[3]] * Weights[3];
+ 	mat4 BoneTransform = bones[int(BoneIDs[0])] * Weights[0];
+    BoneTransform     += bones[BoneIDs[1]] * Weights[1];
+    BoneTransform     += bones[BoneIDs[2]] * Weights[2];
+    BoneTransform     += bones[BoneIDs[3]] * Weights[3];
 	 
-	//vec4 PosL    = BoneTransform * vec4(position, 1.0);
+	vec4 PosL    = BoneTransform * vec4(position, 1.0);
 	colour = colorMap[BoneIDs[0]];
-	//mat4 v = bones[0];
-	gl_Position =  projection * view * model * vec4(position,1.0f) ;//* PosL; 
+	 
+	gl_Position =  projection * view * model * PosL * vec4(position,1.0f); 
 	 
 	TexCoords = texCoord;
 }

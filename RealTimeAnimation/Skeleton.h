@@ -14,6 +14,42 @@ public:
 		rootBone = NULL;
 	}
 
+	void skeleton_animate  (
+		Bone* bone,
+		glm::mat4 parent_mat,
+		glm::mat4* bone_animation_mats
+		) {
+
+			assert (bone);
+
+			/* the animation of a node after inheriting its parent's animation */
+			glm::mat4 our_mat = parent_mat;
+			/* the animation for a particular bone at this time */
+			glm::mat4 local_anim;
+
+			// if node has a weighted bone...
+			int bone_i = bone->boneIndex;
+			if (bone_i > -1) {
+				// ... then get offset matrices
+				glm::mat4 bone_offset = bone->boneOffset;
+				glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+				// ... at the moment get the per-bone animation from keyboard input
+				//local_anim = g_local_anims[bone_i];
+
+				our_mat = parent_mat * inv_bone_offset * animation * bone_offset;
+				bone_animation_mats[bone_i] = our_mat;
+			}
+			for (int i = 0; i < bone->numChildren; i++) {
+				skeleton_animate (
+					bone->children[i],
+					animation,
+					our_mat,
+					bone_animation_mats
+					);
+			}
+	}
+
+
 	bool importSkeletonBone(aiNode* assimp_node,
 		Bone** skeleton_node,
 		int bone_count)

@@ -10,7 +10,7 @@
 #include "Texture.h"
 using namespace std;
 // GL Includes
-#include <GL/glew.h> // Contains all the necessery OpenGL includes
+#include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -23,7 +23,7 @@ public:
 	vector<Texture> textures;
 	glm::mat4 globalInverseTransform;
 	glm::uint numBones;
-	vector<Bone> bones;
+	 
 	vector<VertexBoneData> boneWeights;
 	/*  Functions  */
 	// Constructor
@@ -38,7 +38,7 @@ public:
 		this->setupMesh();
 	}
 
-	void BoneTransform(Bone* rootNode, vector<glm::mat4> transforms, std::map<std::string, glm::uint> boneMapping)
+	void BoneTransform(Bone* rootNode, vector<glm::mat4> &transforms, std::map<std::string, Bone> boneMapping)
 	{
 		glm::mat4 identity;
 		float TicksPerSecond = 25.0f;
@@ -47,27 +47,26 @@ public:
 		//read node Hierarchy
 		this->boneMapping = boneMapping;
 
-		Traverse(rootNode,identity);
+		Traverse(rootNode, identity);
 
-		transforms.resize(bones.size());
+		transforms.resize(numBones);
 
-		for (glm::uint i = 0 ; i < bones.size() ; i++) {
-			transforms[i] = bones[i].finalTransformation;
-		}
+		/*for (glm::uint i = 0 ; i < numBones ; i++) {
+		transforms[i] = bones[i].finalTransformation;
+		}*/
 	}
 
 	void Mesh::Traverse(  const Bone* bone, const glm::mat4 ParentTransform)
 	{    
 		string NodeName(bone->name);
 
-
 		glm::mat4 NodeTransformation(bone->parentTransformation);
 
 		glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
 
 		if (boneMapping.find(NodeName) != boneMapping.end()) {
-			GLuint BoneIndex = boneMapping[NodeName];
-			bones[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation * bones[BoneIndex].boneOffset;
+			GLuint BoneIndex = boneMapping[NodeName].boneIndex;
+			//bone->finalTransformation = globalInverseTransform * GlobalTransformation * bone->boneOffset;
 		}
 
 		for (glm::uint i = 0 ; i < sizeof(bone->children) ; i++) {
@@ -114,7 +113,7 @@ private:
 	GLuint VAO, VBO, EBO, boneVBO;
 
 	int weightJoints;
-	std::map<std::string, glm::uint> boneMapping;
+	std::map<std::string, Bone> boneMapping;
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays
 	void setupMesh()
@@ -128,7 +127,7 @@ private:
 		glBindVertexArray(this->VAO);
 		// Load data into vertex buffers
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-		// A great thing about structs is that their memory layout is sequential for all its items.
+		// A great thing about struct is that their memory layout is sequential for all its items.
 		// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
 		// again translates to 3/2 floats which translates to a byte array.
 		glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW);  
@@ -143,7 +142,7 @@ private:
 		// Vertex Normals
 		glEnableVertexAttribArray(1);	
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
-		// Vertex Texture Coords
+		// Vertex Texture Coordinates
 		glEnableVertexAttribArray(2);	
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 

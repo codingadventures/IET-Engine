@@ -7,6 +7,9 @@
 #include "Camera.h"
 #include "Model.h"
 //#include "Mesh.h" 
+
+#define MAX_BONES 32
+
 bool keys[1024];
 bool firstMouse = true;
 int viewportWidth=1024,viewportHeight = 768;
@@ -15,8 +18,11 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 GLfloat lastX = viewportWidth/2, lastY = viewportHeight/2;
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
-glm::mat4  animationTransformMap[5];
-GLuint boneLocation[4];
+glm::mat4  animationTransformMap;
+GLuint boneLocation[MAX_BONES];
+float theta = 0.0f;
+float rot_speed = 50.0f; // 50 radians per second
+
 
 #pragma region [ Input Callback ]
 
@@ -76,6 +82,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 // Moves/alters the camera positions based on user input
 void Do_Movement()
 {
+	static double previous_seconds = glfwGetTime ();
+	double current_seconds = glfwGetTime ();
+	double elapsed_seconds = current_seconds - previous_seconds;
+	previous_seconds = current_seconds;
+
 	// Camera controls
 	if(keys[GLFW_KEY_W])
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -86,8 +97,11 @@ void Do_Movement()
 	if(keys[GLFW_KEY_D])
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 
-	if(keys[GLFW_KEY_Z]);
-	animationTransformMap[0] = glm::rotate( animationTransformMap[0], 10.0f,glm::vec3(1.0f,0.0f,0.0f));
+	if(keys[GLFW_KEY_Z])
+	{
+		theta += rot_speed * elapsed_seconds;
+		animationTransformMap  = glm::rotate( animationTransformMap,theta,glm::vec3(0.0f,0.0f,1.0f));
+	}
 }
 #pragma endregion
 
@@ -156,15 +170,15 @@ int main(int argc, char* argv[])
 	Model hand("models\\hand(2).dae");
 
 
-	
+
 
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
 
-	for (unsigned int i = 0 ; i < 4 ; i++) {
+	for (unsigned int i = 0 ; i < MAX_BONES ; i++) {
 		char Name[128];
-		 
+
 		memset(Name, 0, sizeof(Name));
 		sprintf_s(Name, sizeof(Name), "bones[%d]", i);
 		GLint location = glGetUniformLocation(shader.Program, Name);
@@ -174,8 +188,8 @@ int main(int argc, char* argv[])
 
 		boneLocation[i] = location;
 	}
-		
-	
+
+
 	while(!glfwWindowShouldClose(window))
 	{
 		// Set frame time
@@ -214,6 +228,11 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
+
+		hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),)
+		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, monkey_bone_animation_mats[0]);
+
+
 		vector<glm::mat4> transforms;
 
 
@@ -223,6 +242,8 @@ int main(int argc, char* argv[])
 		}*/
 
 		hand.Draw(shader);
+
+
 		/*
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, container);

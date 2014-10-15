@@ -32,9 +32,9 @@ public:
 		this->loadModel(path);
 	}
 
-	void Animate(){
-		/*for(GLuint i = 0; i < this->meshes.size(); i++)
-		this->meshes[i].BoneTransform();*/
+	void Animate(vector<glm::mat4> &transforms){
+		for(GLuint i = 0; i < this->meshes.size(); i++)
+			this->meshes[i].BoneTransform(skeleton->rootBone,transforms,skeleton->boneMapping);
 	}
 
 	// Draws the model, and thus all its meshes
@@ -225,6 +225,7 @@ private:
 				)) {
 					fprintf (stderr, "ERROR: could not import node tree from mesh\n");
 			} // endif
+
 
 
 		}
