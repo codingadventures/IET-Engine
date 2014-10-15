@@ -26,3 +26,6 @@ inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4& AssimpMatrix)
 
 	return m;
 }
+
+
+#define INVALID_UNIFORM_LOCATION 0xffffffff

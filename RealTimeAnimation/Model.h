@@ -32,12 +32,19 @@ public:
 		this->loadModel(path);
 	}
 
+	void Animate(){
+	
+	
+	}
+
 	// Draws the model, and thus all its meshes
 	void Draw(Shader shader)
 	{
 		for(GLuint i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].Draw(shader);
 	}
+
+	 
 	Skeleton* skeleton;
 private:
 	/*  Model Data  */
@@ -176,7 +183,7 @@ private:
 					numBones++;            
 					Bone bi;			
 					bones.push_back(bi);
-					bones[BoneIndex].OffsetMatrix = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);  
+//					bones[BoneIndex].OffsetMatrix = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);  
 
 					skeleton->boneMapping[BoneName] = BoneIndex;
 				}
@@ -200,7 +207,7 @@ private:
 		}
 
 		// Return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, textures,bones,boneWeights);
+		return Mesh(vertices, indices, textures, bones, boneWeights);
 	}
 
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.

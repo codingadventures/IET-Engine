@@ -25,7 +25,6 @@ public:
 	glm::uint numBones;
 	vector<Bone> bones;
 	vector<VertexBoneData> boneWeights;
-
 	/*  Functions  */
 	// Constructor
 	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<Bone> bones ,vector<VertexBoneData> boneWeights)
@@ -39,15 +38,16 @@ public:
 		this->setupMesh();
 	}
 
-	void BoneTransform(float TimeInSeconds, vector<glm::mat4> transforms)
+	void BoneTransform(Bone* rootNode, vector<glm::mat4> transforms, std::map<std::string, glm::uint> boneMapping)
 	{
 		glm::mat4 identity;
 		float TicksPerSecond = 25.0f;
-		float TimeInTicks = TimeInSeconds * TicksPerSecond;
+		//float TimeInTicks = TimeInSeconds * TicksPerSecond;
 
 		//read node Hierarchy
+		this->boneMapping = boneMapping;
 
-
+		Traverse(rootNode,identity);
 
 		transforms.resize(bones.size());
 
@@ -56,26 +56,26 @@ public:
 		}
 	}
 
-	void Mesh::Traverse(  const aiNode* pNode, const glm::mat4 ParentTransform)
+	void Mesh::Traverse(  const Bone* bone, const glm::mat4 ParentTransform)
 	{    
-		string NodeName(pNode->mName.data);
+		string NodeName(bone->name);
 
 
-		glm::mat4 NodeTransformation(pNode->mTransformation);
-
-
+		glm::mat4 NodeTransformation(bone->parentTransformation);
 
 		glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
 
-		if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
-			uint BoneIndex = m_BoneMapping[NodeName];
-			m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * m_BoneInfo[BoneIndex].BoneOffset;
+		if (boneMapping.find(NodeName) != boneMapping.end()) {
+			GLuint BoneIndex = boneMapping[NodeName];
+			bones[BoneIndex].FinalTransformation = globalInverseTransform * GlobalTransformation * bones[BoneIndex].BoneOffset;
 		}
 
-		for (glm::uint i = 0 ; i < pNode->mNumChildren ; i++) {
-			ReadNodeHeirarchy( pNode->mChildren[i], GlobalTransformation);
+		for (glm::uint i = 0 ; i < bone->children.size() ; i++) {
+			Traverse( bone->children[i], GlobalTransformation);
 		}
 	}
+
+	 
 
 	// Render the mesh
 	void Draw(Shader shader ) 
@@ -102,6 +102,7 @@ public:
 		}
 		glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 
+		 
 		// Draw mesh
 		glBindVertexArray(this->VAO);
 		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
@@ -111,8 +112,9 @@ public:
 private:
 	/*  Render data  */
 	GLuint VAO, VBO, EBO, boneVBO;
-	int weightJoints;
 
+	int weightJoints;
+	std::map<std::string, glm::uint> boneMapping;
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays
 	void setupMesh()
@@ -152,9 +154,7 @@ private:
 		glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
 
 		glEnableVertexAttribArray(4);    
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16); 
-
-
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)offsetof(VertexBoneData, Weights)); 
 
 		glBindVertexArray(0);
 	}
