@@ -161,6 +161,7 @@ int main(int argc, char* argv[])
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
+
 	for (unsigned int i = 0 ; i < 4 ; i++) {
 		char Name[128];
 		 
@@ -209,6 +210,7 @@ int main(int argc, char* argv[])
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
 		model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
+
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
@@ -216,9 +218,9 @@ int main(int argc, char* argv[])
 
 
 
-		//for (GLuint i = 0 ; i < transforms.size() ; i++) {
-		//	m_pEffect->SetBoneTransform(i, Transforms[i]);
-		//}
+		/*for (GLuint i = 0 ; i < transforms.size() ; i++) {
+		m_pEffect->SetBoneTransform(i, Transforms[i]);
+		}*/
 
 		hand.Draw(shader);
 		/*

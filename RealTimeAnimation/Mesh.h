@@ -27,12 +27,12 @@ public:
 	vector<VertexBoneData> boneWeights;
 	/*  Functions  */
 	// Constructor
-	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<Bone> bones ,vector<VertexBoneData> boneWeights)
+	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexBoneData> boneWeights)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
 		this->textures = textures;
-		this->bones = bones;
+	//	this->bones = bones;
 		this->boneWeights = boneWeights;
 		// Now that we have all the required data, set the vertex buffers and its attribute pointers.
 		this->setupMesh();
@@ -52,7 +52,7 @@ public:
 		transforms.resize(bones.size());
 
 		for (glm::uint i = 0 ; i < bones.size() ; i++) {
-			transforms[i] = bones[i].FinalTransformation;
+			transforms[i] = bones[i].finalTransformation;
 		}
 	}
 
@@ -67,15 +67,15 @@ public:
 
 		if (boneMapping.find(NodeName) != boneMapping.end()) {
 			GLuint BoneIndex = boneMapping[NodeName];
-			bones[BoneIndex].FinalTransformation = globalInverseTransform * GlobalTransformation * bones[BoneIndex].BoneOffset;
+			bones[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation * bones[BoneIndex].boneOffset;
 		}
 
-		for (glm::uint i = 0 ; i < bone->children.size() ; i++) {
+		for (glm::uint i = 0 ; i < sizeof(bone->children) ; i++) {
 			Traverse( bone->children[i], GlobalTransformation);
 		}
 	}
 
-	 
+
 
 	// Render the mesh
 	void Draw(Shader shader ) 
@@ -102,7 +102,7 @@ public:
 		}
 		glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 
-		 
+
 		// Draw mesh
 		glBindVertexArray(this->VAO);
 		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);

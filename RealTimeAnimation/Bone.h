@@ -3,16 +3,20 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+
+#define MAX_BONES 32
+
 struct Bone {
-	glm::mat4 transform;
-	unsigned int jointIndex;
-	std::string name;
-	Bone* parent; 
-	std::vector<Bone*> children;
+	Bone* children[MAX_BONES];
+
+	int boneIndex,numChildren;
 	bool isVisited;
+
+	 
+
+	char name[64];
+	glm::mat4 boneOffset;
 	glm::mat4 parentTransformation;
-
-	glm::mat4 FinalTransformation;
-	glm::mat4 BoneOffset;
-
+	glm::mat4 transform;
+	glm::mat4 finalTransformation;
 };

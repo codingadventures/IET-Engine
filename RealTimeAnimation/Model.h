@@ -34,7 +34,7 @@ public:
 
 	void Animate(){
 		/*for(GLuint i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].BoneTransform();*/
+		this->meshes[i].BoneTransform();*/
 	}
 
 	// Draws the model, and thus all its meshes
@@ -44,7 +44,7 @@ public:
 			this->meshes[i].Draw(shader);
 	}
 
-	 
+
 	Skeleton* skeleton;
 private:
 	/*  Model Data  */
@@ -88,7 +88,7 @@ private:
 
 			mesh.globalInverseTransform = aiMatrix4x4ToGlm(scene->mRootNode->mTransformation);
 			mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
-			
+
 
 			this->meshes.push_back(mesh);			
 		}
@@ -108,6 +108,7 @@ private:
 		vector<GLuint> indices;
 		vector<Texture> textures;
 
+#pragma region [ Process Vertices ]
 		// Walk through each of the mesh's vertices
 		for(GLuint i = 0; i < ai_mesh->mNumVertices; i++)
 		{
@@ -140,7 +141,11 @@ private:
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 			vertices.push_back(vertex);
 		}
-		// Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+#pragma endregion
+
+#pragma region [ Process Faces ]
+
+		// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 		for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
 		{
 			aiFace face = ai_mesh->mFaces[i];
@@ -167,28 +172,35 @@ private:
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
 		glm::uint numBones = 0;
-		vector<Bone> bones;
+		//vector<Bone> bones;
 		vector<VertexBoneData> boneWeights;
 		boneWeights.resize(ai_mesh->mNumVertices);
+#pragma endregion  
+
+#pragma region [ Process Bones ]
 
 		if(ai_mesh->HasBones())
 		{
+			int bone_count =  ai_mesh->mNumBones;
+			char bone_names[256][64];
+
 			for (int i = 0 ; i < ai_mesh->mNumBones ; i++) {                
 				int BoneIndex = 0;        
 				string BoneName(ai_mesh->mBones[i]->mName.data);
 
-				if (!skeleton->boneMapping.empty() && skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
+				if ( skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
 					BoneIndex =  numBones;
 					numBones++;            
 					Bone bi;			
-					bones.push_back(bi);
-//					bones[BoneIndex].OffsetMatrix = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);  
+					bi.boneOffset = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);
+					bi.boneIndex = BoneIndex;
+					//bones.push_back(bi); 
 
-					skeleton->boneMapping[BoneName] = BoneIndex;
+					skeleton->boneMapping[BoneName] = bi;
 				}
 				else {
-					BoneIndex = skeleton->boneMapping[BoneName];
+					BoneIndex = skeleton->boneMapping[BoneName].boneIndex;
 				}                      
 
 				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
@@ -201,13 +213,26 @@ private:
 							break;
 						}        
 					}
-
 				}
 			}    
+
+			// there should always be a 'root node', even if no skeleton exists
+			aiNode* assimp_node = scene->mRootNode;
+			if (!skeleton->importSkeletonBone (
+				assimp_node,
+				&skeleton->rootBone,
+				bone_count
+				)) {
+					fprintf (stderr, "ERROR: could not import node tree from mesh\n");
+			} // endif
+
+
 		}
 
+#pragma endregion  
+
 		// Return a mesh object created from the extracted mesh data
-		return Mesh(vertices, indices, textures, bones, boneWeights);
+		return Mesh(vertices, indices, textures, boneWeights);
 	}
 
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
