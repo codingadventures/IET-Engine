@@ -155,25 +155,26 @@ int main(int argc, char* argv[])
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	Model hand("models\\hand(2).dae");
 
+
+	
+
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
-
 	for (unsigned int i = 0 ; i < 4 ; i++) {
 		char Name[128];
+		 
 		memset(Name, 0, sizeof(Name));
 		sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-		GLuint location = glGetUniformLocation(shader.Program, Name);
-
+		GLint location = glGetUniformLocation(shader.Program, Name);
 		if (location == INVALID_UNIFORM_LOCATION) {
 			fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
 		}
 
 		boneLocation[i] = location;
 	}
-
-	//cout << vec.x << vec.y << vec.z << vec.w <<endl;
-	//Game loop
+		
+	
 	while(!glfwWindowShouldClose(window))
 	{
 		// Set frame time
@@ -215,9 +216,9 @@ int main(int argc, char* argv[])
 
 
 
-		for (GLuint i = 0 ; i < transforms.size() ; i++) {
-			m_pEffect->SetBoneTransform(i, Transforms[i]);
-		}
+		//for (GLuint i = 0 ; i < transforms.size() ; i++) {
+		//	m_pEffect->SetBoneTransform(i, Transforms[i]);
+		//}
 
 		hand.Draw(shader);
 		/*
