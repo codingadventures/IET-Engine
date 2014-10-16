@@ -101,7 +101,7 @@ void Do_Movement()
 	{
 
 		theta[8] += rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,0.0f,1.0f));
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
 		moved = true;
 
 	}
@@ -110,7 +110,7 @@ void Do_Movement()
 	{
 
 		theta[9] += rot_speed * elapsed_seconds;
-		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(0.0f,0.0f,1.0f));
+		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(1.0f,0.0f,0.0f));
 		moved = true;
 
 	}
@@ -118,7 +118,7 @@ void Do_Movement()
 	{
 
 		theta[8] -=  rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,0.0f,1.0f));
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
 		moved = true;
 
 	}

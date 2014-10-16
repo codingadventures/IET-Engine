@@ -44,11 +44,11 @@ public:
 				local_anim = animation[bone_i];
 
 				static float angle = 0.0f;
-				angle += 0.01f;
-				glm::mat4 temp = bone_i==0 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(0.0f,1.0f,0.0f)): glm::mat4(1.0f);
+				angle += 0.04f;
+				//glm::mat4 temp = bone_i==10 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(1.0f,0.0f,0.0f)): glm::mat4(1.0f);
 
-				our_mat = parent_mat * inv_bone_offset * temp * bone_offset;
-				bone_animation_mats[bone_i] = inverseGlobalTransform * our_mat;
+				our_mat = parent_mat * inv_bone_offset * local_anim * bone_offset ;
+				bone_animation_mats[bone_i] = our_mat;/**/
 			}
 			for (int i = 0; i < bone->numChildren; i++) {
 				skeleton_animate (
@@ -98,7 +98,7 @@ public:
 			}
 		}
 		if (has_useful_child || has_bone) {
-			temp->parentTransformation = aiMatrix4x4ToGlm(assimp_node->mTransformation);
+			temp->parentTransformation = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
 			temp->boneOffset = this->boneMapping[temp->name].boneOffset;
 			// point parameter to our allocated node
 			*skeleton_node = temp;

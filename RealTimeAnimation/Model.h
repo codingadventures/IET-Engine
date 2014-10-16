@@ -87,8 +87,8 @@ private:
 			Mesh mesh = this->processMesh(ai_mesh, scene );
 
 			//mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
-			skeleton->inverseGlobalTransform = glm::inverse( aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
-			skeleton->globalTransform =   aiMatrix4x4ToGlm(scene->mRootNode->mTransformation) ;
+			skeleton->inverseGlobalTransform = glm::inverse( aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
+			skeleton->globalTransform =   aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation) ;
 
 			this->meshes.push_back(mesh);			
 		}
@@ -193,7 +193,7 @@ private:
 					BoneIndex =  numBones;
 					numBones++;            
 					Bone bi;			
-					bi.boneOffset = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);
+					bi.boneOffset = aiMatrix4x4ToGlm( &ai_mesh->mBones[i]->mOffsetMatrix);
 					bi.boneIndex = BoneIndex;
 
 					//bones.push_back(bi); 
