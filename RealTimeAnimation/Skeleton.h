@@ -8,6 +8,8 @@ class Skeleton
 public:
 	Bone* rootBone;
 	std::map<std::string, Bone> boneMapping;
+	glm::mat4 inverseGlobalTransform;
+	glm::mat4 globalTransform;
 	//std::map<std::string, Bone*> bones;
 	Skeleton(){
 
@@ -22,8 +24,9 @@ public:
 		) {
 
 			if(!bone)
+			{
 				bone = rootBone;
-
+			}
 			assert (bone);
 
 			/* the animation of a node after inheriting its parent's animation */
@@ -40,8 +43,12 @@ public:
 				// ... at the moment get the per-bone animation from keyboard input
 				local_anim = animation[bone_i];
 
-				our_mat = parent_mat * inv_bone_offset * local_anim * bone_offset;
-				bone_animation_mats[bone_i] = our_mat;
+				static float angle = 0.0f;
+				angle += 0.01f;
+				glm::mat4 temp = bone_i==0 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(0.0f,1.0f,0.0f)): glm::mat4(1.0f);
+
+				our_mat = parent_mat * inv_bone_offset * temp * bone_offset;
+				bone_animation_mats[bone_i] = inverseGlobalTransform * our_mat;
 			}
 			for (int i = 0; i < bone->numChildren; i++) {
 				skeleton_animate (

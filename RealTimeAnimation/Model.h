@@ -32,10 +32,10 @@ public:
 		this->loadModel(path);
 	}
 
-	void Animate(vector<glm::mat4> &transforms){
-		for(GLuint i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].BoneTransform(skeleton->rootBone,transforms,skeleton->boneMapping);
-	}
+	/*void Animate(vector<glm::mat4> &transforms){
+	for(GLuint i = 0; i < this->meshes.size(); i++)
+	this->meshes[i].BoneTransform(skeleton->rootBone,transforms,skeleton->boneMapping);
+	}*/
 
 	// Draws the model, and thus all its meshes
 	void Draw(Shader shader)
@@ -84,11 +84,11 @@ private:
 			// The node object only contains indices to index the actual objects in the scene. 
 			// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 			aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
-			Mesh mesh = this->processMesh(ai_mesh, scene);
+			Mesh mesh = this->processMesh(ai_mesh, scene );
 
-			mesh.globalInverseTransform = aiMatrix4x4ToGlm(scene->mRootNode->mTransformation);
-			mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
-
+			//mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
+			skeleton->inverseGlobalTransform = glm::inverse( aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
+			skeleton->globalTransform =   aiMatrix4x4ToGlm(scene->mRootNode->mTransformation) ;
 
 			this->meshes.push_back(mesh);			
 		}
@@ -101,7 +101,7 @@ private:
 	}
 
 
-	Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene)
+	Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene )
 	{
 		// Data to fill
 		vector<Vertex> vertices;
@@ -195,6 +195,7 @@ private:
 					Bone bi;			
 					bi.boneOffset = aiMatrix4x4ToGlm( ai_mesh->mBones[i]->mOffsetMatrix);
 					bi.boneIndex = BoneIndex;
+
 					//bones.push_back(bi); 
 
 					skeleton->boneMapping[BoneName] = bi;

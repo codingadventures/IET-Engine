@@ -101,16 +101,16 @@ void Do_Movement()
 	{
 
 		theta[8] += rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,1.0f,1.0f));
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,0.0f,1.0f));
 		moved = true;
 
 	}
-	
+
 	if(keys[GLFW_KEY_C])
 	{
 
 		theta[9] += rot_speed * elapsed_seconds;
-		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(0.0f,1.0f,1.0f));
+		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(0.0f,0.0f,1.0f));
 		moved = true;
 
 	}
@@ -118,7 +118,7 @@ void Do_Movement()
 	{
 
 		theta[8] -=  rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,1.0f,1.0f));
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,0.0f,1.0f));
 		moved = true;
 
 	}
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
 
 		view = camera.GetViewMatrix();
 
-		projection = projection = glm::perspective(camera.Zoom, (float)viewportWidth/(float)viewportHeight, 0.1f, 1000.0f);  
+		projection = glm::perspective(camera.Zoom, (float)viewportWidth/(float)viewportHeight, 0.1f, 1000.0f);  
 		//model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
 
 
@@ -242,14 +242,14 @@ int main(int argc, char* argv[])
 		// 5. Draw our object
 		shader.Use();
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
-		model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
+		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
 
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		if(moved)
+		if(true)
 			hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),monkey_bone_animation_mats);
 
 		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(monkey_bone_animation_mats[0]));
