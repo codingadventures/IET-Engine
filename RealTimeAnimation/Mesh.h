@@ -31,51 +31,10 @@ public:
 	{
 		this->vertices = vertices;
 		this->indices = indices;
-		this->textures = textures;
-	//	this->bones = bones;
-		this->boneWeights = boneWeights;
-		// Now that we have all the required data, set the vertex buffers and its attribute pointers.
+		this->textures = textures; 
+		this->boneWeights = boneWeights; 
 		this->setupMesh();
-	}
-
-	//void BoneTransform(Bone* rootNode, vector<glm::mat4> &transforms, std::map<std::string, Bone> boneMapping)
-	//{
-	//	glm::mat4 identity;
-	//	float TicksPerSecond = 25.0f;
-	//	//float TimeInTicks = TimeInSeconds * TicksPerSecond;
-
-	//	//read node Hierarchy
-	//	this->boneMapping = boneMapping;
-
-	//	Traverse(rootNode, identity);
-
-	//	transforms.resize(numBones);
-
-	//	/*for (glm::uint i = 0 ; i < numBones ; i++) {
-	//	transforms[i] = bones[i].finalTransformation;
-	//	}*/
-	//}
-
-	//void Mesh::Traverse(  const Bone* bone, const glm::mat4 ParentTransform)
-	//{    
-	//	string NodeName(bone->name);
-
-	//	glm::mat4 NodeTransformation(bone->parentTransformation);
-
-	//	glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
-
-	//	if (boneMapping.find(NodeName) != boneMapping.end()) {
-	//		GLuint BoneIndex = boneMapping[NodeName].boneIndex;
-	//		//bone->finalTransformation = globalInverseTransform * GlobalTransformation * bone->boneOffset;
-	//	}
-
-	//	for (glm::uint i = 0 ; i < sizeof(bone->children) ; i++) {
-	//		Traverse( bone->children[i], GlobalTransformation);
-	//	}
-	//}
-
-
-
+	}   
 	// Render the mesh
 	void Draw(Shader shader ) 
 	{

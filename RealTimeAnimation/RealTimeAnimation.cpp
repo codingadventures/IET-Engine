@@ -120,7 +120,6 @@ void Do_Movement()
 		theta[8] -=  rot_speed * elapsed_seconds;
 		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
 		moved = true;
-
 	}
 }
 #pragma endregion

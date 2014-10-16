@@ -43,8 +43,6 @@ public:
 				// ... at the moment get the per-bone animation from keyboard input
 				local_anim = animation[bone_i];
 
-				static float angle = 0.0f;
-				angle += 0.04f;
 				//glm::mat4 temp = bone_i==10 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(1.0f,0.0f,0.0f)): glm::mat4(1.0f);
 
 				our_mat = parent_mat * inv_bone_offset * local_anim * bone_offset ;
@@ -60,6 +58,85 @@ public:
 			}
 	}
 
+
+	//void skeleton_animate_with_animation  (
+	//	Bone* node,
+	//	double anim_time,
+	//	glm::mat4 parent_mat,
+	//	glm::mat4* bone_offset_mats,
+	//	glm::mat4* bone_animation_mats
+	//	) {
+
+	//		assert (node);
+
+	//		/* the animation of a node after inheriting its parent's animation */
+	//		glm::mat4 our_mat = parent_mat;
+
+
+
+	//		/* the animation for a particular bone at this time */
+	//		glm::mat4 local_anim;
+
+	//		glm::mat4 node_T;
+	//		if (node->num_pos_keys > 0) {
+	//			int prev_key = 0;
+	//			int next_key = 0;
+	//			for (int i = 0; i < node->num_pos_keys - 1; i++) {
+	//				prev_key = i;
+	//				next_key = i + 1;
+	//				if (node->pos_key_times[next_key] >= anim_time) {
+	//					break;
+	//				}
+	//			}
+	//			float total_t = node->pos_key_times[next_key] - node->pos_key_times[prev_key];
+	//			float t = (anim_time - node->pos_key_times[prev_key]) / total_t;
+	//			glm::vec3 vi = node->pos_keys[prev_key];
+	//			glm::vec3 vf = node->pos_keys[next_key];
+	//			glm::vec3 lerped = vi * (1.0f - t) + vf * t;
+	//			node_T = translate (identity_mat4 (), lerped);
+	//		}
+
+	//		glm::mat4 node_R = identity_mat4 ();
+	//		if (node->num_rot_keys > 0) {
+	//			// find next and previous keys
+	//			int prev_key = 0;
+	//			int next_key = 0;
+	//			for (int i = 0; i < node->num_rot_keys - 1; i++) {
+	//				prev_key = i;
+	//				next_key = i + 1;
+	//				if (node->rot_key_times[next_key] >= anim_time) {
+	//					break;
+	//				}
+	//			}
+	//			float total_t = node->rot_key_times[next_key] - node->rot_key_times[prev_key];
+	//			float t = (anim_time - node->rot_key_times[prev_key]) / total_t;
+	//			versor qi = node->rot_keys[prev_key];
+	//			versor qf = node->rot_keys[next_key];
+	//			versor slerped = slerp (qi, qf, t);
+	//			node_R = quat_to_mat4 (slerped);
+	//		}
+
+	//		local_anim = node_T * node_R;
+
+	//		// if node has a weighted bone...
+	//		int bone_i = node->boneIndex;
+	//		if (bone_i > -1) {
+	//			// ... then get offset matrices
+	//			glm::mat4 bone_offset = bone_offset_mats[bone_i];
+
+	//			our_mat = parent_mat * local_anim;
+	//			bone_animation_mats[bone_i] = parent_mat * local_anim * bone_offset;
+	//		}
+	//		for (int i = 0; i < node->numChildren; i++) {
+	//			skeleton_animate (
+	//				node->children[i],
+	//				anim_time,
+	//				our_mat,
+	//				bone_offset_mats,
+	//				bone_animation_mats
+	//				);
+	//		}
+	//}
 
 	bool importSkeletonBone(aiNode* assimp_node,
 		Bone** skeleton_node,
