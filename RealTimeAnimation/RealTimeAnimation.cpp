@@ -8,7 +8,7 @@
 #include "Model.h"
 //#include "Mesh.h" 
 
-#define MAX_BONES 32
+#define MAX_BONES 16
 
 bool keys[1024];
 bool firstMouse = true;
@@ -18,11 +18,11 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 GLfloat lastX = viewportWidth/2, lastY = viewportHeight/2;
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
-glm::mat4  animationTransformMap;
+glm::mat4  animationTransformMap[MAX_BONES];
 GLuint boneLocation[MAX_BONES];
-float theta = 0.0f;
-float rot_speed = 50.0f; // 50 radians per second
-
+float theta[MAX_BONES];
+float rot_speed = 10.0f; // 50 radians per second
+bool moved = false;
 
 #pragma region [ Input Callback ]
 
@@ -99,8 +99,28 @@ void Do_Movement()
 
 	if(keys[GLFW_KEY_Z])
 	{
-		theta += rot_speed * elapsed_seconds;
-		animationTransformMap  = glm::rotate( animationTransformMap,theta,glm::vec3(0.0f,0.0f,1.0f));
+
+		theta[8] += rot_speed * elapsed_seconds;
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,1.0f,1.0f));
+		moved = true;
+
+	}
+	
+	if(keys[GLFW_KEY_C])
+	{
+
+		theta[9] += rot_speed * elapsed_seconds;
+		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(0.0f,1.0f,1.0f));
+		moved = true;
+
+	}
+	if(keys[GLFW_KEY_X])
+	{
+
+		theta[8] -=  rot_speed * elapsed_seconds;
+		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(0.0f,1.0f,1.0f));
+		moved = true;
+
 	}
 }
 #pragma endregion
@@ -166,7 +186,7 @@ int main(int argc, char* argv[])
 	load_texture("textures\\awesomeface.png",&face);*/
 
 	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	Model hand("models\\hand(2).dae");
 
 
@@ -177,6 +197,7 @@ int main(int argc, char* argv[])
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
 
 	for (unsigned int i = 0 ; i < MAX_BONES ; i++) {
+		theta[i] = 0;
 		char Name[128];
 
 		memset(Name, 0, sizeof(Name));
@@ -188,6 +209,7 @@ int main(int argc, char* argv[])
 
 		boneLocation[i] = location;
 	}
+	glm::mat4 monkey_bone_animation_mats[MAX_BONES];
 
 
 	while(!glfwWindowShouldClose(window))
@@ -216,8 +238,6 @@ int main(int argc, char* argv[])
 
 
 
-
-
 #pragma region First Shader
 		// 5. Draw our object
 		shader.Use();
@@ -229,8 +249,10 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),)
-		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, monkey_bone_animation_mats[0]);
+		if(moved)
+			hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),monkey_bone_animation_mats);
+
+		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(monkey_bone_animation_mats[0]));
 
 
 		vector<glm::mat4> transforms;

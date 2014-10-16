@@ -16,9 +16,13 @@ public:
 
 	void skeleton_animate  (
 		Bone* bone,
+		glm::mat4* animation,
 		glm::mat4 parent_mat,
 		glm::mat4* bone_animation_mats
 		) {
+
+			if(!bone)
+				bone = rootBone;
 
 			assert (bone);
 
@@ -34,9 +38,9 @@ public:
 				glm::mat4 bone_offset = bone->boneOffset;
 				glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
 				// ... at the moment get the per-bone animation from keyboard input
-				//local_anim = g_local_anims[bone_i];
+				local_anim = animation[bone_i];
 
-				our_mat = parent_mat * inv_bone_offset * animation * bone_offset;
+				our_mat = parent_mat * inv_bone_offset * local_anim * bone_offset;
 				bone_animation_mats[bone_i] = our_mat;
 			}
 			for (int i = 0; i < bone->numChildren; i++) {
