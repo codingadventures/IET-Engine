@@ -3,14 +3,17 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-
-#define MAX_BONES 32
+ 
 
 struct Bone {
-	Bone* children[MAX_BONES];
 
-	int boneIndex,numChildren;
-	bool isVisited;
+	Bone* parent;
+	 
+	//Alternatively we can declare a double pointer of children
+	//Bone** children;
+	vector<Bone> children;
+
+	int boneIndex;
 
 	glm::vec3* pos_keys	;	
 	glm::quat*	rot_keys;		
@@ -23,8 +26,6 @@ struct Bone {
 	int	num_sca_keys	;
 
 	char name[64];
-	glm::mat4 boneOffset;
-	glm::mat4 parentTransformation;
-	glm::mat4 transform;
-	glm::mat4 finalTransformation;
+	glm::mat4 boneOffset;   
+	glm::mat4 transformationOffset;
 };

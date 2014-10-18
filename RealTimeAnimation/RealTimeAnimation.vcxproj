@@ -88,7 +88,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bone.h" />
-    <ClInclude Include="BonePose.h" />
     <ClInclude Include="Callbacks.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="common.h" />
@@ -96,9 +95,9 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skeleton.h" />
-    <ClInclude Include="SkeletonPose.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VertexWeight.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag" />

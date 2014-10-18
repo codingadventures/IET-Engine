@@ -24,18 +24,18 @@ GLint TextureFromFile(const char* path, string directory);
 class Model 
 {
 public:
+
+	Skeleton* skeleton;
+	double animDuration;
+
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
 	Model(GLchar* path) 
 	{
 		skeleton = new Skeleton();
 		this->loadModel(path);
-	}
+	} 
 
-	/*void Animate(vector<glm::mat4> &transforms){
-	for(GLuint i = 0; i < this->meshes.size(); i++)
-	this->meshes[i].BoneTransform(skeleton->rootBone,transforms,skeleton->boneMapping);
-	}*/
 
 	// Draws the model, and thus all its meshes
 	void Draw(Shader shader)
@@ -45,8 +45,7 @@ public:
 	}
 
 
-	Skeleton* skeleton;
-	double animDuration;
+	
 
 private:
 	/*  Model Data  */
@@ -87,11 +86,7 @@ private:
 			// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 			aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
 			Mesh mesh = this->processMesh(ai_mesh, scene );
-
-			//mesh.globalInverseTransform = glm::inverse(mesh.globalInverseTransform);
-			//skeleton->inverseGlobalTransform = glm::inverse( aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
-			//skeleton->globalTransform =   aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation) ;
-
+			 
 			this->meshes.push_back(mesh);			
 		}
 		// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
@@ -175,7 +170,7 @@ private:
 		}
 		glm::uint numBones = 0;
 		//vector<Bone> bones;
-		vector<VertexBoneData> boneWeights;
+		vector<VertexWeight> boneWeights;
 		boneWeights.resize(ai_mesh->mNumVertices);
 #pragma endregion  
 
@@ -193,19 +188,11 @@ private:
 				if ( skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
 					BoneIndex =  numBones;
-					numBones++;            
-					Bone bi;			
-					bi.boneOffset = aiMatrix4x4ToGlm( &ai_mesh->mBones[i]->mOffsetMatrix);
-					bi.boneIndex = BoneIndex;
-
-					//bones.push_back(bi); 
-
-					skeleton->boneMapping[BoneName] = bi;
+					numBones++;             
+  
+					skeleton->boneMapping[BoneName] = aiMatrix4x4ToGlm( &ai_mesh->mBones[i]->mOffsetMatrix);
 				}
-				else {
-					BoneIndex = skeleton->boneMapping[BoneName].boneIndex;
-				}                      
-
+				 
 				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
 					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
 					float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
@@ -221,11 +208,7 @@ private:
 
 			// there should always be a 'root node', even if no skeleton exists
 			aiNode* assimp_node = scene->mRootNode;
-			if (!skeleton->importSkeletonBone (
-				assimp_node,
-				&skeleton->rootBone,
-				bone_count
-				)) {
+			if (!skeleton->importSkeletonBone (assimp_node)) {
 					fprintf (stderr, "ERROR: could not import node tree from mesh\n");
 			} // endif
 
@@ -316,6 +299,7 @@ private:
 		vector<Texture> textures;
 		for(GLuint i = 0; i < mat->GetTextureCount(type); i++)
 		{
+
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
@@ -329,6 +313,7 @@ private:
 					break;
 				}
 			}
+
 			if(!skip)
 			{   // If texture hasn't been loaded already, load it
 				Texture texture;

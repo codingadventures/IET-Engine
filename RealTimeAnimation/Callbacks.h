@@ -32,7 +32,6 @@ public:
 		lastY = ypos;
 
 		UserMouseCallback(xoffset, yoffset);
-		//camera.ProcessMouseMovement(xoffset, yoffset);
 	}	
 
 

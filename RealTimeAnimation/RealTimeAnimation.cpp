@@ -9,9 +9,6 @@
 
 using namespace std::placeholders;
 
-//glm::mat4  animationTransformMap[MAX_BONES];
-
-//float theta[MAX_BONES];
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;

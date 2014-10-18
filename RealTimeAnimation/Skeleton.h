@@ -9,7 +9,7 @@ class Skeleton
 public:
 	Bone* rootBone;
 
-	std::map<std::string, Bone> boneMapping;
+	std::map<std::string, glm::mat4> boneMapping;
 
 	Skeleton(){
 		rootBone = new Bone();
@@ -125,6 +125,7 @@ public:
 
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
 	{
+		static int boneIndex = 0;
 		bool has_bone = false;
 		bool has_useful_child = false;
 
@@ -142,7 +143,7 @@ public:
 		if (this->boneMapping.find(bone->name) != this->boneMapping.end()) 
 		{
 			printf ("node uses bone %i\n", this->boneMapping[bone->name]);
-			bone->boneIndex =  this->boneMapping[bone->name].boneIndex;
+			bone->boneIndex =  boneIndex++;
 			has_bone = true;
 		}
 
@@ -162,9 +163,7 @@ public:
 
 		if (has_useful_child || has_bone) {
 			//temp->parentTransformation = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
-			bone->boneOffset = this->boneMapping[bone->name].boneOffset;
-			// point parameter to our allocated node
-
+			bone->boneOffset = this->boneMapping[bone->name];
 			return true;
 		}
 		// no bone or good children - cull self

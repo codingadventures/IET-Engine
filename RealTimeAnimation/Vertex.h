@@ -1,15 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "VertexWeight.h"
 
-#define NUM_BONES_PER_VERTEX 4
-
-
-struct VertexBoneData
-{
-	GLuint IDs[NUM_BONES_PER_VERTEX];
-	float Weights[NUM_BONES_PER_VERTEX];
-};
 
 
 struct Vertex {
@@ -20,6 +13,6 @@ struct Vertex {
 	// TexCoords
 	glm::vec2 TexCoords;
 	//BoneData
-	VertexBoneData BoneData;
+	VertexWeight WeightData;
 };
 

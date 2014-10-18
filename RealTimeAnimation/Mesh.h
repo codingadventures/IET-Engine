@@ -7,7 +7,7 @@
 #include <vector>
 #include "Shader.h"
 #include "Vertex.h"
-#include "Texture.h"
+#include "Texture.h" 
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
@@ -20,14 +20,13 @@ public:
 	/*  Mesh Data  */
 	vector<Vertex> vertices;
 	vector<GLuint> indices;
-	vector<Texture> textures;
-	glm::mat4 globalInverseTransform;
-	glm::uint numBones;
-	 
-	vector<VertexBoneData> boneWeights;
+	vector<Texture> textures; 
+
+
+	vector<VertexWeight> boneWeights;
 	/*  Functions  */
 	// Constructor
-	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexBoneData> boneWeights)
+	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
@@ -71,8 +70,11 @@ private:
 	/*  Render data  */
 	GLuint VAO, VBO, EBO, boneVBO;
 
-	int weightJoints;
 	std::map<std::string, Bone> boneMapping;
+
+	bool hasBones(){
+		return boneWeights.size() >0;
+	}
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays
 	void setupMesh()
@@ -80,7 +82,6 @@ private:
 		// Create buffers/arrays
 		glGenVertexArrays(1, &this->VAO);
 		glGenBuffers(1, &this->VBO);
-		glGenBuffers(1, &this->boneVBO);
 		glGenBuffers(1, &this->EBO);
 
 		glBindVertexArray(this->VAO);
@@ -105,15 +106,20 @@ private:
 		glEnableVertexAttribArray(2);	
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 
-		glBindBuffer(GL_ARRAY_BUFFER, boneVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(boneWeights[0]) * boneWeights.size(), &boneWeights[0], GL_STATIC_DRAW);
+		if (hasBones())
+		{
+			glGenBuffers(1, &this->boneVBO);
 
-		glEnableVertexAttribArray(3);
-		glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
 
-		glEnableVertexAttribArray(4);    
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)offsetof(VertexBoneData, Weights)); 
+			glBindBuffer(GL_ARRAY_BUFFER, boneVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(boneWeights[0]) * boneWeights.size(), &boneWeights[0], GL_STATIC_DRAW);
 
+			glEnableVertexAttribArray(3);
+			glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
+
+			glEnableVertexAttribArray(4);    
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
+		}
 		glBindVertexArray(0);
 	}
 };
