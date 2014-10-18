@@ -1,5 +1,5 @@
 
-
+#include <math.h>
 #include "common.h"
 #include "Callbacks.h"
 #include "Shader.h"
@@ -14,7 +14,7 @@ using namespace std::placeholders;
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
-
+const int totalAnimationTime = 5.0f;
 
 void load_texture(string path, GLuint *texture)
 {
@@ -53,7 +53,7 @@ void load_texture(string path, GLuint *texture)
 int main(int argc, char* argv[])
 { 
 	glm::mat4* animationMatrices;
-	double anim_time = 0.0;
+	double clock = 0.0, anim_time = 0.0f;
 
 	Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -134,10 +134,18 @@ int main(int argc, char* argv[])
 		previous_seconds = current_seconds;
 
 		/* update animation timer and loop */
-		anim_time += elapsed_seconds * ANIMATION_SPEED;
-		if (anim_time >= hand.animDuration) {
-			anim_time = hand.animDuration - anim_time;
+		clock += elapsed_seconds * ANIMATION_SPEED;
+		if ( (int)(clock / totalAnimationTime) % 2 == 0)
+			anim_time += elapsed_seconds * ANIMATION_SPEED;
+		else
+		{
+			anim_time -= elapsed_seconds * ANIMATION_SPEED;
 		}
+		/*if (anim_time >= hand.animDuration) {
+		anim_time = hand.animDuration - anim_time;
+		}
+		*/
+
 
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
@@ -155,8 +163,8 @@ int main(int argc, char* argv[])
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		model = glm::rotate(model, (float)125.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
-		 model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
-	 
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
