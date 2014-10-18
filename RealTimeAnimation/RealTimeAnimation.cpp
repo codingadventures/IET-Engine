@@ -210,9 +210,23 @@ int main(int argc, char* argv[])
 	}
 	glm::mat4 monkey_bone_animation_mats[MAX_BONES];
 
+	double anim_time = 0.0;
+	 
 
 	while(!glfwWindowShouldClose(window))
 	{
+
+		static double previous_seconds = glfwGetTime ();
+		double current_seconds = glfwGetTime ();
+		double elapsed_seconds = current_seconds - previous_seconds;
+		previous_seconds = current_seconds;
+		
+		/* update animation timer and loop */
+		anim_time += elapsed_seconds * 0.5;
+		if (anim_time >= hand.animDuration) {
+			anim_time = hand.animDuration - anim_time;
+		}
+
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -249,7 +263,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
 		if(true)
-			hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),monkey_bone_animation_mats);
+			//hand.skeleton->skeleton_animate(NULL,animationTransformMap,glm::mat4(),monkey_bone_animation_mats);
+				hand.skeleton->skeleton_animate_with_animation(NULL,anim_time,glm::mat4(),monkey_bone_animation_mats);
 
 		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(monkey_bone_animation_mats[0]));
 

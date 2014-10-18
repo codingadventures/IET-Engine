@@ -13,7 +13,7 @@ struct Bone {
 	bool isVisited;
 
 	glm::vec3* pos_keys	;	
-	glm::mat4*	rot_keys;		
+	glm::quat*	rot_keys;		
 	glm::vec3*	sca_keys;		
 	double*	pos_key_times;	
 	double*	rot_key_times;	

@@ -46,8 +46,9 @@ public:
 
 
 	Skeleton* skeleton;
+	double animDuration;
+
 private:
-	double* animDuration;
 	/*  Model Data  */
 	vector<Mesh> meshes;
 	string directory;
@@ -239,7 +240,7 @@ private:
 				printf ("animation duration %f\n", anim->mDuration);
 				printf ("ticks per second %f\n", anim->mTicksPerSecond);
 
-				*animDuration = anim->mDuration;
+				animDuration = anim->mDuration;
 				printf ("anim duration is %f\n", anim->mDuration);
 
 				// get the node channels
@@ -247,7 +248,7 @@ private:
 					aiNodeAnim* chan = anim->mChannels[i];
 					// find the matching node in our skeleton by name
 					Bone* sn = skeleton->findNodeInSkeleton(
-						skeleton->rootBone, chan->mNodeName.C_Str ());
+						chan->mNodeName.C_Str (),	NULL);
 					if (!sn) {
 						fprintf (stderr, "WARNING: did not find node named %s in skeleton."
 							"animation broken.\n", chan->mNodeName.C_Str ());
@@ -260,7 +261,7 @@ private:
 
 					// allocate memory
 					sn->pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_pos_keys);
-					sn->rot_keys = (glm::mat4*)malloc (sizeof (glm::mat4) * sn->num_rot_keys);
+					sn->rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->num_rot_keys);
 					sn->sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_sca_keys);
 					sn->pos_key_times =
 						(double*)malloc (sizeof (double) * sn->num_pos_keys);
@@ -272,27 +273,27 @@ private:
 					// add position keys to node
 					for (int i = 0; i < sn->num_pos_keys; i++) {
 						aiVectorKey key = chan->mPositionKeys[i];
-						sn->pos_keys[i].v[0] = key.mValue.x;
-						sn->pos_keys[i].v[1] = key.mValue.y;
-						sn->pos_keys[i].v[2] = key.mValue.z;
+						sn->pos_keys[i].x = key.mValue.x;
+						sn->pos_keys[i].y = key.mValue.y;
+						sn->pos_keys[i].z = key.mValue.z;
 						// TODO -- forgot this
 						sn->pos_key_times[i] = key.mTime;
 					}
 					// add rotation keys to node
 					for (int i = 0; i < sn->num_rot_keys; i++) {
 						aiQuatKey key = chan->mRotationKeys[i];
-						sn->rot_keys[i].q[0] = key.mValue.w;
-						sn->rot_keys[i].q[1] = key.mValue.x;
-						sn->rot_keys[i].q[2] = key.mValue.y;
-						sn->rot_keys[i].q[3] = key.mValue.z;
+						sn->rot_keys[i].w = key.mValue.w;
+						sn->rot_keys[i].x = key.mValue.x;
+						sn->rot_keys[i].y = key.mValue.y;
+						sn->rot_keys[i].z = key.mValue.z;
 						sn->rot_key_times[i] = key.mTime;
 					}
 					// add scaling keys to node
 					for (int i = 0; i < sn->num_sca_keys; i++) {
 						aiVectorKey key = chan->mScalingKeys[i];
-						sn->sca_keys[i].v[0] = key.mValue.x;
-						sn->sca_keys[i].v[1] = key.mValue.y;
-						sn->sca_keys[i].v[2] = key.mValue.z;
+						sn->sca_keys[i].x  = key.mValue.x;
+						sn->sca_keys[i].y  = key.mValue.y;
+						sn->sca_keys[i].z  = key.mValue.z;
 						sn->sca_key_times[i] = key.mTime;
 					} // end for
 				} // end for mNumChannels
