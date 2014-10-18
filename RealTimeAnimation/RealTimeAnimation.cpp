@@ -9,6 +9,8 @@
 
 using namespace std::placeholders;
 
+#define ANIMATION_SPEED 1.3
+#define HAND_MODEL "models\\hand_with_animation.dae"
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
@@ -93,7 +95,7 @@ int main(int argc, char* argv[])
 	//Wireframe
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	Model hand("models\\hand_with_animation.dae");
+	Model hand(HAND_MODEL);
 
 
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
@@ -132,7 +134,7 @@ int main(int argc, char* argv[])
 		previous_seconds = current_seconds;
 
 		/* update animation timer and loop */
-		anim_time += elapsed_seconds * 1.3;
+		anim_time += elapsed_seconds * ANIMATION_SPEED;
 		if (anim_time >= hand.animDuration) {
 			anim_time = hand.animDuration - anim_time;
 		}
@@ -174,9 +176,6 @@ int main(int argc, char* argv[])
 			hand.skeleton->animateKeyFrames(NULL,anim_time, animationMatrices);
 
 		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(animationMatrices[0]));
-
-
-
 
 		hand.Draw(shader);
 
