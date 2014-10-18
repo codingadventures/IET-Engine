@@ -61,7 +61,4 @@
     <None Include="vertex.vert" />
     <None Include="fragment.frag" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="fragmentYellow.frag" />
-  </ItemGroup>
 </Project>

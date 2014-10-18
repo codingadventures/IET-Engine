@@ -5,7 +5,7 @@ layout (location = 1) in vec2 texCoord;
 layout (location = 3) in ivec4 BoneIDs;
 layout (location = 4) in vec4 Weights;
 
-const int MAX_BONES = 32;
+const int MAX_BONES = 16;
 
 
 const vec3 colorMap[16] = vec3[16](
