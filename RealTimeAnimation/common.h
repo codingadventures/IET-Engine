@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using  std::cout;
 using  std::endl;
@@ -17,13 +18,7 @@ using  std::endl;
 inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
 {
 	glm::mat4 to;
-
-
-	/*m[0][0] = AssimpMatrix.a1; m[0][1] = AssimpMatrix.a2; m[0][2] = AssimpMatrix.a3; m[0][3] = AssimpMatrix.a4;
-	m[1][0] = AssimpMatrix.b1; m[1][1] = AssimpMatrix.b2; m[1][2] = AssimpMatrix.b3; m[1][3] = AssimpMatrix.b4;
-	m[2][0] = AssimpMatrix.c1; m[2][1] = AssimpMatrix.c2; m[2][2] = AssimpMatrix.c3; m[2][3] = AssimpMatrix.c4;
-	m[3][0] = AssimpMatrix.d1; m[3][1] = AssimpMatrix.d2; m[3][2] = AssimpMatrix.d3; m[3][3] = AssimpMatrix.d4;*/
-
+	 
 	to[0][0] = (GLfloat)from->a1; to[1][0] = (GLfloat)from->a2;
 	to[2][0] = (GLfloat)from->a3; to[3][0] = (GLfloat)from->a4;
 	to[0][1] = (GLfloat)from->b1; to[1][1] = (GLfloat)from->b2;
@@ -36,5 +31,28 @@ inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
 	return to;
 }
 
+inline glm::vec3 aiVectorKeyToGlm(const aiVectorKey* from)
+{
+	glm::vec3 to;
+
+	to.x = from->mValue.x;
+	to.y = from->mValue.y;
+	to.z = from->mValue.z;
+
+	return to;
+}
+
+inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
+{
+	 glm::quat to;
+
+	 to.w = from->mValue.w;
+	 to.x = from->mValue.x;
+	 to.y = from->mValue.y;
+	 to.z = from->mValue.z;
+
+	 return to;
+
+}
 
 #define INVALID_UNIFORM_LOCATION 0xffffffff

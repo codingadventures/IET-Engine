@@ -21,7 +21,7 @@ GLfloat lastFrame = 0.0f;
 glm::mat4  animationTransformMap[MAX_BONES];
 GLuint boneLocation[MAX_BONES];
 float theta[MAX_BONES];
-float rot_speed = 10.0f; // 50 radians per second
+float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
 
 #pragma region [ Input Callback ]
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
 
 	glEnable(GL_DEPTH_TEST);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	Model hand("models\\hand(2).dae");
+	Model hand("models\\hand_with_animation.dae");
 
 
 
