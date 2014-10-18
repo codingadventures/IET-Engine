@@ -1,128 +1,24 @@
-// RealTimeAnimation.cpp : Defines the entry point for the console application.
-//
+
 
 #include "common.h"
+#include "Callbacks.h"
 #include "Shader.h"
 #include "SOIL.h"
 #include "Camera.h"
-#include "Model.h"
-//#include "Mesh.h" 
+#include "Model.h" 
+
+using namespace std::placeholders;
 
 #define MAX_BONES 16
+ 
 
-bool keys[1024];
-bool firstMouse = true;
-int viewportWidth=1024,viewportHeight = 768;
-// Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-GLfloat lastX = viewportWidth/2, lastY = viewportHeight/2;
-GLfloat deltaTime = 0.0f;
-GLfloat lastFrame = 0.0f;
 glm::mat4  animationTransformMap[MAX_BONES];
+
 GLuint boneLocation[MAX_BONES];
 float theta[MAX_BONES];
+
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
-
-#pragma region [ Input Callback ]
-
-void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-
-	if(action == GLFW_PRESS)
-		keys[key] = true;
-	else if(action == GLFW_RELEASE)
-		keys[key] = false;  
-
-	// When a user presses the escape key, we set the WindowShouldClose property to true, 
-	// closing the application
-	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
-
-
-
-}   
-
-// Is called whenever a key is pressed/released via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-	//cout << key << endl;
-	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
-
-	if(action == GLFW_PRESS)
-		keys[key] = true;
-	else if(action == GLFW_RELEASE)
-		keys[key] = false;	
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if(firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	GLfloat xoffset = xpos - lastX;
-	GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
-
-	lastX = xpos;
-	lastY = ypos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
-}	
-
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.ProcessMouseScroll(yoffset);
-}
-// Moves/alters the camera positions based on user input
-void Do_Movement()
-{
-	static double previous_seconds = glfwGetTime ();
-	double current_seconds = glfwGetTime ();
-	double elapsed_seconds = current_seconds - previous_seconds;
-	previous_seconds = current_seconds;
-
-	// Camera controls
-	if(keys[GLFW_KEY_W])
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-	if(keys[GLFW_KEY_S])
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-	if(keys[GLFW_KEY_A])
-		camera.ProcessKeyboard(LEFT, deltaTime);
-	if(keys[GLFW_KEY_D])
-		camera.ProcessKeyboard(RIGHT, deltaTime);
-
-	if(keys[GLFW_KEY_Z])
-	{
-
-		theta[8] += rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-
-	}
-
-	if(keys[GLFW_KEY_C])
-	{
-
-		theta[9] += rot_speed * elapsed_seconds;
-		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-
-	}
-	if(keys[GLFW_KEY_X])
-	{
-
-		theta[8] -=  rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-	}
-}
-#pragma endregion
 
 
 void load_texture(string path, GLuint *texture)
@@ -158,26 +54,37 @@ void load_texture(string path, GLuint *texture)
 }
 
 int main(int argc, char* argv[])
-{
+{ 
 
+	Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+	//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
+	UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera,_1,_2);
+	UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,camera,_1);
+	
+
+	//glwf library initialization
 	glfwInit();
+
+	  
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(viewportWidth, viewportHeight, "Lab2", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "Lab2", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	glViewport(0, 0, viewportWidth, viewportHeight); 
+	glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
 
-	glfwSetKeyCallback(window,keyboard_callback);
+	glfwSetKeyCallback(window, Callbacks::keyboardCallback);
+
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
-	glfwSetCursorPosCallback(window, mouse_callback);  
-	glfwSetScrollCallback(window, scroll_callback); 
+	glfwSetCursorPosCallback(window, Callbacks::mouseCallback);  
+	glfwSetScrollCallback(window, Callbacks::scrollCallback); 
 
 	Shader shader("vertex.vert","fragment.frag");
 
@@ -185,11 +92,9 @@ int main(int argc, char* argv[])
 	load_texture("textures\\awesomeface.png",&face);*/
 
 	glEnable(GL_DEPTH_TEST);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	Model hand("models\\hand_with_animation.dae");
-
-
-
+	 
 
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
@@ -222,26 +127,27 @@ int main(int argc, char* argv[])
 		previous_seconds = current_seconds;
 		
 		/* update animation timer and loop */
-		anim_time += elapsed_seconds * 0.5;
+		anim_time += elapsed_seconds * 1.3;
 		if (anim_time >= hand.animDuration) {
 			anim_time = hand.animDuration - anim_time;
 		}
 
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		camera->deltaTime = currentFrame - camera->lastFrame;
+		camera->lastFrame = currentFrame;
 
 		glfwPollEvents();
-		Do_Movement();  
+
+		camera->MoveCamera();  
 
 		glm::mat4 model,projection,view;
 
 
-		view = camera.GetViewMatrix();
+		view = camera->GetViewMatrix();
 
-		projection = glm::perspective(camera.Zoom, (float)viewportWidth/(float)viewportHeight, 0.1f, 1000.0f);  
-		//model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
+		model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
 
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -269,58 +175,10 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(monkey_bone_animation_mats[0]));
 
 
-		vector<glm::mat4> transforms;
-
-
-
-		/*for (GLuint i = 0 ; i < transforms.size() ; i++) {
-		m_pEffect->SetBoneTransform(i, Transforms[i]);
-		}*/
+		 
 
 		hand.Draw(shader);
-
-
-		/*
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, container);
-		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture1"), 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, face);
-		glUniform1i(glGetUniformLocation(shader.Program, "ourTexture2"), 1);
-		*/
-
-		//glBindVertexArray(VAO1);
-
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		/*for(GLuint i = 0; i < 10; i++)
-		{
-		glm::mat4 model;
-		GLfloat angle = 20.0f * i; 
-
-		model = glm::translate(model, cubePositions[i]);
-		if (i % 3 == 0)
-		{
-		model = glm::rotate(model, angle*(float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-
-		}
-		else
-		{
-		model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-
-		}
-
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		}*/
-
-		//glBindVertexArray(0);
-#pragma endregion 
-
-
-
+		 
 		glfwSwapBuffers(window);
 	}
 

@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include <assimp/scene.h> 
 // GLEW
 #define GLEW_STATIC
@@ -12,13 +14,23 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#define VIEWPORT_WIDTH 1024
+#define VIEWPORT_HEIGHT 768
+#define INVALID_UNIFORM_LOCATION 0xffffffff
+#define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
+
+GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
+bool keys[1024];
+
 using  std::cout;
 using  std::endl;
+
+#pragma region [ Helper Functions ]
 
 inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
 {
 	glm::mat4 to;
-	 
+
 	to[0][0] = (GLfloat)from->a1; to[1][0] = (GLfloat)from->a2;
 	to[2][0] = (GLfloat)from->a3; to[3][0] = (GLfloat)from->a4;
 	to[0][1] = (GLfloat)from->b1; to[1][1] = (GLfloat)from->b2;
@@ -44,15 +56,15 @@ inline glm::vec3 aiVectorKeyToGlm(const aiVectorKey* from)
 
 inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
 {
-	 glm::quat to;
+	glm::quat to;
 
-	 to.w = from->mValue.w;
-	 to.x = from->mValue.x;
-	 to.y = from->mValue.y;
-	 to.z = from->mValue.z;
+	to.w = from->mValue.w;
+	to.x = from->mValue.x;
+	to.y = from->mValue.y;
+	to.z = from->mValue.z;
 
-	 return to;
+	return to;
 
 }
 
-#define INVALID_UNIFORM_LOCATION 0xffffffff
+#pragma endregion
