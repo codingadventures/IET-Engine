@@ -230,7 +230,7 @@ private:
 				for (int i = 0; i < (int)anim->mNumChannels; i++) {
 					aiNodeAnim* chan = anim->mChannels[i];
 					// find the matching node in our skeleton by name
-					Bone* sn = skeleton->findNodeInSkeleton(
+					Bone* sn = skeleton->GetBone(
 						chan->mNodeName.C_Str (),	NULL);
 					if (!sn) {
 						fprintf (stderr, "WARNING: did not find node named %s in skeleton."

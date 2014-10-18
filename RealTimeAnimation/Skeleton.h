@@ -172,7 +172,7 @@ public:
 		return false;
 	}
 
-	Bone* findNodeInSkeleton (const char* node_name, Bone* boneToFind = NULL) {
+	Bone* GetBone (const char* node_name, Bone* boneToFind = NULL) {
 
 		if (!boneToFind)
 		{
@@ -188,7 +188,7 @@ public:
 
 		// recurse to children
 		for (int i = 0; i < boneToFind->children.size(); i++) {
-			Bone* child = findNodeInSkeleton (node_name,	&boneToFind->children[i]);
+			Bone* child = GetBone (node_name,	&boneToFind->children[i]);
 			if (child != NULL) {
 				return child;
 			}
