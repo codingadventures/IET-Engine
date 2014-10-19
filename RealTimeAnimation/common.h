@@ -66,5 +66,16 @@ inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
 	return to;
 
 }
+bool pause = false;
+
+void ReadInput()
+{
+	if(keys[GLFW_KEY_P])
+	{
+		pause = !pause;
+	}
+
+ 
+}
 
 #pragma endregion

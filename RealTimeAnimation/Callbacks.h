@@ -7,14 +7,16 @@ bool firstMouse = true;
 
 typedef std::function<void(GLfloat,GLfloat)> MouseCallbackFunction;
 typedef std::function<void(GLfloat)> MouseScrollCallbackFunction;
+typedef std::function<void(void)> KeyboardCallbackFunction;
 
 static MouseCallbackFunction UserMouseCallback;
 static MouseScrollCallbackFunction UserMouseScrollCallback;
+static KeyboardCallbackFunction UserKeyboardCallback;
 
 class Callbacks{
 
 public: 
-	 
+
 
 	static void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	{
@@ -48,6 +50,7 @@ public:
 		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GL_TRUE);
 
+		UserKeyboardCallback();
 	}   
 
 

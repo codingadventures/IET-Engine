@@ -7,8 +7,10 @@
 class Skeleton 
 {
 public:
+	// Root node of the tree
 	Bone* rootBone;
 
+	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
 	std::map<std::string, glm::mat4> boneMapping;
 
 	Skeleton(){
@@ -16,11 +18,10 @@ public:
 	}
 
 	~Skeleton(){
-		/*while(rootBone++)
-		{
-
-		}*/
+		 
 	}
+
+	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
 	void animate(Bone* bone,glm::mat4* animation, glm::mat4* bone_animation_mats) {
 
 		if(!bone)
@@ -57,6 +58,7 @@ public:
 	}
 
 
+	// Animate the model given an animation time. bone_animation_mats is the output to be sent to the shader
 	void animateKeyFrames(Bone* bone,double anim_time, glm::mat4* bone_animation_mats) {
 
 		if(!bone)
@@ -123,6 +125,7 @@ public:
 		}
 	}
 
+	// Import the hierarchical data structure from Assimp
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
 	{
 		static int boneIndex = 0;
@@ -142,7 +145,7 @@ public:
 
 		if (this->boneMapping.find(bone->name) != this->boneMapping.end()) 
 		{
-			printf ("node uses bone %i\n", this->boneMapping[bone->name]);
+			printf ("node uses bone %i\n", boneIndex);
 			bone->boneIndex =  boneIndex++;
 			has_bone = true;
 		}
@@ -172,6 +175,7 @@ public:
 		return false;
 	}
 
+	// Retrieve a bone given the name
 	Bone* GetBone (const char* node_name, Bone* boneToFind = NULL) {
 
 		if (!boneToFind)
@@ -198,6 +202,7 @@ public:
 		return NULL;
 	}
 
+	// get the total number of bones. traverses the tree to count them
 	int getNumberOfBones(Bone* bone = NULL)
 	{
 		if(!bone)

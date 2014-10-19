@@ -150,11 +150,14 @@ private:
 			for(GLuint j = 0; j < face.mNumIndices; j++)
 				indices.push_back(face.mIndices[j]);
 		}
+#pragma endregion
+
+#pragma region [ Process Materials ]
 		// Process materials
 		if(ai_mesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* material = scene->mMaterials[ai_mesh->mMaterialIndex];
-			// We assume a convention for sampler names in the shaders. Each diffuse texture should be named
+			// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
 			// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 			// Same applies to other texture as the following list summarizes:
 			// Diffuse: texture_diffuseN

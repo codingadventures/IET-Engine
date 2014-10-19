@@ -131,7 +131,7 @@ public:
 			this->ProcessKeyboard(LEFT, deltaTime);
 		if(keys[GLFW_KEY_D])
 			this->ProcessKeyboard(RIGHT, deltaTime);
-
+		 
 		/*if(keys[GLFW_KEY_Z])
 		{
 
@@ -159,7 +159,7 @@ public:
 	}
 
 private:
-	
+
 
 	// Calculates the front vector from the Camera's (updated) Eular Angles
 	void updateCameraVectors()

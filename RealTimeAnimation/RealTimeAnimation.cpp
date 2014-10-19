@@ -50,6 +50,7 @@ void load_texture(string path, GLuint *texture)
 
 
 
+
 int main(int argc, char* argv[])
 { 
 	glm::mat4* animationMatrices;
@@ -60,9 +61,9 @@ int main(int argc, char* argv[])
 	//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 	UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera,_1,_2);
 	UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,camera,_1);
+	UserKeyboardCallback = std::bind(&ReadInput);
 
-
-	//glwf library initialization
+	//GLWF library initialization
 	glfwInit();
 
 
@@ -92,7 +93,7 @@ int main(int argc, char* argv[])
 
 	glEnable(GL_DEPTH_TEST);
 
-	//Wireframe
+	//Wire frame
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Model hand(HAND_MODEL);
@@ -107,7 +108,7 @@ int main(int argc, char* argv[])
 	GLuint* boneLocation = (GLuint*) malloc(numberOfBones* sizeof(GLuint));
 
 
-	//Initialize bones in the shader for the unform 
+	//Initialize bones in the shader for the uniform 
 	for (unsigned int i = 0 ; i < numberOfBones; i++) {
 
 
@@ -125,26 +126,30 @@ int main(int argc, char* argv[])
 	}
 
 
-	while(!glfwWindowShouldClose(window))
+	while(!glfwWindowShouldClose(window) )
 	{
+
 
 		static double previous_seconds = glfwGetTime ();
 		double current_seconds = glfwGetTime ();
 		double elapsed_seconds = current_seconds - previous_seconds;
 		previous_seconds = current_seconds;
 
-		/* update animation timer and loop */
-		clock += elapsed_seconds * ANIMATION_SPEED;
-		if ( (int)(clock / totalAnimationTime) % 2 == 0)
-			anim_time += elapsed_seconds * ANIMATION_SPEED;
+		if (pause)
+			glfwWaitEvents();
 		else
 		{
-			anim_time -= elapsed_seconds * ANIMATION_SPEED;
+			/* update animation timer and loop */
+			clock += elapsed_seconds * ANIMATION_SPEED;
+			if ( (int)(clock / totalAnimationTime) % 2 == 0)
+				anim_time += elapsed_seconds * ANIMATION_SPEED;
+			else
+			{
+				anim_time -= elapsed_seconds * ANIMATION_SPEED;
+			}
 		}
-		/*if (anim_time >= hand.animDuration) {
-		anim_time = hand.animDuration - anim_time;
-		}
-		*/
+
+
 
 
 		// Set frame time
@@ -155,6 +160,7 @@ int main(int argc, char* argv[])
 		glfwPollEvents();
 
 		camera->MoveCamera();  
+
 
 		glm::mat4 model,projection,view;
 
