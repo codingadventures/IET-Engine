@@ -59,7 +59,7 @@ private:
 	{
 		// Read file via ASSIMP
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded   | aiProcess_GenSmoothNormals);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 		// Check for errors
 		if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
@@ -335,9 +335,12 @@ GLint TextureFromFile(const char* path, string directory)
 {
 	Magick::Blob m_blob;
 	Magick::Image* m_pImage;
+	string filename = string(path);
+	string ll = "models\\nanosuit2\\" ;
+	filename  = ll + path;
 	try {
-		m_pImage = new Magick::Image(path);
-		m_pImage->write(&m_blob, "RGBA");
+		m_pImage = new Magick::Image(filename);
+		m_pImage->write(&m_blob, "RGB");
 	}
 	catch (Magick::Error& Error) {
 		std::cout << "Error loading texture '" << path << "': " << Error.what() << std::endl;
@@ -345,7 +348,7 @@ GLint TextureFromFile(const char* path, string directory)
 	}
 
 	//Generate texture ID and load texture data 
-	//string filename = string(path);
+	//
 	//filename = directory + '/' + filename;
 	GLuint textureID;
 
@@ -356,14 +359,15 @@ GLint TextureFromFile(const char* path, string directory)
 	//unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, nullptr, 0);
 	// Assign texture to ID
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D,  0, GL_RGBA, m_pImage->columns(), m_pImage->rows(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_blob.data());
- 	glGenerateMipmap(GL_TEXTURE_2D);	
+	glTexImage2D(GL_TEXTURE_2D,  0, GL_RGB, m_pImage->columns(), m_pImage->rows(), 0, GL_RGB, GL_UNSIGNED_BYTE, m_blob.data());
 
 	// Parameters
-	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR );
-	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glGenerateMipmap(GL_TEXTURE_2D);	
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//	SOIL_free_image_data(image);

@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define HAND_MODEL "models\\max.dae"
+#define HAND_MODEL "models\\nanosuit2\\nanosuit.obj"
 
 
 float rot_speed = 50.0f; // 50 radians per second
@@ -169,9 +169,9 @@ int main(int argc, char* argv[])
 		view = camera->GetViewMatrix();
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
-		model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
-		model = glm::rotate(model, (float)180.0f, glm::vec3(0.0f, 0.0f, 1.0f)); 
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
+		//model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		//model = glm::rotate(model, (float)180.0f, glm::vec3(0.0f, 1.0f, 0.0f)); 
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
