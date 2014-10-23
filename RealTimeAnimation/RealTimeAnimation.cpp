@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define HAND_MODEL "models\\nanosuit2\\nanosuit.obj"
+#define HAND_MODEL "models\\max.obj"
 
 
 float rot_speed = 50.0f; // 50 radians per second
