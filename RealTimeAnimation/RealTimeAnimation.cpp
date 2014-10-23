@@ -9,12 +9,12 @@
 
 using namespace std::placeholders;
 
-#define ANIMATION_SPEED 1.3
-#define HAND_MODEL "models\\hand_with_animation.dae"
+#define ANIMATION_SPEED 0.6
+#define HAND_MODEL "models\\hand_with_animation_2.dae"
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
-const int totalAnimationTime = 5.0f;
+int totalAnimationTime;
 
 void load_texture(string path, GLuint *texture)
 {
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 		boneLocation[i] = location;
 	}
 
-
+	totalAnimationTime = hand.animDuration;
 	while(!glfwWindowShouldClose(window) )
 	{
 

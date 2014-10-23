@@ -9,7 +9,7 @@
 #include "Skeleton.h"
 using namespace std;
 // GL Includes
-#include <GL/glew.h> // Contains all the necessery OpenGL includes
+#include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <SOIL.h>
@@ -171,8 +171,7 @@ private:
 			vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
-		glm::uint numBones = 0;
-		//vector<Bone> bones;
+		glm::uint numBones = 0; 
 		vector<VertexWeight> boneWeights;
 		boneWeights.resize(ai_mesh->mNumVertices);
 #pragma endregion  
