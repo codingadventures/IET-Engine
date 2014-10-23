@@ -12,7 +12,7 @@ using namespace std;
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <SOIL.h>
+#include <Magick++.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -45,7 +45,7 @@ public:
 	}
 
 
-	
+
 
 private:
 	/*  Model Data  */
@@ -59,7 +59,7 @@ private:
 	{
 		// Read file via ASSIMP
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs  | aiProcess_GenSmoothNormals);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded   | aiProcess_GenSmoothNormals);
 		// Check for errors
 		if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
@@ -86,7 +86,7 @@ private:
 			// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 			aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
 			Mesh mesh = this->processMesh(ai_mesh, scene );
-			 
+
 			this->meshes.push_back(mesh);			
 		}
 		// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
@@ -181,7 +181,6 @@ private:
 		if(ai_mesh->HasBones())
 		{
 			int bone_count =  ai_mesh->mNumBones;
-			char bone_names[256][64];
 
 			for (int i = 0 ; i < ai_mesh->mNumBones ; i++) {                
 				int BoneIndex = 0;        
@@ -190,11 +189,12 @@ private:
 				if ( skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
 					BoneIndex =  numBones;
-					numBones++;             
-  
+					numBones++;            
+
+
 					skeleton->boneMapping[BoneName] = aiMatrix4x4ToGlm( &ai_mesh->mBones[i]->mOffsetMatrix);
 				}
-				 
+
 				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
 					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
 					float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
@@ -211,7 +211,7 @@ private:
 			// there should always be a 'root node', even if no skeleton exists
 			aiNode* assimp_node = scene->mRootNode;
 			if (!skeleton->importSkeletonBone (assimp_node)) {
-					fprintf (stderr, "ERROR: could not import node tree from mesh\n");
+				fprintf (stderr, "ERROR: could not import node tree from mesh\n");
 			} // endif
 
 
@@ -323,7 +323,7 @@ private:
 				texture.type = typeName;
 				texture.path = str;
 				textures.push_back(texture);
-				this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+				this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
 			}
 		}
 		return textures;
@@ -331,28 +331,41 @@ private:
 };
 
 
-
-
 GLint TextureFromFile(const char* path, string directory)
 {
+	Magick::Blob m_blob;
+	Magick::Image* m_pImage;
+	try {
+		m_pImage = new Magick::Image(path);
+		m_pImage->write(&m_blob, "RGBA");
+	}
+	catch (Magick::Error& Error) {
+		std::cout << "Error loading texture '" << path << "': " << Error.what() << std::endl;
+		return false;
+	}
+
 	//Generate texture ID and load texture data 
-	string filename = string(path);
-	filename = directory + '/' + filename;
+	//string filename = string(path);
+	//filename = directory + '/' + filename;
 	GLuint textureID;
+
+
+	//SOIL_load_OGL_texture(filename.c_str(),SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);;
 	glGenTextures(1, &textureID);
-	int width,height;
-	unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+	//int width,height,channels;
+	//unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, nullptr, 0);
 	// Assign texture to ID
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);	
+	glTexImage2D(GL_TEXTURE_2D,  0, GL_RGBA, m_pImage->columns(), m_pImage->rows(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_blob.data());
+ 	glGenerateMipmap(GL_TEXTURE_2D);	
 
 	// Parameters
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR );
+	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	 glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
-	SOIL_free_image_data(image);
+	//	SOIL_free_image_data(image);
 	return textureID;
 }

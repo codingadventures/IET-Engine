@@ -10,43 +10,44 @@
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define HAND_MODEL "models\\hand_with_animation_2.dae"
+#define HAND_MODEL "models\\max.dae"
+
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
 int totalAnimationTime;
 
-void load_texture(string path, GLuint *texture)
-{
-	//static int counter;
-	int width, height;
-	unsigned char* image = SOIL_load_image(path.c_str(), 
-		&width, &height, nullptr, SOIL_LOAD_RGB); 
-
-	if (!image)
-	{
-		cout << "Error loading the image " << endl;
-		return;
-	}
-
-	glGenTextures(1, texture);  
-	glBindTexture(GL_TEXTURE_2D, *texture);  
-	// Set our texture parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// Set texture filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-
-	//Free memory and unbind the texture object
-	SOIL_free_image_data(image);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
+//void load_texture(string path, GLuint *texture)
+//{
+//	//static int counter;
+//	int width, height;
+//	unsigned char* image = SOIL_load_image(path.c_str(), 
+//		&width, &height, nullptr, SOIL_LOAD_RGB); 
+//
+//	if (!image)
+//	{
+//		cout << "Error loading the image " << endl;
+//		return;
+//	}
+//
+//	glGenTextures(1, texture);  
+//	glBindTexture(GL_TEXTURE_2D, *texture);  
+//	// Set our texture parameters
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//	// Set texture filtering
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+//
+//
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//
+//
+//	//Free memory and unbind the texture object
+//	SOIL_free_image_data(image);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//}
 
 
 
@@ -87,14 +88,14 @@ int main(int argc, char* argv[])
 	glfwSetScrollCallback(window, Callbacks::scrollCallback); 
 
 	Shader shader("vertex.vert","fragment.frag");
-
-	/*load_texture("textures\\container.jpg",&container);
-	load_texture("textures\\awesomeface.png",&face);*/
+	GLuint container;
+	//load_texture("textures\\container.jpg",&container);
+	/*load_texture("textures\\awesomeface.png",&face);*/
 
 	glEnable(GL_DEPTH_TEST);
 
 	//Wire frame
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Model hand(HAND_MODEL);
 
@@ -109,7 +110,7 @@ int main(int argc, char* argv[])
 
 
 	//Initialize bones in the shader for the uniform 
-	for (unsigned int i = 0 ; i < numberOfBones; i++) {
+	/*for (unsigned int i = 0 ; i < numberOfBones; i++) {
 
 
 		animationMatrices[i] = glm::mat4(); 
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
 		}
 
 		boneLocation[i] = location;
-	}
+	}*/
 
 	totalAnimationTime = hand.animDuration;
 	while(!glfwWindowShouldClose(window) )
@@ -168,7 +169,8 @@ int main(int argc, char* argv[])
 		view = camera->GetViewMatrix();
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
-		model = glm::rotate(model, (float)125.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model = glm::rotate(model, (float)180.0f, glm::vec3(0.0f, 0.0f, 1.0f)); 
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -186,10 +188,10 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		if(true)
+		if(false)
 			hand.skeleton->animateKeyFrames(NULL,anim_time, animationMatrices);
 
-		glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(animationMatrices[0]));
+		//glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(animationMatrices[0]));
 
 		hand.Draw(shader);
 
