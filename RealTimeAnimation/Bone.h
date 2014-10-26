@@ -36,6 +36,8 @@ struct Bone {
 	//Loaded from Assimp. Transformation from the mesh space to bone space.
 	glm::mat4 boneOffset;   
 
+	glm::mat4 globalTransform;
+
 	//Calculated at runtime traversing the tree. offset of the bone in respect of its parent. 
 	glm::mat4 transformationOffset;
 };

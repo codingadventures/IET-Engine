@@ -10,51 +10,20 @@
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define HAND_MODEL "models\\max.obj"
+#define MODEL "models\\Cones.dae"
 
+#define CUBE_MODEL "models\\cubeTri.obj"
 
 float rot_speed = 50.0f; // 50 radians per second
 bool moved = false;
 int totalAnimationTime;
 
-//void load_texture(string path, GLuint *texture)
-//{
-//	//static int counter;
-//	int width, height;
-//	unsigned char* image = SOIL_load_image(path.c_str(), 
-//		&width, &height, nullptr, SOIL_LOAD_RGB); 
-//
-//	if (!image)
-//	{
-//		cout << "Error loading the image " << endl;
-//		return;
-//	}
-//
-//	glGenTextures(1, texture);  
-//	glBindTexture(GL_TEXTURE_2D, *texture);  
-//	// Set our texture parameters
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//	// Set texture filtering
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  // NOTE the GL_NEAREST Here! 
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-//
-//
-//	glGenerateMipmap(GL_TEXTURE_2D);
-//
-//
-//	//Free memory and unbind the texture object
-//	SOIL_free_image_data(image);
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//}
-
-
-
 
 int main(int argc, char* argv[])
 { 
 	glm::mat4* animationMatrices;
+	glm::mat4* IKMatrices;
+
 	double clock = 0.0, anim_time = 0.0f;
 
 	Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -97,23 +66,26 @@ int main(int argc, char* argv[])
 	//Wire frame
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	Model hand(HAND_MODEL);
+	Model cones(MODEL);
+	Model cube(CUBE_MODEL);
 
 
 	GLint modelUniform = glGetUniformLocation(shader.Program, "model");
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
 
-	glm::uint numberOfBones = hand.skeleton->getNumberOfBones();
+	glm::uint numberOfBones = cones.skeleton->getNumberOfBones();
 	animationMatrices = (glm::mat4*) malloc(numberOfBones * sizeof(glm::mat4));
+	IKMatrices = (glm::mat4*) malloc(numberOfBones * sizeof(glm::mat4));
 	GLuint* boneLocation = (GLuint*) malloc(numberOfBones* sizeof(GLuint));
 
 
 	//Initialize bones in the shader for the uniform 
-	/*for (unsigned int i = 0 ; i < numberOfBones; i++) {
+	for (unsigned int i = 0 ; i < numberOfBones; i++) {
 
 
 		animationMatrices[i] = glm::mat4(); 
+		IKMatrices[i] = glm::mat4(); 
 		char Name[128];
 
 		memset(Name, 0, sizeof(Name));
@@ -124,13 +96,16 @@ int main(int argc, char* argv[])
 		}
 
 		boneLocation[i] = location;
-	}*/
+	}
 
-	totalAnimationTime = hand.animDuration;
+	totalAnimationTime = cones.animDuration;
+
+	cones.skeleton->ComputeCCDLink(glm::vec3(1.0f,1.0f,0.0f), IKMatrices);
+	cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
+
 	while(!glfwWindowShouldClose(window) )
 	{
-
-
+		 
 		static double previous_seconds = glfwGetTime ();
 		double current_seconds = glfwGetTime ();
 		double elapsed_seconds = current_seconds - previous_seconds;
@@ -169,7 +144,7 @@ int main(int argc, char* argv[])
 		view = camera->GetViewMatrix();
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
-		//model = glm::rotate(model, (float)90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model = glm::rotate(model, (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
 		//model = glm::rotate(model, (float)180.0f, glm::vec3(0.0f, 1.0f, 0.0f)); 
 		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
 
@@ -180,6 +155,7 @@ int main(int argc, char* argv[])
 
 
 		shader.Use();
+
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
 		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
@@ -188,12 +164,13 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		if(false)
-			hand.skeleton->animateKeyFrames(NULL,anim_time, animationMatrices);
+		cube.Draw(shader);
 
-		//glUniformMatrix4fv (boneLocation[0], 16, GL_FALSE, glm::value_ptr(animationMatrices[0]));
+		 
+		glUniformMatrix4fv (boneLocation[0], numberOfBones, GL_FALSE, glm::value_ptr(animationMatrices[0]));
 
-		hand.Draw(shader);
+		cones.Draw(shader);
+
 
 		glfwSwapBuffers(window);
 	}

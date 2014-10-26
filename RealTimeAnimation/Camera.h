@@ -132,30 +132,6 @@ public:
 		if(keys[GLFW_KEY_D])
 			this->ProcessKeyboard(RIGHT, deltaTime);
 		 
-		/*if(keys[GLFW_KEY_Z])
-		{
-
-		theta[8] += rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-
-		}
-
-		if(keys[GLFW_KEY_C])
-		{
-
-		theta[9] += rot_speed * elapsed_seconds;
-		animationTransformMap[9]  = glm::rotate( glm::mat4(),-theta[9],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-
-		}
-		if(keys[GLFW_KEY_X])
-		{
-
-		theta[8] -=  rot_speed * elapsed_seconds;
-		animationTransformMap[8]  = glm::rotate( glm::mat4(),theta[8],glm::vec3(1.0f,0.0f,0.0f));
-		moved = true;
-		}*/
 	}
 
 private:

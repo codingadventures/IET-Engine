@@ -18,7 +18,175 @@ public:
 	}
 
 	~Skeleton(){
-		 
+
+	}
+
+
+	void SolveIK(Bone* endEffector, glm::vec3 target, size_t numIterations, float threshold, int numParents)
+	{
+		//size_t currentIterations = 0;
+
+		//glm::vec4 endPos = glm::p endEffector->boneOffset;
+		//float dist = glm::distance(endPos, target);
+
+		//Bone* curr = endEffector->parent;
+		//int currCountTreeUp = 0;
+		//while (currentIterations < numIterations && dist  > threshold)
+		//{
+		//	//		Take current bone
+		//	//		Build vector V1 from bone pivot to effector
+		//	glm::vec3 v1 = glm::normalize(glm::vec3(endPos - curr->getWorldPosition()));
+		//	//		Build vector V2 from bone pivot to target
+		//	glm::vec3 v2 = glm::normalize(glm::vec3(target - curr->getWorldPosition()));
+
+		//	if ((v1 != v1) || (v2 != v2))
+		//		break;
+		//	//		Get the angle between V1 and V2
+		//	float dp = glm::dot(v1, v2);
+		//	float angle = glm::degrees(glm::acos(dp));
+		//	if (dp >= 1)
+		//		break;
+		//	//		Get the rotation direction
+		//	glm::vec3 rotAxis = glm::normalize(glm::cross(v1, v2));
+
+		//	glm::vec3 rotAxis = glm::vec3(glm::mat3(glm::inverse(curr->parent->transformationOffset*curr->boneOffset))*rotAxis);
+
+		//	dist = glm::distance(endPos, target);
+		//	if (dist < threshold)
+		//		break;
+		//	if ((rotAxis != glm::vec3()) && rotAxis == rotAxis)
+		//	{
+		//		glm::mat4 rotMat = glm::rotate(glm::mat4(),angle, rotAxis); // This needs to be in model space, rather than world space.
+		//		assert(rotMat == rotMat);
+		//		curr->transformationOffset = rotMat;
+		//	}
+		//	//		If it is the base node then the new current bone is the last bone in the chain
+		//	//		Else the new current bone is the previous one in the chain
+		//	//Update the heuristic
+		//	endPos = endEffector->boneOffset;
+		//	if (!curr->parent->parent || currCountTreeUp > numParents)
+		//	{
+		//		curr = endEffector->parent;
+		//		currCountTreeUp = 0;
+		//	}
+		//	else
+		//	{
+		//		curr = curr->parent;
+		//		currCountTreeUp++;
+		//	}
+		//	currentIterations++;
+		//}
+	}
+
+	bool  ComputeCCDLink(glm::vec3 endPos , glm::mat4* bone_animation_mats)
+	{
+		/// Local Variables ///////////////////////////////////////////////////////////
+		glm::vec3		rootPos,curEnd,desiredEnd,targetVector,curVector,crossResult;
+		double			cosAngle,turnAngle,turnDeg;
+		int				boneIndex;
+		int				tries;
+		int				numOfBones =  getNumberOfBones();
+		///////////////////////////////////////////////////////////////////////////////
+		// START AT THE LAST LINK IN THE CHAIN
+		boneIndex = numOfBones - 1;
+		tries = 0;						// LOOP COUNTER SO I KNOW WHEN TO QUIT
+		Bone* effectorBone = GetBone("Top");
+
+		do
+		{
+
+			Bone* linkBone = GetBone(boneIndex);
+
+			// THE COORDS OF THE X,Y,Z POSITION OF THE ROOT OF THIS BONE IS IN THE MATRIX
+			// TRANSLATION PART WHICH IS IN THE 12,13,14 POSITION OF THE MATRIX
+			rootPos.x = linkBone->boneOffset[3][0];
+			rootPos.y = linkBone->boneOffset[3][1];
+			rootPos.z = linkBone->boneOffset[3][2];
+
+			// POSITION OF THE END EFFECTOR
+			curEnd.x = effectorBone->boneOffset[3][0];
+			curEnd.y = effectorBone->boneOffset[3][1];
+			curEnd.z = effectorBone->boneOffset[3][2];
+
+			// DESIRED END EFFECTOR POSITION
+			desiredEnd.x = (float)endPos.x;
+			desiredEnd.y = (float)endPos.y;
+			desiredEnd.z = (float)endPos.z;						// ONLY DOING 2D NOW
+
+			// SEE IF I AM ALREADY CLOSE ENOUGH
+			float distance = glm::distance(curEnd,desiredEnd);
+			glm::mat4 local_anim;
+
+			if (distance > IK_POS_THRESH)
+			{
+				// CREATE THE VECTOR TO THE CURRENT EFFECTOR POS
+				curVector.x = curEnd.x - rootPos.x;
+				curVector.y = curEnd.y - rootPos.y;
+				curVector.z = curEnd.z - rootPos.z;
+				// CREATE THE DESIRED EFFECTOR POSITION VECTOR
+				targetVector.x = endPos.x - rootPos.x;
+				targetVector.y = endPos.y - rootPos.y;
+				targetVector.z = endPos.z - rootPos.z;				// ONLY DOING 2D NOW
+
+				glm::mat4 bone_offset = linkBone->boneOffset;
+				glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+
+				// NORMALIZE THE VECTORS (EXPENSIVE, REQUIRES A SQRT)
+				curVector = glm::normalize(curVector);
+				targetVector = glm::normalize(targetVector);
+
+				// THE DOT PRODUCT GIVES ME THE COSINE OF THE DESIRED ANGLE
+				cosAngle = glm::dot(targetVector,curVector);
+				glm::mat4 parent = boneIndex == 0 ? linkBone->transformationOffset : linkBone->parent->transformationOffset;
+				// IF THE DOT PRODUCT RETURNS 1.0, I DON'T NEED TO ROTATE AS IT IS 0 DEGREES
+				if (cosAngle < 0.99999)
+				{
+					// USE THE CROSS PRODUCT TO CHECK WHICH WAY TO ROTATE
+					crossResult =	glm::cross(targetVector, curVector);
+					if (crossResult.z > 0.0f)	// IF THE Z ELEMENT IS POSITIVE, ROTATE CLOCKWISE
+					{
+						turnAngle = acos((float)cosAngle);	// GET THE ANGLE
+						turnDeg =glm::degrees(turnAngle);		// COVERT TO DEGREES
+						// DAMPING
+						/*	if (m_Damping && turnDeg > m_Link[link].damp_width) 
+						turnDeg = m_Link[link].damp_width;*/
+						local_anim = glm::rotate(glm::mat4(),-(float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
+
+						bone_animation_mats[boneIndex] = local_anim;
+						//m_Link[boneIndex].rot.z -= (float)turnDeg;	// ACTUALLY TURN THE LINK
+						// DOF RESTRICTIONS
+						/*if (m_DOF_Restrict &&
+						m_Link[link].rot.z < (float)m_Link[link].min_rz) 
+						m_Link[link].rot.z = (float)m_Link[link].min_rz;*/
+					}
+					else if (crossResult.z < 0.0f)	// ROTATE COUNTER CLOCKWISE
+					{
+						turnAngle = acos((float)cosAngle);
+						turnDeg = glm::degrees(turnAngle);
+
+						local_anim = glm::rotate(glm::mat4(), (float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
+
+						bone_animation_mats[boneIndex] = local_anim;
+
+						// DAMPING
+						//if (m_Damping && turnDeg > m_Link[link].damp_width) 
+						//	turnDeg = m_Link[link].damp_width;
+						//m_Link[link].rot.z += (float)turnDeg;	// ACTUALLY TURN THE LINK
+						// DOF RESTRICTIONS
+						/*	if (m_DOF_Restrict &&
+						m_Link[link].rot.z > (float)m_Link[link].max_rz) 
+						m_Link[link].rot.z = (float)m_Link[link].max_rz;*/
+					}
+					// RECALC ALL THE MATRICES WITHOUT DRAWING ANYTHING
+					//drawScene(FALSE);		// CHANGE THIS TO TRUE IF YOU WANT TO SEE THE ITERATION
+				}
+				if (--boneIndex < 0) boneIndex = numOfBones - 1;	// START OF THE CHAIN, RESTART
+			}
+			// QUIT IF I AM CLOSE ENOUGH OR BEEN RUNNING LONG ENOUGH
+		} while (tries++ < MAX_IK_TRIES && 
+			glm::distance(curEnd, desiredEnd) > IK_POS_THRESH);
+
+		return true;
 	}
 
 	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
@@ -33,19 +201,20 @@ public:
 
 		/* the animation for a particular bone at this time */
 		glm::mat4 local_anim;
-
 		// if node has a weighted bone...
 		int bone_i = bone->boneIndex;
 		if (bone_i > -1) {
 			// ... then get offset matrices
 			glm::mat4 bone_offset = bone->boneOffset;
 			glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+			glm::mat4 parent = bone_i == 0 ? bone->transformationOffset :  bone->parent->transformationOffset;
+
 			// ... at the moment get the per-bone animation from keyboard input
 			local_anim = animation[bone_i];
 
 			//glm::mat4 temp = bone_i==10 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(1.0f,0.0f,0.0f)): glm::mat4(1.0f);
 
-			bone->transformationOffset = bone->parent->transformationOffset * inv_bone_offset * local_anim * bone_offset ;
+			bone->transformationOffset = parent * inv_bone_offset * local_anim * bone_offset ;
 			bone_animation_mats[bone_i] = bone->transformationOffset; 
 		}
 		for (int i = 0; i < bone->children.size(); i++) {
@@ -131,48 +300,78 @@ public:
 		static int boneIndex = 0;
 		bool has_bone = false;
 		bool has_useful_child = false;
+		const char* boneName = assimp_node->mName.C_Str ();
 
 		if (!bone)
 		{
 			bone = rootBone;
 		} 
 
-		strcpy_s (bone->name, assimp_node->mName.C_Str ());
 
-		printf ("-node name = %s\n", bone->name);
 
-		bone->children.resize((int)assimp_node->mNumChildren);
-
-		if (this->boneMapping.find(bone->name) != this->boneMapping.end()) 
+		if (this->boneMapping.find(boneName) != this->boneMapping.end()) 
 		{
-			printf ("node uses bone %i\n", boneIndex);
 			bone->boneIndex =  boneIndex++;
+			strcpy_s (bone->name, boneName);
+			bone->children.resize((int)assimp_node->mNumChildren);
 			has_bone = true;
 		}
 
 
 		for (int i = 0; i < (int)assimp_node->mNumChildren; i++) 
 		{ 
+			Bone* recursiveBone = bone;
 			//I'm setting the parent here
-			bone->children[i].parent = bone;
-			bool importRes = importSkeletonBone (assimp_node->mChildren[i], &bone->children[i]);
-			if (importRes) 
+			if (has_bone)
 			{
-				has_useful_child = true; 
-			} else {
-				printf ("useless child culled\n");
+				bone->children[i].parent = bone;
+				recursiveBone = &bone->children[i];
 			}
+
+			bool importRes = importSkeletonBone (assimp_node->mChildren[i], recursiveBone);
+			if (importRes) 
+				has_useful_child = true; 
+
 		}
 
 		if (has_useful_child || has_bone) {
-			//temp->parentTransformation = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
+			string nodeName(boneName);
+			string globalTransf("Node Name " + nodeName + "\n Global Transform");
+			printLogT(globalTransf.c_str(),bone->globalTransform);
+			printLogT("Bone Offset \t", this->boneMapping[bone->name]);
+
+			bone->globalTransform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
 			bone->boneOffset = this->boneMapping[bone->name];
 			return true;
 		}
 		// no bone or good children - cull self
-		bone->children.resize(0);
-		bone->children.empty();
 		return false;
+	}
+
+	Bone* GetBone(int boneIndex, Bone* boneToFind = NULL)
+	{
+		if (!boneToFind)
+		{
+			boneToFind = rootBone;
+		}
+		// validate self
+		assert (boneToFind);
+
+		// look for match
+		if ( boneToFind->boneIndex == boneIndex) {
+			return boneToFind;
+		}
+
+		// recurse to children
+		for (int i = 0; i < boneToFind->children.size(); i++) {
+			Bone* child = GetBone (boneIndex,	&boneToFind->children[i]);
+			if (child != NULL) {
+				return child;
+			}
+		}
+
+		// no children match and no self match
+		return NULL;
 	}
 
 	// Retrieve a bone given the name
