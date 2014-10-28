@@ -131,7 +131,7 @@ public:
 			this->ProcessKeyboard(LEFT, deltaTime);
 		if(keys[GLFW_KEY_D])
 			this->ProcessKeyboard(RIGHT, deltaTime);
-		 
+		  
 	}
 
 private:

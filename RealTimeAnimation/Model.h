@@ -104,6 +104,8 @@ private:
 		vector<Vertex> vertices;
 		vector<GLuint> indices;
 		vector<Texture> textures;
+		vector<VertexWeight> boneWeights;
+		glm::uint numBones = 0; 
 
 #pragma region [ Process Vertices ]
 		// Walk through each of the mesh's vertices
@@ -171,9 +173,6 @@ private:
 			vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
-		glm::uint numBones = 0; 
-		vector<VertexWeight> boneWeights;
-		boneWeights.resize(ai_mesh->mNumVertices);
 #pragma endregion  
 
 #pragma region [ Process Bones ]
@@ -181,6 +180,8 @@ private:
 		if(ai_mesh->HasBones())
 		{
 			int bone_count =  ai_mesh->mNumBones;
+
+			boneWeights.resize(ai_mesh->mNumVertices);
 
 			for (int i = 0 ; i < ai_mesh->mNumBones ; i++) {                
 				int BoneIndex = 0;        

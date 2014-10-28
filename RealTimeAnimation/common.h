@@ -22,12 +22,16 @@
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
 #define MAX_IK_TRIES		100		// TIMES THROUGH THE CCD LOOP (TRIES = # / LINKS) 
-#define IK_POS_THRESH		1.0f	// THRESHOLD FOR SUCCESS
+#define IK_POS_THRESH		0.1f	// THRESHOLD FOR SUCCESS
 
 bool keys[1024];
 
 using  std::cout;
 using  std::endl;
+
+glm::mat4 cubeModel;
+bool moved = false;
+
 
 #pragma region [ Helper Functions ]
 
@@ -76,7 +80,32 @@ void ReadInput()
 		pause = !pause;
 	}
 
+	if(keys[GLFW_KEY_K])
+	{
+		cubeModel = glm::translate(cubeModel,glm::vec3(0.0,0.2,0.0));
+		moved = true;
+	}
 
+	if(keys[GLFW_KEY_I])
+	{
+		cubeModel = glm::translate(cubeModel,glm::vec3(0.0,-0.2,0.0));
+		moved = true;
+
+	}
+
+	if(keys[GLFW_KEY_L])
+	{
+		cubeModel = glm::translate(cubeModel,glm::vec3(0.2,0.0,0.0));
+		moved = true;
+
+	}
+
+	if(keys[GLFW_KEY_J])
+	{
+		cubeModel = glm::translate(cubeModel,glm::vec3(-0.2,0.0,0.0));
+		moved = true;
+
+	}
 }
 
 

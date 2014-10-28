@@ -11,11 +11,9 @@ using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
 #define MODEL "models\\Cones.dae"
-
 #define CUBE_MODEL "models\\cubeTri.obj"
 
 float rot_speed = 50.0f; // 50 radians per second
-bool moved = false;
 int totalAnimationTime;
 
 
@@ -42,7 +40,7 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "Lab2", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "Inverse Kinematic - Directed By: Mr. Stark", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	glewExperimental = GL_TRUE;
@@ -57,9 +55,8 @@ int main(int argc, char* argv[])
 	glfwSetScrollCallback(window, Callbacks::scrollCallback); 
 
 	Shader shader("vertex.vert","fragment.frag");
-	GLuint container;
-	//load_texture("textures\\container.jpg",&container);
-	/*load_texture("textures\\awesomeface.png",&face);*/
+	Shader shaderBones("vertex_bone.vert","fragment_bone.frag");
+	GLuint container; 
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -74,9 +71,14 @@ int main(int argc, char* argv[])
 	GLint viewUniform = glGetUniformLocation(shader.Program, "view");
 	GLint projectionUniform = glGetUniformLocation(shader.Program, "projection");
 
+	GLint modelBonesUniform = glGetUniformLocation(shaderBones.Program, "model");
+	GLint viewBonesUniform = glGetUniformLocation(shaderBones.Program, "view");
+	GLint projectionBonesUniform = glGetUniformLocation(shaderBones.Program, "projection");
+
 	glm::uint numberOfBones = cones.skeleton->getNumberOfBones();
 	animationMatrices = (glm::mat4*) malloc(numberOfBones * sizeof(glm::mat4));
 	IKMatrices = (glm::mat4*) malloc(numberOfBones * sizeof(glm::mat4));
+
 	GLuint* boneLocation = (GLuint*) malloc(numberOfBones* sizeof(GLuint));
 
 
@@ -90,7 +92,7 @@ int main(int argc, char* argv[])
 
 		memset(Name, 0, sizeof(Name));
 		sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-		GLint location = glGetUniformLocation(shader.Program, Name);
+		GLint location = glGetUniformLocation(shaderBones.Program, Name);
 		if (location == INVALID_UNIFORM_LOCATION) {
 			fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
 		}
@@ -100,12 +102,18 @@ int main(int argc, char* argv[])
 
 	totalAnimationTime = cones.animDuration;
 
-	cones.skeleton->ComputeCCDLink(glm::vec3(1.0f,1.0f,0.0f), IKMatrices);
-	cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
+	cubeModel = glm::scale(cubeModel, glm::vec3(0.1f, 0.1f, 0.1f));	
+	cubeModel = glm::translate(cubeModel, glm::vec3(10.0f, 0.0f, 0.0f));
 
 	while(!glfwWindowShouldClose(window) )
 	{
-		 
+		glfwPollEvents();
+
+
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+
+
 		static double previous_seconds = glfwGetTime ();
 		double current_seconds = glfwGetTime ();
 		double elapsed_seconds = current_seconds - previous_seconds;
@@ -125,51 +133,62 @@ int main(int argc, char* argv[])
 			}
 		}
 
-
-
-
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
 		camera->deltaTime = currentFrame - camera->lastFrame;
 		camera->lastFrame = currentFrame;
 
-		glfwPollEvents();
-
 		camera->MoveCamera();  
-
-
-		glm::mat4 model,projection,view;
-
-
-		view = camera->GetViewMatrix();
-
-		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
-		model = glm::rotate(model, (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
-		//model = glm::rotate(model, (float)180.0f, glm::vec3(0.0f, 1.0f, 0.0f)); 
-		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-
-		GLfloat timeValue = glfwGetTime();
-
 
 		shader.Use();
 
-		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
-		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
+		glm::mat4 projection,view;
 
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
+		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
+		view = camera->GetViewMatrix();
+
+		
+
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(cubeModel));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
 		cube.Draw(shader);
 
-		 
+
+
+		shaderBones.Use();
+
+		glm::mat4 model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+
+
+		GLfloat timeValue = glfwGetTime();
+
+
+		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
+		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
+
+		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
+
+		if (moved)
+		{
+			//Calculate world space of the cube
+			glm::vec3 cubeModelDirection,cubeModelScale;
+			glm::mat4 cubeModelRotation;
+
+			decomposeTRS(cubeModel,cubeModelScale,cubeModelRotation,cubeModelDirection);
+
+			cones.skeleton->ComputeCCDLink(cubeModelDirection, IKMatrices);
+			//cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
+			moved = false;
+		}
+
 		glUniformMatrix4fv (boneLocation[0], numberOfBones, GL_FALSE, glm::value_ptr(animationMatrices[0]));
 
-		cones.Draw(shader);
+		cones.Draw(shaderBones);
 
 
 		glfwSwapBuffers(window);

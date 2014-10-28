@@ -57,5 +57,7 @@
   <ItemGroup>
     <None Include="vertex.vert" />
     <None Include="fragment.frag" />
+    <None Include="fragment_bone.frag" />
+    <None Include="vertex_bone.vert" />
   </ItemGroup>
 </Project>

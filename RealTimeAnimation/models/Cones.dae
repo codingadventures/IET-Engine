@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.72.0 commit date:2014-10-03, commit time:13:58, hash:95182d1</authoring_tool>
     </contributor>
-    <created>2014-10-26T18:12:56</created>
-    <modified>2014-10-26T18:12:56</modified>
+    <created>2014-10-27T01:43:41</created>
+    <modified>2014-10-27T01:43:41</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -142,25 +142,25 @@
       <skin source="#Cone_002-mesh">
         <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 4 0 0 0 1</bind_shape_matrix>
         <source id="Armature_Cone-skin-joints">
-          <Name_array id="Armature_Cone-skin-joints-array" count="3">Low Medium Top</Name_array>
+          <Name_array id="Armature_Cone-skin-joints-array" count="4">Low Medium Top Effector</Name_array>
           <technique_common>
-            <accessor source="#Armature_Cone-skin-joints-array" count="3" stride="1">
+            <accessor source="#Armature_Cone-skin-joints-array" count="4" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
         <source id="Armature_Cone-skin-bind_poses">
-          <float_array id="Armature_Cone-skin-bind_poses-array" count="48">1 0 0 0 0 0 1 0.9448015 0 -1 0 0 0 0 0 1 0.998188 -0.06017255 0 0 0 0 1 -1.044481 -0.06017255 -0.998188 0 0 0 0 0 1 1 0 0 0 0 0 1 -3.099802 0 -1 0 0 0 0 0 1</float_array>
+          <float_array id="Armature_Cone-skin-bind_poses-array" count="64">1 0 0 0 0 0 1 0.9448015 0 -1 0 0 0 0 0 1 0.998188 -0.06017255 0 0 0 0 1 -1.044481 -0.06017255 -0.998188 0 0 0 0 0 1 1 0 0 0 0 0 1 -3.099802 0 -1 0 0 0 0 0 1 0 -1 0 -2.11825e-7 1 0 0 0 0 0 1 -4.846 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#Armature_Cone-skin-bind_poses-array" count="3" stride="16">
+            <accessor source="#Armature_Cone-skin-bind_poses-array" count="4" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
         <source id="Armature_Cone-skin-weights">
-          <float_array id="Armature_Cone-skin-weights-array" count="99">1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</float_array>
+          <float_array id="Armature_Cone-skin-weights-array" count="102">1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0.9955231 0.004476904 0.9930708 0.006929159 0.9917568 0.008243203 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#Armature_Cone-skin-weights-array" count="99" stride="1">
+            <accessor source="#Armature_Cone-skin-weights-array" count="102" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
@@ -172,8 +172,8 @@
         <vertex_weights count="99">
           <input semantic="JOINT" source="#Armature_Cone-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#Armature_Cone-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </vcount>
-          <v>2 0 2 1 2 2 2 3 2 4 2 5 2 6 2 7 2 8 2 9 2 10 2 11 2 12 2 13 2 14 2 15 2 16 2 17 2 18 2 19 2 20 2 21 2 22 2 23 2 24 2 25 2 26 2 27 2 28 2 29 2 30 2 31 2 32 1 33 1 34 1 35 1 36 1 37 1 38 1 39 1 40 1 41 1 42 1 43 1 44 1 45 1 46 1 47 1 48 1 49 1 50 1 51 1 52 1 53 1 54 1 55 1 56 1 57 1 58 1 59 1 60 1 61 1 62 1 63 1 64 1 65 0 66 0 67 0 68 0 69 0 70 0 71 0 72 0 73 0 74 0 75 0 76 0 77 0 78 0 79 0 80 0 81 0 82 0 83 0 84 0 85 0 86 0 87 0 88 0 89 0 90 0 91 0 92 0 93 0 94 0 95 0 96 0 97 0 98</v>
+          <vcount>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </vcount>
+          <v>2 0 2 1 2 2 2 3 2 4 2 5 2 6 2 7 2 8 2 9 2 10 2 11 2 12 2 13 2 14 2 15 2 16 2 17 3 18 2 19 3 20 2 21 3 22 2 23 2 24 2 25 2 26 2 27 2 28 2 29 2 30 2 31 2 32 2 33 2 34 2 35 1 36 1 37 1 38 1 39 1 40 1 41 1 42 1 43 1 44 1 45 1 46 1 47 1 48 1 49 1 50 1 51 1 52 1 53 1 54 1 55 1 56 1 57 1 58 1 59 1 60 1 61 1 62 1 63 1 64 1 65 1 66 1 67 1 68 0 69 0 70 0 71 0 72 0 73 0 74 0 75 0 76 0 77 0 78 0 79 0 80 0 81 0 82 0 83 0 84 0 85 0 86 0 87 0 88 0 89 0 90 0 91 0 92 0 93 0 94 0 95 0 96 0 97 0 98 0 99 0 100 0 101</v>
         </vertex_weights>
       </skin>
     </controller>
@@ -196,6 +196,9 @@
             <matrix sid="transform">0.998188 0 -0.0601726 0 0 1 0 1.989282 0.0601726 0 0.998188 0 0 0 0 1</matrix>
             <node id="Top" name="Top" sid="Top" type="JOINT">
               <matrix sid="transform">0.998188 0 0.0601726 0 0 1 0 2.055321 -0.0601726 0 0.9981879 0 0 0 0 1</matrix>
+              <node id="Effector" name="Effector" sid="Effector" type="JOINT">
+                <matrix sid="transform">0 1 0 0 4.37114e-8 0 1 1.746198 1 4.44089e-16 -4.37114e-8 0 0 0 0 1</matrix>
+              </node>
             </node>
           </node>
         </node>

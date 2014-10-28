@@ -26,7 +26,7 @@ public:
 	{
 		//size_t currentIterations = 0;
 
-		//glm::vec4 endPos = glm::p endEffector->boneOffset;
+		//glm::vec3 endPos = glm::p endEffector->boneOffset;
 		//float dist = glm::distance(endPos, target);
 
 		//Bone* curr = endEffector->parent;
@@ -78,7 +78,7 @@ public:
 		//}
 	}
 
-	bool  ComputeCCDLink(glm::vec3 endPos , glm::mat4* bone_animation_mats)
+	bool ComputeCCDLink(glm::vec3 endPos , glm::mat4* bone_animation_mats)
 	{
 		/// Local Variables ///////////////////////////////////////////////////////////
 		glm::vec3		rootPos,curEnd,desiredEnd,targetVector,curVector,crossResult;
@@ -88,7 +88,7 @@ public:
 		int				numOfBones =  getNumberOfBones();
 		///////////////////////////////////////////////////////////////////////////////
 		// START AT THE LAST LINK IN THE CHAIN
-		boneIndex = numOfBones - 1;
+		boneIndex = numOfBones - 2;
 		tries = 0;						// LOOP COUNTER SO I KNOW WHEN TO QUIT
 		Bone* effectorBone = GetBone("Top");
 
@@ -111,7 +111,7 @@ public:
 			// DESIRED END EFFECTOR POSITION
 			desiredEnd.x = (float)endPos.x;
 			desiredEnd.y = (float)endPos.y;
-			desiredEnd.z = (float)endPos.z;						// ONLY DOING 2D NOW
+			desiredEnd.z = (float)endPos.z;					
 
 			// SEE IF I AM ALREADY CLOSE ENOUGH
 			float distance = glm::distance(curEnd,desiredEnd);
@@ -126,10 +126,8 @@ public:
 				// CREATE THE DESIRED EFFECTOR POSITION VECTOR
 				targetVector.x = endPos.x - rootPos.x;
 				targetVector.y = endPos.y - rootPos.y;
-				targetVector.z = endPos.z - rootPos.z;				// ONLY DOING 2D NOW
 
-				glm::mat4 bone_offset = linkBone->boneOffset;
-				glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+				targetVector.z = endPos.z - rootPos.z;				// ONLY DOING 2D NOW
 
 				// NORMALIZE THE VECTORS (EXPENSIVE, REQUIRES A SQRT)
 				curVector = glm::normalize(curVector);
@@ -137,6 +135,9 @@ public:
 
 				// THE DOT PRODUCT GIVES ME THE COSINE OF THE DESIRED ANGLE
 				cosAngle = glm::dot(targetVector,curVector);
+
+
+
 				glm::mat4 parent = boneIndex == 0 ? linkBone->transformationOffset : linkBone->parent->transformationOffset;
 				// IF THE DOT PRODUCT RETURNS 1.0, I DON'T NEED TO ROTATE AS IT IS 0 DEGREES
 				if (cosAngle < 0.99999)
@@ -150,9 +151,9 @@ public:
 						// DAMPING
 						/*	if (m_Damping && turnDeg > m_Link[link].damp_width) 
 						turnDeg = m_Link[link].damp_width;*/
-						local_anim = glm::rotate(glm::mat4(),-(float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
+						local_anim = glm::rotate(glm::mat4(),(float)turnDeg,crossResult);
 
-						bone_animation_mats[boneIndex] = local_anim;
+						bone_animation_mats[boneIndex] =    local_anim;
 						//m_Link[boneIndex].rot.z -= (float)turnDeg;	// ACTUALLY TURN THE LINK
 						// DOF RESTRICTIONS
 						/*if (m_DOF_Restrict &&
@@ -164,9 +165,10 @@ public:
 						turnAngle = acos((float)cosAngle);
 						turnDeg = glm::degrees(turnAngle);
 
-						local_anim = glm::rotate(glm::mat4(), (float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
-
+						local_anim = glm::rotate(glm::mat4(), -(float)turnDeg,crossResult);
+						//	linkBone->transformationOffset = parent * inv_bone_offset * local_anim * bone_offset ;
 						bone_animation_mats[boneIndex] = local_anim;
+
 
 						// DAMPING
 						//if (m_Damping && turnDeg > m_Link[link].damp_width) 
@@ -179,6 +181,8 @@ public:
 					}
 					// RECALC ALL THE MATRICES WITHOUT DRAWING ANYTHING
 					//drawScene(FALSE);		// CHANGE THIS TO TRUE IF YOU WANT TO SEE THE ITERATION
+
+					traverse(NULL, )
 				}
 				if (--boneIndex < 0) boneIndex = numOfBones - 1;	// START OF THE CHAIN, RESTART
 			}
@@ -187,6 +191,11 @@ public:
 			glm::distance(curEnd, desiredEnd) > IK_POS_THRESH);
 
 		return true;
+	}
+
+	void traverse(int indexBone,glm::mat4 rotation)
+	{
+
 	}
 
 	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
