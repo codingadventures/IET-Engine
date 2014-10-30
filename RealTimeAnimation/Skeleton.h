@@ -3,7 +3,7 @@
 #include "Bone.h"
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/normalize_dot.hpp>
- 
+
 #include <vector>
 
 class Skeleton 
@@ -84,7 +84,7 @@ public:
 	bool ComputeCCDLink(glm::mat4 model, glm::vec3 endPos,glm::mat4* animationMatrixes, const char* effectorName, int numParents)
 	{
 		/// Local Variables ///////////////////////////////////////////////////////////
-		glm::vec3		rootPos,curEnd,desiredEnd,targetVector,curVector,crossResult;
+		glm::vec3		rootPos,target,desiredEnd,targetVector,curVector,crossResult;
 		double			cosAngle,turnAngle,turnDeg; 
 		int				tries;
 		int				numOfBones =  getNumberOfBones();
@@ -92,48 +92,41 @@ public:
 		// START AT THE LAST LINK IN THE CHAIN 
 		tries = 0;						// LOOP COUNTER SO I KNOW WHEN TO QUIT
 		Bone* effectorBone = GetBone(effectorName);
+		Bone* currBone = effectorBone->parent;
 
 		do
 		{
+			printf("Iteration %d \n",tries);
 
-			Bone* linkBone = effectorBone->parent;
-
-			rootPos = decomposeT(model * linkBone->getGlobalTransform());
-
-			curEnd  = decomposeT(model * effectorBone->getGlobalTransform());
-
+			rootPos = decomposeT(model * currBone->getGlobalTransform());
+ 
+			target  = decomposeT(model * effectorBone->getGlobalTransform());
+			 
+			printLogVec("\tRoot Position: ",   rootPos);
+			printLogVec("\tTarget Position: ", target);
 			// DESIRED END EFFECTOR POSITION
 			desiredEnd = endPos ;
-
+			desiredEnd.z = 0;
+			printLogVec("\tDesired Position: ", desiredEnd);
 
 			// SEE IF I AM ALREADY CLOSE ENOUGH
-			float distance = glm::distance(curEnd,desiredEnd);
+			float distance = glm::distance(target, desiredEnd);
+			printf("\tDistance %f\n",distance);
 
 			glm::mat4 local_anim;
 
 			if (distance > IK_POS_THRESH)
 			{
-				// CREATE THE VECTOR TO THE CURRENT EFFECTOR POS
-				curVector = curEnd - rootPos ;
 
-				// CREATE THE DESIRED EFFECTOR POSITION VECTOR
+				curVector = target - rootPos ;
+				printLogVec("\tCurrent Vector: ",   curVector);
+
 				targetVector = endPos - rootPos ; 
+				targetVector.z = 0;
+				printLogVec("\tTarget Vector: ",   targetVector);
 
-				/*curVector = glm::normalize(curVector);
-
-				targetVector = glm::normalize(targetVector);
-
-				cosAngle = glm::dot(targetVector,curVector);
-				*/
 				cosAngle =  glm::fastNormalizeDot(targetVector,curVector);
 
-			/*	curVector = glm::normalize(curVector);
-
-				targetVector = glm::normalize(targetVector);
-
-				assert(cosAngle, glm::dot(targetVector,curVector));
-*/
-				// IF THE DOT PRODUCT RETURNS 1.0, I DON'T NEED TO ROTATE AS IT IS 0 DEGREES
 				if (cosAngle < 0.9995)
 				{
 					// USE THE CROSS PRODUCT TO CHECK WHICH WAY TO ROTATE
@@ -141,37 +134,45 @@ public:
 
 					turnDeg = glm::degrees( glm::acos(cosAngle));
 
+					printf("\t%s Angle %f\n",currBone->name,turnDeg);
+
 					glm::vec3 rotAxis = glm::normalize(crossResult);
+
+
 
 					if (rotAxis.z < 0)
 						turnDeg = -turnDeg;
+					 
 
-					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,rotAxis);
-					linkBone->localTransform =  rotation;
+					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
+					currBone->localTransform =  rotation;
+
+					updateSkeleton(currBone,animationMatrixes);
+
 				}
 			}
 
-			updateSkeleton(linkBone,animationMatrixes);
 
-			if (linkBone->boneIndex > 0)
-			{
-				linkBone = linkBone->parent;
-				effectorBone = effectorBone->parent;
-			}
+			if (currBone->boneIndex > 0)
+				currBone = currBone->parent; 
 			else
-			{
-				effectorBone = GetBone(effectorName);
-			}
+				currBone = effectorBone->parent;
+			
 
 			// QUIT IF I AM CLOSE ENOUGH OR BEEN RUNNING LONG ENOUGH
 		} while (tries++ < MAX_IK_TRIES && 
-			glm::distance(curEnd, desiredEnd) > IK_POS_THRESH);
+			glm::distance(target, desiredEnd) > IK_POS_THRESH);
 
 		return true;
 	}
 
 	void updateSkeleton(Bone* bone,glm::mat4* animationMatrixes)
 	{
+		if(!bone)
+		{
+			bone = rootBone;
+		}
+
 		glm::mat4 bone_offset = bone->boneOffset;
 		glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
 		glm::mat4 parent = bone->boneIndex == 0 ? bone->transformationOffset :  bone->parent->transformationOffset;

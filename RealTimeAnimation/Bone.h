@@ -41,11 +41,16 @@ struct Bone {
 	//Calculated at runtime traversing the tree. offset of the bone in respect of its parent. 
 	glm::mat4 transformationOffset;
 
-	glm::mat4 Bone::getGlobalTransform(){
+	glm::mat4 getParentTransform()
+	{
 		if (boneIndex >0)
-			return parent->transformationOffset * glm::inverse(this->boneOffset);
-		else
-			return transformationOffset * glm::inverse(this->boneOffset);
+			return parent->transformationOffset ;
+		else return transformationOffset;
 
+
+	}
+
+	glm::mat4 Bone::getGlobalTransform(){
+		return getParentTransform() * glm::inverse(this->boneOffset);
 	}
 };

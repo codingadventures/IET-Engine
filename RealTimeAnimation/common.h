@@ -22,7 +22,7 @@
 
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
-#define MAX_IK_TRIES		100		// TIMES THROUGH THE CCD LOOP (TRIES = # / LINKS) 
+#define MAX_IK_TRIES		3		// TIMES THROUGH THE CCD LOOP (TRIES = # / LINKS) 
 #define IK_POS_THRESH		0.1f	// THRESHOLD FOR SUCCESS
 
 bool keys[1024];
@@ -192,10 +192,13 @@ void decomposeTRS(const glm::mat4& m, glm::vec3& scaling, glm::mat4& rotation, g
 	rotation[3][3] = 1.0;
 }
 
-void printLogT(const char* msg, const  glm::mat4& m){
+void printLogTranslation(const char* msg, const  glm::mat4& m){
 	printf("%s (%f,%f,%f) \n", msg, m[3][0], m[3][1], m[3][2]);
 }
 
+void printLogVec(const char* msg, const  glm::vec3& v){
+	printf("%s (%f,%f,%f) \n", msg, v.x,v.y,v.z);
+}
 
 void _update_fps_counter (GLFWwindow* window) {
 	static double previous_seconds = glfwGetTime ();
