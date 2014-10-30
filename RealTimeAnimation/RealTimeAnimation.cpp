@@ -11,7 +11,7 @@
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define MODEL "models\\boblampclean.md5mesh"
+#define MODEL "models\\Cones.dae"
 #define CUBE_MODEL "models\\cubeTri.obj"
 
 float rot_speed = 50.0f; // 50 radians per second
@@ -105,15 +105,15 @@ int main(int argc, char* argv[])
 	totalAnimationTime = cones.animDuration;
 
 	cubeModel = glm::scale(cubeModel, glm::vec3(0.1f, 0.1f, 0.1f));	
-	cubeModel = glm::translate(cubeModel, glm::vec3(-50.0f, 100.0f, 0.0f));
-	
-	IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
+	cubeModel = glm::translate(cubeModel, glm::vec3(0.0f, 5.0f, 0.0f));
+
+	//	IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
 	//cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
 
 	while(!glfwWindowShouldClose(window) )
 	{
-		 
+
 
 		_update_fps_counter(window);
 
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 
 		shaderBones.Use();
 
-		 glm::mat4 model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		glm::mat4 model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
 
 
 		GLfloat timeValue = glfwGetTime();
@@ -192,15 +192,14 @@ int main(int argc, char* argv[])
 
 			decomposeTRS(cubeModel,cubeModelScale,cubeModelRotation,cubeModelDirection);
 
-			//cones.skeleton->ComputeCCDLink(model, cubeModelDirection,IKMatrices,animationMatrices,"fingers.L", 3);
+			cones.skeleton->ComputeCCDLink(model, cubeModelDirection,animationMatrices,"Effector", 3);
 			moved = false;
 		}
-		cones.skeleton->animate(NULL,IKMatrices,glm::mat4(1),animationMatrices);
+		//		cones.skeleton->animate(NULL,IKMatrices,glm::mat4(1),animationMatrices);
 
 		glUniformMatrix4fv (boneLocation[0], numberOfBones, GL_FALSE, glm::value_ptr(animationMatrices[0]));
 
 		cones.Draw(shaderBones);
-
 
 		glfwSwapBuffers(window);
 	}

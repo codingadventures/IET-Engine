@@ -29,6 +29,7 @@ bool keys[1024];
 
 using  std::cout;
 using  std::endl;
+bool pause = false;
 
 glm::mat4 cubeModel;
 bool moved = false;
@@ -72,7 +73,6 @@ inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
 	return to;
 
 }
-bool pause = false;
 
 void ReadInput()
 {

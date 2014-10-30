@@ -53,9 +53,6 @@
     <ClInclude Include="VertexWeight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TextScreenOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>

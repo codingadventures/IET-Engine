@@ -90,7 +90,6 @@
     <ClInclude Include="Bone.h" />
     <ClInclude Include="Callbacks.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Chain.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />

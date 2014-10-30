@@ -2,6 +2,8 @@
 
 #include "Bone.h"
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/normalize_dot.hpp>
+ 
 #include <vector>
 
 class Skeleton 
@@ -20,6 +22,7 @@ public:
 	~Skeleton(){
 
 	}
+
 
 
 	void SolveIK(Bone* endEffector, glm::vec3 target, size_t numIterations, float threshold, int numParents)
@@ -78,114 +81,88 @@ public:
 		//}
 	}
 
-	bool ComputeCCDLink(glm::vec3 endPos , glm::mat4* bone_animation_mats)
+	bool ComputeCCDLink(glm::mat4 model, glm::vec3 endPos,glm::mat4* animationMatrixes, const char* effectorName, int numParents)
 	{
 		/// Local Variables ///////////////////////////////////////////////////////////
 		glm::vec3		rootPos,curEnd,desiredEnd,targetVector,curVector,crossResult;
-		double			cosAngle,turnAngle,turnDeg;
-		int				boneIndex;
+		double			cosAngle,turnAngle,turnDeg; 
 		int				tries;
 		int				numOfBones =  getNumberOfBones();
 		///////////////////////////////////////////////////////////////////////////////
-		// START AT THE LAST LINK IN THE CHAIN
-		boneIndex = numOfBones - 2;
+		// START AT THE LAST LINK IN THE CHAIN 
 		tries = 0;						// LOOP COUNTER SO I KNOW WHEN TO QUIT
-		Bone* effectorBone = GetBone("Top");
+		Bone* effectorBone = GetBone(effectorName);
 
 		do
 		{
 
-			Bone* linkBone = GetBone(boneIndex);
+			Bone* linkBone = effectorBone->parent;
 
-			// THE COORDS OF THE X,Y,Z POSITION OF THE ROOT OF THIS BONE IS IN THE MATRIX
-			// TRANSLATION PART WHICH IS IN THE 12,13,14 POSITION OF THE MATRIX
-			rootPos.x = linkBone->boneOffset[3][0];
-			rootPos.y = linkBone->boneOffset[3][1];
-			rootPos.z = linkBone->boneOffset[3][2];
+			rootPos = decomposeT(model * linkBone->getGlobalTransform());
 
-			// POSITION OF THE END EFFECTOR
-			curEnd.x = effectorBone->boneOffset[3][0];
-			curEnd.y = effectorBone->boneOffset[3][1];
-			curEnd.z = effectorBone->boneOffset[3][2];
+			curEnd  = decomposeT(model * effectorBone->getGlobalTransform());
 
 			// DESIRED END EFFECTOR POSITION
-			desiredEnd.x = (float)endPos.x;
-			desiredEnd.y = (float)endPos.y;
-			desiredEnd.z = (float)endPos.z;					
+			desiredEnd = endPos ;
+
 
 			// SEE IF I AM ALREADY CLOSE ENOUGH
 			float distance = glm::distance(curEnd,desiredEnd);
+
 			glm::mat4 local_anim;
 
 			if (distance > IK_POS_THRESH)
 			{
 				// CREATE THE VECTOR TO THE CURRENT EFFECTOR POS
-				curVector.x = curEnd.x - rootPos.x;
-				curVector.y = curEnd.y - rootPos.y;
-				curVector.z = curEnd.z - rootPos.z;
+				curVector = curEnd - rootPos ;
+
 				// CREATE THE DESIRED EFFECTOR POSITION VECTOR
-				targetVector.x = endPos.x - rootPos.x;
-				targetVector.y = endPos.y - rootPos.y;
+				targetVector = endPos - rootPos ; 
 
-				targetVector.z = endPos.z - rootPos.z;				// ONLY DOING 2D NOW
+				/*curVector = glm::normalize(curVector);
 
-				// NORMALIZE THE VECTORS (EXPENSIVE, REQUIRES A SQRT)
-				curVector = glm::normalize(curVector);
 				targetVector = glm::normalize(targetVector);
 
-				// THE DOT PRODUCT GIVES ME THE COSINE OF THE DESIRED ANGLE
 				cosAngle = glm::dot(targetVector,curVector);
+				*/
+				cosAngle =  glm::fastNormalizeDot(targetVector,curVector);
 
+			/*	curVector = glm::normalize(curVector);
 
+				targetVector = glm::normalize(targetVector);
 
-				glm::mat4 parent = boneIndex == 0 ? linkBone->transformationOffset : linkBone->parent->transformationOffset;
+				assert(cosAngle, glm::dot(targetVector,curVector));
+*/
 				// IF THE DOT PRODUCT RETURNS 1.0, I DON'T NEED TO ROTATE AS IT IS 0 DEGREES
-				if (cosAngle < 0.99999)
+				if (cosAngle < 0.9995)
 				{
 					// USE THE CROSS PRODUCT TO CHECK WHICH WAY TO ROTATE
 					crossResult =	glm::cross(targetVector, curVector);
-					if (crossResult.z > 0.0f)	// IF THE Z ELEMENT IS POSITIVE, ROTATE CLOCKWISE
-					{
-						turnAngle = acos((float)cosAngle);	// GET THE ANGLE
-						turnDeg =glm::degrees(turnAngle);		// COVERT TO DEGREES
-						// DAMPING
-						/*	if (m_Damping && turnDeg > m_Link[link].damp_width) 
-						turnDeg = m_Link[link].damp_width;*/
-						local_anim = glm::rotate(glm::mat4(),(float)turnDeg,crossResult);
 
-						bone_animation_mats[boneIndex] =    local_anim;
-						//m_Link[boneIndex].rot.z -= (float)turnDeg;	// ACTUALLY TURN THE LINK
-						// DOF RESTRICTIONS
-						/*if (m_DOF_Restrict &&
-						m_Link[link].rot.z < (float)m_Link[link].min_rz) 
-						m_Link[link].rot.z = (float)m_Link[link].min_rz;*/
-					}
-					else if (crossResult.z < 0.0f)	// ROTATE COUNTER CLOCKWISE
-					{
-						turnAngle = acos((float)cosAngle);
-						turnDeg = glm::degrees(turnAngle);
+					turnDeg = glm::degrees( glm::acos(cosAngle));
 
-						local_anim = glm::rotate(glm::mat4(), -(float)turnDeg,crossResult);
-						//	linkBone->transformationOffset = parent * inv_bone_offset * local_anim * bone_offset ;
-						bone_animation_mats[boneIndex] = local_anim;
+					glm::vec3 rotAxis = glm::normalize(crossResult);
 
+					if (rotAxis.z < 0)
+						turnDeg = -turnDeg;
 
-						// DAMPING
-						//if (m_Damping && turnDeg > m_Link[link].damp_width) 
-						//	turnDeg = m_Link[link].damp_width;
-						//m_Link[link].rot.z += (float)turnDeg;	// ACTUALLY TURN THE LINK
-						// DOF RESTRICTIONS
-						/*	if (m_DOF_Restrict &&
-						m_Link[link].rot.z > (float)m_Link[link].max_rz) 
-						m_Link[link].rot.z = (float)m_Link[link].max_rz;*/
-					}
-					// RECALC ALL THE MATRICES WITHOUT DRAWING ANYTHING
-					//drawScene(FALSE);		// CHANGE THIS TO TRUE IF YOU WANT TO SEE THE ITERATION
-
-					traverse(NULL, )
+					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,rotAxis);
+					linkBone->localTransform =  rotation;
 				}
-				if (--boneIndex < 0) boneIndex = numOfBones - 1;	// START OF THE CHAIN, RESTART
 			}
+
+			updateSkeleton(linkBone,animationMatrixes);
+
+			if (linkBone->boneIndex > 0)
+			{
+				linkBone = linkBone->parent;
+				effectorBone = effectorBone->parent;
+			}
+			else
+			{
+				effectorBone = GetBone(effectorName);
+			}
+
 			// QUIT IF I AM CLOSE ENOUGH OR BEEN RUNNING LONG ENOUGH
 		} while (tries++ < MAX_IK_TRIES && 
 			glm::distance(curEnd, desiredEnd) > IK_POS_THRESH);
@@ -193,9 +170,17 @@ public:
 		return true;
 	}
 
-	void traverse(int indexBone,glm::mat4 rotation)
+	void updateSkeleton(Bone* bone,glm::mat4* animationMatrixes)
 	{
+		glm::mat4 bone_offset = bone->boneOffset;
+		glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+		glm::mat4 parent = bone->boneIndex == 0 ? bone->transformationOffset :  bone->parent->transformationOffset;
 
+		bone->transformationOffset = parent * inv_bone_offset *  bone->localTransform * bone_offset ;
+		animationMatrixes[bone->boneIndex] = bone->transformationOffset;
+		for (int i = 0; i < bone->children.size(); i++) {
+			updateSkeleton (&bone->children[i],animationMatrixes);
+		}
 	}
 
 	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
@@ -346,10 +331,8 @@ public:
 		if (has_useful_child || has_bone) {
 			string nodeName(boneName);
 			string globalTransf("Node Name " + nodeName + "\n Global Transform");
-			printLogT(globalTransf.c_str(),bone->globalTransform);
-			printLogT("Bone Offset \t", this->boneMapping[bone->name]);
 
-			bone->globalTransform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
+			//bone->globalTransform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
 			bone->boneOffset = this->boneMapping[bone->name];
 			return true;
 		}
@@ -426,4 +409,7 @@ public:
 
 		return counter;
 	}
+
+private:
+	glm::mat4* animationMatrixes;
 };
