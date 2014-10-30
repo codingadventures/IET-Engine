@@ -59,7 +59,7 @@ private:
 	{
 		// Read file via ASSIMP
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 		// Check for errors
 		if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
@@ -67,12 +67,17 @@ private:
 			return;
 		}
 
-
 		// Retrieve the directory path of the filepath
 		this->directory = path.substr(0, path.find_last_of('/'));
 
 		// Process ASSIMP's root node recursively
 		this->processNode(scene->mRootNode, scene);
+
+		// there should always be a 'root node', even if no skeleton exists
+		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
+			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
+		} // endif
+ 
 	}
 
 	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -208,13 +213,6 @@ private:
 					}
 				}
 			}    
-
-			// there should always be a 'root node', even if no skeleton exists
-			aiNode* assimp_node = scene->mRootNode;
-			if (!skeleton->importSkeletonBone (assimp_node)) {
-				fprintf (stderr, "ERROR: could not import node tree from mesh\n");
-			} // endif
-
 
 			/* get the first animation out and into keys */
 			if (scene->mNumAnimations > 0) {

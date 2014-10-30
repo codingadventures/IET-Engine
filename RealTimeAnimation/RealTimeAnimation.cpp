@@ -6,11 +6,12 @@
 #include "SOIL.h"
 #include "Camera.h"
 #include "Model.h" 
+#include "TextScreenOutput.h"
 
 using namespace std::placeholders;
 
 #define ANIMATION_SPEED 0.6
-#define MODEL "models\\Cones.dae"
+#define MODEL "models\\boblampclean.md5mesh"
 #define CUBE_MODEL "models\\cubeTri.obj"
 
 float rot_speed = 50.0f; // 50 radians per second
@@ -31,9 +32,10 @@ int main(int argc, char* argv[])
 	UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,camera,_1);
 	UserKeyboardCallback = std::bind(&ReadInput);
 
+	glutInit(&argc, argv);
+
 	//GLWF library initialization
 	glfwInit();
-
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 
 	//Wire frame
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Model cones(MODEL);
 	Model cube(CUBE_MODEL);
@@ -85,10 +87,10 @@ int main(int argc, char* argv[])
 	//Initialize bones in the shader for the uniform 
 	for (unsigned int i = 0 ; i < numberOfBones; i++) {
 
-
-		animationMatrices[i] = glm::mat4(); 
-		IKMatrices[i] = glm::mat4(); 
 		char Name[128];
+
+		animationMatrices[i] = glm::mat4(1); 
+		IKMatrices[i] = glm::mat4(1); 
 
 		memset(Name, 0, sizeof(Name));
 		sprintf_s(Name, sizeof(Name), "bones[%d]", i);
@@ -103,10 +105,18 @@ int main(int argc, char* argv[])
 	totalAnimationTime = cones.animDuration;
 
 	cubeModel = glm::scale(cubeModel, glm::vec3(0.1f, 0.1f, 0.1f));	
-	cubeModel = glm::translate(cubeModel, glm::vec3(10.0f, 0.0f, 0.0f));
+	cubeModel = glm::translate(cubeModel, glm::vec3(-50.0f, 100.0f, 0.0f));
+	
+	IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
+
+	//cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
 
 	while(!glfwWindowShouldClose(window) )
 	{
+		 
+
+		_update_fps_counter(window);
+
 		glfwPollEvents();
 
 
@@ -139,6 +149,7 @@ int main(int argc, char* argv[])
 		camera->lastFrame = currentFrame;
 
 		camera->MoveCamera();  
+		//screen_output(0.5f,0.5f,"Hello OpenGL");
 
 		shader.Use();
 
@@ -147,7 +158,7 @@ int main(int argc, char* argv[])
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
 
-		
+
 
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(cubeModel));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
@@ -159,14 +170,14 @@ int main(int argc, char* argv[])
 
 		shaderBones.Use();
 
-		glm::mat4 model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		 glm::mat4 model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
 
 
 		GLfloat timeValue = glfwGetTime();
 
 
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	
 		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
 
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model));
@@ -181,10 +192,10 @@ int main(int argc, char* argv[])
 
 			decomposeTRS(cubeModel,cubeModelScale,cubeModelRotation,cubeModelDirection);
 
-			cones.skeleton->ComputeCCDLink(cubeModelDirection, IKMatrices);
-			//cones.skeleton->animate(NULL, IKMatrices, animationMatrices);
+			//cones.skeleton->ComputeCCDLink(model, cubeModelDirection,IKMatrices,animationMatrices,"fingers.L", 3);
 			moved = false;
 		}
+		cones.skeleton->animate(NULL,IKMatrices,glm::mat4(1),animationMatrices);
 
 		glUniformMatrix4fv (boneLocation[0], numberOfBones, GL_FALSE, glm::value_ptr(animationMatrices[0]));
 

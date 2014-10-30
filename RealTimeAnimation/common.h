@@ -2,6 +2,7 @@
 
 
 #include <assimp/scene.h> 
+ 
 // GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -108,7 +109,16 @@ void ReadInput()
 	}
 }
 
+glm::vec3 decomposeT( const glm::mat4& m ) {
+	glm::vec3 translation;	
+	// Extract the translation
+	
+	translation.x = m[3][0];
+	translation.y = m[3][1];
+	translation.z = m[3][2];
 
+	return translation;
+}
 /**
 * Decomposes matrix M such that T * R * S = M, where T is translation matrix,
 * R is rotation matrix and S is scaling matrix.
@@ -125,7 +135,7 @@ void ReadInput()
 * @param rotation (out) rotation matrix
 * @param translation (out) translation vector
 */
-void decomposeTRS(const glm::mat4& m, glm::vec3& scaling,        glm::mat4& rotation, glm::vec3& translation) {
+void decomposeTRS(const glm::mat4& m, glm::vec3& scaling, glm::mat4& rotation, glm::vec3& translation) {
 	// Extract the translation
 	translation.x = m[3][0];
 	translation.y = m[3][1];
@@ -184,5 +194,22 @@ void decomposeTRS(const glm::mat4& m, glm::vec3& scaling,        glm::mat4& rota
 
 void printLogT(const char* msg, const  glm::mat4& m){
 	printf("%s (%f,%f,%f) \n", msg, m[3][0], m[3][1], m[3][2]);
+}
+
+
+void _update_fps_counter (GLFWwindow* window) {
+	static double previous_seconds = glfwGetTime ();
+	static int frame_count;
+	double current_seconds = glfwGetTime ();
+	double elapsed_seconds = current_seconds - previous_seconds;
+	if (elapsed_seconds > 0.25) {
+		previous_seconds = current_seconds;
+		double fps = (double)frame_count / elapsed_seconds;
+		char tmp[128];
+		sprintf_s (tmp, "opengl @ fps: %.2f", fps);
+		glfwSetWindowTitle (window, tmp);
+		frame_count = 0;
+	}
+	frame_count++;
 }
 #pragma endregion
