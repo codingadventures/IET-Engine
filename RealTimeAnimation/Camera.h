@@ -18,8 +18,8 @@ enum Camera_Movement {
 	RIGHT
 };
 
-
-// An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
+static const float SPEED_STEP = 0.01f;
+// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
 {
 public:
@@ -29,16 +29,13 @@ public:
 	glm::vec3 Up;
 	glm::vec3 Right;
 	glm::vec3 WorldUp;
-	// Eular Angles
+	// Euler Angles
 	GLfloat Yaw;
 	GLfloat Pitch;
 	// Camera options
 	GLfloat MovementSpeed;
 	GLfloat MouseSensitivity;
-	GLfloat Zoom;
-	// Camera
-	GLfloat deltaTime;
-	GLfloat lastFrame;
+	GLfloat Zoom; 
 
 	// Constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = -90.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
@@ -47,9 +44,7 @@ public:
 		this->WorldUp = up;
 		this->Yaw = yaw;
 		this->Pitch = pitch;
-		this->updateCameraVectors();
-		this->deltaTime = 0.0f;
-		this->lastFrame  = 0.0f;
+		this->updateCameraVectors();  
 	}
 	// Constructor with scalar values
 	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)  : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
@@ -61,7 +56,7 @@ public:
 		this->updateCameraVectors();
 	}
 
-	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
+	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix()
 	{
 		return glm::lookAt(this->Position, this->Position + this->Front, this->WorldUp);
@@ -98,7 +93,7 @@ public:
 			this->Pitch = -89.0f;
 
 
-		// Update Front, Right and Up Vectors using the updated Eular angles
+		// Update Front, Right and Up Vectors using the updated Euler angles
 		this->updateCameraVectors();
 	}
 
@@ -117,30 +112,25 @@ public:
 	// Moves/alters the camera positions based on user input
 	void MoveCamera()
 	{
-		static double previous_seconds = glfwGetTime ();
-		double current_seconds = glfwGetTime ();
-		double elapsed_seconds = current_seconds - previous_seconds;
-		previous_seconds = current_seconds;
-
 		// Camera controls
-		if(keys[GLFW_KEY_W])
-			this->ProcessKeyboard(FORWARD, deltaTime);
-		if(keys[GLFW_KEY_S])
-			this->ProcessKeyboard(BACKWARD, deltaTime);
-		if(keys[GLFW_KEY_A])
-			this->ProcessKeyboard(LEFT, deltaTime);
-		if(keys[GLFW_KEY_D])
-			this->ProcessKeyboard(RIGHT, deltaTime);
+		if(keys[KEY_w])
+			this->ProcessKeyboard(FORWARD, SPEED_STEP);
+		if(keys[KEY_s])
+			this->ProcessKeyboard(BACKWARD, SPEED_STEP);
+		if(keys[KEY_a])
+			this->ProcessKeyboard(LEFT, SPEED_STEP);
+		if(keys[KEY_d])
+			this->ProcessKeyboard(RIGHT, SPEED_STEP);
 		  
 	}
 
 private:
 
 
-	// Calculates the front vector from the Camera's (updated) Eular Angles
+	// Calculates the front vector from the Camera's (updated) Euler Angles
 	void updateCameraVectors()
 	{
-		// Calculate the new Front vector
+		// Calculate the new 
 		glm::vec3 front;
 		front.x = cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
 		front.y = sin(glm::radians(this->Pitch));

@@ -53,4 +53,10 @@ struct Bone {
 	glm::mat4 Bone::getGlobalTransform(){
 		return getParentTransform() * glm::inverse(this->boneOffset);
 	}
+
+	glm::vec3 Bone::getWorldSpacePosition(glm::mat4 model)
+	{
+		glm::mat4 globalPosition =model * getParentTransform() * glm::inverse(this->boneOffset);
+		return decomposeT(globalPosition);
+	}
 };

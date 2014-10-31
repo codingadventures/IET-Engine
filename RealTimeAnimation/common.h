@@ -1,28 +1,36 @@
-#pragma once
+#ifndef COMMON_H 
+#define COMMON_H
+
 
 
 #include <assimp/scene.h> 
- 
-// GLEW
-#define GLEW_STATIC
-#include <GL/glew.h>
-// GLFW
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
+
+// GLEW
+#define GLEW_STATIC
+#include <GL/glew.h> 
+ 
+//GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
+
+#include "Keys.h"
 
 #define VIEWPORT_WIDTH 1024
 #define VIEWPORT_HEIGHT 768
 #define INVALID_UNIFORM_LOCATION 0xffffffff
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
 
+#define ANIMATION_SPEED 0.6
+#define MODEL "models\\Cones3.dae"
+#define CUBE_MODEL "models\\cubeTri.obj"
+
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
-#define MAX_IK_TRIES		3		// TIMES THROUGH THE CCD LOOP (TRIES = # / LINKS) 
+#define MAX_IK_TRIES		100		// TIMES THROUGH THE CCD LOOP (TRIES = # / LINKS) 
 #define IK_POS_THRESH		0.1f	// THRESHOLD FOR SUCCESS
 
 bool keys[1024];
@@ -30,9 +38,9 @@ bool keys[1024];
 using  std::cout;
 using  std::endl;
 bool pause = false;
-
-glm::mat4 cubeModel;
 bool moved = false;
+
+
 
 
 #pragma region [ Helper Functions ]
@@ -74,45 +82,11 @@ inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
 
 }
 
-void ReadInput()
-{
-	if(keys[GLFW_KEY_P])
-	{
-		pause = !pause;
-	}
-
-	if(keys[GLFW_KEY_K])
-	{
-		cubeModel = glm::translate(cubeModel,glm::vec3(0.0,0.2,0.0));
-		moved = true;
-	}
-
-	if(keys[GLFW_KEY_I])
-	{
-		cubeModel = glm::translate(cubeModel,glm::vec3(0.0,-0.2,0.0));
-		moved = true;
-
-	}
-
-	if(keys[GLFW_KEY_L])
-	{
-		cubeModel = glm::translate(cubeModel,glm::vec3(0.2,0.0,0.0));
-		moved = true;
-
-	}
-
-	if(keys[GLFW_KEY_J])
-	{
-		cubeModel = glm::translate(cubeModel,glm::vec3(-0.2,0.0,0.0));
-		moved = true;
-
-	}
-}
 
 glm::vec3 decomposeT( const glm::mat4& m ) {
 	glm::vec3 translation;	
 	// Extract the translation
-	
+
 	translation.x = m[3][0];
 	translation.y = m[3][1];
 	translation.z = m[3][2];
@@ -200,19 +174,21 @@ void printLogVec(const char* msg, const  glm::vec3& v){
 	printf("%s (%f,%f,%f) \n", msg, v.x,v.y,v.z);
 }
 
-void _update_fps_counter (GLFWwindow* window) {
-	static double previous_seconds = glfwGetTime ();
-	static int frame_count;
-	double current_seconds = glfwGetTime ();
-	double elapsed_seconds = current_seconds - previous_seconds;
-	if (elapsed_seconds > 0.25) {
-		previous_seconds = current_seconds;
-		double fps = (double)frame_count / elapsed_seconds;
-		char tmp[128];
-		sprintf_s (tmp, "opengl @ fps: %.2f", fps);
-		glfwSetWindowTitle (window, tmp);
-		frame_count = 0;
-	}
-	frame_count++;
-}
+//void _update_fps_counter (GLFWwindow* window) {
+//	static double previous_seconds = glfwGetTime ();
+//	static int frame_count;
+//	double current_seconds = glfwGetTime ();
+//	double elapsed_seconds = current_seconds - previous_seconds;
+//	if (elapsed_seconds > 0.25) {
+//		previous_seconds = current_seconds;
+//		double fps = (double)frame_count / elapsed_seconds;
+//		char tmp[128];
+//		sprintf_s (tmp, "opengl @ fps: %.2f", fps);
+//		glfwSetWindowTitle (window, tmp);
+//		frame_count = 0;
+//	}
+//	frame_count++;
+//}
 #pragma endregion
+
+#endif // COMMON_H

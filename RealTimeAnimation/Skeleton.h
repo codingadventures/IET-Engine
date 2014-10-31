@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Bone.h"
+#include "Bone.h" 
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/normalize_dot.hpp>
-
+#include "common.h"
 #include <vector>
 
 class Skeleton 
@@ -12,18 +12,60 @@ public:
 	// Root node of the tree
 	Bone* rootBone;
 
+	glm::vec3 rotationAxis;
+	float angle;
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
 	std::map<std::string, glm::mat4> boneMapping;
 
 	Skeleton(){
 		rootBone = new Bone();
+		numOfBones = -1;//Initial Value
 	}
 
 	~Skeleton(){
 
 	}
 
+	void updateSkeleton(Bone* bone,glm::mat4* animationMatrixes)
+	{
+		if(!bone)
+		{
+			bone = rootBone;
+		}
 
+		glm::mat4 bone_offset = bone->boneOffset;
+		glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
+		glm::mat4 parent = bone->boneIndex == 0 ? bone->transformationOffset :  bone->parent->transformationOffset;
+
+		bone->transformationOffset = parent * inv_bone_offset *  bone->localTransform * bone_offset ;
+		animationMatrixes[bone->boneIndex] = bone->transformationOffset;
+		for (int i = 0; i < bone->children.size(); i++) {
+			updateSkeleton (&bone->children[i],animationMatrixes);
+		}
+	}
+
+	void traversePositions(Bone* bone,glm::mat4 model, vector<glm::vec3> &positions){
+
+		if(!bone)
+		{
+			bone = rootBone;
+		}
+
+		positions.push_back( bone->getWorldSpacePosition(model));
+
+		for (int i = 0; i < bone->children.size(); i++) {
+			traversePositions (&bone->children[i], model,positions);
+		}
+	}
+
+	vector<glm::vec3> getBonePositions(glm::mat4 model)
+	{
+		vector<glm::vec3> positions;
+
+		traversePositions(rootBone,model, positions);
+
+		return positions;
+	}
 
 	void SolveIK(Bone* endEffector, glm::vec3 target, size_t numIterations, float threshold, int numParents)
 	{
@@ -99,14 +141,14 @@ public:
 			printf("Iteration %d \n",tries);
 
 			rootPos = decomposeT(model * currBone->getGlobalTransform());
- 
+
 			target  = decomposeT(model * effectorBone->getGlobalTransform());
-			 
+
 			printLogVec("\tRoot Position: ",   rootPos);
 			printLogVec("\tTarget Position: ", target);
 			// DESIRED END EFFECTOR POSITION
 			desiredEnd = endPos ;
-			desiredEnd.z = 0;
+			//desiredEnd.z = 0;
 			printLogVec("\tDesired Position: ", desiredEnd);
 
 			// SEE IF I AM ALREADY CLOSE ENOUGH
@@ -122,9 +164,9 @@ public:
 				printLogVec("\tCurrent Vector: ",   curVector);
 
 				targetVector = endPos - rootPos ; 
-				targetVector.z = 0;
+		 
 				printLogVec("\tTarget Vector: ",   targetVector);
-
+				 
 				cosAngle =  glm::fastNormalizeDot(targetVector,curVector);
 
 				if (cosAngle < 0.9995)
@@ -137,15 +179,14 @@ public:
 					printf("\t%s Angle %f\n",currBone->name,turnDeg);
 
 					glm::vec3 rotAxis = glm::normalize(crossResult);
-
-
-
+					 
+					
 					if (rotAxis.z < 0)
 						turnDeg = -turnDeg;
-					 
+
 
 					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
-					currBone->localTransform =  rotation;
+					currBone->localTransform =  rotation * currBone->localTransform;
 
 					updateSkeleton(currBone,animationMatrixes);
 
@@ -157,7 +198,7 @@ public:
 				currBone = currBone->parent; 
 			else
 				currBone = effectorBone->parent;
-			
+
 
 			// QUIT IF I AM CLOSE ENOUGH OR BEEN RUNNING LONG ENOUGH
 		} while (tries++ < MAX_IK_TRIES && 
@@ -166,23 +207,7 @@ public:
 		return true;
 	}
 
-	void updateSkeleton(Bone* bone,glm::mat4* animationMatrixes)
-	{
-		if(!bone)
-		{
-			bone = rootBone;
-		}
 
-		glm::mat4 bone_offset = bone->boneOffset;
-		glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
-		glm::mat4 parent = bone->boneIndex == 0 ? bone->transformationOffset :  bone->parent->transformationOffset;
-
-		bone->transformationOffset = parent * inv_bone_offset *  bone->localTransform * bone_offset ;
-		animationMatrixes[bone->boneIndex] = bone->transformationOffset;
-		for (int i = 0; i < bone->children.size(); i++) {
-			updateSkeleton (&bone->children[i],animationMatrixes);
-		}
-	}
 
 	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
 	void animate(Bone* bone,glm::mat4* animation, glm::mat4* bone_animation_mats) {
@@ -394,9 +419,24 @@ public:
 		return NULL;
 	}
 
+
+	
 	// get the total number of bones. traverses the tree to count them
-	int getNumberOfBones(Bone* bone = NULL)
-	{
+	int getNumberOfBones()
+	{ 
+		if (numOfBones != -1) return numOfBones;
+
+		numOfBones = traverseGetNumberOfBones(rootBone);
+
+		return numOfBones;
+	}
+
+private:
+	glm::mat4* animationMatrixes;
+	int numOfBones;
+
+	int traverseGetNumberOfBones(Bone* bone){
+
 		if(!bone)
 		{
 			bone = rootBone;
@@ -406,11 +446,8 @@ public:
 		int counter = bone->boneIndex > -1 ? 1 : 0;
 
 		for (int i = 0; i < bone->children.size(); i++)
-			counter += getNumberOfBones(&bone->children[i]);
+			counter += traverseGetNumberOfBones(&bone->children[i]);
 
 		return counter;
 	}
-
-private:
-	glm::mat4* animationMatrixes;
 };

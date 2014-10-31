@@ -53,7 +53,13 @@
     <ClInclude Include="VertexWeight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TextScreenOutput.h">
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Keys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

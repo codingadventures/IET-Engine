@@ -1,7 +1,11 @@
-#pragma once 
+#ifndef Callbacks_h__
+#define Callbacks_h__
 
-#include "common.h"
 #include <functional>
+#include "common.h"
+#include "Keys.h"
+#include <gl/freeglut.h>
+#include "ScreenOutput.h"
 
 bool firstMouse = true;
 
@@ -17,47 +21,92 @@ class Callbacks{
 
 public: 
 
-
-	static void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)
+	static void Callbacks::specialUpFunction(int key,int x, int y) 
 	{
-		if(firstMouse)
+
+	}
+
+	static void Callbacks::mouseCallback( int xpos, int ypos)
+	{
+		/*MOUSE mouse = GLUTMouseToMouse(Button);
+		KEY_STATE OgldevKeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
+		*/
+
+		static bool just_warped = false;
+		if(just_warped) {
+			just_warped = false;
+			return;
+		}
+
+		/*if(firstMouse)
 		{
 			lastX = xpos;
 			lastY = ypos;
 			firstMouse = false;
-		}
+		}*/
 
-		GLfloat xoffset = xpos - lastX;
-		GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+		GLfloat xoffset = xpos - VIEWPORT_WIDTH/2;
+		GLfloat yoffset =  VIEWPORT_HEIGHT/2 - ypos;  // Reversed since y-coordinates go from bottom to left
 
 		lastX = xpos;
 		lastY = ypos;
-
+		
 		UserMouseCallback(xoffset, yoffset);
+
+		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
+
+		just_warped = true;
 	}	
 
-
-	static void  Callbacks::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+	static void Callbacks::keyboardUpCallback(unsigned char key , int x, int y)
 	{
+		handleKeyboardInput(KEY_STATE_RELEASE,(KEY)key);
+	}
+	static void Callbacks::keyboardCallback(unsigned char key , int x, int y)
+	{
+		handleKeyboardInput(KEY_STATE_PRESS,(KEY)key);
 
-		if(action == GLFW_PRESS)
-			keys[key] = true;
-		else if(action == GLFW_RELEASE)
-			keys[key] = false;  
 
-		// When a user presses the escape key, we set the WindowShouldClose property to true, 
+		// When a user presses the escape key, break the main loop; 
 		// closing the application
-		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, GL_TRUE);
+		if(key == KEY_ESCAPE)
+			glutLeaveMainLoop();
 
 		UserKeyboardCallback();
 	}   
 
-
+	/*
 	static void  Callbacks::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		UserMouseScrollCallback(yoffset); 
+	UserMouseScrollCallback(yoffset); 
+	}
+	*/
+
+private:
+
+	static  MOUSE GLUTMouseToMouse(unsigned int button)
+	{
+		switch (button) {
+		case GLUT_LEFT_BUTTON:
+			return MOUSE_BUTTON_LEFT;
+		case GLUT_RIGHT_BUTTON:
+			return MOUSE_BUTTON_RIGHT;
+		case GLUT_MIDDLE_BUTTON:
+			return MOUSE_BUTTON_MIDDLE;
+		default:
+			printf("Unimplemented GLUT mouse button");
+		}
+
+		return MOUSE_UNDEFINED;
 	}
 
+	static void handleKeyboardInput(KEY_STATE action, KEY key)
+	{
+		if(action ==  KEY_STATE_PRESS)
+			keys[key] = true;
+		else if(action == KEY_STATE_RELEASE)
+			keys[key] = false;  	 
+	}
 };
 
+#endif // Callbacks_h__

@@ -25,34 +25,67 @@ class Model
 {
 public:
 
-	Skeleton* skeleton;
+	glm::mat4 model;
 	double animDuration;
 
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
-	Model(GLchar* path) 
+	Model(const Shader* shader,GLchar* path) :shader(shader)
 	{
+		assert(shader);
+
 		skeleton = new Skeleton();
+
 		this->loadModel(path);
+
+
+		animationMatrices = (glm::mat4*) malloc(skeleton->getNumberOfBones() * sizeof(glm::mat4));
+
+		//Initialize bones in the shader for the uniform 
+		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
+			animationMatrices[i] = glm::mat4(1); 
+
 	} 
 
+	~Model()
+	{
+		free(animationMatrices);
+		free(boneLocation);
 
+	}
 	// Draws the model, and thus all its meshes
-	void Draw(Shader shader)
+	void Draw()
 	{
 		for(GLuint i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].Draw(shader);
+			this->meshes[i].Draw(*shader);
+
+		if (skeleton->getNumberOfBones()>0)
+			glUniformMatrix4fv (boneLocation[0], skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(animationMatrices[0]));
+
 	}
 
+	void MoveToWithIK(glm::vec3 point, const char* effectorName)
+	{
 
+		skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
+
+	}
+
+	vector<glm::vec3> getBonesOrientation()
+	{
+		return skeleton->getBonePositions(this->model);
+	}
 
 
 private:
 	/*  Model Data  */
 	vector<Mesh> meshes;
+	const Shader* shader;
+	glm::mat4* animationMatrices;
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-
+	Skeleton* skeleton;
+	GLuint* boneLocation;
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -77,7 +110,28 @@ private:
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif
- 
+
+		int numOfBones = skeleton->getNumberOfBones();
+		if (numOfBones > 0)
+		{ 
+			boneLocation = (GLuint*) malloc( skeleton->getNumberOfBones()* sizeof(GLuint));
+
+			for (unsigned int i = 0 ; i < numOfBones; i++) {
+
+				char Name[128];
+				//IKMatrices[i] = glm::mat4(1); 
+
+				memset(Name, 0, sizeof(Name));
+				sprintf_s(Name, sizeof(Name), "bones[%d]", i);
+				GLint location = glGetUniformLocation(shader->Program, Name);
+				if (location == INVALID_UNIFORM_LOCATION) {
+					fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
+				}
+
+				boneLocation[i] = location;
+			}
+		}
+
 	}
 
 	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).

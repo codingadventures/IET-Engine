@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.71.0 commit date:2014-06-25, commit time:18:36, hash:9337574</authoring_tool>
     </contributor>
-    <created>2014-10-31T21:00:38</created>
-    <modified>2014-10-31T21:00:38</modified>
+    <created>2014-10-31T21:03:19</created>
+    <modified>2014-10-31T21:03:19</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -150,7 +150,7 @@
           </technique_common>
         </source>
         <source id="Armature_Cone-skin-bind_poses">
-          <float_array id="Armature_Cone-skin-bind_poses-array" count="64">1 0 0 0 0 0 1 0.9448015 0 -1 0 0 0 0 0 1 0.998188 -0.06017255 0 0 0 0 1 -1.044481 -0.06017249 -0.998188 0 0 0 0 0 1 1 0 0 0 0 -1.21306e-7 1 -3.099802 0 -1 -1.21306e-7 3.76026e-7 0 0 0 1 -0.8201848 0.5720986 -5.5914e-7 2.83078e-6 0 9.77348e-7 1 -4.846001 0.5720986 0.8201848 -8.01606e-7 4.05832e-6 0 0 0 1</float_array>
+          <float_array id="Armature_Cone-skin-bind_poses-array" count="64">1 0 0 0 0 0 1 0.9448015 0 -1 0 0 0 0 0 1 0.998188 -0.06017255 0 0 0 0 1 -1.044481 -0.06017249 -0.998188 0 0 0 0 0 1 1 0 0 0 0 -1.21306e-7 1 -3.099802 0 -1 -1.21306e-7 3.76026e-7 0 0 0 1 1 0 0 0 0 9.77348e-7 1 -4.846001 0 -1 9.77348e-7 -4.94806e-6 0 0 0 1</float_array>
           <technique_common>
             <accessor source="#Armature_Cone-skin-bind_poses-array" count="4" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
@@ -197,7 +197,7 @@
             <node id="Top" name="Top" sid="Top" type="JOINT">
               <matrix sid="transform">0.998188 7.29932e-9 0.06017255 0 0 0.9999999 -1.21306e-7 2.055321 -0.06017255 1.21087e-7 0.998188 0 0 0 0 1</matrix>
               <node id="Effector" name="Effector" sid="Effector" type="JOINT">
-                <matrix sid="transform">-0.8201848 0 0.5720987 0 -6.28539e-7 1 -9.011e-7 1.746198 -0.5720987 -1.09865e-6 -0.8201848 -2.84217e-14 0 0 0 1</matrix>
+                <matrix sid="transform">1 0 3.72529e-9 0 -4.09281e-15 1 1.09865e-6 1.746198 -3.72529e-9 -1.09865e-6 1 -2.84217e-14 0 0 0 1</matrix>
               </node>
             </node>
           </node>
