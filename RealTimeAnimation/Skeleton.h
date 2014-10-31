@@ -169,7 +169,7 @@ public:
 				 
 				cosAngle =  glm::fastNormalizeDot(targetVector,curVector);
 
-				if (cosAngle < 0.9995)
+				if (cosAngle < 0.95)
 				{
 					// USE THE CROSS PRODUCT TO CHECK WHICH WAY TO ROTATE
 					crossResult =	glm::cross(targetVector, curVector);
@@ -185,8 +185,8 @@ public:
 						turnDeg = -turnDeg;
 
 
-					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,glm::vec3(0.0f,0.0f,1.0f));
-					currBone->localTransform =  rotation * currBone->localTransform;
+					glm::mat4 rotation = glm::rotate(glm::mat4(),(float)turnDeg,rotAxis);
+					currBone->localTransform =  rotation ;
 
 					updateSkeleton(currBone,animationMatrixes);
 
