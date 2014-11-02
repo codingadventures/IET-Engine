@@ -38,7 +38,7 @@ bool keys[1024];
 using  std::cout;
 using  std::endl;
 bool pause = false;
-bool moved = false;
+bool moved = false,animationStep = false;
 
 
 

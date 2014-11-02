@@ -69,22 +69,30 @@ public:
 
 
 
-	IKInfo ComputeOneCCDLink(const glm::mat4 model,const glm::vec3 targetWorldPosition,glm::mat4* animations,glm::mat4* animationMatrixes, const char* effectorName, bool simulate)
+	IKInfo ComputeOneCCDLink(const glm::mat4 model,const glm::vec3 targetWorldPosition,glm::mat4* animations,glm::mat4* animationMatrixes, const char* effectorName, bool simulate,bool reset = false)
 	{
 		glm::vec3			currBoneWorldPosition,effectorWorldPosition,targetWorldPositionNormVector,effectorCurrBoneNormVector;
 		glm::vec3			crossProduct,boneSpaceCrossProduct;
 		IKInfo ik;
+		Bone* currBone;
 
 		Bone* effectorBone = GetBone(effectorName);
 
+		static  Bone*		currentIterationBone = effectorBone;
 		static int			currentIteration = 0;
+
 		float				cosAngle = 0,turnAngle = 0;
 		float					turnDeg = 0;
 		float				distance = 0; 
-		static  Bone*		currentIterationBone = effectorBone;
 
+		if ( reset)
+		{ 
+			currentIterationBone = effectorBone;
+			currentIteration = 0;
+		}
 
-		Bone* currBone = currentIterationBone->parent;
+		currBone = currentIterationBone->parent;
+
 
 		effectorWorldPosition  =  effectorBone->getWorldSpacePosition(model);
 
@@ -111,12 +119,12 @@ public:
 		distance = glm::distance(effectorWorldPosition, targetWorldPosition);
 
 		if (distance < IK_POS_THRESH)
- 			goto EXIT;
+			goto EXIT;
 
 
 		crossProduct = glm::normalize(glm::cross(effectorCurrBoneNormVector, targetWorldPositionNormVector));
 
-	//	crossProduct = glm::round(crossProduct);
+		//	crossProduct = glm::round(crossProduct);
 
 
 		boneSpaceCrossProduct = glm::vec3(
@@ -134,7 +142,7 @@ public:
 
 			//if (crossProduct.x != 1 && crossProduct.x != -1)  crossProduct.x = 0;
 			//if (crossProduct.y != 1 && crossProduct.y != -1)  crossProduct.y = 0;
-			 
+
 			/*glm::quat quatRotation = glm::angleAxis(turnDeg, glm::vec3(0.0f,1.0f,1.0));
 
 			glm::mat4 quatRotationMatrix = glm::toMat4(quatRotation); */
@@ -142,9 +150,8 @@ public:
 
 			if (!simulate)
 			{			 
-				currBone->localTransform  *=  glm::rotate(glm::mat4(1.0f), turnDeg, boneSpaceCrossProduct);
+				currBone->localTransform  =  glm::rotate(glm::mat4(1.0f), turnDeg, boneSpaceCrossProduct) * currBone->localTransform;
 
-				//animate(currBone,animations, animationMatrixes);
 				updateSkeleton(currBone, animationMatrixes);
 			}
 		}

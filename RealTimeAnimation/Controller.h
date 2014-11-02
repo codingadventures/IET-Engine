@@ -200,17 +200,18 @@ public:
 			v2.Color = glm::vec3(1.0f,0.0f,0.0f);
 			Line(v1, v2).Draw();
 		}
-
-
-		if (moved)
+		 
+		if (animationStep)
 		{
 			//Calculate world space of the cube
 			glm::mat4 cubeModelRotation;
 
 			//decomposeTRS(cube->model,cubeModelScale,cubeModelRotation,cubeModelDirection);
-			ikInfo = cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0 );
+			ikInfo = cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0, moved );
 
-			moved = false;
+			animationStep = false;
+
+			if (moved) moved = false;
 			//cones->CleanAnimationMatrix();
 		}  
 		//cones->animate(animations);
@@ -223,7 +224,7 @@ public:
 
 		sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
 		screen_output(500,140, ikInfoText);
-		
+
 		sprintf_s(ikInfoText,"Cross Product Bone Space (%f,%f,%f)",ikInfo.boneSpaceCrossProduct.x,ikInfo.boneSpaceCrossProduct.y,ikInfo.boneSpaceCrossProduct.z);
 		screen_output(500,160, ikInfoText);
 
@@ -304,31 +305,37 @@ private:
 		if(keys[KEY_k])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.2,0.0));
+			moved = true;
 		}
 
 		if(keys[KEY_i])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,-0.2,0.0));
+			moved = true;
 		}
 
 		if(keys[KEY_l])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.2,0.0,0.0));
+			moved = true;
 		}
 
 		if(keys[KEY_o])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,0.2));
+			moved = true;
 		}
 
 		if(keys[KEY_u])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,-0.2));
+			moved = true;
 		}
 
 		if(keys[KEY_j])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(-0.2,0.0,0.0));
+			moved = true;
 		}
 
 		if (keys[KEY_r])
@@ -360,7 +367,7 @@ private:
 
 		if (keys[KEY_SPACE])
 		{
-			moved = true;
+			animationStep = true;
 		}
 	}
 };

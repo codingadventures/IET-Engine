@@ -62,9 +62,9 @@ public:
 
 	}
 
-	IKInfo MoveToWithIK(glm::vec3 point, glm::mat4* animations, const char* effectorName, bool simulate)
+	IKInfo MoveToWithIK(glm::vec3 point, glm::mat4* animations, const char* effectorName, bool simulate,bool reset)
 	{
-		return skeleton->ComputeOneCCDLink(this->model,point,animations,animationMatrices, effectorName,simulate);
+		return skeleton->ComputeOneCCDLink(this->model,point,animations,animationMatrices, effectorName,simulate,reset);
 	}
 
 	vector<glm::vec3> getBonesOrientation( )
@@ -88,6 +88,12 @@ public:
 	void animate(glm::mat4* animations)
 	{
 		skeleton->animate(skeleton->rootBone,animations,animationMatrices);
+	}
+
+	void resetAnimation()
+	{
+		CleanAnimationMatrix();
+
 	}
 
 private:
@@ -394,6 +400,9 @@ private:
 		}
 		return textures;
 	}
+
+	
+
 
 	
 
