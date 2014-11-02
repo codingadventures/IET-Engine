@@ -72,7 +72,7 @@ public:
 	IKInfo ComputeOneCCDLink(const glm::mat4 model,const glm::vec3 targetWorldPosition,glm::mat4* animations,glm::mat4* animationMatrixes, const char* effectorName, bool simulate)
 	{
 		glm::vec3			currBoneWorldPosition,effectorWorldPosition,targetWorldPositionNormVector,effectorCurrBoneNormVector;
-		glm::vec3			crossProduct,test;
+		glm::vec3			crossProduct,boneSpaceCrossProduct;
 		IKInfo ik;
 
 		Bone* effectorBone = GetBone(effectorName);
@@ -116,16 +116,18 @@ public:
 
 		crossProduct = glm::normalize(glm::cross(effectorCurrBoneNormVector, targetWorldPositionNormVector));
 
-		crossProduct = glm::round(crossProduct);
-
-		//glm::vec3 boneSpaceCrossProduct =glm::normalize( glm::vec3(
-		//	glm::mat3(
-		// glm::inverse( currBone->getWorldSpace(model) * crossProduct ))  
-		//	));
+	//	crossProduct = glm::round(crossProduct);
 
 
+		boneSpaceCrossProduct = glm::vec3(
+			glm::mat3(
+			glm::inverse(model) * glm::inverse(currBone->getParentTransform()) * currBone->boneOffset) * crossProduct
+			);
 
-		if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
+
+		boneSpaceCrossProduct = glm::normalize(boneSpaceCrossProduct);
+
+		if ((boneSpaceCrossProduct != glm::vec3()) && boneSpaceCrossProduct == boneSpaceCrossProduct)
 		{
 			turnDeg =  glm::round( glm::degrees(glm::acos(cosAngle)));
 
@@ -140,7 +142,7 @@ public:
 
 			if (!simulate)
 			{			 
-				currBone->localTransform  *=  glm::rotate(glm::mat4(1.0f), turnDeg, crossProduct);
+				currBone->localTransform  *=  glm::rotate(glm::mat4(1.0f), turnDeg, boneSpaceCrossProduct);
 
 				//animate(currBone,animations, animationMatrixes);
 				updateSkeleton(currBone, animationMatrixes);
@@ -155,6 +157,7 @@ EXIT:
 			currentIteration++;
 
 		ik.crossProduct = crossProduct;
+		ik.boneSpaceCrossProduct = boneSpaceCrossProduct;
 		ik.cosAngle = cosAngle; 
 		ik.iteration = currentIteration;
 		ik.degreeAngle = turnDeg;

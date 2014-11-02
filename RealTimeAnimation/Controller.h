@@ -223,6 +223,9 @@ public:
 
 		sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
 		screen_output(500,140, ikInfoText);
+		
+		sprintf_s(ikInfoText,"Cross Product Bone Space (%f,%f,%f)",ikInfo.boneSpaceCrossProduct.x,ikInfo.boneSpaceCrossProduct.y,ikInfo.boneSpaceCrossProduct.z);
+		screen_output(500,160, ikInfoText);
 
 		Vertex p1;
 		p1.Position = ikInfo.currentWorldPosition;
