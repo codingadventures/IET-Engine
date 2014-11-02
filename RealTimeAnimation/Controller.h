@@ -6,8 +6,8 @@
 #include "Shader.h"
 #include "Model.h"
 #include "Camera.h"
-
-
+#include "Line.h"
+#include "Point.h"
 #include <gl/glut.h>
 #include <glm/glm.hpp>
 
@@ -24,7 +24,7 @@ public:
 	}
 
 	~Controller(){ 
-		free(IKMatrices);
+		free(animations);
 		free(boneLocation);
 
 	}
@@ -64,13 +64,15 @@ public:
 
 		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
 
-
+		simulationIteration = 0;
+		boneIndex = 0;
 
 		shader = new Shader("vertex.vert","fragment.frag");
 		shaderBones = new Shader("vertex_bone.vert","fragment_bone.frag");
 
 
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		//Wire frame
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -88,11 +90,14 @@ public:
 		modelBonesUniform = glGetUniformLocation(shaderBones->Program, "model");
 		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
 		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
+		numberOfBones = 4;
 
+		animations = (glm::mat4*) malloc(4 * sizeof(glm::mat4));
 
-		IKMatrices = (glm::mat4*) malloc(numberOfBones * sizeof(glm::mat4));
-
-
+		for(int i =0; i<4;i++)
+		{
+			animations[i] = glm::mat4(1.0f);
+		}
 
 		//		totalAnimationTime = cones->animDuration;
 
@@ -140,8 +145,8 @@ public:
 		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
 		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(cones->model).x    ,decomposeT(cones->model).y,decomposeT(cones->model).z);
 
-		screen_output(40,80,cameraPosition); 
-		screen_output(40,60,conesPosition); 
+		//screen_output(40,80,cameraPosition); 
+		//screen_output(40,60,conesPosition); 
 
 
 		shader->Use();
@@ -152,7 +157,7 @@ public:
 		view = camera->GetViewMatrix();
 
 		sprintf_s(cubePosition, "Cube Position (%f,%f,%f)",decomposeT(cube->model).x    ,decomposeT(cube->model).y,decomposeT(cube->model).z);
-		screen_output(40,40,cubePosition);
+		//screen_output(40,40,cubePosition);
 
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(cube->model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
@@ -177,23 +182,71 @@ public:
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(cones->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
-		
+
+		vector<glm::vec3> bonesPositions = cones->getBonesOrientation();
+		glm::vec3 cubeWorldPosition = decomposeT(cube->model);
+
+
+
+		shader->Use();
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+
+		for (glm::vec3 &vec : bonesPositions)
+		{
+			Vertex v1,v2;
+			v1.Position = vec;
+			v2.Position = cubeWorldPosition;
+			v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+			v2.Color = glm::vec3(1.0f,0.0f,0.0f);
+			Line(v1, v2).Draw();
+		}
+
 
 		if (moved)
 		{
 			//Calculate world space of the cube
-			glm::vec3 cubeModelDirection,cubeModelScale;
 			glm::mat4 cubeModelRotation;
 
-			decomposeTRS(cube->model,cubeModelScale,cubeModelRotation,cubeModelDirection);
-
-			cones->MoveToWithIK(cubeModelDirection,"Effector");
+			//decomposeTRS(cube->model,cubeModelScale,cubeModelRotation,cubeModelDirection);
+			ikInfo = cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0 );
 
 			moved = false;
-		} 
+			//cones->CleanAnimationMatrix();
+		}  
+		//cones->animate(animations);
 
+		char ikInfoText[500];
+		sprintf_s(ikInfoText,"Iteration %d - Distance %f - Cos Angle %f", ikInfo.iteration,ikInfo.distance, ikInfo.cosAngle);
+		screen_output(500,120, ikInfoText);
+		sprintf_s(ikInfoText,"Current Bone %s - Degree %f",ikInfo.currBoneName.c_str(), ikInfo.degreeAngle);
+		screen_output(500,100, ikInfoText);
+
+		sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
+		screen_output(500,140, ikInfoText);
+
+		Vertex p1;
+		p1.Position = ikInfo.currentWorldPosition;
+		p1.Color = glm::vec3(1.0f,1.0f,0.0f);
+		Point(p1 
+			).Draw();
+
+		Vertex p2;
+		p2.Position = ikInfo.effectorWorldPosition;
+		p2.Color = glm::vec3(0.0f,0.0f,0.0f);
+		Point(p2).Draw();
+
+		Vertex p3;
+		p3.Position = -(ikInfo.effectorWorldPosition - ikInfo.currentWorldPosition);
+		p3.Color = glm::vec3(0.0f,1.0f,1.0f);
+		Point(p3).Draw();
+
+		shaderBones->Use();
 
 		cones->Draw();
+
+		char bon[100];
+		sprintf_s(bon,"Bone Index %d",boneIndex);
+		screen_output(100.0f,25.0f , bon);
 
 		vector<glm::vec3> bonespos = cones->getBonesOrientation();
 
@@ -201,7 +254,7 @@ public:
 		{
 			char pos[100];
 			sprintf_s(pos,"%d - Position (%f,%f,%f)",i,bonespos[i].x,bonespos[i].y,bonespos[i].z);
-			screen_output(500.0f,15.0f*i,pos);
+			screen_output(500.0f,15.0f + 20 *i,pos);
 
 		}
 
@@ -214,9 +267,10 @@ private:
 
 
 	void Controller::setupCurrentInstance();
+	int boneIndex;
 
-	glm::mat4* IKMatrices;
-
+	glm::mat4* animations;
+	int simulationIteration;
 
 	GLint modelUniform  ;
 	GLint viewUniform  ;
@@ -233,7 +287,7 @@ private:
 
 	Model *cones;
 	Model *cube;
-
+	IKInfo ikInfo;
 	glm::uint numberOfBones ;
 
 
@@ -247,27 +301,31 @@ private:
 		if(keys[KEY_k])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.2,0.0));
-			moved = true;
 		}
 
 		if(keys[KEY_i])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.0,-0.2,0.0));
-			moved = true;
-
 		}
 
 		if(keys[KEY_l])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(0.2,0.0,0.0));
-			moved = true;
+		}
 
+		if(keys[KEY_o])
+		{
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,0.2));
+		}
+
+		if(keys[KEY_u])
+		{
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,-0.2));
 		}
 
 		if(keys[KEY_j])
 		{
 			cube->model = glm::translate(cube->model,glm::vec3(-0.2,0.0,0.0));
-			moved = true;
 		}
 
 		if (keys[KEY_r])
@@ -278,6 +336,28 @@ private:
 		if (keys[KEY_e])
 		{
 			camera->Position = decomposeT(cones->model);
+		}
+
+		if(keys[KEY_PLUS])
+		{
+			if (boneIndex < numberOfBones)
+				boneIndex++;
+		}
+
+		if(keys[KEY_1])
+		{
+			animations[boneIndex] = glm::rotate(glm::mat4(1.0f),25.0f,glm::vec3(0.0f,0.0f,1.0f));
+		}
+
+		if(keys[KEY_MINUS])
+		{
+			if (boneIndex > 0)
+				boneIndex--;
+		}
+
+		if (keys[KEY_SPACE])
+		{
+			moved = true;
 		}
 	}
 };

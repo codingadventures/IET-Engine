@@ -14,5 +14,7 @@ struct Vertex {
 	glm::vec2 TexCoords;
 	//BoneData
 	VertexWeight WeightData;
+	//Color
+	glm::vec3 Color;
 };
 

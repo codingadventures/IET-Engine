@@ -41,9 +41,7 @@ public:
 
 		animationMatrices = (glm::mat4*) malloc(skeleton->getNumberOfBones() * sizeof(glm::mat4));
 
-		//Initialize bones in the shader for the uniform 
-		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
-			animationMatrices[i] = glm::mat4(1); 
+		CleanAnimationMatrix();
 
 	} 
 
@@ -64,18 +62,33 @@ public:
 
 	}
 
-	void MoveToWithIK(glm::vec3 point, const char* effectorName)
+	IKInfo MoveToWithIK(glm::vec3 point, glm::mat4* animations, const char* effectorName, bool simulate)
 	{
-
-		skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
-
+		return skeleton->ComputeOneCCDLink(this->model,point,animations,animationMatrices, effectorName,simulate);
 	}
 
-	vector<glm::vec3> getBonesOrientation()
+	vector<glm::vec3> getBonesOrientation( )
 	{
+
 		return skeleton->getBonePositions(this->model);
 	}
+	
+	glm::vec3 getBoneOrientation(const char* name)
+	{
+		return skeleton->GetBone(name)->getWorldSpacePosition(this->model);
+	}
 
+	void CleanAnimationMatrix()
+	{
+		//Initialize bones in the shader for the uniform 
+		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
+			animationMatrices[i] = glm::mat4(1); 
+	}
+
+	void animate(glm::mat4* animations)
+	{
+		skeleton->animate(skeleton->rootBone,animations,animationMatrices);
+	}
 
 private:
 	/*  Model Data  */
@@ -381,6 +394,12 @@ private:
 		}
 		return textures;
 	}
+
+	
+
+
+	
+
 };
 //
 //GLint TextureFromFile(const char* path, string directory)

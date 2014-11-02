@@ -15,8 +15,6 @@ int main(int argc, char* argv[])
 	controller->Init(argc,argv);
 
 	controller->Run();
-
-
 	 
 	return 0;
 }

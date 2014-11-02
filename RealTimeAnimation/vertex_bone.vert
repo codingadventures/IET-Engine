@@ -52,16 +52,28 @@ uniform mat4 bones[MAX_BONES];
 out vec2 TexCoords;
 out vec3 colour;
 
+
+bool checkMatrixIsZero(mat4 matrix)
+{
+	if (matrix[0][0] == 0 && matrix[1][1] == 0 && matrix[2][2] == 0 && matrix[3][3] == 0)
+		return true;
+	else return false;
+
+
+}
+
 void main() 
 { 
 	 
  	mat4 BoneTransform = bones[BoneIDs[0]] * Weights[0];
     BoneTransform     += bones[BoneIDs[1]] * Weights[1];
    	BoneTransform     += bones[BoneIDs[2]] * Weights[2];
-   	BoneTransform     += bones[BoneIDs[3]] * Weights[3];
+  // 	BoneTransform     += bones[BoneIDs[3]] * Weights[3];
 	 
-	vec4 PosL    = BoneTransform * vec4(position, 1.0);
+ 
 	colour = colorMap[BoneIDs[0]];
+	
+    vec4 PosL  = BoneTransform * vec4(position, 1.0);
 	 
 	gl_Position =  projection * view * model * PosL;
  
