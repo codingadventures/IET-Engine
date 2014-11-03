@@ -108,13 +108,13 @@ public:
 		if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || (targetWorldPositionNormVector != targetWorldPositionNormVector))
 			goto EXIT;
 
-		cosAngle =  glm::dot(effectorCurrBoneNormVector,targetWorldPositionNormVector);
+		cosAngle =  glm::dot(targetWorldPositionNormVector,effectorCurrBoneNormVector);
 
-		if (cosAngle >= 1)
+		if (cosAngle >= 0.9995)
 			goto EXIT;
 
-		if (cosAngle <= -1)
-			goto EXIT;
+		/*if (cosAngle <= -1)
+			goto EXIT;*/
 
 		distance = glm::distance(effectorWorldPosition, targetWorldPosition);
 
@@ -135,7 +135,7 @@ public:
 
 		boneSpaceCrossProduct = glm::normalize(boneSpaceCrossProduct);
 
-		if ((boneSpaceCrossProduct != glm::vec3()) && boneSpaceCrossProduct == boneSpaceCrossProduct)
+		if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
 		{
 			turnDeg =  glm::round( glm::degrees(glm::acos(cosAngle)));
 
@@ -143,14 +143,14 @@ public:
 			//if (crossProduct.x != 1 && crossProduct.x != -1)  crossProduct.x = 0;
 			//if (crossProduct.y != 1 && crossProduct.y != -1)  crossProduct.y = 0;
 
-			/*glm::quat quatRotation = glm::angleAxis(turnDeg, glm::vec3(0.0f,1.0f,1.0));
+			glm::quat quatRotation = glm::angleAxis(turnDeg, crossProduct);
 
-			glm::mat4 quatRotationMatrix = glm::toMat4(quatRotation); */
+			glm::mat4 quatRotationMatrix = glm::toMat4(glm::normalize(quatRotation));/* */
 
 
 			if (!simulate)
 			{			 
-				currBone->localTransform  =  glm::rotate(glm::mat4(1.0f), turnDeg, boneSpaceCrossProduct) * currBone->localTransform;
+				currBone->localTransform  *=  quatRotationMatrix;
 
 				updateSkeleton(currBone, animationMatrixes);
 			}

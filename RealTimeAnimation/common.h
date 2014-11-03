@@ -189,6 +189,19 @@ void printLogVec(const char* msg, const  glm::vec3& v){
 //	}
 //	frame_count++;
 //}
+
+glm::vec3 cubicLerp(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, float t)
+{
+	glm::vec3 a0, a1, a2, a3;
+
+	float t2 = t*t;
+	a0 = v3 - v2 - v0 + v1;
+	a1 = v0 - v1 - a0;
+	a2 = v2 - v0;
+	a3 = v1;
+
+	return (a0*t*t2 + a1*t2 + a2*t + a3);
+}
 #pragma endregion
 
 #endif // COMMON_H

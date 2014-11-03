@@ -116,6 +116,9 @@ public:
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
+		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+		deltaTime = timeSinceStart - oldTimeSinceStart;
+		oldTimeSinceStart = timeSinceStart;
 
 		/*static double previous_seconds = glfwGetTime();
 		double current_seconds = glfwGetTime();
@@ -191,13 +194,29 @@ public:
 		shader->Use();
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
 
+		int i=0;
 		for (glm::vec3 &vec : bonesPositions)
 		{
+
 			Vertex v1,v2;
 			v1.Position = vec;
 			v2.Position = cubeWorldPosition;
-			v1.Color = glm::vec3(1.0f,0.0f,0.0f);
-			v2.Color = glm::vec3(1.0f,0.0f,0.0f);
+			switch (i++)
+			{
+				case 0:
+					v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+					break;
+				case 1:
+					v1.Color = glm::vec3(0.0f,1.0f,0.0f);
+					break;
+				case 2:
+					v1.Color = glm::vec3(0.0f,0.0f,1.0f);
+					break;
+				case 3:
+					v1.Color = glm::vec3(0.0f,1.0f,1.0f);
+
+			}
+			v2.Color = v1.Color;
 			Line(v1, v2).Draw();
 		}
 		 
@@ -216,6 +235,23 @@ public:
 		}  
 		//cones->animate(animations);
 
+
+		Vertex currentWorldPosition;
+		currentWorldPosition.Position = ikInfo.currentWorldPosition;
+		currentWorldPosition.Color = glm::vec3(1.0f,1.0f,0.0f);
+
+		Vertex crossProduct;
+		crossProduct.Position = ikInfo.crossProduct;
+		crossProduct.Color = glm::vec3(1.0f,1.0f,0.0f);
+
+		Vertex boneSpaceCrossProduct;
+		boneSpaceCrossProduct.Position = ikInfo.boneSpaceCrossProduct;
+		boneSpaceCrossProduct.Color = glm::vec3(0.0f,1.0f,1.0f);
+
+		Line(currentWorldPosition, crossProduct).Draw();
+		Line(currentWorldPosition, boneSpaceCrossProduct).Draw();
+
+
 		char ikInfoText[500];
 		sprintf_s(ikInfoText,"Iteration %d - Distance %f - Cos Angle %f", ikInfo.iteration,ikInfo.distance, ikInfo.cosAngle);
 		screen_output(500,120, ikInfoText);
@@ -228,21 +264,17 @@ public:
 		sprintf_s(ikInfoText,"Cross Product Bone Space (%f,%f,%f)",ikInfo.boneSpaceCrossProduct.x,ikInfo.boneSpaceCrossProduct.y,ikInfo.boneSpaceCrossProduct.z);
 		screen_output(500,160, ikInfoText);
 
-		Vertex p1;
-		p1.Position = ikInfo.currentWorldPosition;
-		p1.Color = glm::vec3(1.0f,1.0f,0.0f);
-		Point(p1 
-			).Draw();
+		Point(currentWorldPosition).Draw();
 
 		Vertex p2;
 		p2.Position = ikInfo.effectorWorldPosition;
 		p2.Color = glm::vec3(0.0f,0.0f,0.0f);
 		Point(p2).Draw();
 
-		Vertex p3;
+		/*Vertex p3;
 		p3.Position = -(ikInfo.effectorWorldPosition - ikInfo.currentWorldPosition);
 		p3.Color = glm::vec3(0.0f,1.0f,1.0f);
-		Point(p3).Draw();
+		Point(p3).Draw();*/
 
 		shaderBones->Use();
 
@@ -293,7 +325,8 @@ private:
 	Model *cube;
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
-
+	float oldTimeSinceStart;
+	float deltaTime;
 
 	void ReadInput()
 	{
