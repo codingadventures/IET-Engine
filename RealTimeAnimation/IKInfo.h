@@ -5,6 +5,8 @@ struct IKInfo
 	float cosAngle;
 	float distance;
 	float degreeAngle;
+	float crossProductAngle;
+	float boneSpaceCrossProductAngle;
 	glm::vec3 crossProduct;
 	glm::vec3 currentWorldPosition;
 	glm::vec3 effectorWorldPosition;

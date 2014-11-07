@@ -15,11 +15,6 @@ int main(int argc, char* argv[])
 
 	controller->Run();
 
-	//int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
-	//deltaTime = timeSinceStart - oldTimeSinceStart;
-	//oldTimeSinceStart = timeSinceStart;
-
-	 
 	return 0;
 }
 

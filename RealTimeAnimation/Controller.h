@@ -1,15 +1,19 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#define GLM_FORCE_RADIANS
+
 #include "Callbacks.h"
 #include "ScreenOutput.h"
 #include "Shader.h"
+#include "Spline.h"
 #include "Model.h"
 #include "Camera.h"
 #include "Line.h"
 #include "Point.h"
 #include <gl/glut.h>
 #include <glm/glm.hpp>
+#include "maths_funcs.h"
 
 using namespace std::placeholders;
 
@@ -66,7 +70,7 @@ public:
 
 		simulationIteration = 0;
 		boneIndex = 0;
-
+		oldTimeSinceStart = 0;
 		shader = new Shader("vertex.vert","fragment.frag");
 		shaderBones = new Shader("vertex_bone.vert","fragment_bone.frag");
 
@@ -77,6 +81,10 @@ public:
 		//Wire frame
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		spline.addPoint(0,glm::vec3(0.0f,0.0f,0.0f));
+		spline.addPoint(1,glm::vec3(0.10f,0.10f,0.0f));
+		spline.addPoint(2,glm::vec3(0.20f,0.15f,0.0f));
+		spline.addPoint(3,glm::vec3(0.30f,0.15f,0.0f));
 
 
 		cones = new Model(shaderBones, MODEL);
@@ -100,14 +108,13 @@ public:
 		}
 
 		//		totalAnimationTime = cones->animDuration;
-
-		cube->model = glm::scale(cube->model, glm::vec3(0.1f, 0.1f, 0.1f));	
-		cube->model = glm::translate(cube->model, glm::vec3(0.0f, 5.0f, 0.0f));
-
+		speed = 0.3f;
+		cube->model = glm::translate(glm::mat4(1), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
+		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
 		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
 		//	cones->skeleton->animate(NULL, IKMatrices, animationMatrices);
-
+		 
 	}
 
 
@@ -172,15 +179,16 @@ public:
 
 		shaderBones->Use();
 
-		cones->model = glm::rotate(glm::mat4(), (float)-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+		float deg = -90.0f * ONE_DEG_IN_RAD;
 
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		cones->model = glm::scale(cones->model, glm::vec3(0.1f, 0.1f, 0.1f));	
-		//model = glm::rotate(model,90.0f,glm::vec3(0.0f,0.0f,1.0f));
+		cones->model = glm::translate(glm::mat4(1),glm::vec3(0.0,0.0f,0.0f))*glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(0.1f, 0.1f, 0.1f)); 
+
+
 
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(cones->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
@@ -203,42 +211,63 @@ public:
 			v2.Position = cubeWorldPosition;
 			switch (i++)
 			{
-				case 0:
-					v1.Color = glm::vec3(1.0f,0.0f,0.0f);
-					break;
-				case 1:
-					v1.Color = glm::vec3(0.0f,1.0f,0.0f);
-					break;
-				case 2:
-					v1.Color = glm::vec3(0.0f,0.0f,1.0f);
-					break;
-				case 3:
-					v1.Color = glm::vec3(0.0f,1.0f,1.0f);
+			case 0:
+				v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+				break;
+			case 1:
+				v1.Color = glm::vec3(0.0f,1.0f,0.0f);
+				break;
+			case 2:
+				v1.Color = glm::vec3(0.0f,0.0f,1.0f);
+				break;
+			case 3:
+				v1.Color = glm::vec3(0.0f,1.0f,1.0f);
 
 			}
 			v2.Color = v1.Color;
 			Line(v1, v2).Draw();
 		}
-		 
+
+		//cones->skeleton->updateSkeleton(NULL,cones->animationMatrices); //did u see it?! haha maybe it's a clue?
+
 		if (animationStep)
 		{
 			//Calculate world space of the cube
 			glm::mat4 cubeModelRotation;
 
 			//decomposeTRS(cube->model,cubeModelScale,cubeModelRotation,cubeModelDirection);
-			ikInfo = cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0, moved );
+			cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0, moved );
 
 			animationStep = false;
 
 			if (moved) moved = false;
 			//cones->CleanAnimationMatrix();
 		}  
+		shaderBones->Use();
+
+		cones->Draw();
+
+		shader->Use();
 		//cones->animate(animations);
 
+		// cube->model = glm::translate( cube->model ,spline.getPosition());
 
-		Vertex currentWorldPosition;
-		currentWorldPosition.Position = ikInfo.currentWorldPosition;
-		currentWorldPosition.Color = glm::vec3(1.0f,1.0f,0.0f);
+		spline.Update(deltaTime);
+
+		Vertex v1,v2;
+		v1.Position = ikInfo.currentWorldPosition;
+		v2.Position = cubeWorldPosition;
+		v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+		v2.Color = glm::vec3(1.0f,0.0f,0.0f);
+		Line(v1, v2).Draw();
+
+		v2.Position = ikInfo.effectorWorldPosition;
+		v1.Color = glm::vec3(0.0f,1.0f,0.0f);
+		v2.Color = glm::vec3(0.0f,1.0f,0.0f);
+		//Line(v1,v2).Draw();
+
+
+		v1.Color = glm::vec3(1.0f,1.0f,0.0f);
 
 		Vertex crossProduct;
 		crossProduct.Position = ikInfo.crossProduct;
@@ -248,8 +277,10 @@ public:
 		boneSpaceCrossProduct.Position = ikInfo.boneSpaceCrossProduct;
 		boneSpaceCrossProduct.Color = glm::vec3(0.0f,1.0f,1.0f);
 
-		Line(currentWorldPosition, crossProduct).Draw();
-		Line(currentWorldPosition, boneSpaceCrossProduct).Draw();
+		v1.Color = glm::vec3(1.0f,1.0f,0.0f);
+
+		/*Line(v1, crossProduct).Draw();
+		Line(v1, boneSpaceCrossProduct).Draw();*/
 
 
 		char ikInfoText[500];
@@ -261,10 +292,17 @@ public:
 		sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
 		screen_output(500,140, ikInfoText);
 
-		sprintf_s(ikInfoText,"Cross Product Bone Space (%f,%f,%f)",ikInfo.boneSpaceCrossProduct.x,ikInfo.boneSpaceCrossProduct.y,ikInfo.boneSpaceCrossProduct.z);
+		sprintf_s(ikInfoText,"Cross Product Angle %f",ikInfo.crossProductAngle);
 		screen_output(500,160, ikInfoText);
+		sprintf_s(ikInfoText,"BoneToTarget (%f,%f,%f)",ikInfo.currentWorldPosition.x,ikInfo.currentWorldPosition.y,ikInfo.currentWorldPosition.z);
+		screen_output(500,180, ikInfoText);
+		sprintf_s(ikInfoText,"EffectorToTarget (%f,%f,%f)",ikInfo.effectorWorldPosition.x,ikInfo.effectorWorldPosition.y,ikInfo.effectorWorldPosition.z);
+		screen_output(500,200, ikInfoText);
 
-		Point(currentWorldPosition).Draw();
+		/*sprintf_s(ikInfoText,"BS Cross Product Angle %f",ikInfo.boneSpaceCrossProductAngle);
+		screen_output(100,120, ikInfoText);*/
+
+		Point(v1).Draw();
 
 		Vertex p2;
 		p2.Position = ikInfo.effectorWorldPosition;
@@ -276,24 +314,24 @@ public:
 		p3.Color = glm::vec3(0.0f,1.0f,1.0f);
 		Point(p3).Draw();*/
 
-		shaderBones->Use();
-
-		cones->Draw();
+		
 
 		char bon[100];
 		sprintf_s(bon,"Bone Index %d",boneIndex);
 		screen_output(100.0f,25.0f , bon);
 
 		vector<glm::vec3> bonespos = cones->getBonesOrientation();
-
-		for (int i = 0; i < bonespos.size(); i++)
+		char pos[100];
+		sprintf_s(pos,"Target Position - (%f,%f,%f)",cubeWorldPosition.x,cubeWorldPosition.y,cubeWorldPosition.z);
+		screen_output(500.0f,15.0f + 20 ,pos);
+		/*for (int i = 0; i < bonespos.size(); i++)
 		{
-			char pos[100];
-			sprintf_s(pos,"%d - Position (%f,%f,%f)",i,bonespos[i].x,bonespos[i].y,bonespos[i].z);
-			screen_output(500.0f,15.0f + 20 *i,pos);
+
+		sprintf_s(pos,"%d - Position (%f,%f,%f)",i,bonespos[i].x,bonespos[i].y,bonespos[i].z);
+		screen_output(500.0f,15.0f + 20 *i,pos);
 
 		}
-
+		*/
 		glutSwapBuffers();
 
 	}
@@ -303,6 +341,7 @@ private:
 
 
 	void Controller::setupCurrentInstance();
+	Spline spline;
 	int boneIndex;
 
 	glm::mat4* animations;
@@ -327,6 +366,7 @@ private:
 	glm::uint numberOfBones ;
 	float oldTimeSinceStart;
 	float deltaTime;
+	float speed;
 
 	void ReadInput()
 	{
@@ -337,37 +377,37 @@ private:
 
 		if(keys[KEY_k])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.2,0.0));
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,speed,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_i])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,-0.2,0.0));
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,-speed,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_l])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.2,0.0,0.0));
+			cube->model = glm::translate(cube->model,glm::vec3(speed,0.0,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_o])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,0.2));
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,speed));
 			moved = true;
 		}
 
 		if(keys[KEY_u])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,-0.2));
+			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,-speed));
 			moved = true;
 		}
 
 		if(keys[KEY_j])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(-0.2,0.0,0.0));
+			cube->model = glm::translate(cube->model,glm::vec3(-speed,0.0,0.0));
 			moved = true;
 		}
 

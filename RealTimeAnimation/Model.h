@@ -43,6 +43,8 @@ public:
 
 		CleanAnimationMatrix();
 
+		skeleton->updateSkeleton(nullptr,animationMatrices);
+
 	} 
 
 	~Model()
@@ -54,28 +56,33 @@ public:
 	// Draws the model, and thus all its meshes
 	void Draw()
 	{
-		for(GLuint i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].Draw(*shader);
 
 		if (skeleton->getNumberOfBones()>0)
 			glUniformMatrix4fv (boneLocation[0], skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(animationMatrices[0]));
 
+
+		for(GLuint i = 0; i < this->meshes.size(); i++)
+			this->meshes[i].Draw(*shader);
+
+		
 	}
 
 	IKInfo MoveToWithIK(glm::vec3 point, glm::mat4* animations, const char* effectorName, bool simulate,bool reset)
 	{
 		return skeleton->ComputeOneCCDLink(this->model,point,animations,animationMatrices, effectorName,simulate,reset);
+		 // skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
+		 // return NULL; 
+
 	}
 
 	vector<glm::vec3> getBonesOrientation( )
 	{
-
 		return skeleton->getBonePositions(this->model);
 	}
-	
+
 	glm::vec3 getBoneOrientation(const char* name)
 	{
-		return skeleton->GetBone(name)->getWorldSpacePosition(this->model);
+		return skeleton->GetBone(name)->getMeshSpacePosition(this->model);
 	}
 
 	void CleanAnimationMatrix()
@@ -95,15 +102,15 @@ public:
 		CleanAnimationMatrix();
 
 	}
+	glm::mat4* animationMatrices;
+	Skeleton* skeleton;
 
 private:
 	/*  Model Data  */
 	vector<Mesh> meshes;
 	const Shader* shader;
-	glm::mat4* animationMatrices;
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-	Skeleton* skeleton;
 	GLuint* boneLocation;
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -128,8 +135,8 @@ private:
 		// there should always be a 'root node', even if no skeleton exists
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
-		} // endif
-
+		} // endif 
+			skeleton->inverseTransf =  glm::inverse(aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
 		int numOfBones = skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
@@ -401,13 +408,13 @@ private:
 		return textures;
 	}
 
-	
 
 
-	
 
 
-	
+
+
+
 
 };
 //
