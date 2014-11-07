@@ -12,8 +12,8 @@
 #include "Line.h"
 #include "Point.h"
 #include <gl/glut.h>
-#include <glm/glm.hpp>
-#include "maths_funcs.h"
+#include <glm/glm.hpp> 
+#include "IKSolver.h"
 
 using namespace std::placeholders;
 
@@ -28,6 +28,7 @@ public:
 	}
 
 	~Controller(){ 
+
 		free(animations);
 		free(boneLocation);
 
@@ -91,6 +92,7 @@ public:
 		cube =  new Model(shader, CUBE_MODEL);
 
 
+		 
 		modelUniform = glGetUniformLocation(shader->Program, "model");
 		viewUniform = glGetUniformLocation(shader->Program, "view");
 		projectionUniform = glGetUniformLocation(shader->Program, "projection");
@@ -98,14 +100,15 @@ public:
 		modelBonesUniform = glGetUniformLocation(shaderBones->Program, "model");
 		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
 		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
-		numberOfBones = 4;
+
+		/*numberOfBones = 4;
 
 		animations = (glm::mat4*) malloc(4 * sizeof(glm::mat4));
 
 		for(int i =0; i<4;i++)
 		{
-			animations[i] = glm::mat4(1.0f);
-		}
+		animations[i] = glm::mat4(1.0f);
+		}*/
 
 		//		totalAnimationTime = cones->animDuration;
 		speed = 0.3f;
@@ -113,8 +116,9 @@ public:
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
 		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
-		//	cones->skeleton->animate(NULL, IKMatrices, animationMatrices);
-		 
+
+		animationMap["Cones_IK"] =(IAnimation*) new IKSolver(cones->skeleton);
+
 	}
 
 
@@ -179,7 +183,7 @@ public:
 
 		shaderBones->Use();
 
-		float deg = -90.0f * ONE_DEG_IN_RAD;
+		float deg =   glm::radians(-90.0f);
 
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
@@ -202,45 +206,44 @@ public:
 		shader->Use();
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
 
-		int i=0;
+
+		/*int i=0;
 		for (glm::vec3 &vec : bonesPositions)
 		{
 
-			Vertex v1,v2;
-			v1.Position = vec;
-			v2.Position = cubeWorldPosition;
-			switch (i++)
-			{
-			case 0:
-				v1.Color = glm::vec3(1.0f,0.0f,0.0f);
-				break;
-			case 1:
-				v1.Color = glm::vec3(0.0f,1.0f,0.0f);
-				break;
-			case 2:
-				v1.Color = glm::vec3(0.0f,0.0f,1.0f);
-				break;
-			case 3:
-				v1.Color = glm::vec3(0.0f,1.0f,1.0f);
+		Vertex v1,v2;
+		v1.Position = vec;
+		v2.Position = cubeWorldPosition;
+		switch (i++)
+		{
+		case 0:
+		v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+		break;
+		case 1:
+		v1.Color = glm::vec3(0.0f,1.0f,0.0f);
+		break;
+		case 2:
+		v1.Color = glm::vec3(0.0f,0.0f,1.0f);
+		break;
+		case 3:
+		v1.Color = glm::vec3(0.0f,1.0f,1.0f);
 
-			}
-			v2.Color = v1.Color;
-			Line(v1, v2).Draw();
 		}
+		v2.Color = v1.Color;
+		Line(v1, v2).Draw();
+		}*/
 
-		//cones->skeleton->updateSkeleton(NULL,cones->animationMatrices); //did u see it?! haha maybe it's a clue?
 
-		if (animationStep)
+		if (moved)
 		{
 			//Calculate world space of the cube
 			glm::mat4 cubeModelRotation;
 
-			//decomposeTRS(cube->model,cubeModelScale,cubeModelRotation,cubeModelDirection);
-			cones->MoveToWithIK(cubeWorldPosition, animations,"Effector", this->simulationIteration++ % 2 == 0, moved );
+			cones->Animate(animationMap["Cones_IK"], cubeWorldPosition,"Effector");
 
 			animationStep = false;
 
-			if (moved) moved = false;
+			moved = !moved;
 			//cones->CleanAnimationMatrix();
 		}  
 		shaderBones->Use();
@@ -314,7 +317,7 @@ public:
 		p3.Color = glm::vec3(0.0f,1.0f,1.0f);
 		Point(p3).Draw();*/
 
-		
+
 
 		char bon[100];
 		sprintf_s(bon,"Bone Index %d",boneIndex);
@@ -324,14 +327,7 @@ public:
 		char pos[100];
 		sprintf_s(pos,"Target Position - (%f,%f,%f)",cubeWorldPosition.x,cubeWorldPosition.y,cubeWorldPosition.z);
 		screen_output(500.0f,15.0f + 20 ,pos);
-		/*for (int i = 0; i < bonespos.size(); i++)
-		{
 
-		sprintf_s(pos,"%d - Position (%f,%f,%f)",i,bonespos[i].x,bonespos[i].y,bonespos[i].z);
-		screen_output(500.0f,15.0f + 20 *i,pos);
-
-		}
-		*/
 		glutSwapBuffers();
 
 	}
@@ -341,11 +337,12 @@ private:
 
 
 	void Controller::setupCurrentInstance();
-	Spline spline;
 	int boneIndex;
 
 	glm::mat4* animations;
 	int simulationIteration;
+
+#pragma region [ Uniform Variables ]
 
 	GLint modelUniform  ;
 	GLint viewUniform  ;
@@ -354,9 +351,14 @@ private:
 	GLint modelBonesUniform ;
 	GLint viewBonesUniform ;
 	GLint projectionBonesUniform;
-	GLuint* boneLocation;
 
+#pragma endregion  
+
+	GLuint* boneLocation;
+	std::map<string,IAnimation*> animationMap; 
 	Camera *camera;
+	Spline spline;
+
 	Shader *shader;
 	Shader *shaderBones;
 

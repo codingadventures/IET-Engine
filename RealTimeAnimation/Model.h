@@ -18,6 +18,7 @@ using namespace std;
 #include <assimp/postprocess.h>
 #include <SOIL.h>
 #include "Mesh.h"
+#include "IAnimation.h"
 
 GLint TextureFromFile(const char* path, string directory);
 
@@ -30,7 +31,7 @@ public:
 
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
-	Model(const Shader* shader,GLchar* path) :shader(shader)
+	Model(const Shader* shader, GLchar* path) :shader(shader)
 	{
 		assert(shader);
 
@@ -38,18 +39,22 @@ public:
 
 		this->loadModel(path);
 
+		if (skeleton->getNumberOfBones()>0)
+		{
+			animationMatrix = (glm::mat4*) malloc(skeleton->getNumberOfBones() * sizeof(glm::mat4));
 
-		animationMatrices = (glm::mat4*) malloc(skeleton->getNumberOfBones() * sizeof(glm::mat4));
+			CleanAnimationMatrix();
 
-		CleanAnimationMatrix();
+			skeleton->updateSkeleton();
+			skeleton->updateAnimationMatrix(animationMatrix);
+		}
 
-		skeleton->updateSkeleton(nullptr,animationMatrices);
 
 	} 
 
 	~Model()
 	{
-		free(animationMatrices);
+		free(animationMatrix);
 		free(boneLocation);
 
 	}
@@ -58,20 +63,24 @@ public:
 	{
 
 		if (skeleton->getNumberOfBones()>0)
-			glUniformMatrix4fv (boneLocation[0], skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(animationMatrices[0]));
+			glUniformMatrix4fv (boneLocation[0], skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(animationMatrix[0]));
 
 
 		for(GLuint i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].Draw(*shader);
 
-		
+
 	}
 
-	IKInfo MoveToWithIK(glm::vec3 point, glm::mat4* animations, const char* effectorName, bool simulate,bool reset)
+	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector)
 	{
-		return skeleton->ComputeOneCCDLink(this->model,point,animations,animationMatrices, effectorName,simulate,reset);
-		 // skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
-		 // return NULL; 
+		assert(animationInvoker);
+
+		animationInvoker->Animate(this->model, skeleton->GetBone(boneEffector.c_str()),target);
+
+		skeleton->updateAnimationMatrix(animationMatrix);
+		// skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
+		// return NULL; 
 
 	}
 
@@ -82,27 +91,27 @@ public:
 
 	glm::vec3 getBoneOrientation(const char* name)
 	{
-		return skeleton->GetBone(name)->getMeshSpacePosition(this->model);
+		return skeleton->GetBone(name)->getWorldSpacePosition(this->model);
 	}
 
 	void CleanAnimationMatrix()
 	{
 		//Initialize bones in the shader for the uniform 
 		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
-			animationMatrices[i] = glm::mat4(1); 
+			animationMatrix[i] = glm::mat4(1); 
 	}
 
-	void animate(glm::mat4* animations)
+	/*void animate(glm::mat4* animations)
 	{
-		skeleton->animate(skeleton->rootBone,animations,animationMatrices);
-	}
+	skeleton->animate(skeleton->rootBone,animations,animationMatrices);
+	}*/
 
 	void resetAnimation()
 	{
 		CleanAnimationMatrix();
-
 	}
-	glm::mat4* animationMatrices;
+
+	glm::mat4* animationMatrix;
 	Skeleton* skeleton;
 
 private:
@@ -136,7 +145,7 @@ private:
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-			skeleton->inverseTransf =  glm::inverse(aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
+		//skeleton->inverseTransf =  glm::inverse(aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
 		int numOfBones = skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
@@ -407,14 +416,6 @@ private:
 		}
 		return textures;
 	}
-
-
-
-
-
-
-
-
 
 };
 //

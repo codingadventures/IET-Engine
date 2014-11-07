@@ -1,52 +1,56 @@
 #pragma once
 
-#include "Bone.h" 
-#include "maths_funcs.h"
+
+#include <vector>
+
+#include "Bone.h"  
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/normalize_dot.hpp>
 #include "common.h"
-#include <vector>
 #include "ScreenOutput.h"
 #include "IKInfo.h"
+
 
 class Skeleton 
 {
 public:
 	// Root node of the tree
-	Bone* rootBone;
-	glm::mat4 inverseTransf;
-	glm::vec3 rotationAxis;
-	float angle;
+	Bone* rootBone;  
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
 	std::map<std::string, glm::mat4> boneMapping;
 
+private:
+	int numOfBones;
+	glm::mat4 inverseTransf;
+
+
+public:
 	Skeleton(){
 		rootBone = new Bone();
 		numOfBones = -1;//Initial Value
 	}
 
 	~Skeleton(){
+		free(rootBone);
+		// TODO
 
+		//Consider a recursive method to free all the space
 	}
 
-	void updateSkeleton(Bone* bone,glm::mat4* animationMatrices)
+	void updateSkeleton(Bone* bone = NULL)
 	{
 		if (numOfBones == 0) return;
 
-		if (!bone)
-		{
-			bone = rootBone;
-		}
+		root_bone_check(&bone);
+
 
 		bone->globalTransform =  bone->getParentTransform() * bone->transform;
 
-		bone->finalTransform =  bone->globalTransform * bone->boneOffset; /*watch the vectors ok*/
-
-		animationMatrices[bone->boneIndex] = bone->finalTransform;
+		bone->finalTransform =  bone->globalTransform * bone->boneOffset;  
 
 		for (int i = 0; i < bone->children.size(); i++) {
-			updateSkeleton (&bone->children[i],animationMatrices);
+			updateSkeleton (&bone->children[i]);
 		}
 	}
 
@@ -57,7 +61,7 @@ public:
 			bone = rootBone;
 		}
 
-		positions.push_back( bone->getMeshSpacePosition(model));
+		positions.push_back( bone->getWorldSpacePosition(model));
 
 		for (int i = 0; i < bone->children.size(); i++) {
 			traversePositions (&bone->children[i], model,positions);
@@ -75,196 +79,11 @@ public:
 
 
 
-	IKInfo ComputeOneCCDLink(const glm::mat4 model,const glm::vec3 targetWorldPosition,glm::mat4* animations,glm::mat4* animationMatrixes, const char* effectorName, bool simulate,bool reset = false)
-	{
-		glm::vec3			currBoneWorldPosition,effectorWorldPosition,targetWorldPositionNormVector,effectorCurrBoneNormVector;
-		glm::vec3			crossProduct,boneSpaceCrossProduct;
-		IKInfo ik;
-		Bone* currBone;
 
-		Bone* effectorBone = GetBone(effectorName);
-
-		static  Bone*		currentIterationBone = effectorBone;
-		static int			currentIteration = 0;
-
-		float				cosAngle = 0,turnAngle = 0;
-		float				turnDeg = 0;
-		float				distance = 0; 
-
-		if ( reset)
-		{ 
-			currentIterationBone = effectorBone;
-			currentIteration = 0;
-		}
-
-		currBone = currentIterationBone->parent;
-
-
-		effectorWorldPosition  =  effectorBone->getMeshSpacePosition(model);
-
-
-		distance = glm::distance(effectorWorldPosition, targetWorldPosition);
-
-		currBoneWorldPosition =  currBone->getMeshSpacePosition(model);
-
-		glm::vec3 test = effectorWorldPosition - currBoneWorldPosition;
-
-		effectorCurrBoneNormVector   = glm::normalize(effectorWorldPosition - currBoneWorldPosition);
-
-		targetWorldPositionNormVector = glm::normalize(targetWorldPosition - currBoneWorldPosition); 
-
-
-
-		if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || (targetWorldPositionNormVector != targetWorldPositionNormVector))
-			goto EXIT;
-
-		cosAngle =  glm::dot( targetWorldPositionNormVector, effectorCurrBoneNormVector);
-
-		if (cosAngle >= 1)
-			goto EXIT;
-
-
-		distance = glm::distance(effectorWorldPosition, targetWorldPosition);
-
-		if (distance < IK_POS_THRESH)
-			goto EXIT;
-
-
-		crossProduct = glm::normalize(glm::cross(effectorCurrBoneNormVector, targetWorldPositionNormVector));
-
-		crossProduct =  glm::mat3(glm::inverse(model * currBone->finalTransform * glm::inverse(currBone->boneOffset))) * crossProduct; //this looks weird
-
-
-		ik.crossProductAngle = glm::degrees(glm::acos(glm::dot(crossProduct,targetWorldPositionNormVector))); 
-		ik.boneSpaceCrossProductAngle = glm::degrees(glm::acos(glm::dot(boneSpaceCrossProduct,targetWorldPositionNormVector)));
-
-		if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
-		{ 
-			 
-			glm::quat quatRotation = glm::angleAxis(glm::acos(cosAngle),  glm::normalize(crossProduct));
-
-			glm::mat4 quatRotationMatrix = glm::toMat4(glm::normalize(quatRotation));/* */
-
-
-			if (!simulate)
-			{			 
-				currBone->transform  *=   quatRotationMatrix  ;
-
-				updateSkeleton(currBone, animationMatrixes);
-			}
-		}
-
-
-EXIT:
-		//Update the world position of the effector...
-		//effectorWorldPosition  =  effectorBone->getWorldSpacePosition(model);
-		if (!simulate)
-			currentIteration++;
-
-		ik.crossProduct = crossProduct;
-		ik.boneSpaceCrossProduct = boneSpaceCrossProduct;
-		ik.cosAngle = cosAngle; 
-		ik.iteration = currentIteration;
-		ik.degreeAngle = turnDeg;
-		ik.effectorWorldPosition = effectorCurrBoneNormVector;
-		ik.currentWorldPosition = targetWorldPositionNormVector;
-		ik.distance = distance;
-		ik.currBoneName = currBone->name;
-
-		if (!simulate)
-			if (currBone->boneIndex > 0)
-				currentIterationBone = currBone; 
-			else
-				//Start again from the bone above the parent
-				currentIterationBone = effectorBone;
-
-
-		return ik;
-	}
-
-	bool ComputeCCDLink(const glm::mat4 model,const glm::vec3 targetPosition,glm::mat4* animationMatrixes, const char* effectorName,const int numParents)
-	{ 
-		glm::vec3		currBoneWorldPosition,effectorPosition,targetWorldPositionNormVector,effectorCurrBoneNormVector;
-		glm::vec3		crossProduct;
-		float			cosAngle,turnAngle;
-		float			turnDeg, distance; 
-		int				currentIteration = 0;
-		//int				numOfBones =  getNumberOfBones();
-
-
-		Bone* effectorBone = GetBone(effectorName);
-		Bone* currBone = effectorBone->parent;
-
-		effectorPosition  =  effectorBone->getMeshSpacePosition(model);
-
-		distance = glm::distance(effectorPosition, targetPosition);
-
-		while (currentIteration++ < MAX_IK_TRIES &&  distance > IK_POS_THRESH)
-		{
-
-			currBoneWorldPosition = currBone->getMeshSpacePosition(model);
-
-			effectorCurrBoneNormVector   = glm::normalize(effectorPosition - currBoneWorldPosition);
-
-			targetWorldPositionNormVector = glm::normalize(targetPosition - currBoneWorldPosition); 
-
-
-
-			if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || (targetWorldPositionNormVector != targetWorldPositionNormVector))
-				break;
-
-			cosAngle =  glm::dot(targetWorldPositionNormVector,effectorCurrBoneNormVector); //Although I don't think it makes that difference
-
-			if (cosAngle >= 1)
-				break;
-			 
-			distance = glm::distance(effectorPosition, targetPosition);
-
-			if (distance < IK_POS_THRESH)
-				break;
-
-
-			crossProduct = glm::normalize(glm::cross(effectorCurrBoneNormVector, targetWorldPositionNormVector));
-
-			crossProduct =  glm::mat3(glm::inverse(currBone->getMeshSpace(model))) * crossProduct;
-
-			if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
-			{
-				glm::quat quatRotation = glm::angleAxis(glm::acos(cosAngle), glm::normalize(crossProduct)); //I'm using the radians not the degrees
-
-				glm::mat4 quatRotationMatrix = glm::toMat4(quatRotation); 
-
-				currBone->transform  *=  quatRotationMatrix ;
-
-				updateSkeleton(currBone, animationMatrixes);
-			}
-			else
-			{
-				printf("Singularity!");
-			}
-
-			//Update the world position of the effector...
-			effectorPosition  =  effectorBone->getMeshSpacePosition(model);
-
-			if (currBone->boneIndex > 0)
-				currBone = currBone->parent; 
-			else
-				//Start again from the bone above the parent
-				currBone = effectorBone->parent;
-		} 
-
-		return true;
-	}
- 
 	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
 	void animate(Bone* bone,glm::mat4* animation, glm::mat4* bone_animation_mats) {
 
-		if(!bone)
-		{
-			bone = rootBone;
-		}
-		assert (bone);
-
+		root_bone_check(&bone);
 
 		/* the animation for a particular bone at this time */
 		glm::mat4 local_anim;
@@ -297,11 +116,7 @@ EXIT:
 	// Animate the model given an animation time. bone_animation_mats is the output to be sent to the shader
 	void animateKeyFrames(Bone* bone,double anim_time, glm::mat4* bone_animation_mats) {
 
-		if(!bone)
-		{
-			bone = rootBone;
-		}
-		assert (bone);
+		root_bone_check(&bone);
 
 		/* the animation for a particular bone at this time */
 		glm::mat4 local_anim;
@@ -369,11 +184,7 @@ EXIT:
 		bool has_useful_child = false;
 		const char* boneName = assimp_node->mName.C_Str ();
 
-		if (!bone)
-		{
-			bone = rootBone;
-		} 
-
+		root_bone_check(&bone);
 
 
 		if (this->boneMapping.find(boneName) != this->boneMapping.end()) 
@@ -406,7 +217,6 @@ EXIT:
 			string globalTransf("Node Name " + nodeName + "\n Global Transform");
 			if (strcmp(bone->name, boneName) == 0)
 				bone->transform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
-			//bone->globalTransform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
 
 			bone->boneOffset = this->boneMapping[bone->name];
 			return true;
@@ -417,12 +227,7 @@ EXIT:
 
 	Bone* GetBone(int boneIndex, Bone* boneToFind = NULL)
 	{
-		if (!boneToFind)
-		{
-			boneToFind = rootBone;
-		}
-		// validate self
-		assert (boneToFind);
+		root_bone_check(&boneToFind);
 
 		// look for match
 		if ( boneToFind->boneIndex == boneIndex) {
@@ -444,12 +249,7 @@ EXIT:
 	// Retrieve a bone given the name
 	Bone* GetBone (const char* node_name, Bone* boneToFind = NULL) {
 
-		if (!boneToFind)
-		{
-			boneToFind = rootBone;
-		}
-		// validate self
-		assert (boneToFind);
+		root_bone_check(&boneToFind); 
 
 		// look for match
 		if (strcmp (node_name, boneToFind->name) == 0) {
@@ -480,11 +280,34 @@ EXIT:
 		return numOfBones;
 	}
 
-private:
-	glm::mat4* animationMatrixes;
-	int numOfBones;
+	void updateAnimationMatrix(glm::mat4* animationMatrix, Bone* bone = NULL)
+	{
+		assert(animationMatrix);
 
-	int traverseGetNumberOfBones(Bone* bone){
+		root_bone_check (&bone); 
+
+		animationMatrix[bone->boneIndex] = bone->finalTransform;
+
+		for (Bone child : bone->children)
+		{
+			updateAnimationMatrix(animationMatrix,&child);
+		}
+
+	} 
+private:
+
+
+
+	void root_bone_check(Bone** bone)
+	{
+		if(!*bone)
+			*bone = rootBone;
+
+		assert(*bone);
+	}
+
+	int traverseGetNumberOfBones(Bone* bone)  
+	{
 
 		if(!bone)
 		{
@@ -498,20 +321,5 @@ private:
 			counter += traverseGetNumberOfBones(&bone->children[i]);
 
 		return counter;
-	}
-
-	float CalculateAngle(glm::vec3 v0, glm::vec3 v1, glm::vec3 crossProductOfV0andV1)
-	{
-		glm::vec3  n0 =glm::normalize(v0);
-		glm::vec3  n1 = glm::normalize(v1);
-		glm::vec3  nCross = glm::normalize(glm::cross(n1, n0));
-
-		float NDot = glm::dot(n0, n1);
-		if (NDot >= FLT_MAX || NDot<= -FLT_MAX) NDot = 0;
-		if (NDot > 1) NDot = 1;
-		if (NDot < -1) NDot = -1;
-		float a = (float)glm::acos(NDot);
-		if (glm::distance(n0 , n1)  < 0.01f) return  glm::pi<float>();
-		return glm::dot(nCross, crossProductOfV0andV1) >= 0 ? a : -a;
 	}
 };

@@ -1,3 +1,6 @@
+#ifndef IKInfo_h__
+#define IKInfo_h__
+
 #include <glm/glm.hpp>
 
 struct IKInfo
@@ -20,3 +23,4 @@ struct IKInfo
 		distance	= 0;
 	}
 };
+#endif // IKInfo_h__
