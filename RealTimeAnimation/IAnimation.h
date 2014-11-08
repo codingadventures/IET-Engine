@@ -13,7 +13,7 @@ protected:
 public:
 	//Pure virtual functions
 	virtual void Animate(glm::mat4 model,Bone* bone, glm::vec3 target = glm::vec3(), int numParents = 3) = 0;
-	virtual void Animate(glm::mat4 model,glm::mat4* animationSequence)= 0;
+	virtual void Animate(glm::mat4 model,float animationTime, glm::mat4* animationSequence)= 0;
 
 protected:
 	Skeleton* skeleton;

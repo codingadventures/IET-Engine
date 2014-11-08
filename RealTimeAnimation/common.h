@@ -82,7 +82,7 @@ inline glm::quat aiQuatKeyToGlm(const aiQuatKey* from)
 }
 
 
-glm::vec3 decomposeT( const glm::mat4& m ) {
+inline glm::vec3 decomposeT( const glm::mat4& m ) {
 	glm::vec3 translation;	
 	// Extract the translation
 
@@ -92,6 +92,19 @@ glm::vec3 decomposeT( const glm::mat4& m ) {
 
 	return translation;
 }
+
+
+//inline glm::mat4 decomposeR( const glm::mat4& m ) {
+//
+//	glm::mat4 rotation; 
+//	glm::vec3 scaling;
+//	glm::vec3 translation;
+//
+//	decomposeTRS(m,scaling,rotation,translation);
+//
+//
+//	return rotation;
+//}
 /**
 * Decomposes matrix M such that T * R * S = M, where T is translation matrix,
 * R is rotation matrix and S is scaling matrix.

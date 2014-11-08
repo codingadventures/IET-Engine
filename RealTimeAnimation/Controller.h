@@ -13,7 +13,7 @@
 #include "Point.h"
 #include <gl/glut.h>
 #include <glm/glm.hpp> 
-#include "IKSolver.h"
+#include "IKAnimator.h"
 
 using namespace std::placeholders;
 
@@ -117,7 +117,7 @@ public:
 		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
 
-		animationMap["Cones_IK"] =(IAnimation*) new IKSolver(cones->skeleton);
+		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(cones->skeleton);
 
 	}
 

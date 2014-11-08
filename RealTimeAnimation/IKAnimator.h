@@ -8,10 +8,13 @@
 #include "Skeleton.h"
 #include "IAnimation.h" 
 
-class IKSolver : IAnimation
+#define RADIANS_180 glm::radians(180.0f)
+#define RADIANS_360 glm::radians(360.0f)
+
+class IKAnimator : IAnimation
 {
 public:
-	IKSolver(Skeleton *skeleton) : IAnimation(skeleton,model)		 
+	IKAnimator(Skeleton *skeleton) : IAnimation(skeleton,model)		 
 	{
 		assert(skeleton);
 		maxNumIterations = 100;
@@ -170,7 +173,7 @@ EXIT:
 			if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || (targetWorldPositionNormVector != targetWorldPositionNormVector))
 				break;
 
-			cosAngle =  glm::dot(targetWorldPositionNormVector,effectorCurrBoneNormVector); //Although I don't think it makes that difference
+			cosAngle =  glm::dot(targetWorldPositionNormVector,effectorCurrBoneNormVector); 
 
 			if (cosAngle >= 1)
 				break;
@@ -188,11 +191,15 @@ EXIT:
 			if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
 			{
 				glm::quat quatRotation = glm::angleAxis(glm::acos(cosAngle), glm::normalize(crossProduct)); //I'm using the radians not the degrees
+				
+				currBone->totalRotation *= quatRotation;
 
-				glm::mat4 quatRotationMatrix = glm::toMat4(quatRotation); 
+				checkAngleRestrictions(currBone);
 
-				currBone->transform  *=  quatRotationMatrix ;
-
+				glm::mat4 quatRotationMatrix = glm::toMat4(currBone->totalRotation); 
+				 
+				currBone->localTransform =  quatRotationMatrix ;
+				 
 				skeleton->updateSkeleton(currBone);
 			}
 			else
@@ -215,7 +222,33 @@ EXIT:
 		}
 	}
 
-	virtual void Animate(glm::mat4 model, glm::mat4* animationSequence){ throw new exception("not implemented");};
+	virtual void Animate(glm::mat4 model,float animationTime, glm::mat4* animationSequence){ throw new exception("not implemented");};
+private:
+	void checkAngleRestrictions (Bone* bone)
+	{
+		 glm::vec3 euler = glm::eulerAngles(bone->totalRotation);
+		 
+		 
+		if(bone->angleRestriction.xAxis) {
+			if(euler.x > RADIANS_180)
+				euler.x -= RADIANS_360;
+			euler.x = glm::clamp(euler.x, bone->angleRestriction.xMin, bone->angleRestriction.xMax);
+		}
+
+		if(bone->angleRestriction.yAxis) {
+			if(euler.y > RADIANS_180)
+				euler.y -= RADIANS_360;
+			euler.y = glm::clamp(euler.y, bone->angleRestriction.yMin, bone->angleRestriction.yMax);
+		}
+
+		if(bone->angleRestriction.zAxis) {
+			if(euler.z > RADIANS_180)
+				euler.z -= RADIANS_360;
+			euler.z = glm::clamp(euler.z, bone->angleRestriction.zMin, bone->angleRestriction.zMax);
+		}
+
+		bone->totalRotation = glm::quat(euler); 
+	}
 
 };
 #endif // IKSOLVER_H

@@ -98,9 +98,6 @@
     <ClInclude Include="IKInfo.h">
       <Filter>Header Files\Animation\InverseKinematic</Filter>
     </ClInclude>
-    <ClInclude Include="IKSolver.h">
-      <Filter>Header Files\Animation\InverseKinematic</Filter>
-    </ClInclude>
     <ClInclude Include="IAnimation.h">
       <Filter>Header Files\Animation</Filter>
     </ClInclude>
@@ -109,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="Skeleton.h">
       <Filter>Header Files\Animation\Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="IKAnimator.h">
+      <Filter>Header Files\Animation\InverseKinematic</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyFrameAnimator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AngleRestriction.h">
+      <Filter>Header Files\Animation\InverseKinematic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
