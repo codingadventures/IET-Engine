@@ -17,7 +17,7 @@ public:
 	IKAnimator(Skeleton *skeleton) : IAnimation(skeleton,model)		 
 	{
 		assert(skeleton);
-		maxNumIterations = 100;
+		maxNumIterations = 5;
 		distanceThreshold = 0.01f;
 	}
 
@@ -142,7 +142,7 @@ EXIT:
 		this->distanceThreshold = distanceThreshold;
 	}
 
-	virtual void Animate(glm::mat4 model, Bone* bone,glm::vec3 targetPosition, int numParents = 3)  
+	virtual void Animate(glm::mat4 model, Bone* bone,glm::vec3 targetPosition, int numParents = 6)  
 	{
 		glm::vec3		currBoneWorldPosition,effectorPosition,targetWorldPositionNormVector,effectorCurrBoneNormVector;
 		glm::vec3		crossProduct;
@@ -196,14 +196,14 @@ EXIT:
 
 				glm::mat4 quatRotationMatrix = glm::toMat4(currBone->totalRotation); 
 				 
-				currBone->localTransform =  quatRotationMatrix ;
+				currBone->localTransform = quatRotationMatrix ;
 				 
 				skeleton->updateSkeleton(currBone);
 			}
 			else
 			{
 				printf("Singularity!");
-				throw new std::exception("Singularity");
+				//throw new std::exception("Singularity");
 			}
 
 			//Update the world position of the effector...

@@ -111,8 +111,9 @@ public:
 		}*/
 
 		//		totalAnimationTime = cones->animDuration;
-		speed = 0.3f;
-		cube->model = glm::translate(glm::mat4(1), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
+		speed = 1.0f;
+		cube->model = glm::translate(glm::mat4(1), glm::vec3(0.0f, 0.0f, 0.0f));
+		//* glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
 		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
@@ -183,7 +184,7 @@ public:
 
 		shaderBones->Use();
 
-		float deg =   glm::radians(90.0f);
+		float deg =   glm::radians(-90.0f);
 
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
@@ -193,7 +194,7 @@ public:
 		model_max->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
 		model_max->model =  glm::rotate(model_max->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		
-		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
+//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
 
 
 
@@ -242,7 +243,7 @@ public:
 			//Calculate world space of the cube
 			glm::mat4 cubeModelRotation;
 
-			model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"Effector");
+			model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
 
 			animationStep = false;
 

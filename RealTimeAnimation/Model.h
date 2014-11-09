@@ -76,12 +76,13 @@ public:
 	{
 		assert(animationInvoker);
 
-		animationInvoker->Animate(this->model, skeleton->GetBone(boneEffector.c_str()),target);
+		Bone *effector = skeleton->GetBone(boneEffector.c_str());
+
+		assert(effector);
+
+		animationInvoker->Animate(this->model, effector ,target);
 
 		skeleton->updateAnimationMatrix(animationMatrix);
-		// skeleton->ComputeCCDLink(this->model,point,animationMatrices, effectorName,3);
-		// return NULL; 
-
 	}
 
 	vector<glm::vec3> getBonesOrientation( )

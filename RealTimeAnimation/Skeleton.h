@@ -46,13 +46,10 @@ public:
 
 		root_bone_check(&bone);
 
-
-		bone->globalTransform =  bone->getParentTransform() * bone->transform;
-		
-		if (bone->boneIndex >= 0)
-		{
-			bone->finalTransform =  bone->globalTransform  * bone->localTransform * bone->boneOffset;  
-		}
+		bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
+		 
+		bone->finalTransform =  bone->globalTransform  * bone->boneOffset;  
+		 
 
 		for (int i = 0; i < bone->children.size(); i++) {
 			updateSkeleton (&bone->children[i]);
@@ -162,7 +159,7 @@ public:
 		if (has_useful_child || has_bone) {
 			string nodeName(boneName);
 			string globalTransf("Node Name " + nodeName + "\n Global Transform");
-			
+
 			bone->boneOffset = this->boneMapping[bone->name].offset;
 			bone->boneIndex = this->boneMapping[bone->name].index;
 

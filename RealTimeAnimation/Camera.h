@@ -18,7 +18,7 @@ enum Camera_Movement {
 	RIGHT
 };
 
-static const float SPEED_STEP = 0.01f;
+static const float SPEED_STEP = 0.3f;
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
 {
