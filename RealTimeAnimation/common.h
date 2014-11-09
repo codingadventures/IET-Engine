@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/spline.hpp>
 
 #include "Keys.h"
 
@@ -29,6 +30,9 @@
 #define MAX_MODEL "models\\max.dae"
 #define CUBE_MODEL "models\\cubeTri.obj"
 #define BOB_MODEL "models\\boblampclean.md5mesh"
+#define INITIAL_POINTER_POSITION glm::vec3(50.0f, 50.0f, -5.0f)
+
+
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
 
@@ -94,18 +98,6 @@ inline glm::vec3 decomposeT( const glm::mat4& m ) {
 	return translation;
 }
 
-
-//inline glm::mat4 decomposeR( const glm::mat4& m ) {
-//
-//	glm::mat4 rotation; 
-//	glm::vec3 scaling;
-//	glm::vec3 translation;
-//
-//	decomposeTRS(m,scaling,rotation,translation);
-//
-//
-//	return rotation;
-//}
 /**
 * Decomposes matrix M such that T * R * S = M, where T is translation matrix,
 * R is rotation matrix and S is scaling matrix.
@@ -203,16 +195,17 @@ void printLogVec(const char* msg, const  glm::vec3& v){
 //	frame_count++;
 //}
 
+
+
 glm::vec3 cubicLerp(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, float t)
 {
 	glm::vec3 a0, a1, a2, a3;
-
+	 
 	float t2 = t*t;
 	a0 = v3 - v2 - v0 + v1;
 	a1 = v0 - v1 - a0;
 	a2 = v2 - v0;
-	a3 = v1;
-
+	a3 = v1; 
 	return (a0*t*t2 + a1*t2 + a2*t + a3);
 }
 #pragma endregion

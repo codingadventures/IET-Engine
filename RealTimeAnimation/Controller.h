@@ -82,17 +82,23 @@ public:
 		//Wire frame
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		spline.addPoint(0,glm::vec3(0.0f,0.0f,0.0f));
-		spline.addPoint(1,glm::vec3(0.10f,0.10f,0.0f));
-		spline.addPoint(2,glm::vec3(0.20f,0.15f,0.0f));
-		spline.addPoint(3,glm::vec3(0.30f,0.15f,0.0f));
+		
+		spline.addPoint(-1,INITIAL_POINTER_POSITION);
+		spline.addPoint(0, glm::vec3(9.0f,40.0f,-21.0f));  
+		spline.addPoint(5, glm::vec3(59.0f,55.0f,4.0f));  
+		spline.addPoint(8, glm::vec3(-3.0f,32.0f,-18.0f)); 
+		spline.addPoint(10, glm::vec3(59.0f,55.0f,4.0f));  
+		spline.addPoint(12, glm::vec3(9.0f,40.0f,-21.0f));  
+		spline.addPoint(14,INITIAL_POINTER_POSITION);
 
+		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
+		 
 
 		model_max = new Model(shaderBones, BOB_MODEL);
 		cube =  new Model(shader, CUBE_MODEL);
 
 
-		 
+
 		modelUniform = glGetUniformLocation(shader->Program, "model");
 		viewUniform = glGetUniformLocation(shader->Program, "view");
 		projectionUniform = glGetUniformLocation(shader->Program, "projection");
@@ -101,21 +107,11 @@ public:
 		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
 		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
 
-		/*numberOfBones = 4;
-
-		animations = (glm::mat4*) malloc(4 * sizeof(glm::mat4));
-
-		for(int i =0; i<4;i++)
-		{
-		animations[i] = glm::mat4(1.0f);
-		}*/
-
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
-		cube->model = glm::translate(glm::mat4(1), glm::vec3(0.0f, 0.0f, 0.0f));
+		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
 		//* glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
-		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
 
 		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
@@ -181,7 +177,6 @@ public:
 		cube->Draw();
 
 
-
 		shaderBones->Use();
 
 		float deg =   glm::radians(-90.0f);
@@ -193,8 +188,8 @@ public:
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		model_max->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
 		model_max->model =  glm::rotate(model_max->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
-		
-//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
+
+		//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
 
 
 
@@ -238,28 +233,31 @@ public:
 		}*/
 
 
-		if (moved)
-		{
-			//Calculate world space of the cube
-			glm::mat4 cubeModelRotation;
+		/*if (moved)
+		{*/
+		//Calculate world space of the cube
+		glm::mat4 cubeModelRotation;
 
-			model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
+		model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
 
-			animationStep = false;
+		//	animationStep = false;
 
-			moved = !moved;
-			//cones->CleanAnimationMatrix();
-		}  
+		//	moved = !moved;
+		//cones->CleanAnimationMatrix();
+		//}  
 		shaderBones->Use();
 
 		model_max->Draw();
 
 		shader->Use();
 		//cones->animate(animations);
+		/*glm::vec3 splinePath = glm::cubic(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(3.0f,0.0f,0.0f),1);
+		*/
 
-		// cube->model = glm::translate( cube->model ,spline.getPosition());
+		glm::vec3 position = spline.getPosition();
+		 cube->model = glm::translate( glm::mat4(1) ,position);
 
-		//spline.Update(deltaTime);
+		spline.Update(deltaTime);
 
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;

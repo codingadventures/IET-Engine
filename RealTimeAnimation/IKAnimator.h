@@ -17,7 +17,7 @@ public:
 	IKAnimator(Skeleton *skeleton) : IAnimation(skeleton,model)		 
 	{
 		assert(skeleton);
-		maxNumIterations = 5;
+		maxNumIterations = 100;
 		distanceThreshold = 0.01f;
 	}
 

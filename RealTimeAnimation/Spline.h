@@ -12,7 +12,7 @@ public :
 	{
 		timer = 0;
 	}
-	std::vector<std::pair<double, glm::vec3>> interpolationValues;
+	std::vector<std::pair<float, glm::vec3>> interpolationValues;
 
 
 	void Update(double deltaTime)
@@ -55,7 +55,7 @@ public :
 
 		float timeBetweenKeys = interpolationValues[next_key].first - interpolationValues[prev_key].first;
 		float t = (timer - interpolationValues[prev_key].first) / timeBetweenKeys; 
-
+		 
 		return cubicLerp(interpolationValues[prev_key-1].second, interpolationValues[prev_key].second, interpolationValues[next_key].second, interpolationValues[next_key+1].second, t);
 
 	}
