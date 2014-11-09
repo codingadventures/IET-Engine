@@ -80,7 +80,7 @@ public:
 		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		//Wire frame
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		spline.addPoint(0,glm::vec3(0.0f,0.0f,0.0f));
 		spline.addPoint(1,glm::vec3(0.10f,0.10f,0.0f));

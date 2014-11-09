@@ -137,7 +137,7 @@ private:
 		}
 
 		// Retrieve the directory path of the filepath
-		this->directory = path.substr(0, path.find_last_of('/'));
+		this->directory = path.substr(0, path.find_last_of('\\'));
 
 		// Process ASSIMP's root node recursively
 		this->processNode(scene->mRootNode, scene);
@@ -450,16 +450,18 @@ private:
 //}
 
 
-GLint TextureFromFile(const char* path, string directory)
+GLint TextureFromFile(const char* fileName, string directory)
 {
 	Magick::Blob m_blob;
 	Magick::Image* m_pImage; 
+	string stringFileName(fileName);
+	string fullPath = directory + "\\" + stringFileName;
 	try {
-		m_pImage = new Magick::Image(path);
+		m_pImage = new Magick::Image(fullPath.c_str());
 		m_pImage->write(&m_blob, "RGB");
 	}
 	catch (Magick::Error& Error) {
-		std::cout << "Error loading texture '" << path << "': " << Error.what() << std::endl;
+		std::cout << "Error loading texture '" << fullPath << "': " << Error.what() << std::endl;
 		return false;
 	}
 
