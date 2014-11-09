@@ -45,8 +45,8 @@ public:
 
 			CleanAnimationMatrix();
 
-			//skeleton->updateSkeleton();
-			//skeleton->updateAnimationMatrix(animationMatrix);/**/
+			skeleton->updateSkeleton();
+			skeleton->updateAnimationMatrix(animationMatrix);/**/
 		}
 
 

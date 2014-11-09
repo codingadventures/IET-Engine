@@ -183,14 +183,17 @@ public:
 
 		shaderBones->Use();
 
-		float deg =   glm::radians(-90.0f);
+		float deg =   glm::radians(90.0f);
 
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		model_max->model = glm::scale(glm::mat4(1),glm::vec3(0.1f,0.1f,0.1f)) *glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model_max->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
+		model_max->model =  glm::rotate(model_max->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
 
 
 

@@ -168,8 +168,6 @@ EXIT:
 
 			targetWorldPositionNormVector = glm::normalize(targetPosition - currBoneWorldPosition); 
 
-
-
 			if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || (targetWorldPositionNormVector != targetWorldPositionNormVector))
 				break;
 
