@@ -4,8 +4,19 @@
 #include <glm/glm.hpp>  
 #include "AngleRestriction.h"
 
+struct BoneInfo
+{
+	glm::mat4  offset;   
+	GLuint index;
+};
+
 struct Bone {
 
+	Bone()
+	{
+		parent = NULL;
+		boneIndex = -1;
+	}
 	// Reference to its parent
 	Bone* parent;
 
@@ -47,7 +58,7 @@ struct Bone {
 	glm::mat4 localTransform;
 	glm::mat4 getParentTransform()
 	{
-		if (boneIndex >0)
+		if (this->parent)
 			return parent->globalTransform;
 		else 
 			return glm::mat4(1.0f);

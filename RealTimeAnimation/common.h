@@ -25,9 +25,10 @@
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
 
 #define ANIMATION_SPEED 0.6
-#define MODEL "models\\Cones3.dae"
+#define CONES_MODEL "models\\Cones3.dae"
+#define MAX_MODEL "models\\max.dae"
 #define CUBE_MODEL "models\\cubeTri.obj"
-
+#define BOB_MODEL "models\\boblampclean.md5mesh"
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
 

@@ -34,7 +34,7 @@ public:
 	Model(const Shader* shader, GLchar* path) :shader(shader)
 	{
 		assert(shader);
-
+		m_numberOfBone = 0;
 		skeleton = new Skeleton();
 
 		this->loadModel(path);
@@ -45,8 +45,8 @@ public:
 
 			CleanAnimationMatrix();
 
-			skeleton->updateSkeleton();
-			skeleton->updateAnimationMatrix(animationMatrix);
+			//skeleton->updateSkeleton();
+			//skeleton->updateAnimationMatrix(animationMatrix);/**/
 		}
 
 
@@ -121,6 +121,7 @@ private:
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	GLuint* boneLocation;
+	int m_numberOfBone;
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -283,12 +284,15 @@ private:
 
 				if ( skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
-					BoneIndex =  numBones;
-					numBones++;            
+					BoneInfo info;
 
-
-					skeleton->boneMapping[BoneName] = aiMatrix4x4ToGlm( &ai_mesh->mBones[i]->mOffsetMatrix);
+					BoneIndex = m_numberOfBone++; 
+					info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
+					info.index = BoneIndex;
+					skeleton->boneMapping[BoneName] = info;
 				}
+				else
+					BoneIndex = skeleton->boneMapping[BoneName].index;
 
 				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
 					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
@@ -449,10 +453,7 @@ private:
 GLint TextureFromFile(const char* path, string directory)
 {
 	Magick::Blob m_blob;
-	Magick::Image* m_pImage;
-	string filename = string(path);
-	string ll = "models\\nanosuit2\\" ;
-	filename  = ll + path;
+	Magick::Image* m_pImage; 
 	try {
 		m_pImage = new Magick::Image(path);
 		m_pImage->write(&m_blob, "RGB");

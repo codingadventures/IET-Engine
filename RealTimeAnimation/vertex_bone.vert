@@ -6,7 +6,7 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 3) in ivec4 BoneIDs;
 layout (location = 4) in vec4 Weights;
 
-const int MAX_BONES = 32;
+const int MAX_BONES = 100;
 
 
 const vec3 colorMap[32] = vec3[32](
@@ -68,7 +68,7 @@ void main()
  	mat4 BoneTransform = bones[BoneIDs[0]] * Weights[0];
     BoneTransform     += bones[BoneIDs[1]] * Weights[1];
    	BoneTransform     += bones[BoneIDs[2]] * Weights[2];
-  // 	BoneTransform     += bones[BoneIDs[3]] * Weights[3];
+   	BoneTransform     += bones[BoneIDs[3]] * Weights[3];
 	 
  
 	colour = colorMap[BoneIDs[0]];

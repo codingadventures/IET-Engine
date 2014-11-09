@@ -20,7 +20,7 @@ public:
 	// Root node of the tree
 	Bone* rootBone;  
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
-	std::map<std::string, glm::mat4> boneMapping;
+	std::map<std::string, BoneInfo> boneMapping;
 
 private:
 	int numOfBones;
@@ -47,9 +47,12 @@ public:
 		root_bone_check(&bone);
 
 
-		bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
-
-		bone->finalTransform =  bone->globalTransform * bone->boneOffset;  
+		bone->globalTransform =  bone->getParentTransform() * bone->transform;
+		
+		if (bone->boneIndex >= 0)
+		{
+			bone->finalTransform =  bone->globalTransform  * bone->localTransform * bone->boneOffset;  
+		}
 
 		for (int i = 0; i < bone->children.size(); i++) {
 			updateSkeleton (&bone->children[i]);
@@ -118,7 +121,7 @@ public:
 	// Animate the model given an animation time. bone_animation_mats is the output to be sent to the shader
 	void animateKeyFrames(Bone* bone,double anim_time, glm::mat4* bone_animation_mats) {
 
-		
+
 	}
 
 	// Import the hierarchical data structure from Assimp
@@ -131,42 +134,46 @@ public:
 
 		root_bone_check(&bone);
 
+		bone->children.resize((int)assimp_node->mNumChildren);
 
 		if (this->boneMapping.find(boneName) != this->boneMapping.end()) 
 		{
-			bone->boneIndex =  boneIndex++;
 			strcpy_s (bone->name, boneName);
-			bone->children.resize((int)assimp_node->mNumChildren);
 			has_bone = true;
 		}
 
 
 		for (int i = 0; i < (int)assimp_node->mNumChildren; i++) 
 		{ 
-			Bone* recursiveBone = bone;
-			//I'm setting the parent here
-			if (has_bone)
-			{
-				bone->children[i].parent = bone;
-				recursiveBone = &bone->children[i];
-			}
+			//Bone* recursiveBone = bone;
+			////I'm setting the parent here
+			/*if (has_bone)
+			{*/
+			bone->children[i].parent = bone; 
+			//}
 
-			bool importRes = importSkeletonBone (assimp_node->mChildren[i], recursiveBone);
+			bool importRes = importSkeletonBone (assimp_node->mChildren[i], &bone->children[i]);
 			if (importRes) 
 				has_useful_child = true; 
+
 
 		}
 
 		if (has_useful_child || has_bone) {
 			string nodeName(boneName);
 			string globalTransf("Node Name " + nodeName + "\n Global Transform");
+			
+			bone->boneOffset = this->boneMapping[bone->name].offset;
+			bone->boneIndex = this->boneMapping[bone->name].index;
+
 			if (strcmp(bone->name, boneName) == 0)
 				bone->transform = aiMatrix4x4ToGlm(&assimp_node->mTransformation);
 
-			bone->boneOffset = this->boneMapping[bone->name];
 			return true;
 		}
 		// no bone or good children - cull self
+		//free(bone);
+		//bone = NULL;
 		return false;
 	}
 
@@ -231,11 +238,12 @@ public:
 
 		root_bone_check (&bone); 
 
-		animationMatrix[bone->boneIndex] = bone->finalTransform;
+		if (bone->boneIndex >= 0)
+			animationMatrix[bone->boneIndex] = bone->finalTransform;
 
-		for (Bone child : bone->children)
+		for (int i = 0; i < bone->children.size(); i++)
 		{
-			updateAnimationMatrix(animationMatrix,&child);
+			updateAnimationMatrix(animationMatrix, &bone->children[i]);
 		}
 
 	} 

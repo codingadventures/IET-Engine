@@ -88,7 +88,7 @@ public:
 		spline.addPoint(3,glm::vec3(0.30f,0.15f,0.0f));
 
 
-		cones = new Model(shaderBones, MODEL);
+		model_max = new Model(shaderBones, BOB_MODEL);
 		cube =  new Model(shader, CUBE_MODEL);
 
 
@@ -117,7 +117,7 @@ public:
 		//IKMatrices[cones.skeleton->GetBone("forearm.L")->boneIndex] = glm::rotate(glm::mat4(1), 45.0f, glm::vec3(0.0f,0.0f,1.0f));
 
 
-		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(cones->skeleton);
+		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 
 	}
 
@@ -157,7 +157,7 @@ public:
 		/*sprintf_s(front, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
 		sprintf_s(up, "Camera Up (%f,%f,%f)",camera->Up.x,camera->Up.y,camera->Up.z);*/
 		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
-		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(cones->model).x    ,decomposeT(cones->model).y,decomposeT(cones->model).z);
+		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(model_max->model).x    ,decomposeT(model_max->model).y,decomposeT(model_max->model).z);
 
 		//screen_output(40,80,cameraPosition); 
 		//screen_output(40,60,conesPosition); 
@@ -190,21 +190,21 @@ public:
 
 
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		cones->model = glm::translate(glm::mat4(1),glm::vec3(0.0,0.0f,0.0f))*glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(0.1f, 0.1f, 0.1f)); 
+		model_max->model = glm::scale(glm::mat4(1),glm::vec3(0.1f,0.1f,0.1f)) *glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)); 
 
 
 
-		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(cones->model));
+		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		vector<glm::vec3> bonesPositions = cones->getBonesOrientation();
+		vector<glm::vec3> bonesPositions = model_max->getBonesOrientation();
 		glm::vec3 cubeWorldPosition = decomposeT(cube->model);
 
 
 
-		shader->Use();
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+		/*shader->Use();
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));*/
 
 
 		/*int i=0;
@@ -239,7 +239,7 @@ public:
 			//Calculate world space of the cube
 			glm::mat4 cubeModelRotation;
 
-			cones->Animate(animationMap["Cones_IK"], cubeWorldPosition,"Effector");
+			model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"Effector");
 
 			animationStep = false;
 
@@ -248,69 +248,69 @@ public:
 		}  
 		shaderBones->Use();
 
-		cones->Draw();
+		model_max->Draw();
 
 		shader->Use();
 		//cones->animate(animations);
 
 		// cube->model = glm::translate( cube->model ,spline.getPosition());
 
-		spline.Update(deltaTime);
+		//spline.Update(deltaTime);
 
-		Vertex v1,v2;
-		v1.Position = ikInfo.currentWorldPosition;
-		v2.Position = cubeWorldPosition;
-		v1.Color = glm::vec3(1.0f,0.0f,0.0f);
-		v2.Color = glm::vec3(1.0f,0.0f,0.0f);
-		Line(v1, v2).Draw();
+		//Vertex v1,v2;
+		//v1.Position = ikInfo.currentWorldPosition;
+		//v2.Position = cubeWorldPosition;
+		//v1.Color = glm::vec3(1.0f,0.0f,0.0f);
+		//v2.Color = glm::vec3(1.0f,0.0f,0.0f);
+		//Line(v1, v2).Draw();
 
-		v2.Position = ikInfo.effectorWorldPosition;
-		v1.Color = glm::vec3(0.0f,1.0f,0.0f);
-		v2.Color = glm::vec3(0.0f,1.0f,0.0f);
-		//Line(v1,v2).Draw();
-
-
-		v1.Color = glm::vec3(1.0f,1.0f,0.0f);
-
-		Vertex crossProduct;
-		crossProduct.Position = ikInfo.crossProduct;
-		crossProduct.Color = glm::vec3(1.0f,1.0f,0.0f);
-
-		Vertex boneSpaceCrossProduct;
-		boneSpaceCrossProduct.Position = ikInfo.boneSpaceCrossProduct;
-		boneSpaceCrossProduct.Color = glm::vec3(0.0f,1.0f,1.0f);
-
-		v1.Color = glm::vec3(1.0f,1.0f,0.0f);
-
-		/*Line(v1, crossProduct).Draw();
-		Line(v1, boneSpaceCrossProduct).Draw();*/
+		//v2.Position = ikInfo.effectorWorldPosition;
+		//v1.Color = glm::vec3(0.0f,1.0f,0.0f);
+		//v2.Color = glm::vec3(0.0f,1.0f,0.0f);
+		////Line(v1,v2).Draw();
 
 
-		char ikInfoText[500];
-		sprintf_s(ikInfoText,"Iteration %d - Distance %f - Cos Angle %f", ikInfo.iteration,ikInfo.distance, ikInfo.cosAngle);
-		screen_output(500,120, ikInfoText);
-		sprintf_s(ikInfoText,"Current Bone %s - Degree %f",ikInfo.currBoneName.c_str(), ikInfo.degreeAngle);
-		screen_output(500,100, ikInfoText);
+		//v1.Color = glm::vec3(1.0f,1.0f,0.0f);
 
-		sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
-		screen_output(500,140, ikInfoText);
+		//Vertex crossProduct;
+		//crossProduct.Position = ikInfo.crossProduct;
+		//crossProduct.Color = glm::vec3(1.0f,1.0f,0.0f);
 
-		sprintf_s(ikInfoText,"Cross Product Angle %f",ikInfo.crossProductAngle);
-		screen_output(500,160, ikInfoText);
-		sprintf_s(ikInfoText,"BoneToTarget (%f,%f,%f)",ikInfo.currentWorldPosition.x,ikInfo.currentWorldPosition.y,ikInfo.currentWorldPosition.z);
-		screen_output(500,180, ikInfoText);
-		sprintf_s(ikInfoText,"EffectorToTarget (%f,%f,%f)",ikInfo.effectorWorldPosition.x,ikInfo.effectorWorldPosition.y,ikInfo.effectorWorldPosition.z);
-		screen_output(500,200, ikInfoText);
+		//Vertex boneSpaceCrossProduct;
+		//boneSpaceCrossProduct.Position = ikInfo.boneSpaceCrossProduct;
+		//boneSpaceCrossProduct.Color = glm::vec3(0.0f,1.0f,1.0f);
 
-		/*sprintf_s(ikInfoText,"BS Cross Product Angle %f",ikInfo.boneSpaceCrossProductAngle);
-		screen_output(100,120, ikInfoText);*/
+		//v1.Color = glm::vec3(1.0f,1.0f,0.0f);
 
-		Point(v1).Draw();
+		///*Line(v1, crossProduct).Draw();
+		//Line(v1, boneSpaceCrossProduct).Draw();*/
 
-		Vertex p2;
-		p2.Position = ikInfo.effectorWorldPosition;
-		p2.Color = glm::vec3(0.0f,0.0f,0.0f);
-		Point(p2).Draw();
+
+		//char ikInfoText[500];
+		//sprintf_s(ikInfoText,"Iteration %d - Distance %f - Cos Angle %f", ikInfo.iteration,ikInfo.distance, ikInfo.cosAngle);
+		//screen_output(500,120, ikInfoText);
+		//sprintf_s(ikInfoText,"Current Bone %s - Degree %f",ikInfo.currBoneName.c_str(), ikInfo.degreeAngle);
+		//screen_output(500,100, ikInfoText);
+
+		//sprintf_s(ikInfoText,"Cross Product (%f,%f,%f)",ikInfo.crossProduct.x,ikInfo.crossProduct.y,ikInfo.crossProduct.z);
+		//screen_output(500,140, ikInfoText);
+
+		//sprintf_s(ikInfoText,"Cross Product Angle %f",ikInfo.crossProductAngle);
+		//screen_output(500,160, ikInfoText);
+		//sprintf_s(ikInfoText,"BoneToTarget (%f,%f,%f)",ikInfo.currentWorldPosition.x,ikInfo.currentWorldPosition.y,ikInfo.currentWorldPosition.z);
+		//screen_output(500,180, ikInfoText);
+		//sprintf_s(ikInfoText,"EffectorToTarget (%f,%f,%f)",ikInfo.effectorWorldPosition.x,ikInfo.effectorWorldPosition.y,ikInfo.effectorWorldPosition.z);
+		//screen_output(500,200, ikInfoText);
+
+		///*sprintf_s(ikInfoText,"BS Cross Product Angle %f",ikInfo.boneSpaceCrossProductAngle);
+		//screen_output(100,120, ikInfoText);*/
+
+		//Point(v1).Draw();
+
+		//Vertex p2;
+		//p2.Position = ikInfo.effectorWorldPosition;
+		//p2.Color = glm::vec3(0.0f,0.0f,0.0f);
+		//Point(p2).Draw();
 
 		/*Vertex p3;
 		p3.Position = -(ikInfo.effectorWorldPosition - ikInfo.currentWorldPosition);
@@ -323,7 +323,7 @@ public:
 		sprintf_s(bon,"Bone Index %d",boneIndex);
 		screen_output(100.0f,25.0f , bon);
 
-		vector<glm::vec3> bonespos = cones->getBonesOrientation();
+		vector<glm::vec3> bonespos = model_max->getBonesOrientation();
 		char pos[100];
 		sprintf_s(pos,"Target Position - (%f,%f,%f)",cubeWorldPosition.x,cubeWorldPosition.y,cubeWorldPosition.z);
 		screen_output(500.0f,15.0f + 20 ,pos);
@@ -362,7 +362,7 @@ private:
 	Shader *shader;
 	Shader *shaderBones;
 
-	Model *cones;
+	Model *model_max;
 	Model *cube;
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
@@ -420,7 +420,7 @@ private:
 
 		if (keys[KEY_e])
 		{
-			camera->Position = decomposeT(cones->model);
+			camera->Position = decomposeT(model_max->model);
 		}
 
 		if(keys[KEY_PLUS])
