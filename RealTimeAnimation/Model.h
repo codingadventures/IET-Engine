@@ -72,7 +72,7 @@ public:
 
 	}
 
-	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector)
+	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
 	{
 		assert(animationInvoker);
 
@@ -80,7 +80,7 @@ public:
 
 		assert(effector);
 
-		animationInvoker->Animate(this->model, effector ,target);
+		animationInvoker->Animate(this->model, effector ,target,numParent);
 
 		skeleton->updateAnimationMatrix(animationMatrix);
 	}

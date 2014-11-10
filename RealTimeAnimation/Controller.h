@@ -85,16 +85,19 @@ public:
 		
 		spline.addPoint(-1,INITIAL_POINTER_POSITION);
 		spline.addPoint(0, glm::vec3(9.0f,40.0f,-21.0f));  
-		spline.addPoint(5, glm::vec3(59.0f,55.0f,4.0f));  
-		spline.addPoint(8, glm::vec3(-3.0f,32.0f,-18.0f)); 
+		spline.addPoint(2, glm::vec3(59.0f,55.0f,4.0f));  
+		spline.addPoint(6, glm::vec3(-60.0f,20.0f,-38.0f)); 
 		spline.addPoint(10, glm::vec3(59.0f,55.0f,4.0f));  
-		spline.addPoint(12, glm::vec3(9.0f,40.0f,-21.0f));  
-		spline.addPoint(14,INITIAL_POINTER_POSITION);
+		spline.addPoint(13, glm::vec3(9.0f,40.0f,-21.0f));  
+		spline.addPoint(16,INITIAL_POINTER_POSITION);
+		//spline.addPoint(20,glm::vec3(-20.0f,40.0f,-21.0f));
 
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 		 
 
-		model_max = new Model(shaderBones, BOB_MODEL);
+		model_bob = new Model(shaderBones, BOB_MODEL);
+		model_max = new Model(shaderBones, MAX_MODEL);
+		
 		cube =  new Model(shader, CUBE_MODEL);
 
 
@@ -112,9 +115,9 @@ public:
 		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
 		//* glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
+		camera->Position = glm::vec3(0.0f,50.0f,-10.0f);
 
-
-		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
+		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 
 	}
 
@@ -154,7 +157,7 @@ public:
 		/*sprintf_s(front, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
 		sprintf_s(up, "Camera Up (%f,%f,%f)",camera->Up.x,camera->Up.y,camera->Up.z);*/
 		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
-		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(model_max->model).x    ,decomposeT(model_max->model).y,decomposeT(model_max->model).z);
+		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(model_bob->model).x    ,decomposeT(model_bob->model).y,decomposeT(model_bob->model).z);
 
 		//screen_output(40,80,cameraPosition); 
 		//screen_output(40,60,conesPosition); 
@@ -186,18 +189,18 @@ public:
 
 
 		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		model_max->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
-		model_max->model =  glm::rotate(model_max->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
+		model_bob->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
+		model_bob->model =  glm::rotate(model_bob->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
 
 
 
-		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
+		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_bob->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		vector<glm::vec3> bonesPositions = model_max->getBonesOrientation();
+		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
 		glm::vec3 cubeWorldPosition = decomposeT(cube->model);
 
 
@@ -238,7 +241,9 @@ public:
 		//Calculate world space of the cube
 		glm::mat4 cubeModelRotation;
 
-		model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
+		
+		
+		model_bob->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
 
 		//	animationStep = false;
 
@@ -246,6 +251,20 @@ public:
 		//cones->CleanAnimationMatrix();
 		//}  
 		shaderBones->Use();
+
+		model_bob->Draw();
+
+		model_max->model = glm::rotate(glm::mat4(),glm::radians(90.0f),glm::vec3(0.0f,1.0f,0.0f));
+		model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
+		model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
+
+		model_max->model = glm::translate(model_max->model,glm::vec3(-50.0f,-50.0f,0.0f));
+		model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
+
+		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
+
+		model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"L_Finger12",5);
+		 
 
 		model_max->Draw();
 
@@ -258,6 +277,7 @@ public:
 		 cube->model = glm::translate( glm::mat4(1) ,position);
 
 		spline.Update(deltaTime);
+
 
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
@@ -325,7 +345,7 @@ public:
 		sprintf_s(bon,"Bone Index %d",boneIndex);
 		screen_output(100.0f,25.0f , bon);
 
-		vector<glm::vec3> bonespos = model_max->getBonesOrientation();
+		vector<glm::vec3> bonespos = model_bob->getBonesOrientation();
 		char pos[100];
 		sprintf_s(pos,"Target Position - (%f,%f,%f)",cubeWorldPosition.x,cubeWorldPosition.y,cubeWorldPosition.z);
 		screen_output(500.0f,15.0f + 20 ,pos);
@@ -364,14 +384,13 @@ private:
 	Shader *shader;
 	Shader *shaderBones;
 
-	Model *model_max;
-	Model *cube;
+	Model *model_bob;
+	Model *cube,*model_max;
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
 	float oldTimeSinceStart;
 	float deltaTime;
-	float speed;
-
+	float speed; 
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -422,7 +441,7 @@ private:
 
 		if (keys[KEY_e])
 		{
-			camera->Position = decomposeT(model_max->model);
+			camera->Position = decomposeT(model_bob->model);
 		}
 
 		if(keys[KEY_PLUS])
