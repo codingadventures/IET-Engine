@@ -40,25 +40,27 @@ public:
 		// Bind appropriate textures
 		GLuint diffuseNr = 1;
 		GLuint specularNr = 1;
-		for(GLuint i = 0; i < this->textures.size(); i++)
+		if ( this->textures.size()>0)
 		{
-			glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
-			// Retrieve texture number (the N in diffuse_textureN)
-			stringstream ss;
-			string number;
-			string name = this->textures[i].type;
-			if(name == "texture_diffuse")
-				ss << diffuseNr++; // Transfer GLuint to stream
-			else if(name == "texture_specular")
-				ss << specularNr++; // Transfer GLuint to stream
-			number = ss.str(); 
-			// Now set the sampler to the correct texture unit
-			glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
-			// And finally bind the texture
-			glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+			for(GLuint i = 0; i < this->textures.size(); i++)
+			{
+				glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
+				// Retrieve texture number (the N in diffuse_textureN)
+				stringstream ss;
+				string number;
+				string name = this->textures[i].type;
+				if(name == "texture_diffuse")
+					ss << diffuseNr++; // Transfer GLuint to stream
+				else if(name == "texture_specular")
+					ss << specularNr++; // Transfer GLuint to stream
+				number = ss.str(); 
+				// Now set the sampler to the correct texture unit
+				glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+				// And finally bind the texture
+				glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+			}
+			glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 		}
-		glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
-
 
 		// Draw mesh
 		glBindVertexArray(this->VAO);

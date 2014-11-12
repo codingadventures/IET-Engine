@@ -94,11 +94,12 @@ public:
 
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 		 
+		tennisModel =  new Model(shader, TENNIS_MODEL);
 
 		model_bob = new Model(shaderBones, BOB_MODEL);
 		model_max = new Model(shaderBones, MAX_MODEL);
-		
-		cube =  new Model(shader, CUBE_MODEL);
+
+		model_floor = new Model(shader, FLOOR_MODEL);
 
 
 
@@ -113,11 +114,12 @@ public:
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
 		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
-		//* glm::scale(glm::mat4(1), glm::vec3(0.05f, 0.05f, 0.05f));	
+		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
+
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
 		camera->Position = glm::vec3(0.0f,50.0f,-10.0f);
 
-		animationMap["Cones_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
+		animationMap["IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 
 	}
 
@@ -170,15 +172,18 @@ public:
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
 
-		sprintf_s(cubePosition, "Cube Position (%f,%f,%f)",decomposeT(cube->model).x    ,decomposeT(cube->model).y,decomposeT(cube->model).z);
+		sprintf_s(cubePosition, "Cube Position (%f,%f,%f)",decomposeT(tennisModel->model).x    ,decomposeT(tennisModel->model).y,decomposeT(tennisModel->model).z);
 		//screen_output(40,40,cubePosition);
 
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(cube->model));
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(tennisModel->model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
-		cube->Draw();
+		tennisModel->Draw();
 
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model_floor->model));
+
+		model_floor->Draw();
 
 		shaderBones->Use();
 
@@ -195,13 +200,12 @@ public:
 		//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
 
 
-
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_bob->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
-		glm::vec3 cubeWorldPosition = decomposeT(cube->model);
+		glm::vec3 tennisModelWorldPosition = decomposeT(tennisModel->model);
 
 
 
@@ -243,7 +247,7 @@ public:
 
 		
 		
-		model_bob->Animate(animationMap["Cones_IK"], cubeWorldPosition,"fingerstip.L");
+		model_bob->Animate(animationMap["IK"], tennisModelWorldPosition,"fingerstip.L");
 
 		//	animationStep = false;
 
@@ -253,17 +257,18 @@ public:
 		shaderBones->Use();
 
 		model_bob->Draw();
+		model_max->model = glm::translate(glm::mat4(),glm::vec3(45.0f,45.0f,-25.0f));
 
-		model_max->model = glm::rotate(glm::mat4(),glm::radians(90.0f),glm::vec3(0.0f,1.0f,0.0f));
-		model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
+	//	model_max->model = glm::rotate(model_max->model,glm::radians(90.0f),glm::vec3(0.0f,1.0f,0.0f)); 
+		 model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
 		model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
 
-		model_max->model = glm::translate(model_max->model,glm::vec3(-50.0f,-50.0f,0.0f));
+
 		model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
 
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
 
-		model_max->Animate(animationMap["Cones_IK"], cubeWorldPosition,"L_Finger12",5);
+		model_max->Animate(animationMap["IK"], tennisModelWorldPosition,"L_Finger12",5);
 		 
 
 		model_max->Draw();
@@ -274,7 +279,8 @@ public:
 		*/
 
 		glm::vec3 position = spline.getPosition();
-		 cube->model = glm::translate( glm::mat4(1) ,position);
+		
+		tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f));
 
 		spline.Update(deltaTime);
 
@@ -347,7 +353,7 @@ public:
 
 		vector<glm::vec3> bonespos = model_bob->getBonesOrientation();
 		char pos[100];
-		sprintf_s(pos,"Target Position - (%f,%f,%f)",cubeWorldPosition.x,cubeWorldPosition.y,cubeWorldPosition.z);
+		sprintf_s(pos,"Target Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
 		screen_output(500.0f,15.0f + 20 ,pos);
 
 		glutSwapBuffers();
@@ -385,12 +391,13 @@ private:
 	Shader *shaderBones;
 
 	Model *model_bob;
-	Model *cube,*model_max;
+	Model *tennisModel,*model_max;
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
 	float oldTimeSinceStart;
 	float deltaTime;
 	float speed; 
+	Model* model_floor;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -400,43 +407,43 @@ private:
 
 		if(keys[KEY_k])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,speed,0.0));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_i])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,-speed,0.0));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,-speed,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_l])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(speed,0.0,0.0));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(speed,0.0,0.0));
 			moved = true;
 		}
 
 		if(keys[KEY_o])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,speed));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,speed));
 			moved = true;
 		}
 
 		if(keys[KEY_u])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(0.0,0.0,-speed));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,-speed));
 			moved = true;
 		}
 
 		if(keys[KEY_j])
 		{
-			cube->model = glm::translate(cube->model,glm::vec3(-speed,0.0,0.0));
+			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
 			moved = true;
 		}
 
 		if (keys[KEY_r])
 		{
-			camera->Position = decomposeT(cube->model);
+			camera->Position = decomposeT(tennisModel->model);
 		}
 
 		if (keys[KEY_e])
