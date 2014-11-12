@@ -210,7 +210,7 @@ EXIT:
 			effectorPosition  =  effectorBone->getWorldSpacePosition(model);
 
 
-			if (currBone->boneIndex > 0 && currentIteration % numParents != 0) // Second condition is for limit the number of parents in the skeleton to recurse upon
+			if (currBone->boneIndex > 0 && numParents > 0 && currentIteration % numParents != 0) // Second condition is for limit the number of parents in the skeleton to recurse upon
 				currBone = currBone->parent; 
 			else
 			{	//Start again from the bone above the parent

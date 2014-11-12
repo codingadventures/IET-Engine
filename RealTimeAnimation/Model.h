@@ -112,6 +112,11 @@ public:
 		CleanAnimationMatrix();
 	}
 
+	void setJointLimit(string boneName, AngleRestriction angleRestriction )
+	{ 
+		skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
+	}
+
 	glm::mat4* animationMatrix;
 	Skeleton* skeleton;
 

@@ -87,7 +87,11 @@ public:
 		spline.addPoint(0, glm::vec3(9.0f,40.0f,-21.0f));  
 		spline.addPoint(2, glm::vec3(59.0f,55.0f,4.0f));  
 		spline.addPoint(6, glm::vec3(-60.0f,20.0f,-38.0f)); 
-		spline.addPoint(10, glm::vec3(59.0f,55.0f,4.0f));  
+
+		spline.addPoint(8, glm::vec3(-60.0f,120.0f,-38.0f)); 
+
+		spline.addPoint(11, glm::vec3(59.0f,55.0f,4.0f));  
+
 		spline.addPoint(13, glm::vec3(9.0f,40.0f,-21.0f));  
 		spline.addPoint(16,INITIAL_POINTER_POSITION);
 		//spline.addPoint(20,glm::vec3(-20.0f,40.0f,-21.0f));
@@ -268,7 +272,16 @@ public:
 
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
 
+		AngleRestriction arms(0.0f,0.0f,-60.0f,60.0f,-30.0f,30.0f);
+		AngleRestriction fingers(0.0f,0.0f,-10.0f,10.0f,-10.0f,10.0f);
+		model_max->setJointLimit("L_Hand",arms);
+		model_max->setJointLimit("L_Forearm",arms);
+		model_max->setJointLimit("L_UpperArm",arms);
+		model_max->setJointLimit("L_Finger12",fingers);
+		model_max->setJointLimit("L_Finger11",fingers);
+		model_max->setJointLimit("L_Finger1",fingers);
 		model_max->Animate(animationMap["IK"], tennisModelWorldPosition,"L_Finger12",5);
+		 
 		 
 
 		model_max->Draw();

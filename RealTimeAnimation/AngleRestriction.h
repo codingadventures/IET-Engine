@@ -25,12 +25,9 @@ public:
 		zMin(glm::radians(zMin)),
 		zMax(glm::radians(zMax))
 	{
-
 		xAxis = true;
 		yAxis = true;
-		zAxis = true;
-
-		
+		zAxis = true;	
 	}
 
 	 
