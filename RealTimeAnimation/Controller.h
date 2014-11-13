@@ -50,7 +50,7 @@ public:
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
-		this->camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+		this->camera = new Camera(glm::vec3(-48.0f,135.0f,-164.0f), glm::vec3(0.0f,1.0f,0.0f),90);
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
@@ -74,15 +74,16 @@ public:
 		oldTimeSinceStart = 0;
 		shader = new Shader("vertex.vert","fragment.frag");
 		shaderBones = new Shader("vertex_bone.vert","fragment_bone.frag");
+		shaderBonesNoTexture = new Shader("vertex_bone.vert","fragment_bone_notexture.frag");
 
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		//Wire frame
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		
+
 		spline.addPoint(-1,INITIAL_POINTER_POSITION);
 		spline.addPoint(0, glm::vec3(9.0f,40.0f,-21.0f));  
 		spline.addPoint(2, glm::vec3(59.0f,55.0f,4.0f));  
@@ -97,11 +98,12 @@ public:
 		//spline.addPoint(20,glm::vec3(-20.0f,40.0f,-21.0f));
 
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
-		 
+
 		tennisModel =  new Model(shader, TENNIS_MODEL);
 
 		model_bob = new Model(shaderBones, BOB_MODEL);
 		model_max = new Model(shaderBones, MAX_MODEL);
+		model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 
 		model_floor = new Model(shader, FLOOR_MODEL);
 
@@ -115,16 +117,25 @@ public:
 		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
 		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
 
+		modelBonesNoTextureUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "model");
+		viewBonesNoTextureUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "view");
+		projectionNoTextureBonesUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "projection");
+
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
 		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
 
+		model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
-		camera->Position = glm::vec3(0.0f,50.0f,-10.0f);
 
-		animationMap["IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 
+		animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
+		animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
+		animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
+
+		conesOn = false;
+		dofOn = false;
 	}
 
 
@@ -159,15 +170,8 @@ public:
 		// Set frame time
 		camera->MoveCamera();  
 
-		char front[100],up[100], cameraPosition[100], cubePosition[100],conesPosition[100];
-		/*sprintf_s(front, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
-		sprintf_s(up, "Camera Up (%f,%f,%f)",camera->Up.x,camera->Up.y,camera->Up.z);*/
-		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
-		sprintf_s(conesPosition, "Cones Position (%f,%f,%f)",decomposeT(model_bob->model).x    ,decomposeT(model_bob->model).y,decomposeT(model_bob->model).z);
-
-		//screen_output(40,80,cameraPosition); 
-		//screen_output(40,60,conesPosition); 
-
+		model_bob->ClearJointsLimit();
+		model_max->ClearJointsLimit();
 
 		shader->Use();
 
@@ -176,8 +180,6 @@ public:
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
 
-		sprintf_s(cubePosition, "Cube Position (%f,%f,%f)",decomposeT(tennisModel->model).x    ,decomposeT(tennisModel->model).y,decomposeT(tennisModel->model).z);
-		//screen_output(40,40,cubePosition);
 
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(tennisModel->model));
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
@@ -197,106 +199,91 @@ public:
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 
-		//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		model_bob->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
 		model_bob->model =  glm::rotate(model_bob->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
-
-		//		model_max->model = glm::scale(model_max->model,glm::vec3(0.1f,0.1f,0.1f)); 
-
 
 		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_bob->model));
 		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
-		glm::vec3 tennisModelWorldPosition = decomposeT(tennisModel->model);
+		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
-
-
-		/*shader->Use();
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));*/
-
-
-		/*int i=0;
-		for (glm::vec3 &vec : bonesPositions)
-		{
-
-		Vertex v1,v2;
-		v1.Position = vec;
-		v2.Position = cubeWorldPosition;
-		switch (i++)
-		{
-		case 0:
-		v1.Color = glm::vec3(1.0f,0.0f,0.0f);
-		break;
-		case 1:
-		v1.Color = glm::vec3(0.0f,1.0f,0.0f);
-		break;
-		case 2:
-		v1.Color = glm::vec3(0.0f,0.0f,1.0f);
-		break;
-		case 3:
-		v1.Color = glm::vec3(0.0f,1.0f,1.0f);
-
-		}
-		v2.Color = v1.Color;
-		Line(v1, v2).Draw();
-		}*/
-
-
-		/*if (moved)
-		{*/
-		//Calculate world space of the cube
 		glm::mat4 cubeModelRotation;
 
-		
-		
-		model_bob->Animate(animationMap["IK"], tennisModelWorldPosition,"fingerstip.L");
 
-		//	animationStep = false;
+		if (dofOn)
+		{
+			setDofOnModel();
+			((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.5f);
+			((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.5f);
+			((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(20);
+			((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(20);
+		}
+		else
+		{
+			((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.01f);
+			((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.01f);
+			((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(100);
+			((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(100);
+		}
+		model_bob->Animate(animationMap["BOB_IK"], tennisModelWorldPosition,"fingerstip.L");
 
-		//	moved = !moved;
-		//cones->CleanAnimationMatrix();
-		//}  
+		model_bob->Animate(animationMap["BOB_IK"], tennisModelWorldPosition,"head",1);
+
+
 		shaderBones->Use();
 
-		model_bob->Draw();
-		model_max->model = glm::translate(glm::mat4(),glm::vec3(45.0f,45.0f,-25.0f));
+		if (humansOn)
+		{
+			model_bob->Draw();
+			model_max->model = glm::translate(glm::mat4(),glm::vec3(45.0f,45.0f,-25.0f));
 
-	//	model_max->model = glm::rotate(model_max->model,glm::radians(90.0f),glm::vec3(0.0f,1.0f,0.0f)); 
-		 model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
-		model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
+			model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
+			model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
 
 
-		model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
+			model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
 
-		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
+			glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
 
-		AngleRestriction arms(0.0f,0.0f,-60.0f,60.0f,-30.0f,30.0f);
-		AngleRestriction fingers(0.0f,0.0f,-10.0f,10.0f,-10.0f,10.0f);
-		model_max->setJointLimit("L_Hand",arms);
-		model_max->setJointLimit("L_Forearm",arms);
-		model_max->setJointLimit("L_UpperArm",arms);
-		model_max->setJointLimit("L_Finger12",fingers);
-		model_max->setJointLimit("L_Finger11",fingers);
-		model_max->setJointLimit("L_Finger1",fingers);
-		model_max->Animate(animationMap["IK"], tennisModelWorldPosition,"L_Finger12",5);
-		 
-		 
 
-		model_max->Draw();
+			model_max->Animate(animationMap["MAX_IK"], tennisModelWorldPosition,"L_Finger12",5);
 
+			model_max->Draw();
+		}
+		if (conesOn)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			shaderBonesNoTexture->Use();
+
+			glUniformMatrix4fv(modelBonesNoTextureUniform, 1, GL_FALSE, glm::value_ptr(model_cones->model));
+			glUniformMatrix4fv(viewBonesNoTextureUniform, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(projectionNoTextureBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+			model_cones->Animate(animationMap["CONES_IK"], tennisModelWorldPosition,"Effector");
+
+			model_cones->Draw();
+
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
 		shader->Use();
 		//cones->animate(animations);
 		/*glm::vec3 splinePath = glm::cubic(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(3.0f,0.0f,0.0f),1);
 		*/
+		if (splineOn)
+		{
+			glm::vec3 position;
 
-		glm::vec3 position = spline.getPosition();
-		
-		tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f));
+			position = spline.getPosition();
 
-		spline.Update(deltaTime);
+			tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f));
 
+			spline.Update(deltaTime);
+		}
 
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
@@ -360,22 +347,54 @@ public:
 
 
 
-		char bon[100];
-		sprintf_s(bon,"Bone Index %d",boneIndex);
-		screen_output(100.0f,25.0f , bon);
 
-		vector<glm::vec3> bonespos = model_bob->getBonesOrientation();
-		char pos[100];
-		sprintf_s(pos,"Target Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
-		screen_output(500.0f,15.0f + 20 ,pos);
+		//vector<glm::vec3> bonespos = model_bob->getBonesOrientation();
 
+		TextToScreen();
 		glutSwapBuffers();
 
 	}
 
 
+	void TextToScreen()
+	{
+		string splineStatus = splineOn ? "ON" : "OFF";
+		string splineMessage = ("1 - Enable/Disable Spline - STATUS: " + splineStatus );
+		screen_output(10, VIEWPORT_HEIGHT - 30, (char*) splineMessage.c_str());
+
+		string conesStatus = conesOn ? "ON" : "OFF";
+		string conesMessage = ("2 - Show/Hide Cones - STATUS: " + conesStatus );
+		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) conesMessage.c_str());
+
+		string dofStatus = dofOn ? "ON" : "OFF";
+		string dofMessage = "3 - Enable/Disable DOF - STATUS: " + dofStatus;
+		screen_output(10, VIEWPORT_HEIGHT - 70, (char*) dofMessage.c_str());
+
+		string humanStatus = humansOn? "ON" : "OFF";
+		string humanMessage = "4 - Show/Hide Humans - STATUS: " + humanStatus;
+		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) humanMessage.c_str());
+
+		string controls = "Camera W,A,S,D - Tennis Ball Control I,J,K,L,U,O";
+		screen_output(10, 20, (char*) controls.c_str());
+
+
+		char pos[100];
+		sprintf_s(pos,"Ball Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
+
+		char cameraPosition[100];
+		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,cameraPosition);
+
+		char cameraFrontPosition[100];
+		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
+
+	}
+
 private:
 
+	glm::vec3 tennisModelWorldPosition;
 
 	void Controller::setupCurrentInstance();
 	int boneIndex;
@@ -411,6 +430,15 @@ private:
 	float deltaTime;
 	float speed; 
 	Model* model_floor;
+	Model*  model_cones;
+	Shader* shaderBonesNoTexture;
+	GLint projectionNoTextureBonesUniform;
+	GLint modelBonesNoTextureUniform;
+	GLint	viewBonesNoTextureUniform;
+	bool splineOn;
+	bool conesOn;
+	bool dofOn;
+	bool humansOn;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -418,19 +446,19 @@ private:
 			pause = !pause;
 		}
 
-		if(keys[KEY_k])
+		if(keys[KEY_i])
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
 			moved = true;
 		}
 
-		if(keys[KEY_i])
+		if(keys[KEY_k])
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,-speed,0.0));
 			moved = true;
 		}
 
-		if(keys[KEY_l])
+		if(keys[KEY_j])
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(speed,0.0,0.0));
 			moved = true;
@@ -448,7 +476,7 @@ private:
 			moved = true;
 		}
 
-		if(keys[KEY_j])
+		if(keys[KEY_l])
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
 			moved = true;
@@ -470,10 +498,7 @@ private:
 				boneIndex++;
 		}
 
-		if(keys[KEY_1])
-		{
-			animations[boneIndex] = glm::rotate(glm::mat4(1.0f),25.0f,glm::vec3(0.0f,0.0f,1.0f));
-		}
+
 
 		if(keys[KEY_MINUS])
 		{
@@ -485,6 +510,49 @@ private:
 		{
 			animationStep = true;
 		}
+
+		if (keys[KEY_1])
+		{
+			splineOn = !splineOn;
+		}
+		if (keys[KEY_2])
+		{
+			conesOn = !conesOn;
+		}
+		if (keys[KEY_3])
+		{
+			dofOn = !dofOn;
+		}
+		if (keys[KEY_4])
+		{
+			humansOn = !humansOn;
+		}
+
+
+	}
+
+	void setDofOnModel()
+	{
+
+		AngleRestriction head(-30.0f,30.0f,-20.0f,20.0f,-10.0f,10.0f);
+		AngleRestriction arms(-30.0f,30.0f,-60.0f,60.0f,-30.0f,30.0f);
+		AngleRestriction fingers(0.0f,0.0f,-10.0f,10.0f,-10.0f,10.0f);
+
+		model_bob->setJointLimit("neck",head);
+		model_bob->setJointLimit("head",head);
+		model_bob->setJointLimit("upperarm.L",arms);
+		model_bob->setJointLimit("forearm.L",arms);
+		model_bob->setJointLimit("wrist.L",arms);
+		model_bob->setJointLimit("thumb.L",fingers);
+		model_bob->setJointLimit("fingers.L",fingers);
+		model_bob->setJointLimit("fingerstip.L",fingers);
+
+		model_max->setJointLimit("L_Hand",arms);
+		model_max->setJointLimit("L_Forearm",arms);
+		model_max->setJointLimit("L_UpperArm",arms);
+		model_max->setJointLimit("L_Finger12",fingers);
+		model_max->setJointLimit("L_Finger11",fingers);
+		model_max->setJointLimit("L_Finger1",fingers);
 	}
 };
 

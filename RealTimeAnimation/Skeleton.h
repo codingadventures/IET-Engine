@@ -114,13 +114,7 @@ public:
 		}
 	}
 
-
-	// Animate the model given an animation time. bone_animation_mats is the output to be sent to the shader
-	void animateKeyFrames(Bone* bone,double anim_time, glm::mat4* bone_animation_mats) {
-
-
-	}
-
+	 
 	// Import the hierarchical data structure from Assimp
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
 	{
@@ -244,6 +238,17 @@ public:
 		}
 
 	} 
+
+	void ResetAllJointLimits(Bone* bone = NULL)
+	{
+		root_bone_check(&bone);
+		AngleRestriction newRestr;
+		bone->angleRestriction = newRestr;	
+
+		for (int i = 0; i < bone->children.size(); i++)
+			ResetAllJointLimits(&bone->children[i]);
+	}
+
 private:
 
 
@@ -259,11 +264,7 @@ private:
 	int traverseGetNumberOfBones(Bone* bone)  
 	{
 
-		if(!bone)
-		{
-			bone = rootBone;
-		}
-		assert (bone);
+		root_bone_check(&bone);
 
 		int counter = bone->boneIndex > -1 ? 1 : 0;
 
@@ -272,4 +273,8 @@ private:
 
 		return counter;
 	}
+
+	
+
+
 };

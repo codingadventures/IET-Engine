@@ -51,16 +51,7 @@ uniform mat4 bones[MAX_BONES];
 
 out vec2 TexCoords;
 out vec3 colour;
-
-
-bool checkMatrixIsZero(mat4 matrix)
-{
-	if (matrix[0][0] == 0 && matrix[1][1] == 0 && matrix[2][2] == 0 && matrix[3][3] == 0)
-		return true;
-	else return false;
-
-
-}
+ 
 
 void main() 
 { 

@@ -117,6 +117,9 @@ public:
 		skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 	}
 
+	void ClearJointsLimit(){
+		skeleton->ResetAllJointLimits();
+	}
 	glm::mat4* animationMatrix;
 	Skeleton* skeleton;
 

@@ -223,7 +223,7 @@ EXIT:
 	virtual void Animate(glm::mat4 model,float animationTime, glm::mat4* animationSequence){ throw new exception("not implemented");};
 private:
 	void checkAngleRestrictions (Bone* bone)
-	{
+	{ 
 		 glm::vec3 euler = glm::eulerAngles(bone->totalRotation);
 		 
 		 
