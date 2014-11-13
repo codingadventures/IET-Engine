@@ -113,7 +113,7 @@
   <ItemGroup>
     <None Include="fragment.frag" />
     <None Include="fragment_bone.frag" />
-    <None Include="fragment_bone_notexture.frag" />
+    <None Include="fragment_notexture.frag" />
     <None Include="vertex.vert" />
     <None Include="vertex_bone.vert" />
   </ItemGroup>

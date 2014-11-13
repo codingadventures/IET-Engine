@@ -1,6 +1,5 @@
 #version 330 core
- 
-in vec3 colour;
+  
 
 uniform sampler2D texture_diffuse1;
 in vec2 TexCoords; 

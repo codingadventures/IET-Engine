@@ -50,7 +50,7 @@ uniform mat4 model;
 uniform mat4 bones[MAX_BONES];
 
 out vec2 TexCoords;
-out vec3 colour;
+out vec3 outColor;
  
 
 void main() 
@@ -62,7 +62,7 @@ void main()
    	BoneTransform     += bones[BoneIDs[3]] * Weights[3];
 	 
  
-	colour = colorMap[BoneIDs[0]];
+	outColor = colorMap[BoneIDs[0]];
 	
     vec4 PosL  = BoneTransform * vec4(position, 1.0);
 	 

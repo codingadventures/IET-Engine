@@ -130,7 +130,7 @@
     <None Include="vertex_bone.vert">
       <Filter>Header Files\Shaders</Filter>
     </None>
-    <None Include="fragment_bone_notexture.frag">
+    <None Include="fragment_notexture.frag">
       <Filter>Header Files\Shaders</Filter>
     </None>
   </ItemGroup>

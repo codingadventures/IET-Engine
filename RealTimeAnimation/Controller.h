@@ -74,8 +74,8 @@ public:
 		oldTimeSinceStart = 0;
 		shader = new Shader("vertex.vert","fragment.frag");
 		shaderBones = new Shader("vertex_bone.vert","fragment_bone.frag");
-		shaderBonesNoTexture = new Shader("vertex_bone.vert","fragment_bone_notexture.frag");
-
+		shaderBonesNoTexture = new Shader("vertex_bone.vert","fragment_notexture.frag");
+		shaderNoTexture = new Shader("vertex.vert","fragment_notexture.frag");
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE);
@@ -121,6 +121,10 @@ public:
 		viewBonesNoTextureUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "view");
 		projectionNoTextureBonesUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "projection");
 
+		modelNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "model");
+		viewNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "view");
+		projectionNoTextureUniform	= glGetUniformLocation(shaderNoTexture->Program, "projection");
+
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
 		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
@@ -136,6 +140,8 @@ public:
 
 		conesOn = false;
 		dofOn = false;
+		humansOn = false;
+		splineOn = false;
 	}
 
 
@@ -270,21 +276,40 @@ public:
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-		shader->Use();
+
 		//cones->animate(animations);
 		/*glm::vec3 splinePath = glm::cubic(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(3.0f,0.0f,0.0f),1);
 		*/
+
 		if (splineOn)
 		{
+			shaderNoTexture->Use();
+
+			
 			glm::vec3 position;
 
 			position = spline.getPosition();
 
 			tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f));
 
+			glUniformMatrix4fv(modelNoTextureUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+
+			glUniformMatrix4fv(viewNoTextureUniform, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(projectionNoTextureUniform, 1, GL_FALSE, glm::value_ptr(projection));
+
+
 			spline.Update(deltaTime);
+
+			for (int i = 1; i < spline.interpolationValues.size() - 1; i++)
+			{
+				Vertex v;
+				v.Position = spline.interpolationValues[i].second;
+				v.Color = glm::vec3(1.0f,0.0f,0.0f);
+				Point(v).Draw();
+			}
 		}
 
+		shader->Use();
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
 		//v2.Position = cubeWorldPosition;
@@ -412,6 +437,9 @@ private:
 	GLint viewBonesUniform ;
 	GLint projectionBonesUniform;
 
+	GLint modelNoTextureUniform		;
+	GLint	viewNoTextureUniform		;
+	GLint	projectionNoTextureUniform;
 #pragma endregion  
 
 	GLuint* boneLocation;
@@ -439,6 +467,7 @@ private:
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
+	Shader* shaderNoTexture;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
