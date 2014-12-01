@@ -109,10 +109,8 @@ public:
 
 
 
-		modelUniform = glGetUniformLocation(shader->Program, "model");
-		viewUniform = glGetUniformLocation(shader->Program, "view");
-		projectionUniform = glGetUniformLocation(shader->Program, "projection");
-
+		
+/*
 		modelBonesUniform = glGetUniformLocation(shaderBones->Program, "model");
 		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
 		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
@@ -123,7 +121,7 @@ public:
 
 		modelNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "model");
 		viewNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "view");
-		projectionNoTextureUniform	= glGetUniformLocation(shaderNoTexture->Program, "projection");
+		projectionNoTextureUniform	= glGetUniformLocation(shaderNoTexture->Program, "projection");*/
 
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
@@ -185,15 +183,12 @@ public:
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
-
-
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(tennisModel->model));
-		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
+		 
+		shader->SetModelViewProjection(tennisModel->model,view,projection);
 
 		tennisModel->Draw();
 
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model_floor->model));
+		shader->SetModel(model_floor->model);
 
 		model_floor->Draw();
 
@@ -208,10 +203,8 @@ public:
 		model_bob->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
 		model_bob->model =  glm::rotate(model_bob->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 
-		glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_bob->model));
-		glUniformMatrix4fv(viewBonesUniform, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projectionBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
-
+		shaderBones->SetModelViewProjection(model_bob->model,view,projection);
+		 
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
 		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
@@ -251,8 +244,8 @@ public:
 
 			model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
 
-			glUniformMatrix4fv(modelBonesUniform, 1, GL_FALSE, glm::value_ptr(model_max->model));
-
+			
+			shaderBones->SetModel(model_max->model);
 
 			model_max->Animate(animationMap["MAX_IK"], tennisModelWorldPosition,"L_Finger12",5);
 
@@ -263,12 +256,8 @@ public:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 			shaderBonesNoTexture->Use();
-
-			glUniformMatrix4fv(modelBonesNoTextureUniform, 1, GL_FALSE, glm::value_ptr(model_cones->model));
-			glUniformMatrix4fv(viewBonesNoTextureUniform, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projectionNoTextureBonesUniform, 1, GL_FALSE, glm::value_ptr(projection));
-
-
+			shaderBonesNoTexture->SetModelViewProjection(model_cones->model,view,projection); 
+			 
 			model_cones->Animate(animationMap["CONES_IK"], tennisModelWorldPosition,"Effector");
 
 			model_cones->Draw();
@@ -285,18 +274,13 @@ public:
 		{
 			shaderNoTexture->Use();
 
-			
 			glm::vec3 position;
 
 			position = spline.getPosition();
 
-			tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f));
+			tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f)); 
 
-			glUniformMatrix4fv(modelNoTextureUniform, 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
-
-			glUniformMatrix4fv(viewNoTextureUniform, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projectionNoTextureUniform, 1, GL_FALSE, glm::value_ptr(projection));
-
+			shaderNoTexture->SetModelViewProjection(glm::mat4(1),view,projection); 
 
 			spline.Update(deltaTime);
 
@@ -428,10 +412,8 @@ private:
 	int simulationIteration;
 
 #pragma region [ Uniform Variables ]
+	/*
 
-	GLint modelUniform  ;
-	GLint viewUniform  ;
-	GLint projectionUniform ;
 
 	GLint modelBonesUniform ;
 	GLint viewBonesUniform ;
@@ -439,7 +421,7 @@ private:
 
 	GLint modelNoTextureUniform		;
 	GLint	viewNoTextureUniform		;
-	GLint	projectionNoTextureUniform;
+	GLint	projectionNoTextureUniform;*/
 #pragma endregion  
 
 	GLuint* boneLocation;
@@ -449,25 +431,28 @@ private:
 
 	Shader *shader;
 	Shader *shaderBones;
+	Shader* shaderBonesNoTexture;
+	Shader* shaderNoTexture;
 
 	Model *model_bob;
 	Model *tennisModel,*model_max;
+	Model* model_floor;
+	Model*  model_cones;
+
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
 	float oldTimeSinceStart;
 	float deltaTime;
 	float speed; 
-	Model* model_floor;
-	Model*  model_cones;
-	Shader* shaderBonesNoTexture;
-	GLint projectionNoTextureBonesUniform;
+	
+	/*GLint projectionNoTextureBonesUniform;
 	GLint modelBonesNoTextureUniform;
-	GLint	viewBonesNoTextureUniform;
+	GLint	viewBonesNoTextureUniform;*/
+
 	bool splineOn;
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
-	Shader* shaderNoTexture;
 	void ReadInput()
 	{
 		if(keys[KEY_p])

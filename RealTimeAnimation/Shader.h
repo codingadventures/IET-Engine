@@ -14,25 +14,48 @@ public:
 	// Our program ID
 	GLuint Program;
 	// Constructor reads and builds our shader
-	Shader(const GLchar* vertexSourcePath, const GLchar* fragmentSourcePath) 
+	Shader(const GLchar* vertexSourcePath, const GLchar* fragmentSourcePath
+		, string modelUniformName = "model"
+		, string viewUniformName = "view"
+		, string projectionUniformName = "projection") 
 		: vertexSourcePath(vertexSourcePath),fragmentSourcePath(fragmentSourcePath)
 	{
 		load();
 		compile();
-		link();
+		link(); 
+		modelUniform = glGetUniformLocation(Program, modelUniformName.c_str());
+		viewUniform = glGetUniformLocation(Program, viewUniformName.c_str());
+		projectionUniform = glGetUniformLocation(Program, projectionUniformName.c_str());
 	}
 	// Use our program
 	void Use()
 	{
 		glUseProgram(this->Program);
 	}
+
+	void SetModel(glm::mat4 model)
+	{
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
+
+	}
+
+	void SetModelViewProjection(glm::mat4 model,  glm::mat4 view, glm::mat4 projection)
+	{
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
+	}
 private:
+	 
+	GLint modelUniform;
+	GLint viewUniform ;
+	GLint projectionUniform;
 
 	const GLchar* vertexSourcePath;
 	const GLchar* fragmentSourcePath;
 	GLint vertexShader;
 	GLint fragmentShader;
-		string vCode,fCode;
+	string vCode,fCode;
 
 
 	void load()
@@ -54,7 +77,7 @@ private:
 			vCode = vShaderStream.str();
 			fCode = fShaderStream.str();		
 
-			
+
 		}
 		catch(exception e)
 		{

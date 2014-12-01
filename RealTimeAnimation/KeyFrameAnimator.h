@@ -17,15 +17,17 @@ class KeyFrameAnimator : IAnimation
 
 	virtual void Animate(glm::mat4 model, float animationTime, glm::mat4* animationSequence)
 	{
-		animateKeyFrames(skeleton->rootBone,animationTime);
+		assert(animationSequence);
+		this->animationSequence = animationSequence;
 
+		animateKeyFrames(skeleton->rootBone,animationTime);
 	}
 
 	private:
+		glm::mat4* animationSequence;
+
 		void animateKeyFrames(Bone* bone, float animationTime){
-
 			 
-
 			/* the animation for a particular bone at this time */
 			glm::mat4 local_anim;
 
@@ -77,12 +79,12 @@ class KeyFrameAnimator : IAnimation
 				glm::mat4 bone_offset = bone->boneOffset;;
 
 				bone->finalTransform = bone->parent->finalTransform * local_anim;
-				//bone_animation_mats[bone_i] = bone->finalTransform  * bone_offset; //Change this to match OGL
+				animationSequence[bone_i] = bone->finalTransform  * bone_offset; //Change this to match OGL
 
 
 			}
 			for (int i = 0; i < bone->children.size(); i++) {
-				//animateKeyFrames (&bone->children[i],anim_time, bone_animation_mats);
+				animateKeyFrames (&bone->children[i],animationTime);
 			}
 		}
 };

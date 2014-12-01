@@ -110,11 +110,11 @@
     <ClInclude Include="IKAnimator.h">
       <Filter>Header Files\Animation\InverseKinematic</Filter>
     </ClInclude>
-    <ClInclude Include="KeyFrameAnimator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AngleRestriction.h">
       <Filter>Header Files\Animation\InverseKinematic</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyFrameAnimator.h">
+      <Filter>Header Files\Animation\KeyFrame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
