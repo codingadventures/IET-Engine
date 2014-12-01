@@ -14,6 +14,7 @@
 #include <gl/glut.h>
 #include <glm/glm.hpp> 
 #include "IKAnimator.h"
+#include "KeyFrameAnimator.h"
 
 using namespace std::placeholders;
 
@@ -100,34 +101,22 @@ public:
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 
 		tennisModel =  new Model(shader, TENNIS_MODEL);
-
+		dartmaulModel = new Model(shaderBones, DART_MAUL);
 		model_bob = new Model(shaderBones, BOB_MODEL);
 		model_max = new Model(shaderBones, MAX_MODEL);
 		model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 
 		model_floor = new Model(shader, FLOOR_MODEL);
 
-
-
-		
-/*
-		modelBonesUniform = glGetUniformLocation(shaderBones->Program, "model");
-		viewBonesUniform = glGetUniformLocation(shaderBones->Program, "view");
-		projectionBonesUniform = glGetUniformLocation(shaderBones->Program, "projection");
-
-		modelBonesNoTextureUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "model");
-		viewBonesNoTextureUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "view");
-		projectionNoTextureBonesUniform = glGetUniformLocation(shaderBonesNoTexture->Program, "projection");
-
-		modelNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "model");
-		viewNoTextureUniform		= glGetUniformLocation(shaderNoTexture->Program, "view");
-		projectionNoTextureUniform	= glGetUniformLocation(shaderNoTexture->Program, "projection");*/
-
 		//		totalAnimationTime = cones->animDuration;
 		speed = 1.0f;
 		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
+		float deg =   glm::radians(-90.0f);
 
+		dartmaulModel->model = glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+	 
+		//dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
 
@@ -135,11 +124,13 @@ public:
 		animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 		animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
+		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(dartmaulModel->skeleton);
 
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
 		splineOn = false;
+		anim_time = 0;
 	}
 
 
@@ -152,24 +143,16 @@ public:
 		deltaTime = timeSinceStart - oldTimeSinceStart;
 		oldTimeSinceStart = timeSinceStart;
 
-		/*static double previous_seconds = glfwGetTime();
-		double current_seconds = glfwGetTime();
-		double elapsed_seconds = current_seconds - previous_seconds;
-		previous_seconds = current_seconds;*/
 
-		//if (pause)
-		//	glfwWaitEvents();
-		//else
-		//{
-		//	/* update animation timer and loop */
-		//	clock += elapsed_seconds * ANIMATION_SPEED;
-		//	if ( (int)(clock / totalAnimationTime) % 2 == 0)
-		//		anim_time += elapsed_seconds * ANIMATION_SPEED;
-		//	else
-		//	{
-		//		anim_time -= elapsed_seconds * ANIMATION_SPEED;
-		//	}
-		//}
+
+
+		anim_time += deltaTime/1000 * ANIMATION_SPEED;
+		/*else
+		{
+		anim_time -= elapsed_seconds * ANIMATION_SPEED;
+		}*/
+		if (anim_time> dartmaulModel->animDuration)
+			anim_time=0;
 
 		// Set frame time
 		camera->MoveCamera();  
@@ -183,10 +166,10 @@ public:
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
-		 
+
 		shader->SetModelViewProjection(tennisModel->model,view,projection);
 
-		tennisModel->Draw();
+		//tennisModel->Draw();
 
 		shader->SetModel(model_floor->model);
 
@@ -194,105 +177,107 @@ public:
 
 		shaderBones->Use();
 
-		float deg =   glm::radians(-90.0f);
 
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
+		
+		shaderBones->SetModelViewProjection(dartmaulModel->model,view,projection);
 
-		model_bob->model =  glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f));
-		model_bob->model =  glm::rotate(model_bob->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 
-		shaderBones->SetModelViewProjection(model_bob->model,view,projection);
-		 
+		/*	
+
+
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
 		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
-		glm::mat4 cubeModelRotation;
-
-
-		if (dofOn)
+		glm::mat4 cubeModelRotation;*/
+		 
+		 
+		 dartmaulModel->Animate(animationMap["DART_MAUL_KF"],anim_time);
+		 dartmaulModel->Draw();
+		/*	if (dofOn)
 		{
-			setDofOnModel();
-			((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.5f);
-			((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.5f);
-			((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(20);
-			((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(20);
+		setDofOnModel();
+		((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.5f);
+		((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.5f);
+		((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(20);
+		((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(20);
 		}
 		else
 		{
-			((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.01f);
-			((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.01f);
-			((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(100);
-			((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(100);
+		((IKAnimator*)animationMap["BOB_IK"])->setDistanceThreshold(0.01f);
+		((IKAnimator*)animationMap["MAX_IK"])->setDistanceThreshold(0.01f);
+		((IKAnimator*)animationMap["BOB_IK"])->setMaxNumIterations(100);
+		((IKAnimator*)animationMap["MAX_IK"])->setMaxNumIterations(100);
 		}
 		model_bob->Animate(animationMap["BOB_IK"], tennisModelWorldPosition,"fingerstip.L");
 
 		model_bob->Animate(animationMap["BOB_IK"], tennisModelWorldPosition,"head",1);
 
 
-		shaderBones->Use();
+		shaderBones->Use();*/
 
-		if (humansOn)
+		/*	if (humansOn)
 		{
-			model_bob->Draw();
-			model_max->model = glm::translate(glm::mat4(),glm::vec3(45.0f,45.0f,-25.0f));
+		model_bob->Draw();
+		model_max->model = glm::translate(glm::mat4(),glm::vec3(45.0f,45.0f,-25.0f));
 
-			model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
-			model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
+		model_max->model = glm::rotate(model_max->model ,glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
+		model_max->model = glm::rotate(model_max->model ,glm::radians(-180.0f),glm::vec3(0.0f,0.0f,1.0f));
 
 
-			model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
+		model_max->model = glm::scale(model_max->model,glm::vec3(50.0f,50.0f,50.0f));
 
-			
-			shaderBones->SetModel(model_max->model);
 
-			model_max->Animate(animationMap["MAX_IK"], tennisModelWorldPosition,"L_Finger12",5);
+		shaderBones->SetModel(model_max->model);
 
-			model_max->Draw();
-		}
-		if (conesOn)
+		model_max->Animate(animationMap["MAX_IK"], tennisModelWorldPosition,"L_Finger12",5);
+
+		model_max->Draw();
+		}*/
+		/*if (conesOn)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-			shaderBonesNoTexture->Use();
-			shaderBonesNoTexture->SetModelViewProjection(model_cones->model,view,projection); 
-			 
-			model_cones->Animate(animationMap["CONES_IK"], tennisModelWorldPosition,"Effector");
+		shaderBonesNoTexture->Use();
+		shaderBonesNoTexture->SetModelViewProjection(model_cones->model,view,projection); 
 
-			model_cones->Draw();
+		model_cones->Animate(animationMap["CONES_IK"], tennisModelWorldPosition,"Effector");
+
+		model_cones->Draw();
 
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-
+		*/
 		//cones->animate(animations);
 		/*glm::vec3 splinePath = glm::cubic(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(2.0f,0.0f,0.0f),glm::vec3(3.0f,0.0f,0.0f),1);
 		*/
 
-		if (splineOn)
+		/*if (splineOn)
 		{
-			shaderNoTexture->Use();
+		shaderNoTexture->Use();
 
-			glm::vec3 position;
+		glm::vec3 position;
 
-			position = spline.getPosition();
+		position = spline.getPosition();
 
-			tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f)); 
+		tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f)); 
 
-			shaderNoTexture->SetModelViewProjection(glm::mat4(1),view,projection); 
+		shaderNoTexture->SetModelViewProjection(glm::mat4(1),view,projection); 
 
-			spline.Update(deltaTime);
+		spline.Update(deltaTime);
 
-			for (int i = 1; i < spline.interpolationValues.size() - 1; i++)
-			{
-				Vertex v;
-				v.Position = spline.interpolationValues[i].second;
-				v.Color = glm::vec3(1.0f,0.0f,0.0f);
-				Point(v).Draw();
-			}
+		for (int i = 1; i < spline.interpolationValues.size() - 1; i++)
+		{
+		Vertex v;
+		v.Position = spline.interpolationValues[i].second;
+		v.Color = glm::vec3(1.0f,0.0f,0.0f);
+		Point(v).Draw();
 		}
-
+		}
+		*/
 		shader->Use();
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
@@ -399,6 +384,11 @@ public:
 		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
 
+		char animationTime[100];
+		sprintf_s(animationTime, "Animation Time %f",anim_time);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,animationTime);
+
+
 	}
 
 private:
@@ -444,7 +434,7 @@ private:
 	float oldTimeSinceStart;
 	float deltaTime;
 	float speed; 
-	
+	float anim_time;
 	/*GLint projectionNoTextureBonesUniform;
 	GLint modelBonesNoTextureUniform;
 	GLint	viewBonesNoTextureUniform;*/
@@ -453,6 +443,7 @@ private:
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
+	Model* dartmaulModel;
 	void ReadInput()
 	{
 		if(keys[KEY_p])

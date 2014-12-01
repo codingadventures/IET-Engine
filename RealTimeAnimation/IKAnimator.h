@@ -14,7 +14,7 @@
 class IKAnimator : IAnimation
 {
 public:
-	IKAnimator(Skeleton *skeleton) : IAnimation(skeleton,model)		 
+	IKAnimator(Skeleton *skeleton) : IAnimation(skeleton,glm::mat4(1))		 
 	{
 		assert(skeleton);
 		maxNumIterations = 100;
@@ -189,15 +189,15 @@ EXIT:
 			if ((crossProduct != glm::vec3()) && crossProduct == crossProduct)
 			{
 				glm::quat quatRotation = glm::angleAxis(glm::acos(cosAngle), glm::normalize(crossProduct)); //I'm using the radians not the degrees
-				
+
 				currBone->totalRotation *= quatRotation;
 
 				checkAngleRestrictions(currBone);
 
 				glm::mat4 quatRotationMatrix = glm::toMat4(currBone->totalRotation); 
-				 
+
 				currBone->localTransform = quatRotationMatrix ;
-				 
+
 				skeleton->updateSkeleton(currBone);
 			}
 			else
@@ -224,9 +224,9 @@ EXIT:
 private:
 	void checkAngleRestrictions (Bone* bone)
 	{ 
-		 glm::vec3 euler = glm::eulerAngles(bone->totalRotation);
-		 
-		 
+		glm::vec3 euler = glm::eulerAngles(bone->totalRotation);
+
+
 		if(bone->angleRestriction.xAxis) {
 			if(euler.x > RADIANS_180)
 				euler.x -= RADIANS_360;

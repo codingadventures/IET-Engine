@@ -68,8 +68,13 @@ public:
 
 		for(GLuint i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].Draw(*shader);
+	}
 
-
+	void Animate(IAnimation* animationInvoker, float animation_time)
+	{
+		assert(animationInvoker);
+		animationInvoker->Animate(this->model,animation_time,animationMatrix);
+		//skeleton->updateAnimationMatrix(animationMatrix);
 	}
 
 	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
@@ -155,6 +160,9 @@ private:
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
+
+		this->loadAnimations(scene);
+
 		//skeleton->inverseTransf =  glm::inverse(aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
 		int numOfBones = skeleton->getNumberOfBones();
 		if (numOfBones > 0)
@@ -314,79 +322,7 @@ private:
 						}        
 					}
 				}
-			}    
-
-			/* get the first animation out and into keys */
-			if (scene->mNumAnimations > 0) {
-				// get just the first animation
-				aiAnimation* anim = scene->mAnimations[0];
-				printf ("animation name: %s\n", anim->mName.C_Str ());
-				printf ("animation has %i node channels\n", anim->mNumChannels);
-				printf ("animation has %i mesh channels\n", anim->mNumMeshChannels);
-				printf ("animation duration %f\n", anim->mDuration);
-				printf ("ticks per second %f\n", anim->mTicksPerSecond);
-
-				animDuration = anim->mDuration;
-				printf ("anim duration is %f\n", anim->mDuration);
-
-				// get the node channels
-				for (int i = 0; i < (int)anim->mNumChannels; i++) {
-					aiNodeAnim* chan = anim->mChannels[i];
-					// find the matching node in our skeleton by name
-					Bone* sn = skeleton->GetBone(
-						chan->mNodeName.C_Str (),	NULL);
-					if (!sn) {
-						fprintf (stderr, "WARNING: did not find node named %s in skeleton."
-							"animation broken.\n", chan->mNodeName.C_Str ());
-						continue;
-					}
-
-					sn->num_pos_keys = chan->mNumPositionKeys;
-					sn->num_rot_keys = chan->mNumRotationKeys;
-					sn->num_sca_keys = chan->mNumScalingKeys;
-
-					// allocate memory
-					sn->pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_pos_keys);
-					sn->rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->num_rot_keys);
-					sn->sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_sca_keys);
-					sn->pos_key_times =
-						(double*)malloc (sizeof (double) * sn->num_pos_keys);
-					sn->rot_key_times =
-						(double*)malloc (sizeof (double) * sn->num_rot_keys);
-					sn->sca_key_times =
-						(double*)malloc (sizeof (double) * sn->num_sca_keys);
-
-					// add position keys to node
-					for (int i = 0; i < sn->num_pos_keys; i++) {
-						aiVectorKey key = chan->mPositionKeys[i];
-						sn->pos_keys[i].x = key.mValue.x;
-						sn->pos_keys[i].y = key.mValue.y;
-						sn->pos_keys[i].z = key.mValue.z;
-						// TODO -- forgot this
-						sn->pos_key_times[i] = key.mTime;
-					}
-					// add rotation keys to node
-					for (int i = 0; i < sn->num_rot_keys; i++) {
-						aiQuatKey key = chan->mRotationKeys[i];
-						sn->rot_keys[i].w = key.mValue.w;
-						sn->rot_keys[i].x = key.mValue.x;
-						sn->rot_keys[i].y = key.mValue.y;
-						sn->rot_keys[i].z = key.mValue.z;
-						sn->rot_key_times[i] = key.mTime;
-					}
-					// add scaling keys to node
-					for (int i = 0; i < sn->num_sca_keys; i++) {
-						aiVectorKey key = chan->mScalingKeys[i];
-						sn->sca_keys[i].x  = key.mValue.x;
-						sn->sca_keys[i].y  = key.mValue.y;
-						sn->sca_keys[i].z  = key.mValue.z;
-						sn->sca_key_times[i] = key.mTime;
-					} // end for
-				} // end for mNumChannels
-			} else {
-				fprintf (stderr, "WARNING: no animations found in mesh file\n");
-			} // endif mNumAnimations > 0
-
+			}     
 		}
 
 #pragma endregion  
@@ -429,6 +365,82 @@ private:
 		}
 		return textures;
 	}
+
+	void loadAnimations(const aiScene* scene)
+	{
+		/* get the first animation out and into keys */
+		if (scene->mNumAnimations > 0) {
+			// get just the first animation
+			aiAnimation* anim = scene->mAnimations[0];
+			printf ("animation name: %s\n", anim->mName.C_Str ());
+			printf ("animation has %i node channels\n", anim->mNumChannels);
+			printf ("animation has %i mesh channels\n", anim->mNumMeshChannels);
+			printf ("animation duration %f\n", anim->mDuration);
+			printf ("ticks per second %f\n", anim->mTicksPerSecond);
+
+			animDuration = anim->mDuration;
+			printf ("anim duration is %f\n", anim->mDuration);
+
+			// get the node channels
+			for (int i = 0; i < (int)anim->mNumChannels; i++) {
+				aiNodeAnim* chan = anim->mChannels[i];
+				// find the matching node in our skeleton by name
+				Bone* sn = skeleton->GetBone(
+					chan->mNodeName.C_Str (),	NULL);
+				if (!sn) {
+					fprintf (stderr, "WARNING: did not find node named %s in skeleton."
+						"animation broken.\n", chan->mNodeName.C_Str ());
+					continue;
+				}
+
+				sn->num_pos_keys = chan->mNumPositionKeys;
+				sn->num_rot_keys = chan->mNumRotationKeys;
+				sn->num_sca_keys = chan->mNumScalingKeys;
+
+				// allocate memory
+				sn->pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_pos_keys);
+				sn->rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->num_rot_keys);
+				sn->sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_sca_keys);
+				sn->pos_key_times =
+					(double*)malloc (sizeof (double) * sn->num_pos_keys);
+				sn->rot_key_times =
+					(double*)malloc (sizeof (double) * sn->num_rot_keys);
+				sn->sca_key_times =
+					(double*)malloc (sizeof (double) * sn->num_sca_keys);
+
+				// add position keys to node
+				for (int i = 0; i < sn->num_pos_keys; i++) {
+					aiVectorKey key = chan->mPositionKeys[i];
+					sn->pos_keys[i].x = key.mValue.x;
+					sn->pos_keys[i].y = key.mValue.y;
+					sn->pos_keys[i].z = key.mValue.z;
+					// TODO -- forgot this
+					sn->pos_key_times[i] = key.mTime;
+				}
+				// add rotation keys to node
+				for (int i = 0; i < sn->num_rot_keys; i++) {
+					aiQuatKey key = chan->mRotationKeys[i];
+					sn->rot_keys[i].w = key.mValue.w;
+					sn->rot_keys[i].x = key.mValue.x;
+					sn->rot_keys[i].y = key.mValue.y;
+					sn->rot_keys[i].z = key.mValue.z;
+					sn->rot_key_times[i] = key.mTime;
+				}
+				// add scaling keys to node
+				for (int i = 0; i < sn->num_sca_keys; i++) {
+					aiVectorKey key = chan->mScalingKeys[i];
+					sn->sca_keys[i].x  = key.mValue.x;
+					sn->sca_keys[i].y  = key.mValue.y;
+					sn->sca_keys[i].z  = key.mValue.z;
+					sn->sca_key_times[i] = key.mTime;
+				} // end for
+			} // end for mNumChannels
+		} else {
+			fprintf (stderr, "WARNING: no animations found in mesh file\n");
+		} // endif mNumAnimations > 0
+
+	}
+
 
 };
 //
