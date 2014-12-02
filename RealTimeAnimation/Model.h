@@ -36,7 +36,7 @@ public:
 		assert(shader);
 		m_numberOfBone = 0;
 		skeleton = new Skeleton();
-
+		total_animation_time = 0.1;
 		this->loadModel(path);
 
 		if (skeleton->getNumberOfBones()>0)
@@ -70,10 +70,16 @@ public:
 			this->meshes[i].Draw(*shader);
 	}
 
-	void Animate(IAnimation* animationInvoker, float animation_time)
+	void Animate(IAnimation* animationInvoker, float delta_time)
 	{
 		assert(animationInvoker);
-		animationInvoker->Animate(this->model,animation_time,animationMatrix);
+
+		total_animation_time += delta_time/1000 * ANIMATION_SPEED;
+
+		if (total_animation_time > animDuration)
+			total_animation_time =  0.1;
+
+		animationInvoker->Animate(this->model,total_animation_time,animationMatrix);
 		//skeleton->updateAnimationMatrix(animationMatrix);
 	}
 
@@ -136,6 +142,8 @@ private:
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	GLuint* boneLocation;
 	int m_numberOfBone;
+
+	float total_animation_time; 
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)

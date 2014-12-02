@@ -101,20 +101,20 @@ public:
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 
 		tennisModel =  new Model(shader, TENNIS_MODEL);
-		dartmaulModel = new Model(shaderBones, DART_MAUL);
+		model_dartmaul = new Model(shaderBones, DART_MAUL);
 		model_bob = new Model(shaderBones, BOB_MODEL);
 		model_max = new Model(shaderBones, MAX_MODEL);
 		model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
-
+		model_drone = new Model(shaderBones, DRONE_MODEL);
+		
 		model_floor = new Model(shader, FLOOR_MODEL);
-
-		//		totalAnimationTime = cones->animDuration;
-		speed = 1.0f;
-		//cube->model = glm::translate(glm::mat4(1), INITIAL_POINTER_POSITION);
+		 
+		speed = 1.0f; 
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
 		float deg =   glm::radians(-90.0f);
 
-		dartmaulModel->model = glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+		model_dartmaul->model = glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+		model_drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
 	 
 		//dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
@@ -124,13 +124,14 @@ public:
 		animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 		animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
-		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(dartmaulModel->skeleton);
+		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(model_dartmaul->skeleton);
+		animationMap["DRONE_KF"] =(IAnimation*) new  KeyFrameAnimator(model_drone->skeleton);
 
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
 		splineOn = false;
-		anim_time = 0;
+		global_clock = 0;
 	}
 
 
@@ -139,26 +140,13 @@ public:
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
-		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
-		deltaTime = timeSinceStart - oldTimeSinceStart;
-		oldTimeSinceStart = timeSinceStart;
-
-
-
-
-		anim_time += deltaTime/1000 * ANIMATION_SPEED;
-		/*else
-		{
-		anim_time -= elapsed_seconds * ANIMATION_SPEED;
-		}*/
-		if (anim_time> dartmaulModel->animDuration)
-			anim_time=0;
-
+		update_timer();
+		   
 		// Set frame time
 		camera->MoveCamera();  
 
-		model_bob->ClearJointsLimit();
-		model_max->ClearJointsLimit();
+		//model_bob->ClearJointsLimit();
+		//model_max->ClearJointsLimit();
 
 		shader->Use();
 
@@ -182,7 +170,7 @@ public:
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 		
-		shaderBones->SetModelViewProjection(dartmaulModel->model,view,projection);
+		shaderBones->SetModelViewProjection(model_dartmaul->model,view,projection);
 
 
 		/*	
@@ -192,10 +180,14 @@ public:
 		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
 		glm::mat4 cubeModelRotation;*/
-		 
-		 
-		 dartmaulModel->Animate(animationMap["DART_MAUL_KF"],anim_time);
-		 dartmaulModel->Draw();
+		  
+		 model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
+		 model_dartmaul->Draw();
+
+		 shaderBones->SetModel(model_drone->model);
+		 model_drone->Animate(animationMap["DRONE_KF"], deltaTime);
+
+		 model_drone->Draw();
 		/*	if (dofOn)
 		{
 		setDofOnModel();
@@ -350,47 +342,6 @@ public:
 	}
 
 
-	void TextToScreen()
-	{
-		string splineStatus = splineOn ? "ON" : "OFF";
-		string splineMessage = ("1 - Enable/Disable Spline - STATUS: " + splineStatus );
-		screen_output(10, VIEWPORT_HEIGHT - 30, (char*) splineMessage.c_str());
-
-		string conesStatus = conesOn ? "ON" : "OFF";
-		string conesMessage = ("2 - Show/Hide Cones - STATUS: " + conesStatus );
-		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) conesMessage.c_str());
-
-		string dofStatus = dofOn ? "ON" : "OFF";
-		string dofMessage = "3 - Enable/Disable DOF - STATUS: " + dofStatus;
-		screen_output(10, VIEWPORT_HEIGHT - 70, (char*) dofMessage.c_str());
-
-		string humanStatus = humansOn? "ON" : "OFF";
-		string humanMessage = "4 - Show/Hide Humans - STATUS: " + humanStatus;
-		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) humanMessage.c_str());
-
-		string controls = "Camera W,A,S,D - Tennis Ball Control I,J,K,L,U,O";
-		screen_output(10, 20, (char*) controls.c_str());
-
-
-		char pos[100];
-		sprintf_s(pos,"Ball Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
-
-		char cameraPosition[100];
-		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,cameraPosition);
-
-		char cameraFrontPosition[100];
-		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
-
-		char animationTime[100];
-		sprintf_s(animationTime, "Animation Time %f",anim_time);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,animationTime);
-
-
-	}
-
 private:
 
 	glm::vec3 tennisModelWorldPosition;
@@ -400,19 +351,7 @@ private:
 
 	glm::mat4* animations;
 	int simulationIteration;
-
-#pragma region [ Uniform Variables ]
-	/*
-
-
-	GLint modelBonesUniform ;
-	GLint viewBonesUniform ;
-	GLint projectionBonesUniform;
-
-	GLint modelNoTextureUniform		;
-	GLint	viewNoTextureUniform		;
-	GLint	projectionNoTextureUniform;*/
-#pragma endregion  
+ 
 
 	GLuint* boneLocation;
 	std::map<string,IAnimation*> animationMap; 
@@ -433,17 +372,14 @@ private:
 	glm::uint numberOfBones ;
 	float oldTimeSinceStart;
 	float deltaTime;
+	float global_clock;
 	float speed; 
-	float anim_time;
-	/*GLint projectionNoTextureBonesUniform;
-	GLint modelBonesNoTextureUniform;
-	GLint	viewBonesNoTextureUniform;*/
-
 	bool splineOn;
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
-	Model* dartmaulModel;
+	Model* model_dartmaul;
+	Model* model_drone;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -558,6 +494,58 @@ private:
 		model_max->setJointLimit("L_Finger12",fingers);
 		model_max->setJointLimit("L_Finger11",fingers);
 		model_max->setJointLimit("L_Finger1",fingers);
+	}
+
+
+	inline void update_timer()
+	{
+		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+		deltaTime = timeSinceStart - oldTimeSinceStart;
+		oldTimeSinceStart = timeSinceStart; 
+
+		global_clock += deltaTime/1000 * ANIMATION_SPEED;
+	}
+
+
+	void TextToScreen()
+	{
+		string splineStatus = splineOn ? "ON" : "OFF";
+		string splineMessage = ("1 - Enable/Disable Spline - STATUS: " + splineStatus );
+		screen_output(10, VIEWPORT_HEIGHT - 30, (char*) splineMessage.c_str());
+
+		string conesStatus = conesOn ? "ON" : "OFF";
+		string conesMessage = ("2 - Show/Hide Cones - STATUS: " + conesStatus );
+		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) conesMessage.c_str());
+
+		string dofStatus = dofOn ? "ON" : "OFF";
+		string dofMessage = "3 - Enable/Disable DOF - STATUS: " + dofStatus;
+		screen_output(10, VIEWPORT_HEIGHT - 70, (char*) dofMessage.c_str());
+
+		string humanStatus = humansOn? "ON" : "OFF";
+		string humanMessage = "4 - Show/Hide Humans - STATUS: " + humanStatus;
+		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) humanMessage.c_str());
+
+		string controls = "Camera W,A,S,D - Tennis Ball Control I,J,K,L,U,O";
+		screen_output(10, 20, (char*) controls.c_str());
+
+
+		char pos[100];
+		sprintf_s(pos,"Ball Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
+
+		char cameraPosition[100];
+		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,cameraPosition);
+
+		char cameraFrontPosition[100];
+		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
+
+		char animationTime[100];
+		sprintf_s(animationTime, "Animation Time %f",global_clock);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,animationTime);
+
+
 	}
 };
 
