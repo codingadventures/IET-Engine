@@ -105,17 +105,28 @@ public:
 		model_bob = new Model(shaderBones, BOB_MODEL);
 		model_max = new Model(shaderBones, MAX_MODEL);
 		model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
-		model_drone = new Model(shaderBones, DRONE_MODEL);
+		float deg =   glm::radians(-90.0f);
+
+		for (int i = 0; i < 1; i++)
+		{
+			Model* drone = new Model(shaderBones, DRONE_MODEL);
+			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+			char animationName[20];
+			sprintf_s(animationName, "DRONE_KF_%d",i);
+			animationMap[animationName] =(IAnimation*) new  KeyFrameAnimator(drone->skeleton);
+			models_drone.push_back(drone);
+		
+			//free(drone);
+
+		}
 		
 		model_floor = new Model(shader, FLOOR_MODEL);
 		 
 		speed = 1.0f; 
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
-		float deg =   glm::radians(-90.0f);
 
 		model_dartmaul->model = glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
-		model_drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
-	 
+		
 		//dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
@@ -125,7 +136,6 @@ public:
 		animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(model_dartmaul->skeleton);
-		animationMap["DRONE_KF"] =(IAnimation*) new  KeyFrameAnimator(model_drone->skeleton);
 
 		conesOn = false;
 		dofOn = false;
@@ -184,10 +194,19 @@ public:
 		 model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
 		 model_dartmaul->Draw();
 
-		 shaderBones->SetModel(model_drone->model);
-		 model_drone->Animate(animationMap["DRONE_KF"], deltaTime);
+		 for (int i = 0; i < 1; i++)
+		 {
+			 char animationName[20];
+			 sprintf_s(animationName, "DRONE_KF_%d",i);
 
-		 model_drone->Draw();
+			 shaderBones->SetModel(models_drone[i]->model);
+
+			 models_drone[i]->Animate(animationMap[animationName], deltaTime);
+
+			 models_drone[i]->Draw();
+		 }
+		
+
 		/*	if (dofOn)
 		{
 		setDofOnModel();
@@ -367,6 +386,9 @@ private:
 	Model *tennisModel,*model_max;
 	Model* model_floor;
 	Model*  model_cones;
+	Model* model_dartmaul;
+	std::vector<Model*> models_drone;
+
 
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
@@ -378,8 +400,6 @@ private:
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
-	Model* model_dartmaul;
-	Model* model_drone;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
