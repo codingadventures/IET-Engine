@@ -401,47 +401,47 @@ private:
 					continue;
 				}
 
-				sn->num_pos_keys = chan->mNumPositionKeys;
-				sn->num_rot_keys = chan->mNumRotationKeys;
-				sn->num_sca_keys = chan->mNumScalingKeys;
+				sn->keyframe.num_pos_keys = chan->mNumPositionKeys;
+				sn->keyframe.num_rot_keys = chan->mNumRotationKeys;
+				sn->keyframe.num_sca_keys = chan->mNumScalingKeys;
 
 				// allocate memory
-				sn->pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_pos_keys);
-				sn->rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->num_rot_keys);
-				sn->sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->num_sca_keys);
-				sn->pos_key_times =
-					(double*)malloc (sizeof (double) * sn->num_pos_keys);
-				sn->rot_key_times =
-					(double*)malloc (sizeof (double) * sn->num_rot_keys);
-				sn->sca_key_times =
-					(double*)malloc (sizeof (double) * sn->num_sca_keys);
+				sn->keyframe.pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->keyframe.num_pos_keys);
+				sn->keyframe.rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->keyframe.num_rot_keys);
+				sn->keyframe.sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->keyframe.num_sca_keys);
+				sn->keyframe.pos_key_times =
+					(double*)malloc (sizeof (double) * sn->keyframe.num_pos_keys);
+				sn->keyframe.rot_key_times =
+					(double*)malloc (sizeof (double) * sn->keyframe.num_rot_keys);
+				sn->keyframe.sca_key_times =
+					(double*)malloc (sizeof (double) * sn->keyframe.num_sca_keys);
 
 				// add position keys to node
-				for (int i = 0; i < sn->num_pos_keys; i++) {
+				for (int i = 0; i < sn->keyframe.num_pos_keys; i++) {
 					aiVectorKey key = chan->mPositionKeys[i];
-					sn->pos_keys[i].x = key.mValue.x;
-					sn->pos_keys[i].y = key.mValue.y;
-					sn->pos_keys[i].z = key.mValue.z;
+					sn->keyframe.pos_keys[i].x = key.mValue.x;
+					sn->keyframe.pos_keys[i].y = key.mValue.y;
+					sn->keyframe.pos_keys[i].z = key.mValue.z;
 					// TODO -- forgot this
-					sn->pos_key_times[i] = key.mTime;
+					sn->keyframe.pos_key_times[i] = key.mTime;
 				}
 				// add rotation keys to node
-				for (int i = 0; i < sn->num_rot_keys; i++) {
+				for (int i = 0; i < sn->keyframe.num_rot_keys; i++) {
 					aiQuatKey key = chan->mRotationKeys[i];
-					sn->rot_keys[i].w = key.mValue.w;
-					sn->rot_keys[i].x = key.mValue.x;
-					sn->rot_keys[i].y = key.mValue.y;
-					sn->rot_keys[i].z = key.mValue.z;
-					sn->rot_key_times[i] = key.mTime;
-				}
+					sn->keyframe.rot_keys[i].w = key.mValue.w;
+					sn->keyframe.rot_keys[i].x = key.mValue.x;
+					sn->keyframe.rot_keys[i].y = key.mValue.y;
+					sn->keyframe.rot_keys[i].z = key.mValue.z;
+					sn->keyframe.rot_key_times[i] = key.mTime;
+				}		 
 				// add scaling keys to node
-				for (int i = 0; i < sn->num_sca_keys; i++) {
+				for (int i = 0; i < sn->keyframe.num_sca_keys; i++) {
 					aiVectorKey key = chan->mScalingKeys[i];
-					sn->sca_keys[i].x  = key.mValue.x;
-					sn->sca_keys[i].y  = key.mValue.y;
-					sn->sca_keys[i].z  = key.mValue.z;
-					sn->sca_key_times[i] = key.mTime;
-				} // end for
+					sn->keyframe.sca_keys[i].x  = key.mValue.x;
+					sn->keyframe.sca_keys[i].y  = key.mValue.y;
+					sn->keyframe.sca_keys[i].z  = key.mValue.z;
+					sn->keyframe.sca_key_times[i] = key.mTime;
+				} // end  for
 			} // end for mNumChannels
 		} else {
 			fprintf (stderr, "WARNING: no animations found in mesh file\n");

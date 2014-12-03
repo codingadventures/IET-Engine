@@ -110,31 +110,29 @@ public:
 		for (int i = 0; i < 1; i++)
 		{
 			Model* drone = new Model(shaderBones, DRONE_MODEL);
-			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 			animationMap[animationName] =(IAnimation*) new  KeyFrameAnimator(drone->skeleton);
 			models_drone.push_back(drone);
-		
+
 			//free(drone);
 
 		}
-		
+
 		model_floor = new Model(shader, FLOOR_MODEL);
-		 
+
 		speed = 1.0f; 
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
-
-		model_dartmaul->model = glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f))* glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
-		
-		//dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
-		model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
-		//cones->model = glm::translate(cones->model, glm::vec3(0.0f, 15.0f, 0.0f));
+		 
+		//
+		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
+		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 
 
-		animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
-		animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
-		animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
+		//animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
+		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
+		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(model_dartmaul->skeleton);
 
 		conesOn = false;
@@ -151,7 +149,8 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
 		update_timer();
-		   
+		float deg =   glm::radians(-90.0f);
+
 		// Set frame time
 		camera->MoveCamera();  
 
@@ -165,11 +164,11 @@ public:
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(tennisModel->model,view,projection);
+		shader->SetModelViewProjection(model_floor->model,view,projection);
 
 		//tennisModel->Draw();
 
-		shader->SetModel(model_floor->model);
+		//shader->SetModel(model_floor->model);
 
 		model_floor->Draw();
 
@@ -179,7 +178,17 @@ public:
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
-		
+		//if (camera->HasMoved)
+			model_dartmaul->model = 
+			glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
+			* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
+			* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
+			* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,50.0f))
+			* glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) 
+			* glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
+
+		dartMaulModelWorldPosition = decomposeT(model_dartmaul->model); 
+
 		shaderBones->SetModelViewProjection(model_dartmaul->model,view,projection);
 
 
@@ -189,23 +198,25 @@ public:
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
 		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
+
 		glm::mat4 cubeModelRotation;*/
-		  
-		 model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
-		 model_dartmaul->Draw();
+		// model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
 
-		 for (int i = 0; i < 1; i++)
-		 {
-			 char animationName[20];
-			 sprintf_s(animationName, "DRONE_KF_%d",i);
 
-			 shaderBones->SetModel(models_drone[i]->model);
+		model_dartmaul->Draw();
 
-			 models_drone[i]->Animate(animationMap[animationName], deltaTime);
+		for (int i = 0; i < 1; i++)
+		{
+			char animationName[20];
+			sprintf_s(animationName, "DRONE_KF_%d",i);
 
-			 models_drone[i]->Draw();
-		 }
-		
+			shaderBones->SetModel(models_drone[i]->model);
+
+			models_drone[i]->Animate(animationMap[animationName], deltaTime);
+
+			models_drone[i]->Draw();
+		}
+
 
 		/*	if (dofOn)
 		{
@@ -363,14 +374,14 @@ public:
 
 private:
 
-	glm::vec3 tennisModelWorldPosition;
+	glm::vec3 dartMaulModelWorldPosition;
 
 	void Controller::setupCurrentInstance();
 	int boneIndex;
 
 	glm::mat4* animations;
 	int simulationIteration;
- 
+
 
 	GLuint* boneLocation;
 	std::map<string,IAnimation*> animationMap; 
@@ -407,7 +418,7 @@ private:
 			pause = !pause;
 		}
 
-		if(keys[KEY_i])
+	/*	if(keys[KEY_i])
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
 			moved = true;
@@ -441,7 +452,7 @@ private:
 		{
 			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
 			moved = true;
-		}
+		}*/
 
 		if (keys[KEY_r])
 		{
@@ -550,7 +561,7 @@ private:
 
 
 		char pos[100];
-		sprintf_s(pos,"Ball Position - (%f,%f,%f)",tennisModelWorldPosition.x,tennisModelWorldPosition.y,tennisModelWorldPosition.z);
+		sprintf_s(pos,"Dart Maul Position - (%f,%f,%f)",dartMaulModelWorldPosition.x,dartMaulModelWorldPosition.y,dartMaulModelWorldPosition.z);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
 
 		char cameraPosition[100];

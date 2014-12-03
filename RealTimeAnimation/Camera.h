@@ -36,6 +36,7 @@ public:
 	GLfloat MovementSpeed;
 	GLfloat MouseSensitivity;
 	GLfloat Zoom; 
+	GLboolean HasMoved;
 
 	// Constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = -90.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
@@ -65,11 +66,12 @@ public:
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
 	void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
 	{
-		GLfloat velocity = this->MovementSpeed * deltaTime;
+		GLfloat velocity = this->MovementSpeed * deltaTime; 
+		HasMoved = true;
 		if(direction == FORWARD)
-			this->Position += this->Front * velocity;
+			this->Position += this->Front * velocity * glm::vec3(1.0f,0.0f,1.0f);
 		if(direction == BACKWARD)
-			this->Position -= this->Front * velocity;
+			this->Position -= this->Front * velocity * glm::vec3(1.0f,0.0f,1.0f);
 		if(direction == LEFT)
 			this->Position -= this->Right * velocity;
 		if(direction == RIGHT)
@@ -112,6 +114,7 @@ public:
 	// Moves/alters the camera positions based on user input
 	void MoveCamera()
 	{
+		HasMoved = false;
 		// Camera controls
 		if(keys[KEY_w])
 			this->ProcessKeyboard(FORWARD, SPEED_STEP);
@@ -121,7 +124,6 @@ public:
 			this->ProcessKeyboard(LEFT, SPEED_STEP);
 		if(keys[KEY_d])
 			this->ProcessKeyboard(RIGHT, SPEED_STEP);
-		  
 	}
 
 private:

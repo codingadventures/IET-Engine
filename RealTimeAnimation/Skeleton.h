@@ -77,43 +77,7 @@ public:
 		traversePositions(rootBone,model, positions);
 
 		return positions;
-	}
-
-
-
-
-	// Animate the model, given a animation matrix. bone_animation_mats is the output to be sent to the shader
-	void animate(Bone* bone,glm::mat4* animation, glm::mat4* bone_animation_mats) {
-
-		root_bone_check(&bone);
-
-		/* the animation for a particular bone at this time */
-		glm::mat4 local_anim;
-		// if node has a weighted bone...
-		int bone_i = bone->boneIndex;
-		if (bone_i > -1) {
-			// ... then get offset matrices
-			glm::mat4 bone_offset = bone->boneOffset;
-			glm::mat4 inv_bone_offset = glm::inverse (bone_offset);
-			glm::mat4 parent = bone_i == 0 ? glm::mat4(1.0f) :  bone->parent->finalTransform;
-
-			// ... at the moment get the per-bone animation from keyboard input
-			local_anim = animation[bone_i];
-
-			//glm::mat4 temp = bone_i==10 ? glm::rotate(glm::mat4(1.0f),angle,glm::vec3(1.0f,0.0f,0.0f)): glm::mat4(1.0f);
-
-			bone->finalTransform = parent * inv_bone_offset * local_anim * bone_offset ;
-			bone_animation_mats[bone_i] = bone->finalTransform; 
-		}
-		for (int i = 0; i < bone->children.size(); i++) {
-			animate (
-				&bone->children[i],
-				animation, 
-				bone_animation_mats
-				);
-		}
-	}
-
+	} 
 	 
 	// Import the hierarchical data structure from Assimp
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)

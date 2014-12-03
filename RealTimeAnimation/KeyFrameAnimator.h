@@ -37,40 +37,40 @@ private:
 		glm::mat4 local_anim;
 
 		glm::mat4 bone_T;
-		if (bone->num_pos_keys > 0) {
+		if (bone->keyframe.num_pos_keys > 0) {
 			int prev_key = 0;
 			int next_key = 0;
-			for (int i = 0; i < bone->num_pos_keys - 1; i++) {
+			for (int i = 0; i < bone->keyframe.num_pos_keys - 1; i++) {
 				prev_key = i;
 				next_key = i + 1;
-				if (bone->pos_key_times[next_key] >= animationTime) {
+				if (bone->keyframe.pos_key_times[next_key] >= animationTime) {
 					break;
 				}
 			}
-			float total_t = bone->pos_key_times[next_key] - bone->pos_key_times[prev_key];
-			float t = (animationTime - bone->pos_key_times[prev_key]) / total_t;
-			glm::vec3 vi = bone->pos_keys[prev_key];
-			glm::vec3 vf = bone->pos_keys[next_key];
+			float total_t = bone->keyframe.pos_key_times[next_key] - bone->keyframe.pos_key_times[prev_key];
+			float t = (animationTime - bone->keyframe.pos_key_times[prev_key]) / total_t;
+			glm::vec3 vi = bone->keyframe.pos_keys[prev_key];
+			glm::vec3 vf = bone->keyframe.pos_keys[next_key];
 			glm::vec3 lerped = vi * (1.0f - t) + vf * t;
 			bone_T = glm::translate(glm::mat4(), lerped);
 		}
 
 		glm::mat4 bone_R;
-		if (bone->num_rot_keys > 0) {
+		if (bone->keyframe.num_rot_keys > 0) {
 			// find next and previous keys
 			int prev_key = 0;
 			int next_key = 0;
-			for (int i = 0; i < bone->num_rot_keys - 1; i++) {
+			for (int i = 0; i < bone->keyframe.num_rot_keys - 1; i++) {
 				prev_key = i;
 				next_key = i + 1;
-				if (bone->rot_key_times[next_key] >= animationTime) {
+				if (bone->keyframe.rot_key_times[next_key] >= animationTime) {
 					break;
 				}
 			}
-			float total_t = bone->rot_key_times[next_key] - bone->rot_key_times[prev_key];
-			float t = (animationTime - bone->rot_key_times[prev_key]) / total_t;
-			glm::quat qi = bone->rot_keys[prev_key];
-			glm::quat qf = bone->rot_keys[next_key];
+			float total_t = bone->keyframe.rot_key_times[next_key] - bone->keyframe.rot_key_times[prev_key];
+			float t = (animationTime - bone->keyframe.rot_key_times[prev_key]) / total_t;
+			glm::quat qi = bone->keyframe.rot_keys[prev_key];
+			glm::quat qf = bone->keyframe.rot_keys[next_key];
 			glm::quat slerped = glm::slerp (qi, qf, t);
 			bone_R = glm::toMat4(slerped);
 		}

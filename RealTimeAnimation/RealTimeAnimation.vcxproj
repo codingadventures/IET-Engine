@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />
+    <ClInclude Include="KeyFrame.h" />
     <ClInclude Include="KeyFrameAnimator.h" />
     <ClInclude Include="Callbacks.h" />
     <ClInclude Include="Camera.h" />

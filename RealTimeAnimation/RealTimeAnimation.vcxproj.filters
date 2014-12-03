@@ -116,6 +116,9 @@
     <ClInclude Include="KeyFrameAnimator.h">
       <Filter>Header Files\Animation\KeyFrame</Filter>
     </ClInclude>
+    <ClInclude Include="KeyFrame.h">
+      <Filter>Header Files\Animation\Skeleton</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag">
