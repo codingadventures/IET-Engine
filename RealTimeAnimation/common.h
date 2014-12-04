@@ -32,6 +32,7 @@
 #define TENNIS_MODEL "models\\tennisball.obj"
 #define DART_MAUL "models\\DarMaul_LowPoly.dae"
 #define DRONE_MODEL "models\\drone.dae"
+#define ACTION_SHOOT "models\\shoot.dae"
 #define BOB_MODEL "models\\boblampclean.md5mesh"
 #define INITIAL_POINTER_POSITION glm::vec3(50.0f, 50.0f, -5.0f)
 

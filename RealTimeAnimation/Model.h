@@ -19,6 +19,7 @@ using namespace std;
 #include <SOIL.h>
 #include "Mesh.h"
 #include "IAnimation.h"
+#include "KeyFrameAnimator.h"
 
 GLint TextureFromFile(const char* path, string directory);
 
@@ -35,8 +36,7 @@ public:
 	{
 		assert(shader);
 		m_numberOfBone = 0;
-		skeleton = new Skeleton();
-		total_animation_time = 0.1;
+		skeleton = new Skeleton(); 
 		this->loadModel(path);
 
 		if (skeleton->getNumberOfBones()>0)
@@ -70,18 +70,6 @@ public:
 			this->meshes[i].Draw(*shader);
 	}
 
-	void Animate(IAnimation* animationInvoker, float delta_time)
-	{
-		assert(animationInvoker);
-
-		total_animation_time += delta_time/1000 * ANIMATION_SPEED;
-
-		if (total_animation_time > animDuration)
-			total_animation_time =  0.1;
-
-		animationInvoker->Animate(this->model,total_animation_time,animationMatrix);
-		//skeleton->updateAnimationMatrix(animationMatrix);
-	}
 
 	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
 	{
@@ -112,12 +100,7 @@ public:
 		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
 			animationMatrix[i] = glm::mat4(1); 
 	}
-
-	/*void animate(glm::mat4* animations)
-	{
-	skeleton->animate(skeleton->rootBone,animations,animationMatrices);
-	}*/
-
+ 
 	void resetAnimation()
 	{
 		CleanAnimationMatrix();
@@ -142,8 +125,7 @@ private:
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	GLuint* boneLocation;
 	int m_numberOfBone;
-
-	float total_animation_time; 
+	 
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -168,10 +150,7 @@ private:
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-
-		this->loadAnimations(scene);
-
-		//skeleton->inverseTransf =  glm::inverse(aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation));
+		 
 		int numOfBones = skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
@@ -373,110 +352,8 @@ private:
 		}
 		return textures;
 	}
-
-	void loadAnimations(const aiScene* scene)
-	{
-		/* get the first animation out and into keys */
-		if (scene->mNumAnimations > 0) {
-			// get just the first animation
-			aiAnimation* anim = scene->mAnimations[0];
-			printf ("animation name: %s\n", anim->mName.C_Str ());
-			printf ("animation has %i node channels\n", anim->mNumChannels);
-			printf ("animation has %i mesh channels\n", anim->mNumMeshChannels);
-			printf ("animation duration %f\n", anim->mDuration);
-			printf ("ticks per second %f\n", anim->mTicksPerSecond);
-
-			animDuration = anim->mDuration;
-			printf ("anim duration is %f\n", anim->mDuration);
-
-			// get the node channels
-			for (int i = 0; i < (int)anim->mNumChannels; i++) {
-				aiNodeAnim* chan = anim->mChannels[i];
-				// find the matching node in our skeleton by name
-				Bone* sn = skeleton->GetBone(
-					chan->mNodeName.C_Str (),	NULL);
-				if (!sn) {
-					fprintf (stderr, "WARNING: did not find node named %s in skeleton."
-						"animation broken.\n", chan->mNodeName.C_Str ());
-					continue;
-				}
-
-				sn->keyframe.num_pos_keys = chan->mNumPositionKeys;
-				sn->keyframe.num_rot_keys = chan->mNumRotationKeys;
-				sn->keyframe.num_sca_keys = chan->mNumScalingKeys;
-
-				// allocate memory
-				sn->keyframe.pos_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->keyframe.num_pos_keys);
-				sn->keyframe.rot_keys = (glm::quat*)malloc (sizeof (glm::quat) * sn->keyframe.num_rot_keys);
-				sn->keyframe.sca_keys = (glm::vec3*)malloc (sizeof (glm::vec3) * sn->keyframe.num_sca_keys);
-				sn->keyframe.pos_key_times =
-					(double*)malloc (sizeof (double) * sn->keyframe.num_pos_keys);
-				sn->keyframe.rot_key_times =
-					(double*)malloc (sizeof (double) * sn->keyframe.num_rot_keys);
-				sn->keyframe.sca_key_times =
-					(double*)malloc (sizeof (double) * sn->keyframe.num_sca_keys);
-
-				// add position keys to node
-				for (int i = 0; i < sn->keyframe.num_pos_keys; i++) {
-					aiVectorKey key = chan->mPositionKeys[i];
-					sn->keyframe.pos_keys[i].x = key.mValue.x;
-					sn->keyframe.pos_keys[i].y = key.mValue.y;
-					sn->keyframe.pos_keys[i].z = key.mValue.z;
-					// TODO -- forgot this
-					sn->keyframe.pos_key_times[i] = key.mTime;
-				}
-				// add rotation keys to node
-				for (int i = 0; i < sn->keyframe.num_rot_keys; i++) {
-					aiQuatKey key = chan->mRotationKeys[i];
-					sn->keyframe.rot_keys[i].w = key.mValue.w;
-					sn->keyframe.rot_keys[i].x = key.mValue.x;
-					sn->keyframe.rot_keys[i].y = key.mValue.y;
-					sn->keyframe.rot_keys[i].z = key.mValue.z;
-					sn->keyframe.rot_key_times[i] = key.mTime;
-				}		 
-				// add scaling keys to node
-				for (int i = 0; i < sn->keyframe.num_sca_keys; i++) {
-					aiVectorKey key = chan->mScalingKeys[i];
-					sn->keyframe.sca_keys[i].x  = key.mValue.x;
-					sn->keyframe.sca_keys[i].y  = key.mValue.y;
-					sn->keyframe.sca_keys[i].z  = key.mValue.z;
-					sn->keyframe.sca_key_times[i] = key.mTime;
-				} // end  for
-			} // end for mNumChannels
-		} else {
-			fprintf (stderr, "WARNING: no animations found in mesh file\n");
-		} // endif mNumAnimations > 0
-
-	}
-
-
+	 
 };
-//
-//GLint TextureFromFile(const char* path, string directory)
-//{
-//	//Generate texture ID and load texture data 
-//	string filename = string(path);
-//	//	string filename = string(path);
-//	 	string ll = "models\\" ;
-//	 	filename  = ll + path;
-//	GLuint textureID;
-//	glGenTextures(1, &textureID);
-//	int width,height;
-//	unsigned char* image = SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
-//	// Assign texture to ID
-//	glBindTexture(GL_TEXTURE_2D, textureID);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-//	glGenerateMipmap(GL_TEXTURE_2D);	
-//
-//	// Parameters
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-//	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//	SOIL_free_image_data(image);
-//	return textureID;
-//}
 
 
 GLint TextureFromFile(const char* fileName, string directory)

@@ -113,18 +113,18 @@ public:
 			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
-			animationMap[animationName] =(IAnimation*) new  KeyFrameAnimator(drone->skeleton);
+			droidAnimator =  new  KeyFrameAnimator(drone->skeleton);
 			models_drone.push_back(drone);
 
 			//free(drone);
 
 		}
-
+		mFireAnimationClip = new AnimationClip(ACTION_SHOOT);
 		model_floor = new Model(shader, FLOOR_MODEL);
 
 		speed = 1.0f; 
 		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
-		 
+
 		//
 		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
@@ -133,7 +133,7 @@ public:
 		//animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
-		animationMap["DART_MAUL_KF"] =(IAnimation*) new  KeyFrameAnimator(model_dartmaul->skeleton);
+		dartMaulAnimator =  new  KeyFrameAnimator(model_dartmaul->skeleton);
 
 		conesOn = false;
 		dofOn = false;
@@ -179,7 +179,7 @@ public:
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 		//if (camera->HasMoved)
-			model_dartmaul->model = 
+		model_dartmaul->model = 
 			glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
 			* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
 			* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
@@ -212,7 +212,7 @@ public:
 
 			shaderBones->SetModel(models_drone[i]->model);
 
-			models_drone[i]->Animate(animationMap[animationName], deltaTime);
+			droidAnimator->Animate(models_drone[i]->model,deltaTime,models_drone[i]->animationMatrix, mFireAnimationClip);
 
 			models_drone[i]->Draw();
 		}
@@ -384,7 +384,7 @@ private:
 
 
 	GLuint* boneLocation;
-	std::map<string,IAnimation*> animationMap; 
+	//std::map<string,IAnimation*> animationMap; 
 	Camera *camera;
 	Spline spline;
 
@@ -399,7 +399,8 @@ private:
 	Model*  model_cones;
 	Model* model_dartmaul;
 	std::vector<Model*> models_drone;
-
+	KeyFrameAnimator* droidAnimator;
+	KeyFrameAnimator* dartMaulAnimator;
 
 	IKInfo ikInfo;
 	glm::uint numberOfBones ;
@@ -411,6 +412,7 @@ private:
 	bool conesOn;
 	bool dofOn;
 	bool humansOn;
+	AnimationClip* mFireAnimationClip;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -418,40 +420,40 @@ private:
 			pause = !pause;
 		}
 
-	/*	if(keys[KEY_i])
+		/*	if(keys[KEY_i])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
+		moved = true;
 		}
 
 		if(keys[KEY_k])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,-speed,0.0));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,-speed,0.0));
+		moved = true;
 		}
 
 		if(keys[KEY_j])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(speed,0.0,0.0));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(speed,0.0,0.0));
+		moved = true;
 		}
 
 		if(keys[KEY_o])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,speed));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,speed));
+		moved = true;
 		}
 
 		if(keys[KEY_u])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,-speed));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,-speed));
+		moved = true;
 		}
 
 		if(keys[KEY_l])
 		{
-			tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
-			moved = true;
+		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
+		moved = true;
 		}*/
 
 		if (keys[KEY_r])

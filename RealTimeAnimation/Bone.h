@@ -28,7 +28,7 @@ struct Bone {
 	// General index of this bone
 	int boneIndex;
 
-	KeyFrame keyframe;
+	//KeyFrame keyframe;
 
 	char name[64];
 
