@@ -25,14 +25,16 @@
 #define INVALID_UNIFORM_LOCATION 0xffffffff
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
 
-#define ANIMATION_SPEED 0.6
+#define ANIMATION_SPEED 0.5
 #define CONES_MODEL "models\\Cones3.dae"
 #define MAX_MODEL "models\\max.dae"
 #define FLOOR_MODEL "models\\floor.obj"
 #define TENNIS_MODEL "models\\tennisball.obj"
-#define DART_MAUL "models\\DarMaul_LowPoly.dae"
-#define DRONE_MODEL "models\\drone.dae"
-#define ACTION_SHOOT "models\\shoot.dae"
+#define DART_MAUL "models\\DartMaul\\DartMaul.dae"
+#define WALK_ACTION "models\\DartMaul\\walk.dae"
+#define RUN_ACTION "models\\DartMaul\\run.dae"
+#define DROID_MODEL "models\\Droids\\droid.dae"
+#define SHOOT_ACTION "models\\Droids\\shoot.dae"
 #define BOB_MODEL "models\\boblampclean.md5mesh"
 #define INITIAL_POINTER_POSITION glm::vec3(50.0f, 50.0f, -5.0f)
 

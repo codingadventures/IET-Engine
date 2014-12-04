@@ -14,8 +14,7 @@ public:
 
 	KeyFrameAnimator(Skeleton *skeleton) : skeleton(skeleton) //: IAnimation(skeleton,glm::mat4(1))		 
 	{
-		assert(skeleton); 
-		mTotalAnimationTime = 0.1;
+		assert(skeleton);   
 	}
 
 	void Animate(glm::mat4 model, float deltaTime, glm::mat4* outAnimationSequence, AnimationClip* animationClip)
@@ -24,19 +23,21 @@ public:
 		this->animationSequence = outAnimationSequence;
 		this->mAnimationClip = animationClip;
 
-		mTotalAnimationTime += deltaTime/1000 * ANIMATION_SPEED;
+		this->mAnimationClip->mLocalTimer += deltaTime / 1000  * animationClip->mAnimationSpeed;
 
-		if (mTotalAnimationTime > mAnimationClip->mTotalDuration)
-			mTotalAnimationTime =  0.1;
-
-		animateKeyFrames(skeleton->rootBone,mTotalAnimationTime);
+		if (mAnimationClip->mLocalTimer > mAnimationClip->mTotalDuration)
+		{
+			mAnimationClip->mLocalTimer =  0;
+			mAnimationClip->mIsAnimationFinished = true;
+			//signal animation is done.
+		}
+		animateKeyFrames(skeleton->rootBone, mAnimationClip->mLocalTimer);
 	}
 
 private:
 	glm::mat4* animationSequence;
 	Skeleton* skeleton;
-	AnimationClip* mAnimationClip;
-	double mTotalAnimationTime;
+	AnimationClip* mAnimationClip; 
 
 	void animateKeyFrames(Bone* bone, float animationTime){
 
@@ -45,27 +46,49 @@ private:
 		glm::mat4 bone_T;
 		glm::mat4 bone_R;
 		AnimationPose* animationPose = mAnimationClip->GetAnimationPose(bone->name);
+
 		if (animationPose)
 		{
-
-
 			int lTranslationsSize = animationPose->GetTranslationsSize();
 			int lRotationsSize = animationPose->GetRotationsSize();
 			if (lTranslationsSize > 0) {
+
 				int prev_key = 0;
 				int next_key = 0;
-				for (int i = 0; i < lTranslationsSize - 1; i++) {
+				float total_t = 0.0f;
+				float t = 0.0f;
+				/*	if (mTotalAnimationTime <= mStartAnimationTime)
+				{
+				prev_key = lTranslationsSize - 1;
+				for (int i = 0; i < lTranslationsSize - 1; i++) 
+				{
+				next_key = i;
+				if (animationPose->GetTranslationKeyFrame(next_key).GetTime() >= animationTime) {
+				break;
+				}
+				} 
+
+				total_t = mAnimationClip->mTotalDuration;
+				t  =   (animationPose->GetTranslationKeyFrame(prev_key).GetTime() - animationTime) / total_t;
+				}
+				else
+				{	*/
+				for (int i = 0; i < lTranslationsSize - 1; i++) 
+				{
 					prev_key = i;
 					next_key = i + 1;
-					if (animationPose->GetTranslationKeyFrame(next_key).GetTime() >= animationTime) {
+					if (animationPose->GetTranslationKeyFrame(next_key).GetTime() > animationTime) {
 						break;
 					}
 				} 
-				float total_t = animationPose->GetTranslationKeyFrame(next_key).GetTime() - animationPose->GetTranslationKeyFrame(prev_key).GetTime();
-				float t = (animationTime - animationPose->GetTranslationKeyFrame(prev_key).GetTime()) / total_t;
+
+				total_t = animationPose->GetTranslationKeyFrame(next_key).GetTime() - animationPose->GetTranslationKeyFrame(prev_key).GetTime();
+				t = (animationTime - animationPose->GetTranslationKeyFrame(prev_key).GetTime()) / total_t;
+		 
 				glm::vec3 vi = animationPose->GetTranslationKeyFrame(prev_key).mTranslation;
 				glm::vec3 vf = animationPose->GetTranslationKeyFrame(next_key).mTranslation;
-				glm::vec3 lerped = vi * (1.0f - t) + vf * t;
+				glm::vec3 lerped =  vi * (1.0f - t) + vf * t;
+
 				bone_T = glm::translate(glm::mat4(), lerped);
 			}
 
@@ -73,15 +96,35 @@ private:
 				// find next and previous keys
 				int prev_key = 0;
 				int next_key = 0;
+				float total_t = 0.0f;
+				float t = 0.0f;
+				/*	if (mTotalAnimationTime <= mStartAnimationTime)
+				{	
+				prev_key = lRotationsSize - 1;
+				for (int i = 0; i < lRotationsSize - 1; i++) 
+				{
+				next_key = i;
+				if (animationPose->GetRotationKeyFrame(next_key).GetTime() >= animationTime) {
+				break;
+				}
+				} 
+
+				total_t =  mAnimationClip->mTotalDuration;
+				t =    (animationPose->GetRotationKeyFrame(prev_key).GetTime() - animationTime)   / total_t;
+				}
+				else
+				{*/
 				for (int i = 0; i < lRotationsSize - 1; i++) {
 					prev_key = i;
 					next_key = i + 1;
-					if (animationPose->GetRotationKeyFrame(next_key).GetTime() >= animationTime) {
+					if (animationPose->GetRotationKeyFrame(next_key).GetTime() > animationTime) {
 						break;
 					}
 				}
-				float total_t = animationPose->GetRotationKeyFrame(next_key).GetTime() - animationPose->GetRotationKeyFrame(prev_key).GetTime();
-				float t = (animationTime -  animationPose->GetRotationKeyFrame(next_key).GetTime()) / total_t;
+				total_t = animationPose->GetRotationKeyFrame(next_key).GetTime() - animationPose->GetRotationKeyFrame(prev_key).GetTime();
+				t = (animationTime -  animationPose->GetRotationKeyFrame(prev_key).GetTime()) / total_t;
+				//}
+
 				glm::quat qi = animationPose->GetRotationKeyFrame(prev_key).mRotation;
 				glm::quat qf = animationPose->GetRotationKeyFrame(next_key).mRotation;
 				glm::quat slerped = glm::slerp (qi, qf, t);
@@ -97,7 +140,7 @@ private:
 				glm::mat4 bone_offset = bone->boneOffset;;
 
 				bone->finalTransform = bone->parent->finalTransform * local_anim;
-				animationSequence[bone_i] = bone->finalTransform  * bone_offset; //Change this to match OGL
+				animationSequence[bone_i] =  bone->finalTransform * bone_offset; //Change this to match OGL
 
 			}
 		}

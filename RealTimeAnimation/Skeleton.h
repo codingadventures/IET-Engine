@@ -21,11 +21,10 @@ public:
 	Bone* rootBone;  
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
 	std::map<std::string, BoneInfo> boneMapping;
+	glm::mat4 inverseGlobal;
 
 private:
-	int numOfBones;
-	glm::mat4 inverseTransf;
-
+	int numOfBones; 
 
 public:
 	Skeleton(){
@@ -48,7 +47,7 @@ public:
 
 		bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
 		 
-		bone->finalTransform =  bone->globalTransform  * bone->boneOffset;  
+		bone->finalTransform = inverseGlobal * bone->globalTransform  * bone->boneOffset;  
 		 
 
 		for (int i = 0; i < bone->children.size(); i++) {

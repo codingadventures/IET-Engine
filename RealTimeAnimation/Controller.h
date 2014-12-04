@@ -3,6 +3,9 @@
 
 #define GLM_FORCE_RADIANS
 
+#include <gl/glut.h>
+#include <glm/glm.hpp> 
+#include <queue>
 #include "Callbacks.h"
 #include "ScreenOutput.h"
 #include "Shader.h"
@@ -11,8 +14,6 @@
 #include "Camera.h"
 #include "Line.h"
 #include "Point.h"
-#include <gl/glut.h>
-#include <glm/glm.hpp> 
 #include "IKAnimator.h"
 #include "KeyFrameAnimator.h"
 
@@ -51,7 +52,7 @@ public:
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
-		this->camera = new Camera(glm::vec3(-48.0f,135.0f,-164.0f), glm::vec3(0.0f,1.0f,0.0f),90);
+		this->camera = new Camera(glm::vec3(0.0f,150.0f,0.0f));
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
@@ -100,30 +101,34 @@ public:
 
 		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 
-		tennisModel =  new Model(shader, TENNIS_MODEL);
+		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL);
-		model_bob = new Model(shaderBones, BOB_MODEL);
-		model_max = new Model(shaderBones, MAX_MODEL);
-		model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
+		//model_bob = new Model(shaderBones, BOB_MODEL);
+		//model_max = new Model(shaderBones, MAX_MODEL);
+		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 		float deg =   glm::radians(-90.0f);
 
 		for (int i = 0; i < 1; i++)
 		{
-			Model* drone = new Model(shaderBones, DRONE_MODEL);
-			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+			Model* drone = new Model(shaderBones, DROID_MODEL);
+			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 			droidAnimator =  new  KeyFrameAnimator(drone->skeleton);
 			models_drone.push_back(drone);
 
 			//free(drone);
-
 		}
-		mFireAnimationClip = new AnimationClip(ACTION_SHOOT);
+
+
+		mFireAnimationClip = new AnimationClip(SHOOT_ACTION, 1.0f);
+		mWalkAnimationClip = new AnimationClip(WALK_ACTION,ANIMATION_SPEED);
+		mRunAnimationClip = new AnimationClip(RUN_ACTION,1.0f);
+
 		model_floor = new Model(shader, FLOOR_MODEL);
 
 		speed = 1.0f; 
-		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(10.0f, 10.0f, 10.0f));	
+		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(50.0f, 50.0f, 50.0f));	
 
 		//
 		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
@@ -138,6 +143,7 @@ public:
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
+		isRunning = false;
 		splineOn = false;
 		global_clock = 0;
 	}
@@ -178,14 +184,14 @@ public:
 
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
-		//if (camera->HasMoved)
+		//
 		model_dartmaul->model = 
 			glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
 			* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
 			* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
-			* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,50.0f))
-			* glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) 
-			* glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
+			* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,150.0f))
+			//	* glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) 
+			*  glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
 
 		dartMaulModelWorldPosition = decomposeT(model_dartmaul->model); 
 
@@ -201,8 +207,14 @@ public:
 
 		glm::mat4 cubeModelRotation;*/
 		// model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
+		if (camera->HasMoved)
+		{
+			if (isRunning)
+				dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mRunAnimationClip);
+			else
+				dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);
 
-
+		}
 		model_dartmaul->Draw();
 
 		for (int i = 0; i < 1; i++)
@@ -381,7 +393,7 @@ private:
 
 	glm::mat4* animations;
 	int simulationIteration;
-
+	std::queue<AnimationClip*> mEventQueue;
 
 	GLuint* boneLocation;
 	//std::map<string,IAnimation*> animationMap; 
@@ -413,6 +425,9 @@ private:
 	bool dofOn;
 	bool humansOn;
 	AnimationClip* mFireAnimationClip;
+	AnimationClip* mRunAnimationClip;
+	AnimationClip* mWalkAnimationClip;
+	bool isRunning;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -420,6 +435,11 @@ private:
 			pause = !pause;
 		}
 
+		if (keys[KEY_w] || keys[KEY_s] || keys[KEY_a] || keys[KEY_d])
+		{
+			mEventQueue.push(mWalkAnimationClip);
+
+		}
 		/*	if(keys[KEY_i])
 		{
 		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
@@ -458,7 +478,7 @@ private:
 
 		if (keys[KEY_r])
 		{
-			camera->Position = decomposeT(tennisModel->model);
+			mEventQueue.push(mRunAnimationClip);
 		}
 
 		if (keys[KEY_e])

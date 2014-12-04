@@ -12,14 +12,15 @@
 class AnimationClip
 {
 public:
-	AnimationClip(string file_name);
+	AnimationClip(string file_name, float animationSpeed);
 
 	std::map<std::string,AnimationPose> mBoneMapping;
 
 	std::string mAnimationName;
 	double mLocalTimer;
 	double mTotalDuration;
-
+	float mAnimationSpeed;
+	bool mIsAnimationFinished;
 	AnimationPose* GetAnimationPose(std::string boneName);
 protected:
 
@@ -79,8 +80,11 @@ void AnimationClip::loadAnimations(const aiScene* scene )
 
 }
 
-AnimationClip::AnimationClip(string file_name)
+AnimationClip::AnimationClip(string file_name, float animationSpeed)
 {
+	mLocalTimer = 0;
+	mIsAnimationFinished = false;
+	mAnimationSpeed = animationSpeed;
 	// Read file via ASSIMP
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(file_name,aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);

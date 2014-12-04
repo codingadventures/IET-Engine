@@ -45,8 +45,8 @@ public:
 
 			CleanAnimationMatrix();
 
-			skeleton->updateSkeleton();
-			skeleton->updateAnimationMatrix(animationMatrix);/**/
+		 	skeleton->updateSkeleton();
+			skeleton->updateAnimationMatrix(animationMatrix); 
 		}
 
 
@@ -150,7 +150,7 @@ private:
 		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-		 
+		 skeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
 		int numOfBones = skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
