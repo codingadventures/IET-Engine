@@ -2,7 +2,6 @@
 #define COMMON_H
 
 
-
 #include <assimp/scene.h> 
 #include <iostream>
 #include <vector>
@@ -10,6 +9,8 @@
 // GLEW
 #define GLEW_STATIC
 #include <GL/glew.h> 
+
+#include <gl/glut.h>
  
 //GLM
 #include <glm/glm.hpp>
@@ -17,6 +18,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/spline.hpp>
+
+
+
 
 #include "Keys.h"
 

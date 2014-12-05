@@ -22,6 +22,7 @@ public:
 	float mAnimationSpeed;
 	bool mIsAnimationFinished;
 	AnimationPose* GetAnimationPose(std::string boneName);
+	void Reset(double animationSpeed = 0);
 protected:
 
 private: 
@@ -29,6 +30,14 @@ private:
 	void loadAnimations(const aiScene* scene );
 };
 
+void AnimationClip::Reset(double animationSpeed = NULL){
+	
+	this->mIsAnimationFinished = false;
+	mLocalTimer = 0;
+
+	if (animationSpeed !=NULL)
+		mAnimationSpeed = animationSpeed;
+}
 void AnimationClip::loadAnimations(const aiScene* scene )
 {
 

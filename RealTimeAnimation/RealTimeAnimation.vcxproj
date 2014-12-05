@@ -88,10 +88,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationClip.h" />
+    <ClInclude Include="AnimationEventController.h" />
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Idle.h" />
     <ClInclude Include="KeyFrame.h" />
     <ClInclude Include="KeyFrameAnimator.h" />
     <ClInclude Include="Callbacks.h" />
@@ -99,12 +102,15 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="IKAnimator.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerState.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="IKInfo.h" />
     <ClInclude Include="Keys.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Run.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skeleton.h" />
     <ClInclude Include="ScreenOutput.h" />
@@ -112,6 +118,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />
+    <ClInclude Include="Walk.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag" />

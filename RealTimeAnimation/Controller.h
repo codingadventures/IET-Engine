@@ -3,7 +3,6 @@
 
 #define GLM_FORCE_RADIANS
 
-#include <gl/glut.h>
 #include <glm/glm.hpp> 
 #include <queue>
 #include "Callbacks.h"
@@ -15,7 +14,8 @@
 #include "Line.h"
 #include "Point.h"
 #include "IKAnimator.h"
-#include "KeyFrameAnimator.h"
+#include "KeyFrameAnimator.h" 
+#include "AnimationEventController.h"
 
 using namespace std::placeholders;
 
@@ -140,6 +140,7 @@ public:
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 		dartMaulAnimator =  new  KeyFrameAnimator(model_dartmaul->skeleton);
 
+		mAnimationEventController = new AnimationEventController();
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
@@ -207,14 +208,17 @@ public:
 
 		glm::mat4 cubeModelRotation;*/
 		// model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
-		if (camera->HasMoved)
-		{
-			if (isRunning)
-				dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mRunAnimationClip);
-			else
-				dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);
+		std::vector<AnimationClip*> animations = mAnimationEventController->GetNextAnimation();
 
-		}
+		if (animations.size()>0)
+			dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,);
+
+		/*if (isRunning)
+		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mRunAnimationClip);
+		else
+		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);*/
+
+
 		model_dartmaul->Draw();
 
 		for (int i = 0; i < 1; i++)
@@ -228,6 +232,7 @@ public:
 
 			models_drone[i]->Draw();
 		}
+
 
 
 		/*	if (dofOn)
@@ -389,14 +394,12 @@ private:
 	glm::vec3 dartMaulModelWorldPosition;
 
 	void Controller::setupCurrentInstance();
+	GLuint* boneLocation;
+
 	int boneIndex;
+	int simulationIteration;
 
 	glm::mat4* animations;
-	int simulationIteration;
-	std::queue<AnimationClip*> mEventQueue;
-
-	GLuint* boneLocation;
-	//std::map<string,IAnimation*> animationMap; 
 	Camera *camera;
 	Spline spline;
 
@@ -435,11 +438,15 @@ private:
 			pause = !pause;
 		}
 
+
 		if (keys[KEY_w] || keys[KEY_s] || keys[KEY_a] || keys[KEY_d])
 		{
-			mEventQueue.push(mWalkAnimationClip);
-
+			mAnimationEventController->AddAnimation(mWalkAnimationClip);
 		}
+
+		if (keys[KEY_r])
+			mAnimationEventController->AddAnimation(mRunAnimationClip);
+
 		/*	if(keys[KEY_i])
 		{
 		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
@@ -476,15 +483,11 @@ private:
 		moved = true;
 		}*/
 
-		if (keys[KEY_r])
-		{
-			mEventQueue.push(mRunAnimationClip);
-		}
 
-		if (keys[KEY_e])
-		{
-			camera->Position = decomposeT(model_bob->model);
-		}
+		//if (keys[KEY_e])
+		//{
+		//	camera->Position = decomposeT(model_bob->model);
+		//}
 
 		if(keys[KEY_PLUS])
 		{

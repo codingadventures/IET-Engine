@@ -6,7 +6,7 @@
 class Blender
 {
 public:
-	  static AnimationClip Blend(AnimationClip animation1, AnimationClip animation2)
+	  static AnimationClip* Blend(AnimationClip animation1, AnimationClip animation2, double tStart)
 	  {
 
 	  }

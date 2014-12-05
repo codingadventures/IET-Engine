@@ -19,9 +19,6 @@
     <Filter Include="Header Files\Controller">
       <UniqueIdentifier>{5fba5639-efe6-4644-89ad-73159fc3dc30}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Control">
-      <UniqueIdentifier>{329f97fc-4698-4b70-96e5-a5aae98101e1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Camera">
       <UniqueIdentifier>{4b92aaa5-bcda-4271-8169-3cfc57edd370}</UniqueIdentifier>
     </Filter>
@@ -43,6 +40,15 @@
     <Filter Include="Header Files\Animation\Skeleton">
       <UniqueIdentifier>{f86179ba-f3db-4633-a871-5e958b1e07fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Player">
+      <UniqueIdentifier>{81a9a69f-2218-4da7-aeb3-db232ecb8f36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\User Control">
+      <UniqueIdentifier>{329f97fc-4698-4b70-96e5-a5aae98101e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Player\States">
+      <UniqueIdentifier>{4ed1f97c-a970-4528-a7c5-96383661dc4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -57,10 +63,10 @@
       <Filter>Header Files\Controller</Filter>
     </ClInclude>
     <ClInclude Include="Callbacks.h">
-      <Filter>Header Files\Control</Filter>
+      <Filter>Header Files\User Control</Filter>
     </ClInclude>
     <ClInclude Include="Keys.h">
-      <Filter>Header Files\Control</Filter>
+      <Filter>Header Files\User Control</Filter>
     </ClInclude>
     <ClInclude Include="Spline.h">
       <Filter>Header Files\Animation</Filter>
@@ -124,6 +130,27 @@
     </ClInclude>
     <ClInclude Include="Blender.h">
       <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationEventController.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerState.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Idle.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Walk.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Run.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Header Files\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
