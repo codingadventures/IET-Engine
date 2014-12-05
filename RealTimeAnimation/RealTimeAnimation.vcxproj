@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClInclude Include="AnimationClip.h" />
     <ClInclude Include="AnimationEventController.h" />
+    <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
     <ClInclude Include="Bone.h" />

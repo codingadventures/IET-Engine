@@ -30,7 +30,7 @@ private:
 	void loadAnimations(const aiScene* scene );
 };
 
-void AnimationClip::Reset(double animationSpeed = NULL){
+void AnimationClip::Reset(double animationSpeed){
 	
 	this->mIsAnimationFinished = false;
 	mLocalTimer = 0;

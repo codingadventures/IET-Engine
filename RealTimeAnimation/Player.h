@@ -1,24 +1,58 @@
-#ifndef Player__
-#define Player__
+#ifndef Player_h__
+#define Player_h__
+#include "PlayerState.h"
+#include "AnimationEventController.h"
+#include "Model.h"
+
 
 class Player
 {
 public:
-	AnimationEventController* mAnimationEventController;
 	Model* model;
-	PlayerState* state;
-	Player();
+
+	PlayerState* mState;
+	Player(Model* model);
+
+	void HandleInput(bool* inputKeys);
+	void Update(double deltaTime);
 	~Player();
 
+	 
+
 private:
+	AnimationEventController* mAnimationEventController;
 
 };
 
-Player::Player()
+Player::Player(Model* model) : model(model)
 {
+
 }
 
 Player::~Player()
 {
-}  
-#endif // !Player__
+	delete mAnimationEventController;
+}   
+
+void Player::HandleInput(bool* inputKeys)
+{
+	PlayerState* state = mState->handleInput(inputKeys);
+	 
+	if (state != nullptr)
+	{
+		delete mState;
+
+		mAnimationEventController->AddAnimation(state->GetAnimation());
+		
+		mState = state;
+	}
+}
+
+void Player::Update(double deltaTime)
+{
+	//Do something with animating
+
+
+}
+
+#endif // Player_h__

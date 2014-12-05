@@ -2,25 +2,29 @@
 #ifndef PlayerState__
 #define PlayerState__
 
-#include "Player.h"
-#include "common.h"
+//#include "Player.h"
 #include "AnimationClip.h"
 
 class PlayerState
 {
 protected:
 	AnimationClip* mAnimationClip;
-	PlayerState(AnimationClip* animationClip): mAnimationClip(animationClip){}
-
-public:
-
-	virtual ~PlayerState() {}
-	virtual void handleInput(Player& heroine);
-	virtual void update(Player& heroine);
 	
+public:
+	virtual ~PlayerState() {}
+	virtual PlayerState* handleInput(bool* inputKeys);
+	virtual void update();
+	
+	AnimationClip* GetAnimation();
+
 private:
 
 };
+
+AnimationClip* PlayerState::GetAnimation()
+{
+	return this->mAnimationClip;
+}
 
 
 #endif

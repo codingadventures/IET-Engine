@@ -152,6 +152,9 @@
     <ClInclude Include="Enemy.h">
       <Filter>Header Files\Player</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationManager.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag">

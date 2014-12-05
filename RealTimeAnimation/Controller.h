@@ -16,6 +16,8 @@
 #include "IKAnimator.h"
 #include "KeyFrameAnimator.h" 
 #include "AnimationEventController.h"
+#include "AnimationManager.h"
+#include "Player.h"
 
 using namespace std::placeholders;
 
@@ -33,6 +35,9 @@ public:
 
 		free(animations);
 		free(boneLocation);
+		free(mFireAnimationClip);
+		free(mRunAnimationClip);
+		free(mWalkAnimationClip);
 
 	}
 	void Run(){
@@ -103,6 +108,9 @@ public:
 
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL);
+
+		player = new Player(model_dartmaul);
+
 		//model_bob = new Model(shaderBones, BOB_MODEL);
 		//model_max = new Model(shaderBones, MAX_MODEL);
 		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
@@ -120,10 +128,14 @@ public:
 			//free(drone);
 		}
 
-
 		mFireAnimationClip = new AnimationClip(SHOOT_ACTION, 1.0f);
-		mWalkAnimationClip = new AnimationClip(WALK_ACTION,ANIMATION_SPEED);
+		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
+
+		mWalkAnimationClip = new AnimationClip(WALK_ACTION, ANIMATION_SPEED);
+		AnimationManager::AnimationSet["walk"] = mWalkAnimationClip;
+
 		mRunAnimationClip = new AnimationClip(RUN_ACTION,1.0f);
+		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
 
 		model_floor = new Model(shader, FLOOR_MODEL);
 
@@ -139,8 +151,7 @@ public:
 		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 		dartMaulAnimator =  new  KeyFrameAnimator(model_dartmaul->skeleton);
-
-		mAnimationEventController = new AnimationEventController();
+		 
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
@@ -208,16 +219,19 @@ public:
 
 		glm::mat4 cubeModelRotation;*/
 		// model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
-		std::vector<AnimationClip*> animations = mAnimationEventController->GetNextAnimation();
+//		std::vector<AnimationClip*> animations = mAnimationEventController->GetNextAnimation();
 
-		if (animations.size()>0)
-			dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,);
+	//	if (animations.size()>0)
+//			dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,);
 
 		/*if (isRunning)
 		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mRunAnimationClip);
 		else
 		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);*/
 
+		player->HandleInput(keys);
+
+		player->Update(deltaTime);
 
 		model_dartmaul->Draw();
 
@@ -403,6 +417,8 @@ private:
 	Camera *camera;
 	Spline spline;
 
+	Player* player;
+
 	Shader *shader;
 	Shader *shaderBones;
 	Shader* shaderBonesNoTexture;
@@ -437,16 +453,7 @@ private:
 		{
 			pause = !pause;
 		}
-
-
-		if (keys[KEY_w] || keys[KEY_s] || keys[KEY_a] || keys[KEY_d])
-		{
-			mAnimationEventController->AddAnimation(mWalkAnimationClip);
-		}
-
-		if (keys[KEY_r])
-			mAnimationEventController->AddAnimation(mRunAnimationClip);
-
+		 
 		/*	if(keys[KEY_i])
 		{
 		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
