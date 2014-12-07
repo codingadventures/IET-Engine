@@ -1,4 +1,5 @@
-#pragma once
+#ifndef Skeleton_h__
+#define Skeleton_h__
 
 
 #include <vector>
@@ -7,10 +8,10 @@
 #include "Bone.h"  
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/normalize_dot.hpp>
-#include "common.h"
+#include <glm/gtx/normalize_dot.hpp> 
 #include "ScreenOutput.h"
 #include "IKInfo.h"
+#include "Helper.h"
 
 using namespace std;
 
@@ -163,7 +164,7 @@ public:
 		}
 
 		// recurse to children
-		for (int i = 0; i < boneToFind->children.size(); i++) {
+		for (unsigned int i = 0; i < boneToFind->children.size(); i++) {
 			Bone* child = GetBone (node_name,	&boneToFind->children[i]);
 			if (child != NULL) {
 				return child;
@@ -195,7 +196,7 @@ public:
 		if (bone->boneIndex >= 0)
 			animationMatrix[bone->boneIndex] = bone->finalTransform;
 
-		for (int i = 0; i < bone->children.size(); i++)
+		for (unsigned int i = 0; i < bone->children.size(); i++)
 		{
 			updateAnimationMatrix(animationMatrix, &bone->children[i]);
 		}
@@ -231,7 +232,7 @@ private:
 
 		int counter = bone->boneIndex > -1 ? 1 : 0;
 
-		for (int i = 0; i < bone->children.size(); i++)
+		for (unsigned int i = 0; i < bone->children.size(); i++)
 			counter += traverseGetNumberOfBones(&bone->children[i]);
 
 		return counter;
@@ -241,3 +242,4 @@ private:
 
 
 };
+#endif // Skeleton_h__

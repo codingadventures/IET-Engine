@@ -1,14 +1,17 @@
-#pragma once
+#ifndef Bone_h__
+#define Bone_h__
+
 
 #include <vector>
 #include <glm/glm.hpp>  
 #include "AngleRestriction.h"
 #include "KeyFrame.h"
+#include "Helper.h"
 
 struct BoneInfo
 {
 	glm::mat4  offset;   
-	GLuint index;
+	unsigned int index;
 };
 
 struct Bone {
@@ -71,3 +74,4 @@ struct Bone {
  
 
 };
+#endif // Bone_h__

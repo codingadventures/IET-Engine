@@ -12,34 +12,46 @@
 class AnimationClip
 {
 public:
-	AnimationClip(string file_name, float animationSpeed);
+	AnimationClip(double ,string ,string );
+	AnimationClip(double , double, string );
+
 
 	std::map<std::string,AnimationPose> mBoneMapping;
 
 	std::string mAnimationName;
-	double mLocalTimer;
 	double mTotalDuration;
-	float mAnimationSpeed;
-	bool mIsAnimationFinished;
-	AnimationPose* GetAnimationPose(std::string boneName);
+	double mLocalTimer;
+	double mAnimationSpeed; 
+	AnimationPose* GetAnimationPose( string boneName);
+	void SetAnimationPose(string boneName,AnimationPose animationPose);
+	void Update(double deltaTime);
 	void Reset(double animationSpeed = 0);
-protected:
 
 private: 
 
-	void loadAnimations(const aiScene* scene );
+	void loadAnimations(string file_name );
+
+	void Init();
 };
 
 void AnimationClip::Reset(double animationSpeed){
-	
-	this->mIsAnimationFinished = false;
-	mLocalTimer = 0;
+	 
+	mLocalTimer = 0.0;
 
-	if (animationSpeed !=NULL)
+	if (animationSpeed != 0)
 		mAnimationSpeed = animationSpeed;
 }
-void AnimationClip::loadAnimations(const aiScene* scene )
+void AnimationClip::loadAnimations(string file_name)
 {
+	// Read file via ASSIMP
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(file_name,aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	// Check for errors
+	if(!scene || !scene->mRootNode) // if is Not Zero
+	{
+		printf("ERROR::ASSIMP::%s",importer.GetErrorString());
+		return;
+	}
 
 	/* get the first animation out and into keys */
 	if (scene->mNumAnimations > 0) {
@@ -89,22 +101,16 @@ void AnimationClip::loadAnimations(const aiScene* scene )
 
 }
 
-AnimationClip::AnimationClip(string file_name, float animationSpeed)
+AnimationClip::AnimationClip(double animationSpeed, string file_name, string animationName) : mAnimationSpeed(animationSpeed), mAnimationName(animationName)
 {
-	mLocalTimer = 0;
-	mIsAnimationFinished = false;
-	mAnimationSpeed = animationSpeed;
-	// Read file via ASSIMP
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(file_name,aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
-	// Check for errors
-	if(!scene || !scene->mRootNode) // if is Not Zero
-	{
-		cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
-		return;
-	}
+	Init();
 
-	loadAnimations(scene);
+	loadAnimations(file_name);
+}
+
+AnimationClip::AnimationClip(double animationSpeed, double totalDuration, string animationName)  : mAnimationSpeed(animationSpeed), mTotalDuration(totalDuration), mAnimationName(animationName)
+{
+	Init();
 }
 
 AnimationPose* AnimationClip::GetAnimationPose(std::string boneName)
@@ -113,6 +119,27 @@ AnimationPose* AnimationClip::GetAnimationPose(std::string boneName)
 		return &this->mBoneMapping[boneName];
 
 	return nullptr;
+}
+
+void AnimationClip::Init()
+{
+	mLocalTimer = 0.0; 
+}
+
+void AnimationClip::SetAnimationPose(string boneName,AnimationPose animationPose)
+{
+	mBoneMapping[boneName] = animationPose;
+}
+
+void AnimationClip::Update(double deltaTime)
+{
+	mLocalTimer += deltaTime / 1000  * mAnimationSpeed;
+
+	if (mLocalTimer > mTotalDuration)
+	{
+		Reset();
+		//signal animation is done.
+	}
 }
 
 #endif // AnimationClip_h__

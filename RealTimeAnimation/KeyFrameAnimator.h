@@ -12,31 +12,27 @@ class KeyFrameAnimator
 {
 public:
 
-	KeyFrameAnimator(Skeleton *skeleton) : skeleton(skeleton) //: IAnimation(skeleton,glm::mat4(1))		 
+
+
+
+	KeyFrameAnimator(Skeleton* pSkeleton) : m_pSkeleton(pSkeleton) //: IAnimation(skeleton,glm::mat4(1))		 
 	{
-		assert(skeleton);   
+		assert(pSkeleton);   
 	}
 
 	void Animate(glm::mat4 model, float deltaTime, glm::mat4* outAnimationSequence, AnimationClip* animationClip)
 	{
 		assert(outAnimationSequence);
-		this->animationSequence = outAnimationSequence;
+
+		this->mAnimationMatrix = outAnimationSequence;
 		this->mAnimationClip = animationClip;
 
-		this->mAnimationClip->mLocalTimer += deltaTime / 1000  * animationClip->mAnimationSpeed;
-
-		if (mAnimationClip->mLocalTimer > mAnimationClip->mTotalDuration)
-		{
-			mAnimationClip->mLocalTimer =  0;
-			mAnimationClip->mIsAnimationFinished = true;
-			//signal animation is done.
-		}
-		animateKeyFrames(skeleton->rootBone, mAnimationClip->mLocalTimer);
+		animateKeyFrames(m_pSkeleton->rootBone, mAnimationClip->mLocalTimer);
 	}
 
 private:
-	glm::mat4* animationSequence;
-	Skeleton* skeleton;
+	glm::mat4* mAnimationMatrix;
+	Skeleton* m_pSkeleton;
 	AnimationClip* mAnimationClip; 
 
 	void animateKeyFrames(Bone* bone, float animationTime){
@@ -49,9 +45,17 @@ private:
 
 		if (animationPose)
 		{    
-			bone_T = glm::translate(glm::mat4(), animationPose->GetInterpolatedTranslationKeyFrame(animationTime));
-			bone_R = glm::toMat4(animationPose->GetInterpolatedRotationKeyFrame(animationTime));
-
+			if (animationPose->mIsAlreadyInterpolated)
+			{
+				bone_T = glm::translate(glm::mat4(),animationPose->GetTranslationKeyFrame(animationPose->FindTranslationKeyFrame(animationTime)).mTranslation);
+				bone_R = glm::toMat4(animationPose->GetRotationKeyFrame(animationPose->FindRotationKeyFrame(animationTime)).mRotation);
+			}
+			else
+			{
+				bone_T = glm::translate(glm::mat4(), animationPose->GetInterpolatedTranslationKeyFrame(animationTime));
+				bone_R = glm::toMat4(animationPose->GetInterpolatedRotationKeyFrame(animationTime));
+			}
+			
 			local_anim = bone_T * bone_R;
 
 			// if bone has a weighted bone...
@@ -61,7 +65,7 @@ private:
 				glm::mat4 bone_offset = bone->boneOffset;;
 
 				bone->finalTransform = bone->parent->finalTransform * local_anim;
-				animationSequence[bone_i] =  bone->finalTransform * bone_offset; //Change this to match OGL
+				mAnimationMatrix[bone_i] =  bone->finalTransform * bone_offset; //Change this to match OGL
 
 			}
 		}

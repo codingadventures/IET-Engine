@@ -11,7 +11,7 @@
 class AnimationPose
 {
 public:
-
+	bool mIsAlreadyInterpolated;
 	void AddTranslationKeyFrame(glm::vec3 translation,double time);
 	void AddRotationKeyFrame(glm::quat rotation,double time);
 	void AddScaleKeyFrame(glm::vec3 scale,double time);
@@ -20,15 +20,21 @@ public:
 	glm::quat  GetInterpolatedRotationKeyFrame(double time);
 	glm::vec3 GetInterpolatedScaleKeyFrame(double time);
 
+	int FindTranslationKeyFrame(double time);
+	int FindRotationKeyFrame(double time);
 
+	TranslationKeyFrame GetTranslationKeyFrame(int keyFrameIndex);
+	ScaleKeyFrame GetScaleKeyFrame(int keyFrameIndex);
+	RotationKeyFrame GetRotationKeyFrame(int keyFrameIndex);
+
+
+	AnimationPose(bool = false);
 private:
 	std::vector<TranslationKeyFrame> mTranslations;
 	std::vector<ScaleKeyFrame> mScales;
 	std::vector<RotationKeyFrame> mRotations;
 
-	TranslationKeyFrame GetTranslationKeyFrame(int keyFrameIndex);
-	ScaleKeyFrame GetScaleKeyFrame(int keyFrameIndex);
-	RotationKeyFrame GetRotationKeyFrame(int keyFrameIndex);
+	
 
 	int GetTranslationsSize();
 	int GetRotationsSize();
@@ -84,24 +90,17 @@ glm::vec3 AnimationPose::GetInterpolatedTranslationKeyFrame(double time)
 	glm::vec3 lerped;
 	if (lTranslationsSize > 0) {
 
-		int prev_key = 0;
-		int next_key = 0;
+		
 		float total_t = 0.0f;
 		float t = 0.0f;
+		int curr_key = FindTranslationKeyFrame(time);
+		int next_key = curr_key + 1;
+		
 
-		for (int i = 0; i < lTranslationsSize - 1; i++) 
-		{
-			prev_key = i;
-			next_key = i + 1;
-			if ( GetTranslationKeyFrame(next_key).GetTime() > time) {
-				break;
-			}
-		} 
+		total_t =  GetTranslationKeyFrame(next_key).GetTime() - GetTranslationKeyFrame(curr_key).GetTime();
+		t = (time - GetTranslationKeyFrame(curr_key).GetTime()) / total_t;
 
-		total_t =  GetTranslationKeyFrame(next_key).GetTime() - GetTranslationKeyFrame(prev_key).GetTime();
-		t = (time - GetTranslationKeyFrame(prev_key).GetTime()) / total_t;
-
-		glm::vec3 vi =  GetTranslationKeyFrame(prev_key).mTranslation;
+		glm::vec3 vi =  GetTranslationKeyFrame(curr_key).mTranslation;
 		glm::vec3 vf =  GetTranslationKeyFrame(next_key).mTranslation;
 		lerped =  vi * (1.0f - t) + vf * t;
 	}
@@ -115,29 +114,70 @@ glm::quat  AnimationPose::GetInterpolatedRotationKeyFrame(double time)
 	int lRotationsSize = GetRotationsSize();
 	glm::quat slerped;
 	if (lRotationsSize > 0) {
-		// find next and previous keys
-		int prev_key = 0;
-		int next_key = 0;
+		// find next and current keys
+		int curr_key = FindRotationKeyFrame(time);
+		int next_key = curr_key + 1;
 		float total_t = 0.0f;
 		float t = 0.0f;
 
-		for (int i = 0; i < lRotationsSize - 1; i++) {
-			prev_key = i;
-			next_key = i + 1;
-			if (GetRotationKeyFrame(next_key).GetTime() > time) {
-				break;
-			}
-		}
-		total_t = GetRotationKeyFrame(next_key).GetTime() - GetRotationKeyFrame(prev_key).GetTime();
-		t = (time -  GetRotationKeyFrame(prev_key).GetTime()) / total_t;
+		
+		total_t = GetRotationKeyFrame(next_key).GetTime() - GetRotationKeyFrame(curr_key).GetTime();
+		t = (time -  GetRotationKeyFrame(curr_key).GetTime()) / total_t;
 		//}
 
-		glm::quat qi = GetRotationKeyFrame(prev_key).mRotation;
+		glm::quat qi = GetRotationKeyFrame(curr_key).mRotation;
 		glm::quat qf = GetRotationKeyFrame(next_key).mRotation;
 		slerped = glm::slerp (qi, qf, t);
 	}
 
 	return slerped;
+}
+
+//void AnimationPose::ReplaceTranslationKeyFrame(glm::vec3 translation, double time)
+//{
+//	int keyFrameIndex = FindTranslationKeyFrame(time);
+//	mTranslations[keyFrameIndex] = TranslationKeyFrame(translation,time);
+//}
+//
+//
+//void AnimationPose::ReplaceRotationKeyFrame(glm::quat rotation,double time)
+//{
+//	int keyFrameIndex = FindRotationKeyFrame(time);
+//	mRotations[keyFrameIndex] = RotationKeyFrame(rotation,time);
+//}
+
+
+int AnimationPose::FindTranslationKeyFrame(double time)
+{
+	int lTranslationsSize =  GetTranslationsSize();
+	int curr_key = 0; 
+
+	for (int i = 0; i < lTranslationsSize - 1; i++) 
+	{
+		curr_key = i; 
+		if ( GetTranslationKeyFrame(curr_key + 1).GetTime() > time) {
+			break;
+		}
+	} 
+
+	return curr_key;
+}
+
+int AnimationPose::FindRotationKeyFrame(double time)
+{
+	int lRotationsSize = GetRotationsSize();
+	int curr_key = 0;
+	for (int i = 0; i < lRotationsSize - 1; i++) {
+		curr_key = i; 
+		if (GetRotationKeyFrame(curr_key + 1).GetTime() > time) {
+			break;
+		}
+	}
+	return curr_key;
+}
+
+AnimationPose::AnimationPose(bool isAlreadyInterpolated ) : mIsAlreadyInterpolated(isAlreadyInterpolated)
+{ 
 }
 
 #endif // AnimationPose_h__

@@ -119,28 +119,28 @@ public:
 		for (int i = 0; i < 1; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
-			drone->model = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+			drone->mModelMatrix = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
-			droidAnimator =  new  KeyFrameAnimator(drone->skeleton);
+			droidAnimator =  new  KeyFrameAnimator(drone->mSkeleton);
 			models_drone.push_back(drone);
 
 			//free(drone);
 		}
 
-		mFireAnimationClip = new AnimationClip(SHOOT_ACTION, 1.0f);
+		mFireAnimationClip = new AnimationClip(1.0f, SHOOT_ACTION, "shoot");
 		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
 
-		mWalkAnimationClip = new AnimationClip(WALK_ACTION, ANIMATION_SPEED);
+		mWalkAnimationClip = new AnimationClip(ANIMATION_SPEED, WALK_ACTION, "walk");
 		AnimationManager::AnimationSet["walk"] = mWalkAnimationClip;
 
-		mRunAnimationClip = new AnimationClip(RUN_ACTION,1.0f);
+		mRunAnimationClip = new AnimationClip(1.0f, RUN_ACTION, "run");
 		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
 
 		model_floor = new Model(shader, FLOOR_MODEL);
 
 		speed = 1.0f; 
-		model_floor->model = glm::scale(glm::mat4(1), glm::vec3(50.0f, 50.0f, 50.0f));	
+		model_floor->mModelMatrix = glm::scale(glm::mat4(1), glm::vec3(50.0f, 50.0f, 50.0f));	
 
 		//
 		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
@@ -150,8 +150,7 @@ public:
 		//animationMap["BOB_IK"] =(IAnimation*) new IKAnimator(model_bob->skeleton);
 		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
-		dartMaulAnimator =  new  KeyFrameAnimator(model_dartmaul->skeleton);
-		 
+
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
@@ -182,7 +181,7 @@ public:
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(model_floor->model,view,projection);
+		shader->SetModelViewProjection(model_floor->mModelMatrix,view,projection);
 
 		//tennisModel->Draw();
 
@@ -197,17 +196,17 @@ public:
 		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
 
 		//
-		model_dartmaul->model = 
-			glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
-			* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
-			* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
-			* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,150.0f))
+		model_dartmaul->mModelMatrix = 
+			//glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
+			//* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
+			//* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
+			//* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,150.0f))
 			//	* glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) 
-			*  glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
+			 glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
 
-		dartMaulModelWorldPosition = decomposeT(model_dartmaul->model); 
+		dartMaulModelWorldPosition = decomposeT(model_dartmaul->mModelMatrix); 
 
-		shaderBones->SetModelViewProjection(model_dartmaul->model,view,projection);
+		shaderBones->SetModelViewProjection(model_dartmaul->mModelMatrix,view,projection);
 
 
 		/*	
@@ -219,10 +218,10 @@ public:
 
 		glm::mat4 cubeModelRotation;*/
 		// model_dartmaul->Animate(animationMap["DART_MAUL_KF"], deltaTime);
-//		std::vector<AnimationClip*> animations = mAnimationEventController->GetNextAnimation();
+		//		std::vector<AnimationClip*> animations = mAnimationEventController->GetNextAnimation();
 
-	//	if (animations.size()>0)
-//			dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,);
+		//	if (animations.size()>0)
+		//			dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,);
 
 		/*if (isRunning)
 		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mRunAnimationClip);
@@ -240,9 +239,9 @@ public:
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 
-			shaderBones->SetModel(models_drone[i]->model);
+			shaderBones->SetModel(models_drone[i]->mModelMatrix);
 
-			droidAnimator->Animate(models_drone[i]->model,deltaTime,models_drone[i]->animationMatrix, mFireAnimationClip);
+			droidAnimator->Animate(models_drone[i]->mModelMatrix,deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
 
 			models_drone[i]->Draw();
 		}
@@ -453,7 +452,7 @@ private:
 		{
 			pause = !pause;
 		}
-		 
+
 		/*	if(keys[KEY_i])
 		{
 		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
@@ -608,7 +607,12 @@ private:
 		sprintf_s(animationTime, "Animation Time %f",global_clock);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,animationTime);
 
-
+		char playerState[200];
+		if (player->mState != nullptr)
+		{
+			sprintf_s(playerState, "Player State %s", player->mState->m_name.c_str());
+			screen_output(500.0f,VIEWPORT_HEIGHT - 110 ,playerState);
+		}
 	}
 };
 

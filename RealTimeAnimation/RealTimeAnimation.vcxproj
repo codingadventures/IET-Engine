@@ -49,7 +49,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -95,7 +95,8 @@
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />
     <ClInclude Include="Enemy.h" />
-    <ClInclude Include="Idle.h" />
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="State.h" />
     <ClInclude Include="KeyFrame.h" />
     <ClInclude Include="KeyFrameAnimator.h" />
     <ClInclude Include="Callbacks.h" />
@@ -111,7 +112,6 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Run.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skeleton.h" />
     <ClInclude Include="ScreenOutput.h" />
@@ -119,7 +119,6 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />
-    <ClInclude Include="Walk.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag" />

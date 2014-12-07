@@ -49,6 +49,9 @@
     <Filter Include="Header Files\Player\States">
       <UniqueIdentifier>{4ed1f97c-a970-4528-a7c5-96383661dc4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Helper">
+      <UniqueIdentifier>{12538098-441a-4e3f-bea3-b6f17840c358}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -81,9 +84,6 @@
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Point.h">
@@ -140,20 +140,20 @@
     <ClInclude Include="PlayerState.h">
       <Filter>Header Files\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Idle.h">
-      <Filter>Header Files\Player\States</Filter>
-    </ClInclude>
-    <ClInclude Include="Walk.h">
-      <Filter>Header Files\Player\States</Filter>
-    </ClInclude>
-    <ClInclude Include="Run.h">
-      <Filter>Header Files\Player\States</Filter>
-    </ClInclude>
     <ClInclude Include="Enemy.h">
       <Filter>Header Files\Player</Filter>
     </ClInclude>
     <ClInclude Include="AnimationManager.h">
       <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>Header Files\Player\States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

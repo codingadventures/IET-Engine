@@ -1,13 +1,16 @@
+#ifndef Spline_h__
+#define Spline_h__
+
 #include <vector>
-#include "common.h"
 
 #include <glm/glm.hpp>
+#include "Helper.h"
 
 
 class Spline {
 
 public :
-		
+
 	Spline()
 	{
 		timer = 0;
@@ -55,7 +58,7 @@ public :
 
 		float timeBetweenKeys = interpolationValues[next_key].first - interpolationValues[prev_key].first;
 		float t = (timer - interpolationValues[prev_key].first) / timeBetweenKeys; 
-		 
+
 		return cubicLerp(interpolationValues[prev_key-1].second, interpolationValues[prev_key].second, interpolationValues[next_key].second, interpolationValues[next_key+1].second, t);
 
 	}
@@ -70,3 +73,4 @@ private:
 
 
 };
+#endif // Spline_h__

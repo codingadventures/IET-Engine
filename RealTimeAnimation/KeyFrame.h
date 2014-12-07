@@ -2,7 +2,8 @@
 #define KEYFRAME_H__
 
 
-#include <glm/glm.hpp>  
+#include <glm/glm.hpp> 
+#include <glm/gtx/quaternion.hpp>
 
 struct KeyFrame
 {

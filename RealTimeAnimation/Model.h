@@ -1,4 +1,7 @@
-#pragma once
+#ifndef Model_h__
+#define Model_h__
+
+
 // Std. Includes
 #include <string>
 #include <fstream>
@@ -27,8 +30,8 @@ class Model
 {
 public:
 
-	glm::mat4 model;
-	double animDuration;
+	glm::mat4 mModelMatrix;
+	double mAnimationDuration;
 
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
@@ -36,17 +39,17 @@ public:
 	{
 		assert(shader);
 		m_numberOfBone = 0;
-		skeleton = new Skeleton(); 
+		mSkeleton = new Skeleton(); 
 		this->loadModel(path);
 
-		if (skeleton->getNumberOfBones()>0)
+		if (mSkeleton->getNumberOfBones()>0)
 		{
-			animationMatrix = (glm::mat4*) malloc(skeleton->getNumberOfBones() * sizeof(glm::mat4));
+			mAnimationMatrix = (glm::mat4*) malloc(mSkeleton->getNumberOfBones() * sizeof(glm::mat4));
 
 			CleanAnimationMatrix();
 
-		 	skeleton->updateSkeleton();
-			skeleton->updateAnimationMatrix(animationMatrix); 
+		 	mSkeleton->updateSkeleton();
+			mSkeleton->updateAnimationMatrix(mAnimationMatrix); 
 		}
 
 
@@ -54,7 +57,7 @@ public:
 
 	~Model()
 	{
-		free(animationMatrix);
+		free(mAnimationMatrix);
 		free(boneLocation);
 
 	}
@@ -62,8 +65,8 @@ public:
 	void Draw()
 	{
 
-		if (skeleton->getNumberOfBones()>0)
-			glUniformMatrix4fv (boneLocation[0], skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(animationMatrix[0]));
+		if (mSkeleton->getNumberOfBones()>0)
+			glUniformMatrix4fv (boneLocation[0], mSkeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(mAnimationMatrix[0]));
 
 
 		for(GLuint i = 0; i < this->meshes.size(); i++)
@@ -75,30 +78,30 @@ public:
 	{
 		assert(animationInvoker);
 
-		Bone *effector = skeleton->GetBone(boneEffector.c_str());
+		Bone *effector = mSkeleton->GetBone(boneEffector.c_str());
 
 		assert(effector);
 
-		animationInvoker->Animate(this->model, effector ,target,numParent);
+		animationInvoker->Animate(this->mModelMatrix, effector ,target,numParent);
 
-		skeleton->updateAnimationMatrix(animationMatrix);
+		mSkeleton->updateAnimationMatrix(mAnimationMatrix);
 	}
 
 	vector<glm::vec3> getBonesOrientation( )
 	{
-		return skeleton->getBonePositions(this->model);
+		return mSkeleton->getBonePositions(this->mModelMatrix);
 	}
 
 	glm::vec3 getBoneOrientation(const char* name)
 	{
-		return skeleton->GetBone(name)->getWorldSpacePosition(this->model);
+		return mSkeleton->GetBone(name)->getWorldSpacePosition(this->mModelMatrix);
 	}
 
 	void CleanAnimationMatrix()
 	{
 		//Initialize bones in the shader for the uniform 
-		for (unsigned int i = 0 ; i < skeleton->getNumberOfBones(); i++) 
-			animationMatrix[i] = glm::mat4(1); 
+		for (unsigned int i = 0 ; i < mSkeleton->getNumberOfBones(); i++) 
+			mAnimationMatrix[i] = glm::mat4(1); 
 	}
  
 	void resetAnimation()
@@ -108,14 +111,14 @@ public:
 
 	void setJointLimit(string boneName, AngleRestriction angleRestriction )
 	{ 
-		skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
+		mSkeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 	}
 
 	void ClearJointsLimit(){
-		skeleton->ResetAllJointLimits();
+		mSkeleton->ResetAllJointLimits();
 	}
-	glm::mat4* animationMatrix;
-	Skeleton* skeleton;
+	glm::mat4* mAnimationMatrix;
+	Skeleton* mSkeleton;
 
 private:
 	/*  Model Data  */
@@ -147,14 +150,14 @@ private:
 		this->processNode(scene->mRootNode, scene);
 
 		// there should always be a 'root node', even if no skeleton exists
-		if (!skeleton->importSkeletonBone ( scene->mRootNode)) {
+		if (!mSkeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-		 skeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
-		int numOfBones = skeleton->getNumberOfBones();
+		 mSkeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
+		int numOfBones = mSkeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
-			boneLocation = (GLuint*) malloc( skeleton->getNumberOfBones()* sizeof(GLuint));
+			boneLocation = (GLuint*) malloc( mSkeleton->getNumberOfBones()* sizeof(GLuint));
 
 			for (unsigned int i = 0 ; i < numOfBones; i++) {
 
@@ -282,23 +285,23 @@ private:
 
 			boneWeights.resize(ai_mesh->mNumVertices);
 
-			for (int i = 0 ; i < ai_mesh->mNumBones ; i++) {                
+			for (GLuint i = 0 ; i < ai_mesh->mNumBones ; i++) {                
 				int BoneIndex = 0;        
 				string BoneName(ai_mesh->mBones[i]->mName.data);
 
-				if ( skeleton->boneMapping.find(BoneName) == skeleton->boneMapping.end()) {
+				if ( mSkeleton->boneMapping.find(BoneName) == mSkeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
 					BoneInfo info;
 
 					BoneIndex = m_numberOfBone++; 
 					info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
 					info.index = BoneIndex;
-					skeleton->boneMapping[BoneName] = info;
+					mSkeleton->boneMapping[BoneName] = info;
 				}
 				else
-					BoneIndex = skeleton->boneMapping[BoneName].index;
+					BoneIndex = mSkeleton->boneMapping[BoneName].index;
 
-				for (int j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
+				for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
 					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
 					float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
 					for (glm::uint i = 0 ; i < 4 ; i++) {
@@ -397,3 +400,4 @@ GLint TextureFromFile(const char* fileName, string directory)
 	//	SOIL_free_image_data(image);
 	return textureID;
 }
+#endif // Model_h__
