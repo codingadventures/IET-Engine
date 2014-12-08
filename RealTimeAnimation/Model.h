@@ -85,7 +85,6 @@ public:
 	{
 		this->m_Rotation = glm::rotate(glm::mat4(),radians,rotation_vector);
 	}
-
 	void Rotate(glm::quat rotation)
 	{
 		this->m_Rotation = glm::toMat4(rotation);
@@ -142,11 +141,14 @@ public:
 		mSkeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 	}
 
+	 
+
 	void ClearJointsLimit(){
 		mSkeleton->ResetAllJointLimits();
 	}
 	glm::mat4* mAnimationMatrix;
 	Skeleton* mSkeleton;
+	glm::vec3 m_Direction;
 
 private:
 	/*  Model Data  */
@@ -159,7 +161,6 @@ private:
 	glm::mat4 mModelMatrix;
 
 	glm::mat4 m_Scale,m_Position,m_Rotation;
-
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)

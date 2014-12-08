@@ -197,6 +197,8 @@ public:
 
 		camera->MoveCamera(deltaTime);
 		//camera->Front = glm::vec3(0,150,0);
+		
+		model_dartmaul->m_Direction = camera->Front * glm::vec3(1,0,1);
 		view = camera->GetViewMatrix();
 
 		shader->SetModelViewProjection(model_floor->GetModelMatrix(),view,projection);

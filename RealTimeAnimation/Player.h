@@ -77,12 +77,12 @@ void Player::Update(double deltaTime)
 
 void Player::Move(glm::vec3 direction)
 {
-	 this->model->Translate(direction * MOVE_SPEED);
+	 this->model->Translate(this->model->m_Direction * MOVE_SPEED);
 }
 
 void Player::Run(glm::vec3 direction)
 {
-	this->model->Translate(direction * RUN_SPEED);
+	this->model->Translate(this->model->m_Direction * RUN_SPEED);
 	 
 }
 
