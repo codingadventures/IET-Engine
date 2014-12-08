@@ -80,9 +80,13 @@ PlayerState* Idle::handleInput(bool* inputKeys)
 
 PlayerState* Run::handleInput(bool* inputKeys)
 {
-	if (inputKeys[KEY_r] && inputKeys[KEY_i])
-		return this;
+	m_direction = glm::vec3();
 
+	if (inputKeys[KEY_r] && inputKeys[KEY_i])
+	{
+		m_direction = glm::vec3(0.0f,0.0f,1.0f);
+		return this;
+	}
 
 	if (inputKeys[KEY_i] ||  inputKeys[KEY_k] ||  inputKeys[KEY_j] || inputKeys[KEY_l])
 		return new  Walk(this->mAnimationClip);
@@ -93,7 +97,22 @@ PlayerState* Run::handleInput(bool* inputKeys)
 
 PlayerState* Walk::handleInput(bool* inputKeys)
 {
-	if (!(inputKeys[KEY_i] ||  inputKeys[KEY_k] ||  inputKeys[KEY_j] || inputKeys[KEY_l]))
+	bool isMoved = inputKeys[KEY_i] || inputKeys[KEY_k] || inputKeys[KEY_j] || inputKeys[KEY_l];
+	m_direction = glm::vec3();
+
+	if (inputKeys[KEY_i])
+		m_direction = glm::vec3(0.0f,0.0f,1.0f);
+
+	if (inputKeys[KEY_k])
+		m_direction += glm::vec3(0.0f,0.0f,-1.0f);
+
+	if ( inputKeys[KEY_j])
+		m_direction += glm::vec3(1.0f,0.0f,0.0f);
+
+	if(inputKeys[KEY_l])
+		m_direction += glm::vec3(-1.0f,0.0f,0.0f);
+
+	if (!isMoved)
 		return new Idle(this->mAnimationClip);
 
 	if (inputKeys[KEY_r] && inputKeys[KEY_i])
@@ -122,7 +141,7 @@ void Walk::update(Player* player, double deltaTime)
 		return;
 	}
 
-	player->mKeyFrameAnimator->Animate(player->model->mModelMatrix, deltaTime, player->model->mAnimationMatrix, clipToAnimate);
+	player->mKeyFrameAnimator->Animate(player->model->GetModelMatrix(), deltaTime, player->model->mAnimationMatrix, clipToAnimate);
 
 	for (AnimationClip* clip : animations)
 	{
@@ -130,8 +149,9 @@ void Walk::update(Player* player, double deltaTime)
 			this->mTransitionClip = nullptr;
 
 		clip->Update(deltaTime);
-
 	}
+
+	player->Move(m_direction);
 
 }
 void Run::update(Player* player, double deltaTime)
@@ -154,7 +174,7 @@ void Run::update(Player* player, double deltaTime)
 		return;
 	}
 
-	player->mKeyFrameAnimator->Animate(player->model->mModelMatrix, deltaTime, player->model->mAnimationMatrix, clipToAnimate);
+	player->mKeyFrameAnimator->Animate(player->model->GetModelMatrix(), deltaTime, player->model->mAnimationMatrix, clipToAnimate);
 
 	for (AnimationClip* clip : animations)
 	{
@@ -163,6 +183,9 @@ void Run::update(Player* player, double deltaTime)
 
 		clip->Update(deltaTime);
 	}
+
+	player->Run(m_direction);
+
 }
 
 #include "Player.h"

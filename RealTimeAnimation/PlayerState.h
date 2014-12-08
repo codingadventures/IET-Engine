@@ -12,6 +12,8 @@ class PlayerState
 protected:
 	AnimationClip* mAnimationClip;
 	AnimationClip* mTransitionClip;
+ 
+	glm::vec3 m_direction;
 public:
 	PlayerState(){}
 	virtual ~PlayerState() {}
@@ -20,8 +22,7 @@ public:
 	string m_name;
 	AnimationClip* GetBaseAnimation();
 	AnimationClip* GetTransitionAnimation();
-
-private:
+	 
 
 };
 

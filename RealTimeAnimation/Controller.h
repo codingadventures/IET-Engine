@@ -49,7 +49,7 @@ public:
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
 		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		glutCreateWindow("Inverse Kinematic - Directed By: Mr. Stark"); 
+		glutCreateWindow("The Revenge of Dart Maul  - Directed By: Mr. Stark"); 
 
 		glewExperimental = GL_TRUE;
 		glewInit();
@@ -58,6 +58,7 @@ public:
 		glutIdleFunc(drawCallback);
 
 		this->camera = new Camera(glm::vec3(0.0f,150.0f,0.0f));
+		camera->Direction =  CAMERA_OFFSET;
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
@@ -108,7 +109,7 @@ public:
 
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL);
-
+		model_dartmaul->Scale(glm::vec3(40,40,40));
 		player = new Player(model_dartmaul);
 
 		//model_bob = new Model(shaderBones, BOB_MODEL);
@@ -119,7 +120,8 @@ public:
 		for (int i = 0; i < 1; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
-			drone->mModelMatrix = glm::translate(glm::mat4(1), glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(40.0f, 40.0f, 40.0f));	
+			drone->Translate(glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f));
+			drone->Scale(glm::vec3(40.0f, 40.0f, 40.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 			droidAnimator =  new  KeyFrameAnimator(drone->mSkeleton);
@@ -138,10 +140,11 @@ public:
 		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
 
 		model_floor = new Model(shader, FLOOR_MODEL);
+		model_space = new Model(shader, SPACE_MODEL);
 
 		speed = 1.0f; 
-		model_floor->mModelMatrix = glm::scale(glm::mat4(1), glm::vec3(50.0f, 50.0f, 50.0f));	
-
+		model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
+		model_space->Scale(glm::vec3(5000.0f,5000.0f,5000.0f));
 		//
 		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
@@ -162,14 +165,15 @@ public:
 
 	void Draw()
 	{
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
 		update_timer();
 		float deg =   glm::radians(-90.0f);
 
+
 		// Set frame time
-		camera->MoveCamera();  
+		//camera->MoveCamera();  
 
 		//model_bob->ClearJointsLimit();
 		//model_max->ClearJointsLimit();
@@ -178,40 +182,46 @@ public:
 
 		glm::mat4 projection,view;
 
-		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
+		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 10000.0f);  
+
+
+		player->HandleInput(keys);
+
+		player->Update(deltaTime);
+
+		dartMaulModelWorldPosition = decomposeT(model_dartmaul->GetPosition()); 
+
+		camera->SetTarget(dartMaulModelWorldPosition + glm::vec3(0,20,0));
+
+		//camera->Position = dartMaulModelWorldPosition + CAMERA_OFFSET;
+
+		camera->MoveCamera(deltaTime);
+		//camera->Front = glm::vec3(0,150,0);
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(model_floor->mModelMatrix,view,projection);
+		shader->SetModelViewProjection(model_floor->GetModelMatrix(),view,projection);
 
 		//tennisModel->Draw();
 
 		//shader->SetModel(model_floor->model);
 
 		model_floor->Draw();
+		shader->SetModelViewProjection(model_space->GetModelMatrix(),view,projection);
+
+		model_space->Draw();
 
 		shaderBones->Use();
+		/*
+		float angle = glm::fastNormalizeDot(glm::vec3(1,0,1),camera->Front);
+		*/
 
+		model_dartmaul->Rotate(camera->ModelRotation *  glm::quat(glm::vec3(0.0f,glm::radians(220.0f),0.0f)));
 
+		shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),view,projection);
 
-		GLfloat timeValue = glutGet(GLUT_ELAPSED_TIME);
-
-		//
-		model_dartmaul->mModelMatrix = 
-			//glm::translate(glm::mat4(1.0),camera->Position * glm::vec3(1.0f,0.0f,1.0f)  )  //in order to push it a bit far from the camera
-			//* glm::rotate(glm::mat4(1.0),-glm::radians(camera->Yaw),glm::vec3(0.0,1.0,0.0))
-			//* glm::rotate(glm::mat4(1.0), glm::radians(90.0f),glm::vec3(0.0,1.0,0.0))
-			//* glm::translate(glm::mat4(1.0),glm::vec3(0.0f,0.0f,150.0f))
-			//	* glm::rotate(glm::mat4(1.0), deg , glm::vec3(1.0f, 0.0f, 0.0f)) 
-			 glm::scale(glm::mat4(1.0),  glm::vec3(40.0f, 40.0f, 40.0f));
-
-		dartMaulModelWorldPosition = decomposeT(model_dartmaul->mModelMatrix); 
-
-		shaderBones->SetModelViewProjection(model_dartmaul->mModelMatrix,view,projection);
-
+		model_dartmaul->Draw();
 
 		/*	
-
-
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
 		tennisModelWorldPosition = decomposeT(tennisModel->model);
 
@@ -228,20 +238,20 @@ public:
 		else
 		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);*/
 
-		player->HandleInput(keys);
 
-		player->Update(deltaTime);
 
-		model_dartmaul->Draw();
+
+		//model_dartmaul->Translate(-CAMERA_OFFSET);
+
 
 		for (int i = 0; i < 1; i++)
 		{
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 
-			shaderBones->SetModel(models_drone[i]->mModelMatrix);
+			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
-			droidAnimator->Animate(models_drone[i]->mModelMatrix,deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
+			droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
 
 			models_drone[i]->Draw();
 		}
@@ -446,6 +456,7 @@ private:
 	AnimationClip* mRunAnimationClip;
 	AnimationClip* mWalkAnimationClip;
 	bool isRunning;
+	Model* model_space;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -613,6 +624,11 @@ private:
 			sprintf_s(playerState, "Player State %s", player->mState->m_name.c_str());
 			screen_output(500.0f,VIEWPORT_HEIGHT - 110 ,playerState);
 		}
+
+		char cameraAngles[200];
+		sprintf_s(cameraAngles,"Camera Angles: Yaw %f - Pitch %f",camera->Yaw,camera->Pitch);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 130 ,cameraAngles);
+
 	}
 };
 

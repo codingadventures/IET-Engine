@@ -30,8 +30,8 @@ class Model
 {
 public:
 
-	glm::mat4 mModelMatrix;
 	double mAnimationDuration;
+
 
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
@@ -48,7 +48,7 @@ public:
 
 			CleanAnimationMatrix();
 
-		 	mSkeleton->updateSkeleton();
+			mSkeleton->updateSkeleton();
 			mSkeleton->updateAnimationMatrix(mAnimationMatrix); 
 		}
 
@@ -73,6 +73,34 @@ public:
 			this->meshes[i].Draw(*shader);
 	}
 
+	void Scale(glm::vec3 scale_vector)
+	{
+		this->m_Scale = glm::scale(this->m_Scale,scale_vector);
+	}
+	void Translate(glm::vec3 translation_vector)
+	{
+		this->m_Position = glm::translate(this->m_Position,translation_vector);
+	}
+	void Rotate(glm::vec3 rotation_vector, float radians)
+	{
+		this->m_Rotation = glm::rotate(glm::mat4(),radians,rotation_vector);
+	}
+
+	void Rotate(glm::quat rotation)
+	{
+		this->m_Rotation = glm::toMat4(rotation);
+	}
+
+
+	glm::mat4 GetPosition()
+	{
+		return m_Position;
+	}
+
+	glm::mat4 GetModelMatrix()
+	{
+		return m_Position * m_Rotation * m_Scale;
+	}
 
 	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
 	{
@@ -103,7 +131,7 @@ public:
 		for (unsigned int i = 0 ; i < mSkeleton->getNumberOfBones(); i++) 
 			mAnimationMatrix[i] = glm::mat4(1); 
 	}
- 
+
 	void resetAnimation()
 	{
 		CleanAnimationMatrix();
@@ -128,7 +156,10 @@ private:
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	GLuint* boneLocation;
 	int m_numberOfBone;
-	 
+	glm::mat4 mModelMatrix;
+
+	glm::mat4 m_Scale,m_Position,m_Rotation;
+
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -153,7 +184,7 @@ private:
 		if (!mSkeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-		 mSkeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
+		mSkeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
 		int numOfBones = mSkeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
@@ -355,7 +386,7 @@ private:
 		}
 		return textures;
 	}
-	 
+
 };
 
 

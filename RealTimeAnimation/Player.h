@@ -17,15 +17,26 @@ public:
 	AnimationEventController* mAnimationEventController;
 	KeyFrameAnimator* mKeyFrameAnimator;
 
+	void Move(glm::vec3 direction);
 	void HandleInput(bool* inputKeys);
 	void Update(double deltaTime);
 	~Player();
 
+	void Run(glm::vec3 m_direction);
+
+
 
 
 private:
+	static const float MOVE_SPEED;
+	static const float RUN_SPEED;
 };
+
+const float Player::MOVE_SPEED = 0.5f;
+const float Player::RUN_SPEED = 1.0f;
+
 #include "State.h"
+
 
 Player::Player(Model* model) : model(model)
 {
@@ -61,6 +72,17 @@ void Player::Update(double deltaTime)
 
 	//mAnimationEventController->RemoveEndedAnimation();
 
+
+}
+
+void Player::Move(glm::vec3 direction)
+{
+	 this->model->Translate(direction * MOVE_SPEED);
+}
+
+void Player::Run(glm::vec3 direction)
+{
+	this->model->Translate(direction * RUN_SPEED);
 	 
 }
 
