@@ -40,10 +40,11 @@
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
 #define SPACE_MODEL "models\\Space\\space.dae"
+#define BATTLECRUISE_MODEL "models\\BattleCruise\\BattleCruise.dae"
 #define BOB_MODEL "models\\boblampclean.md5mesh"
 #define INITIAL_POINTER_POSITION glm::vec3(50.0f, 50.0f, -5.0f)
 
-#define CAMERA_OFFSET glm::vec3(0.0f,150.0f,150.0f)
+#define CAMERA_OFFSET glm::vec3(0.0f,15.0f,10.0f)
 
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 

@@ -39,8 +39,10 @@ public:
 	{
 		assert(shader);
 		m_numberOfBone = 0;
-		mSkeleton = new Skeleton(); 
+		mSkeleton = new Skeleton( ); 
+
 		this->loadModel(path);
+
 
 		if (mSkeleton->getNumberOfBones()>0)
 		{
@@ -64,6 +66,7 @@ public:
 	// Draws the model, and thus all its meshes
 	void Draw()
 	{
+		this->mModelMatrix = GetModelMatrix();
 
 		if (mSkeleton->getNumberOfBones()>0)
 			glUniformMatrix4fv (boneLocation[0], mSkeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(mAnimationMatrix[0]));
@@ -91,9 +94,9 @@ public:
 	}
 
 
-	glm::mat4 GetPosition()
+	glm::vec3 GetPosition()
 	{
-		return m_Position;
+		return decomposeT(m_Position);
 	}
 
 	glm::mat4 GetModelMatrix()

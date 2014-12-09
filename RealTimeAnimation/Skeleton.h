@@ -26,9 +26,9 @@ public:
 
 private:
 	int numOfBones; 
-
 public:
-	Skeleton(){
+	Skeleton( ) 
+	{
 		rootBone = new Bone();
 		numOfBones = -1;//Initial Value
 	}
@@ -47,38 +47,48 @@ public:
 		root_bone_check(&bone);
 
 		bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
-		 
+
 		bone->finalTransform = inverseGlobal * bone->globalTransform  * bone->boneOffset;  
-		 
+
 
 		for (int i = 0; i < bone->children.size(); i++) {
 			updateSkeleton (&bone->children[i]);
 		}
 	}
 
-	void traversePositions(Bone* bone,glm::mat4 model, vector<glm::vec3> &positions){
+	void traversePositions(Bone* bone, glm::mat4 modelMatrix, vector<glm::vec3> &positions){
 
 		if(!bone)
 		{
 			bone = rootBone;
 		}
 
-		positions.push_back( bone->getWorldSpacePosition(model));
+		positions.push_back( bone->getWorldSpacePosition(modelMatrix));
 
 		for (int i = 0; i < bone->children.size(); i++) {
-			traversePositions (&bone->children[i], model,positions);
+			traversePositions (&bone->children[i],modelMatrix,positions);
 		}
 	}
 
-	vector<glm::vec3> getBonePositions(glm::mat4 model)
+	vector<glm::vec3> getBonePositions(glm::mat4 modelMatrix)
 	{
 		vector<glm::vec3> positions;
 
-		traversePositions(rootBone,model, positions);
+		traversePositions(rootBone, modelMatrix,positions);
 
 		return positions;
 	} 
-	 
+
+	glm::vec3  getBonePosition(string boneName, glm::mat4 modelMatrix)
+	{ 
+		Bone* bone = GetBone(boneName.c_str());
+
+		if (bone)
+			return bone->getWorldSpacePosition(modelMatrix); 
+
+		return glm::vec3();
+	} 
+
 	// Import the hierarchical data structure from Assimp
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
 	{
@@ -176,7 +186,6 @@ public:
 	}
 
 
-
 	// get the total number of bones. traverses the tree to count them
 	int getNumberOfBones()
 	{ 
@@ -238,7 +247,7 @@ private:
 		return counter;
 	}
 
-	
+
 
 
 };

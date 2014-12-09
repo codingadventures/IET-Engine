@@ -32,8 +32,8 @@ private:
 	static const float RUN_SPEED;
 };
 
-const float Player::MOVE_SPEED = 0.5f;
-const float Player::RUN_SPEED = 1.0f;
+const float Player::MOVE_SPEED = 0.3f;
+const float Player::RUN_SPEED = 0.7f;
 
 #include "State.h"
 
@@ -68,11 +68,8 @@ void Player::HandleInput(bool* inputKeys)
 
 void Player::Update(double deltaTime)
 {
-	mState->update(this, deltaTime);
-
-	//mAnimationEventController->RemoveEndedAnimation();
-
-
+	mState->update(this, deltaTime); 
+	 
 }
 
 void Player::Move(glm::vec3 direction)

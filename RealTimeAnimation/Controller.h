@@ -57,7 +57,7 @@ public:
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
-		this->camera = new Camera(glm::vec3(0.0f,150.0f,0.0f));
+		this->camera = new Camera(glm::vec3(0.0f,30.0f,0.0f));
 		camera->Direction =  CAMERA_OFFSET;
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
@@ -109,19 +109,21 @@ public:
 
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL);
-		model_dartmaul->Scale(glm::vec3(40,40,40));
+		model_dartmaul->Scale(glm::vec3(3,3,3));
+		//model_dartmaul->Translate(glm::vec3(0,5,0));
 		player = new Player(model_dartmaul);
 
 		//model_bob = new Model(shaderBones, BOB_MODEL);
 		//model_max = new Model(shaderBones, MAX_MODEL);
 		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
-		float deg =   glm::radians(-90.0f);
+		float deg =   glm::radians(90.0f);
 
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
-			drone->Translate(glm::vec3(10.f * (i+1) * 2,10.0f ,-50.0f));
-			drone->Scale(glm::vec3(40.0f, 40.0f, 40.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
+			drone->Translate(glm::vec3(-100.0f,0.0f ,1.0f * (i+1) * 2));
+			drone->Scale(glm::vec3(3.0f, 3.0f, 3.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
+			drone->Rotate(glm::vec3(0,1,0),deg);
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 			droidAnimator =  new  KeyFrameAnimator(drone->mSkeleton);
@@ -130,7 +132,7 @@ public:
 			//free(drone);
 		}
 
-		mFireAnimationClip = new AnimationClip(1.0f, SHOOT_ACTION, "shoot");
+		mFireAnimationClip = new AnimationClip(0.5f, SHOOT_ACTION, "shoot");
 		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
 
 		mWalkAnimationClip = new AnimationClip(ANIMATION_SPEED, WALK_ACTION, "walk");
@@ -139,12 +141,11 @@ public:
 		mRunAnimationClip = new AnimationClip(1.0f, RUN_ACTION, "run");
 		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
 
-		model_floor = new Model(shader, FLOOR_MODEL);
-		model_space = new Model(shader, SPACE_MODEL);
-
+		//model_floor = new Model(shader, FLOOR_MODEL);
+		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
 		speed = 1.0f; 
-		model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
-		model_space->Scale(glm::vec3(5000.0f,5000.0f,5000.0f));
+		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
+		//model_battlecruise->Scale(glm::vec3(5000.0f,5000.0f,5000.0f));
 		//
 		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
@@ -168,12 +169,7 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
-		update_timer();
-		float deg =   glm::radians(-90.0f);
-
-
-		// Set frame time
-		//camera->MoveCamera();  
+		update_timer(); 
 
 		//model_bob->ClearJointsLimit();
 		//model_max->ClearJointsLimit();
@@ -189,33 +185,27 @@ public:
 
 		player->Update(deltaTime);
 
-		dartMaulModelWorldPosition = decomposeT(model_dartmaul->GetPosition()); 
-
-		camera->SetTarget(dartMaulModelWorldPosition + glm::vec3(0,20,0));
-
-		//camera->Position = dartMaulModelWorldPosition + CAMERA_OFFSET;
-
 		camera->MoveCamera(deltaTime);
 		//camera->Front = glm::vec3(0,150,0);
-		
+
 		model_dartmaul->m_Direction = camera->Front * glm::vec3(1,0,1);
+
+		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(model_floor->GetModelMatrix(),view,projection);
+		//shader->SetModelViewProjection(model_floor->GetModelMatrix(),view,projection);
 
 		//tennisModel->Draw();
 
 		//shader->SetModel(model_floor->model);
 
-		model_floor->Draw();
-		shader->SetModelViewProjection(model_space->GetModelMatrix(),view,projection);
+		//model_floor->Draw();
+		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
-		model_space->Draw();
+		model_battlecruise->Draw();
 
-		shaderBones->Use();
-		/*
-		float angle = glm::fastNormalizeDot(glm::vec3(1,0,1),camera->Front);
-		*/
+		shaderBones->Use(); 
 
 		model_dartmaul->Rotate(camera->ModelRotation *  glm::quat(glm::vec3(0.0f,glm::radians(220.0f),0.0f)));
 
@@ -246,7 +236,7 @@ public:
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
 
 
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
@@ -254,7 +244,9 @@ public:
 			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
 			droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
-
+			
+			mFireAnimationClip->Update(deltaTime);
+			
 			models_drone[i]->Draw();
 		}
 
@@ -342,7 +334,7 @@ public:
 		}
 		}
 		*/
-		shader->Use();
+		shaderNoTexture->Use();
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
 		//v2.Position = cubeWorldPosition;
@@ -437,7 +429,7 @@ private:
 
 	Model *model_bob;
 	Model *tennisModel,*model_max;
-	Model* model_floor;
+	//Model* model_floor;
 	Model*  model_cones;
 	Model* model_dartmaul;
 	std::vector<Model*> models_drone;
@@ -458,7 +450,7 @@ private:
 	AnimationClip* mRunAnimationClip;
 	AnimationClip* mWalkAnimationClip;
 	bool isRunning;
-	Model* model_space;
+	Model* model_battlecruise;
 	void ReadInput()
 	{
 		if(keys[KEY_p])

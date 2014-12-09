@@ -145,7 +145,7 @@ void Walk::update(Player* player, double deltaTime)
 
 	for (AnimationClip* clip : animations)
 	{
-		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed >clip->mTotalDuration)
+		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed > clip->mTotalDuration)
 			this->mTransitionClip = nullptr;
 
 		clip->Update(deltaTime);
@@ -181,7 +181,7 @@ void Run::update(Player* player, double deltaTime)
 		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed >clip->mTotalDuration)
 			this->mTransitionClip = nullptr;
 
-		clip->Update(deltaTime);
+		 clip->Update(deltaTime);
 	}
 
 	player->Run(m_direction);
