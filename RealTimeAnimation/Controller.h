@@ -135,7 +135,7 @@ public:
 		mFireAnimationClip = new AnimationClip(0.5f, SHOOT_ACTION, "shoot");
 		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
 
-		mWalkAnimationClip = new AnimationClip(ANIMATION_SPEED, WALK_ACTION, "walk");
+		mWalkAnimationClip = new AnimationClip(1.0f, WALK_ACTION, "walk");
 		AnimationManager::AnimationSet["walk"] = mWalkAnimationClip;
 
 		mRunAnimationClip = new AnimationClip(1.0f, RUN_ACTION, "run");

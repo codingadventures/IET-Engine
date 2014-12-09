@@ -179,7 +179,7 @@ void Run::update(Player* player, double deltaTime)
 	for (AnimationClip* clip : animations)
 	{
 		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed >clip->mTotalDuration)
-			this->mTransitionClip = nullptr;
+			this->mTransitionClip = nullptr;//total hack..I got to change this!
 
 		 clip->Update(deltaTime);
 	}

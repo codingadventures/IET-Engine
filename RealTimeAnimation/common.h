@@ -35,7 +35,7 @@
 #define FLOOR_MODEL "models\\floor.obj"
 #define TENNIS_MODEL "models\\tennisball.obj"
 #define DART_MAUL "models\\DartMaul\\DartMaul.dae"
-#define WALK_ACTION "models\\DartMaul\\walk.dae"
+#define WALK_ACTION "models\\DartMaul\\walk_1.dae"
 #define RUN_ACTION "models\\DartMaul\\run.dae"
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
