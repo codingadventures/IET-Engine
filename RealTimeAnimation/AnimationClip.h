@@ -13,30 +13,45 @@ class AnimationClip
 {
 public:
 	AnimationClip(double ,string ,string );
-	AnimationClip(double , double, string );
+	AnimationClip(double , double, string , double = 0);
 
 
 	std::map<std::string,AnimationPose> mBoneMapping;
 
 	std::string mAnimationName;
-	double mTotalDuration;
-	double mLocalTimer;
+
+
 	double mAnimationSpeed; 
 	AnimationPose* GetAnimationPose( string boneName);
 	void SetAnimationPose(string boneName,AnimationPose animationPose);
 	void Update(double deltaTime);
 	void Reset(double animationSpeed = 0);
 
-private: 
+	double GetLocalTimer() const;
+	double GetTotalDuration() const;
+	float GetBlendUpdateRatio() const;
+	void SetBlendUpdateRatio(float val);
 
+private: 
+	double mLocalTimer;
+	double mTotalDuration;
+	float m_blendUpdateRatio;
 	void loadAnimations(string file_name );
 
 	void Init();
+	
 };
 
+double AnimationClip::GetLocalTimer() const { return mLocalTimer; }
+double AnimationClip::GetTotalDuration() const { return mTotalDuration; } 
+
+float AnimationClip::GetBlendUpdateRatio() const { return m_blendUpdateRatio; }
+void AnimationClip::SetBlendUpdateRatio(float val) { m_blendUpdateRatio = val; }
+
 void AnimationClip::Reset(double animationSpeed){
-	 
+
 	mLocalTimer = 0.0;
+	m_blendUpdateRatio = 1.0f;
 
 	if (animationSpeed != 0)
 		mAnimationSpeed = animationSpeed;
@@ -108,7 +123,8 @@ AnimationClip::AnimationClip(double animationSpeed, string file_name, string ani
 	loadAnimations(file_name);
 }
 
-AnimationClip::AnimationClip(double animationSpeed, double totalDuration, string animationName)  : mAnimationSpeed(animationSpeed), mTotalDuration(totalDuration), mAnimationName(animationName)
+AnimationClip::AnimationClip(double animationSpeed, double totalDuration, string animationName, double localTimer)  
+	: mAnimationSpeed(animationSpeed), mTotalDuration(totalDuration), mAnimationName(animationName), mLocalTimer(localTimer)
 {
 	Init();
 }
@@ -124,6 +140,7 @@ AnimationPose* AnimationClip::GetAnimationPose(std::string boneName)
 void AnimationClip::Init()
 {
 	mLocalTimer = 0.0; 
+	m_blendUpdateRatio = 1.0f;
 }
 
 void AnimationClip::SetAnimationPose(string boneName,AnimationPose animationPose)
@@ -133,7 +150,7 @@ void AnimationClip::SetAnimationPose(string boneName,AnimationPose animationPose
 
 void AnimationClip::Update(double deltaTime)
 {
-	mLocalTimer += deltaTime / 1000  * mAnimationSpeed;
+	mLocalTimer += deltaTime / 1000  * mAnimationSpeed * this->m_blendUpdateRatio;
 
 	if (mLocalTimer > mTotalDuration)
 	{

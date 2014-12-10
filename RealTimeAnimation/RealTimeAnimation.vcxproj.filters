@@ -155,9 +155,6 @@
     <ClInclude Include="Idle.h">
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
-    <ClInclude Include="Walk.h">
-      <Filter>Header Files\Player\States</Filter>
-    </ClInclude>
     <ClInclude Include="Run.h">
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
@@ -168,6 +165,9 @@
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
     <ClInclude Include="SwingSword.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="WalkForward.h">
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
   </ItemGroup>

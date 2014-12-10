@@ -2,73 +2,57 @@
 #ifndef PlayerState__
 #define PlayerState__
 
- 
+
 #include "AnimationClip.h"
 #include "Keys.h"  
 
 class Player;
 
+#define WALK_LEFT inputKeys[KEY_a]
+#define WALK_RIGHT inputKeys[KEY_d]
+#define WALK_FORWARD inputKeys[KEY_w] && !RUN
+#define WALK_BACKWARD inputKeys[KEY_s]
+#define RUN inputKeys[KEY_r] && inputKeys[KEY_w]
+#define IDLE !(WALK_LEFT || WALK_RIGHT || WALK_FORWARD || WALK_BACKWARD || RUN )
+
 
 class PlayerState
 {
-protected:
-	AnimationClip* mAnimationClip;
-	AnimationClip* mTransitionClip;
-
+protected: 
+	string m_nextStateClipName;
 	glm::vec3 m_direction;
+	string m_currentStateClipName;
+
 public:
 	PlayerState(){}
 	virtual ~PlayerState() {}
 	virtual PlayerState* handleInput(bool* inputKeys) = 0;
 	virtual void Update(Player* player, double deltaTime);
-	string m_name;
-	AnimationClip* GetBaseAnimation();
-	AnimationClip* GetTransitionAnimation();
+	string GetCurrentAnimationName() const;
+	string GetNextAnimationName() const;
+
 };
 
 #include "Player.h"
 
-AnimationClip* PlayerState::GetBaseAnimation()
-{
-	return this->mAnimationClip;
-}
-
-
-AnimationClip* PlayerState::GetTransitionAnimation()
-{
-	return this->mTransitionClip;
-}
 
 void PlayerState::Update(Player* player, double deltaTime){
 
 	int c_numOfClip = 0;
 	AnimationClip* clipToAnimate;
-	vector<AnimationClip*> animations = player->mAnimationEventController->GetNextAnimation(); 
+	player->m_animationManager.Animate(player->model, deltaTime); 
+}
 
-	c_numOfClip = animations.size();
 
-	switch (c_numOfClip)
-	{
-	case 1:
-		clipToAnimate = animations[0];
-		break;
-	case 2:
-		clipToAnimate = Blender::Blend(*animations[0],*animations[1], deltaTime); //first animation blended into the second
+std::string PlayerState::GetCurrentAnimationName() const
+{
+	return m_currentStateClipName;
 
-		break;
-	default:
-		return;
-	}
+}
 
-	player->mKeyFrameAnimator->Animate(player->model->GetModelMatrix(), deltaTime, player->model->mAnimationMatrix, clipToAnimate);
-
-	for (AnimationClip* clip : animations)
-	{
-		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed > clip->mTotalDuration)
-			this->mTransitionClip = nullptr;
-
-		clip->Update(deltaTime);
-	}
+std::string PlayerState::GetNextAnimationName() const
+{
+	return m_nextStateClipName;
 
 }
 

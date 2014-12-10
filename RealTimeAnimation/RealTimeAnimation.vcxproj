@@ -121,7 +121,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />
-    <ClInclude Include="Walk.h" />
+    <ClInclude Include="WalkForward.h" />
     <ClInclude Include="WalkLeft.h" />
     <ClInclude Include="WalkRight.h" />
   </ItemGroup>

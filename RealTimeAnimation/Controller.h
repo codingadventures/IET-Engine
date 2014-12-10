@@ -69,7 +69,9 @@ private:
 	bool humansOn;
 	AnimationClip* mFireAnimationClip;
 	AnimationClip* mRunAnimationClip;
-	AnimationClip* mWalkAnimationClip;
+	AnimationClip* mWalkForwardAnimationClip;
+	AnimationClip* mWalkLeftAnimationClip;
+	AnimationClip* mWalkRightAnimationClip;
 	bool isRunning;
 	Model* model_battlecruise;
 	AnimationClip* mIdleAnimationClip;
@@ -87,7 +89,9 @@ public:
 		free(boneLocation);
 		free(mFireAnimationClip);
 		free(mRunAnimationClip);
-		free(mWalkAnimationClip);
+		free(mWalkForwardAnimationClip);
+		free(mWalkLeftAnimationClip);
+		free(mWalkRightAnimationClip);
 
 	}
 	void Run(){
@@ -144,7 +148,7 @@ public:
 
 
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
-		model_dartmaul = new Model(shaderBones, DART_MAUL);
+		model_dartmaul = new Model(shaderBones, DART_MAUL_MODEL);
 		model_dartmaul->Scale(glm::vec3(3,3,3));
 		//model_dartmaul->Translate(glm::vec3(0,5,0));
 
@@ -167,19 +171,7 @@ public:
 			//free(drone);
 		}
 
-		mFireAnimationClip = new AnimationClip(0.5f, SHOOT_ACTION, "shoot");
-		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
 
-
-
-		mIdleAnimationClip = new AnimationClip(1.0f, IDLE_ACTION, "idle");
-		AnimationManager::AnimationSet["idle"] = mIdleAnimationClip;
-
-		mWalkAnimationClip = new AnimationClip(1.0f, WALK_ACTION, "walk");
-		AnimationManager::AnimationSet["walk"] = mWalkAnimationClip;
-
-		mRunAnimationClip = new AnimationClip(1.0f, RUN_ACTION, "run");
-		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		spline.addPoint(-1, model_dartmaul->GetPosition() + glm::vec3(0,5,0));
@@ -205,7 +197,7 @@ public:
 		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 
-		player = new Player(model_dartmaul);
+		LoadPlayer();
 
 		conesOn = false;
 		dofOn = false;
@@ -216,6 +208,18 @@ public:
 		global_clock = 0;
 		m_gameState = INTRO;
 		timeAtReset = glutGet(GLUT_ELAPSED_TIME);
+	}
+
+	void LoadPlayer()
+	{
+		player = new Player(model_dartmaul);
+
+		player->m_animationManager.Load(1.0f, SHOOT_ACTION, "shoot");
+		player->m_animationManager.Load(1.0f, WALK_ACTION, "walk");
+		player->m_animationManager.Load(1.0f, RUN_ACTION, "run");
+		player->m_animationManager.Load(1.0f, WALK_RIGHT_ACTION,"walkright");
+		player->m_animationManager.Load(1.0f, WALK_LEFT_ACTION,"walkleft");
+		player->m_animationManager.Load(1.0f, IDLE_ACTION, "idle");
 	}
 
 	void Intro()
@@ -260,7 +264,7 @@ public:
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		view = camera->GetViewMatrix();
-		
+
 		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
 		model_battlecruise->Draw();
@@ -639,7 +643,7 @@ public:
 		char playerState[200];
 		if (player->mState != nullptr)
 		{
-			sprintf_s(playerState, "Player State %s", player->mState->m_name.c_str());
+			sprintf_s(playerState, "Player State %s", player->mState->GetCurrentAnimationName().c_str());
 			screen_output(500.0f,VIEWPORT_HEIGHT - 110 ,playerState);
 		}
 

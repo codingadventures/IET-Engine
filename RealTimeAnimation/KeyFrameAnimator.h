@@ -11,9 +11,7 @@
 class KeyFrameAnimator 
 {
 public:
-
-
-
+	 
 
 	KeyFrameAnimator(Skeleton* pSkeleton) : m_pSkeleton(pSkeleton) //: IAnimation(skeleton,glm::mat4(1))		 
 	{
@@ -27,7 +25,7 @@ public:
 		this->mAnimationMatrix = outAnimationSequence;
 		this->mAnimationClip = animationClip;
 
-		animateKeyFrames(m_pSkeleton->rootBone, mAnimationClip->mLocalTimer);
+		animateKeyFrames(m_pSkeleton->rootBone, mAnimationClip->GetLocalTimer());
 	}
 
 private:

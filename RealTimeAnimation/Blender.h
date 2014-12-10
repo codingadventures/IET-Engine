@@ -7,14 +7,18 @@
 class Blender
 {
 public:
-	static AnimationClip* Blend(AnimationClip&  animation1, AnimationClip& animation2, double deltaTime)
+	static AnimationClip* LinearBlend(AnimationClip&  animation1, AnimationClip& animation2, double deltaTime)
 	{
-		AnimationClip* animationClip = new AnimationClip(animation2.mAnimationSpeed, animation2.mTotalDuration, animation2.mAnimationName);
+		double anim1LocalTimer = animation1.GetLocalTimer();
+		double anim2LocalTimer = animation2.GetLocalTimer();
+		double anim1TotalDuration = animation1.GetTotalDuration();
+		double anim2TotalDuration = animation2.GetTotalDuration();
+
+		AnimationClip* animationClip = new AnimationClip(animation2.mAnimationSpeed, anim2TotalDuration, animation2.mAnimationName, anim2LocalTimer);
 
 		AnimationPose sourcePose;
 		AnimationPose targetPose;
 
-		animationClip->mLocalTimer = animation2.mLocalTimer;
 
 		for (std::map<string,AnimationPose>::iterator it=animation1.mBoneMapping.begin(); it!=animation1.mBoneMapping.end(); ++it)
 		{
@@ -25,28 +29,31 @@ public:
 				AnimationPose blended(true);
 				float beta = 0.0f;
 				sourcePose = animation1.mBoneMapping[boneName];
-				targetPose = animation2.mBoneMapping[boneName];
-				 
-			/*	float t = animation2.mLocalTimer;
+				targetPose = animation2.mBoneMapping[boneName]; 
 
-				beta = lerp(0.0f, 1.0f, t);
-				current->weight = 1 - next->weight;*/
+				beta =  anim2LocalTimer / (anim1TotalDuration - anim1LocalTimer + anim2LocalTimer);
 
-				beta = animation2.mLocalTimer / (animation1.mTotalDuration - animation1.mLocalTimer + animation2.mLocalTimer);
+				glm::vec3 lerp_T =  sourcePose.GetInterpolatedTranslationKeyFrame(anim1LocalTimer) * (1 - beta)  + targetPose.GetInterpolatedTranslationKeyFrame(anim2LocalTimer) * beta;
+				glm::quat slerp_R =  glm::slerp(sourcePose.GetInterpolatedRotationKeyFrame(anim1LocalTimer), targetPose.GetInterpolatedRotationKeyFrame(anim2LocalTimer), beta);
 
-				glm::vec3 lerp_T =  sourcePose.GetInterpolatedTranslationKeyFrame(animation1.mLocalTimer) * (1 - beta)  + targetPose.GetInterpolatedTranslationKeyFrame(animation2.mLocalTimer) * beta;
-				glm::quat slerp_R =  glm::slerp(sourcePose.GetInterpolatedRotationKeyFrame(animation1.mLocalTimer), targetPose.GetInterpolatedRotationKeyFrame(animation2.mLocalTimer), beta);
-				
-				blended.AddRotationKeyFrame(slerp_R,animation2.mLocalTimer);
-				blended.AddTranslationKeyFrame(lerp_T,animation2.mLocalTimer);
+				blended.AddRotationKeyFrame(slerp_R,anim2LocalTimer);
+				blended.AddTranslationKeyFrame(lerp_T,anim2LocalTimer);
 
-				animationClip->SetAnimationPose(boneName,blended);
-				/*targetPose.ReplaceTranslationKeyFrame(lerp_T, animation2.mLocalTimer);
-				targetPose.ReplaceRotationKeyFrame(slerp_R, animation2.mLocalTimer);*/
+				animationClip->SetAnimationPose(boneName,blended); 
 			}
 		}
 
+		// I update the timer update ratio of the first animation
+		animation1.SetBlendUpdateRatio( CalculateBlendRatio(animation1,animation2));
+
 		return animationClip;
+	}
+private:
+
+	static float CalculateBlendRatio(AnimationClip&  animation1, AnimationClip& animation2)
+	{
+		float roundRatio = floorf(animation1.GetTotalDuration() / animation2.GetTotalDuration() * 100 ) / 100;
+		return roundRatio;
 	}
 };
 

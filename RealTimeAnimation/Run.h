@@ -3,13 +3,13 @@
 
 #include "PlayerState.h"   
 class Idle;
-class Walk; 
+class WalkForward; 
 
 
 class Run : public PlayerState
 {
 public:
-	Run(AnimationClip*);
+	Run(string);
 
 	virtual PlayerState* handleInput(bool* inputKeys);
 
@@ -17,34 +17,30 @@ public:
 };
 
 #include "Idle.h"
-#include "Walk.h"
+#include "WalkForward.h"
 
 
 
-Run::Run(AnimationClip* transitionClip)
+Run::Run(string transitionClipName)
 {
-	this->mAnimationClip = AnimationManager::AnimationSet["run"];
-	m_name = "run";
-	this->mTransitionClip = transitionClip;
+	 
+	m_currentStateClipName = "run";
+	this->m_nextStateClipName = transitionClipName; 
+	this->m_direction = glm::vec3(-1,0,0);
 
 }
 
 
 PlayerState* Run::handleInput(bool* inputKeys)
-{
-	m_direction = glm::vec3();
+{ 
 
-	if (inputKeys[KEY_r] && inputKeys[KEY_i])
-	{
-		m_direction = glm::vec3(0.0f,0.0f,1.0f);
-		return this;
-	}
+	if (WALK_FORWARD)
+		return new  WalkForward(this->m_currentStateClipName);
 
-	if (inputKeys[KEY_i] ||  inputKeys[KEY_k] ||  inputKeys[KEY_j] || inputKeys[KEY_l])
-		return new  Walk(this->mAnimationClip);
+	if (IDLE)
+		return new Idle(this->m_currentStateClipName);
 
-
-	return new Idle(this->mAnimationClip);
+	return this;
 }
 
 void Run::Update(Player* player, double deltaTime)

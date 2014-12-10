@@ -8,7 +8,7 @@ class AnimationEventController
 {
 public:
 	void AddAnimation(AnimationClip* animationClip);
-	std::vector<AnimationClip*> GetNextAnimation();
+	std::vector<AnimationClip*> GetNextAnimations();
 	void RemoveEndedAnimation(); 
 private:
 	std::deque<AnimationClip*> mEventQueue;
@@ -26,11 +26,12 @@ void AnimationEventController::AddAnimation(AnimationClip* animationClip)
 	}
 }
 
-std::vector<AnimationClip*> AnimationEventController::GetNextAnimation()
+std::vector<AnimationClip*> AnimationEventController::GetNextAnimations()
 {
 	std::vector <AnimationClip*> lReturnVector;
 
 	if (this->mEventQueue.empty()) return lReturnVector;
+
 	int queueSize =  mEventQueue.size();
 
 	for (int i = 0; i < queueSize; i++)
@@ -43,22 +44,7 @@ std::vector<AnimationClip*> AnimationEventController::GetNextAnimation()
 	return lReturnVector;
 } 
 
-void AnimationEventController::RemoveEndedAnimation(){ 
-	/*if (this->mEventQueue.empty()) return;
-
-	if (this->mEventQueue.size()==1) 
-	{
-	mAnimationOnQueue.erase(this->mEventQueue.front()->mAnimationName);
-	if(this->mEventQueue.front()->mIsAnimationFinished) this->mEventQueue.front()->Reset();
-	this->mEventQueue.pop_front();
-	}
-
-	if (this->mEventQueue.size() > 1 && this->mEventQueue.front()->mIsAnimationFinished)
-	{
-	mAnimationOnQueue.erase(this->mEventQueue.front()->mAnimationName);
-	this->mEventQueue.front()->Reset();
-	this->mEventQueue.pop_front();
-	}*/
+void AnimationEventController::RemoveEndedAnimation(){  
 }
 
 #endif // AnimationEventController_h__

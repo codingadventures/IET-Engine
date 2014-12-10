@@ -15,18 +15,15 @@ public:
 
 	PlayerState* mState;
 	Player(Model* model);
-	AnimationEventController* mAnimationEventController;
-	KeyFrameAnimator* mKeyFrameAnimator;
+	AnimationManager m_animationManager; 
 
-	void Move(glm::vec3 direction);
 	void HandleInput(bool* inputKeys);
 	void Update(double deltaTime);
 	~Player();
 
-	void Run(glm::vec3 m_direction);
-
-
-
+	void Run(glm::vec3 direction);
+	void Move(glm::vec3 direction);
+	 
 
 private:
 	static const float MOVE_SPEED;
@@ -42,15 +39,11 @@ const float Player::RUN_SPEED = 0.7f;
 
 Player::Player(Model* model) : model(model)
 {
-	mKeyFrameAnimator =  new  KeyFrameAnimator(this->model->mSkeleton);
-	mAnimationEventController = new AnimationEventController();
 	mState = new Idle(nullptr);
 }
 
 Player::~Player()
-{
-	delete mAnimationEventController;
-	delete mKeyFrameAnimator;
+{ 
 }   
 
 void Player::HandleInput(bool* inputKeys)
@@ -61,8 +54,8 @@ void Player::HandleInput(bool* inputKeys)
 	{
 		//delete mState;
 
-		mAnimationEventController->AddAnimation(state->GetBaseAnimation());
-		mAnimationEventController->AddAnimation(state->GetTransitionAnimation());
+		m_animationManager.AddAnimationOnQueue(state->GetCurrentAnimationName());
+		m_animationManager.AddAnimationOnQueue(state->GetNextAnimationName());
 
 		mState = state;
 	}
@@ -76,12 +69,12 @@ void Player::Update(double deltaTime)
 
 void Player::Move(glm::vec3 direction)
 {
-	 this->model->Translate(this->model->m_Direction * MOVE_SPEED);
+	 this->model->Translate(direction * MOVE_SPEED);
 }
 
 void Player::Run(glm::vec3 direction)
 {
-	this->model->Translate(this->model->m_Direction * RUN_SPEED);
+	this->model->Translate(direction * RUN_SPEED);
 	 
 }
 
