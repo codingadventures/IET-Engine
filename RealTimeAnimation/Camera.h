@@ -18,6 +18,28 @@ enum Camera_Movement {
 	RIGHT
 };
 
+enum Camera_Type{
+	THIRD_PERSON,
+	FREE_FLY
+};
+
+// Beware, brain-compiled code ahead! 
+Camera_Type& operator++(Camera_Type& cameraType)
+{ 
+	int val = static_cast<int>(cameraType);
+	if (val>1)
+		val = 0;
+
+	return cameraType = static_cast<Camera_Type>( ++val );
+}
+
+Camera_Type operator++(Camera_Type& cameraType, int)
+{
+	Camera_Type tmp(cameraType);
+	++cameraType;
+	return tmp;
+}
+
 static const float SPEED_STEP = 0.3f;
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
@@ -31,6 +53,7 @@ public:
 	glm::vec3 WorldUp;
 	glm::quat Rotation;
 	glm::quat ModelRotation;
+	glm::vec3 Offset;
 	glm::vec3 Direction;
 	// Euler Angles
 	GLfloat Yaw;
@@ -40,13 +63,15 @@ public:
 	GLfloat MouseSensitivity;
 	GLfloat Zoom; 
 	GLboolean HasMoved;
+	Camera_Type CameraType;
 	// Constructor with vectors
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = -90.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = 0.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
 	{
 		this->Position = position;
 		this->WorldUp = up;
 		this->Yaw = yaw;
 		this->Pitch = pitch;
+		this->CameraType = THIRD_PERSON;
 		this->updateCameraVectors();  
 	}
 	// Constructor with scalar values
@@ -55,6 +80,8 @@ public:
 		this->Position = glm::vec3(posX, posY, posZ);
 		this->WorldUp = glm::vec3(upX, upY, upZ);
 		this->Yaw = yaw;
+		this->CameraType = THIRD_PERSON;
+
 		this->Pitch = pitch;
 		this->updateCameraVectors();
 	}
@@ -71,13 +98,16 @@ public:
 		GLfloat velocity = this->MovementSpeed * deltaTime; 
 		HasMoved = true;
 		if(direction == FORWARD)
-			this->Position += this->Front * velocity * glm::vec3(1.0f,0.0f,1.0f);
+			this->Position += this->Front * velocity;
 		if(direction == BACKWARD)
-			this->Position -= this->Front * velocity * glm::vec3(1.0f,0.0f,1.0f);
+			this->Position -= this->Front * velocity;
 		if(direction == LEFT)
 			this->Position -= this->Right * velocity;
 		if(direction == RIGHT)
 			this->Position += this->Right * velocity;
+
+		if (CameraType == THIRD_PERSON)
+			this->Position.y = 0.0f;
 	}
 
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -92,8 +122,8 @@ public:
 
 		if(this->Pitch > 89.0f)
 			this->Pitch = 89.0f;
-		if(this->Pitch < 30.0f)
-			this->Pitch = 30.0f;
+		if(this->Pitch < -89.0f)
+			this->Pitch = -89.0f;
 
 
 		// Update Front, Right and Up Vectors using the updated Euler angles
@@ -113,29 +143,41 @@ public:
 
 
 	// Moves/alters the camera positions based on user input
-	void MoveCamera(GLfloat deltaTime)
+	void MoveCamera()
 	{
 		HasMoved = false;
 
-		this->Position = Direction * Rotation + Target;
-		this->Front = glm::normalize(Target - Position);
-		this->deltaTime = deltaTime;
+		switch (CameraType)
+		{
+		case THIRD_PERSON:
+			this->Position = Offset * Rotation + Target;
+			break;
+		case FREE_FLY:
+			if(keys[KEY_w])
+				this->ProcessKeyboard(FORWARD, SPEED_STEP);
+			if(keys[KEY_s])
+				this->ProcessKeyboard(BACKWARD, SPEED_STEP);
+			if(keys[KEY_a])
+				this->ProcessKeyboard(LEFT, SPEED_STEP);
+			if(keys[KEY_d])
+				this->ProcessKeyboard(RIGHT, SPEED_STEP);
+			break;
+		default:
+			break;
+		}
+
 
 		// Camera controls
-		//if(keys[KEY_w])
-		//	this->ProcessKeyboard(FORWARD, SPEED_STEP);
-		//if(keys[KEY_s])
-		//	this->ProcessKeyboard(BACKWARD, SPEED_STEP);
-		//if(keys[KEY_a])
-		//	this->ProcessKeyboard(LEFT, SPEED_STEP);
-		//if(keys[KEY_d])
-		//	this->ProcessKeyboard(RIGHT, SPEED_STEP);
 
 	}
 
 	void SetTarget(glm::vec3 target)
 	{
-		this->Target = target;
+		if (CameraType == THIRD_PERSON)
+		{
+			this->Target = target;
+			this->Front = glm::normalize(Target - Position);
+		}
 	}
 private:
 
@@ -145,14 +187,20 @@ private:
 	void updateCameraVectors()
 	{
 		// Calculate the new 
-		//glm::vec3 front;
-		//front.x = cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
-		//front.y = sin(glm::radians(this->Pitch));
-		//front.z = sin(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
+		glm::vec3 front;
+		front.x = cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
+		front.y = sin(glm::radians(this->Pitch));
+		front.z = sin(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
 
+		Direction = front;
+	 
 		this->Rotation =   glm::quat(glm::vec3(0.0f,glm::radians(Yaw),glm::radians(Pitch)));
-		this->ModelRotation =  glm::quat(glm::vec3(0.0f,glm::radians(-Yaw),0.0f)); //to obtain this very effect you can simply invert the quaternion
-		this->Front = glm::normalize(Front);
+		this->ModelRotation =  glm::quat(glm::vec3(0.0f,glm::radians(-Yaw),0.0f));
+
+		if (CameraType==FREE_FLY)
+			this->Front = glm::normalize(front);
+
+
 		// Make sure that when pitch is out of bounds, screen doesn't get flipped 
 		//this->Front = glm::normalize(front);
 		// Also re-calculate the Right and Up vector

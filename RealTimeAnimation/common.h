@@ -37,6 +37,7 @@
 #define DART_MAUL "models\\DartMaul\\DartMaul.dae"
 #define WALK_ACTION "models\\DartMaul\\walk_1.dae"
 #define RUN_ACTION "models\\DartMaul\\run.dae"
+#define IDLE_ACTION "models\\DartMaul\\idle.dae"
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
 #define SPACE_MODEL "models\\Space\\space.dae"
@@ -48,7 +49,11 @@
 
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 
-
+enum GameState
+{
+	INTRO,
+	GAME
+};
 
 bool keys[1024];
 

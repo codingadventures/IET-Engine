@@ -43,6 +43,7 @@ public:
 
 		this->loadModel(path);
 
+		//this->m_Direction = glm::vec3(1.0f,0.0f,1.0f);
 
 		if (mSkeleton->getNumberOfBones()>0)
 		{

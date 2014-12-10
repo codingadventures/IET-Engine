@@ -13,7 +13,7 @@ public:
 
 	virtual PlayerState* Idle::handleInput(bool* inputKeys);
 
-	virtual void update(Player* player, double deltaTime){}
+	virtual void update(Player* player, double deltaTime);
 
 };
 
@@ -44,7 +44,7 @@ public:
 
 Idle::Idle(AnimationClip* transitionClip) 
 {
-	this->mAnimationClip = nullptr;//AnimationManager::AnimationSet["idle"];
+	this->mAnimationClip = AnimationManager::AnimationSet["idle"];
 	m_name = "idle";
 	this->mTransitionClip = transitionClip;
 }
@@ -75,7 +75,7 @@ PlayerState* Idle::handleInput(bool* inputKeys)
 	/*if (inputKeys[KEY_r] && inputKeys[KEY_i])
 	return new Run(this->mAnimationClip);*/
 
-	return nullptr;
+	return this;
 }
 
 PlayerState* Run::handleInput(bool* inputKeys)
@@ -181,13 +181,46 @@ void Run::update(Player* player, double deltaTime)
 		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed >clip->mTotalDuration)
 			this->mTransitionClip = nullptr;//total hack..I got to change this!
 
-		 clip->Update(deltaTime);
+		clip->Update(deltaTime);
 	}
 
 	player->Run(m_direction);
 
 }
+void Idle::update(Player* player, double deltaTime){
+	int c_numOfClip = 0;
+	AnimationClip* clipToAnimate;
+	auto animations = player->mAnimationEventController->GetNextAnimation(); 
 
+	c_numOfClip = animations.size();
+
+	switch (c_numOfClip)
+	{
+	case 1:
+		clipToAnimate = animations[0];
+		break;
+	case 2:
+
+		//if (animations[0]->mTotalDuration - animations[0]->mLocalTimer > 0.2)
+		clipToAnimate = Blender::Blend(*animations[0],*animations[1], deltaTime); //first animation blended into the second
+		/*	else
+		clipToAnimate = animations[0];*/
+		break;
+	default:
+		return;
+	}
+
+	player->mKeyFrameAnimator->Animate(player->model->GetModelMatrix(), deltaTime, player->model->mAnimationMatrix, clipToAnimate);
+
+	for (AnimationClip* clip : animations)
+	{
+		if (clip->mLocalTimer + deltaTime/1000 * clip->mAnimationSpeed >clip->mTotalDuration)
+			this->mTransitionClip = nullptr;//total hack..I got to change this!
+
+		clip->Update(deltaTime);
+	}
+
+}
 #include "Player.h"
 
 #endif // State_h__

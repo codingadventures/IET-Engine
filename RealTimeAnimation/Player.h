@@ -32,7 +32,7 @@ private:
 	static const float RUN_SPEED;
 };
 
-const float Player::MOVE_SPEED = 0.3f;
+const float Player::MOVE_SPEED = 0.2f;
 const float Player::RUN_SPEED = 0.7f;
 
 #include "State.h"

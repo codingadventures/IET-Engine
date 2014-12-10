@@ -25,6 +25,56 @@ extern "C" static void drawCallback();
 
 class Controller
 {
+
+private:
+
+	glm::vec3 dartMaulModelWorldPosition;
+
+	void Controller::setupCurrentInstance();
+	GLuint* boneLocation;
+
+	int boneIndex;
+	int simulationIteration;
+	GameState m_gameState;
+
+	glm::mat4* animations;
+	Camera *camera;
+	Spline spline;
+
+	Player* player;
+
+	Shader *shader;
+	Shader *shaderBones;
+	Shader* shaderBonesNoTexture;
+	Shader* shaderNoTexture;
+
+	Model *model_bob;
+	Model *tennisModel,*model_max;
+	//Model* model_floor;
+	Model*  model_cones;
+	Model* model_dartmaul;
+	std::vector<Model*> models_drone;
+	KeyFrameAnimator* droidAnimator;
+	KeyFrameAnimator* dartMaulAnimator;
+
+	IKInfo ikInfo;
+	glm::uint numberOfBones ;
+	float oldTimeSinceStart;
+	float deltaTime;
+	float global_clock;
+	float speed; 
+	bool splineOn;
+	bool conesOn;
+	bool dofOn;
+	bool humansOn;
+	AnimationClip* mFireAnimationClip;
+	AnimationClip* mRunAnimationClip;
+	AnimationClip* mWalkAnimationClip;
+	bool isRunning;
+	Model* model_battlecruise;
+	AnimationClip* mIdleAnimationClip;
+	bool m_introIsOver;
+	float timeAtReset;
 public:
 	Controller(void)
 	{
@@ -58,7 +108,7 @@ public:
 		glutIdleFunc(drawCallback);
 
 		this->camera = new Camera(glm::vec3(0.0f,30.0f,0.0f));
-		camera->Direction =  CAMERA_OFFSET;
+		camera->Offset =  CAMERA_OFFSET;
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
@@ -92,33 +142,18 @@ public:
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-		spline.addPoint(-1,INITIAL_POINTER_POSITION);
-		spline.addPoint(0, glm::vec3(9.0f,40.0f,-21.0f));  
-		spline.addPoint(2, glm::vec3(59.0f,55.0f,4.0f));  
-		spline.addPoint(6, glm::vec3(-60.0f,20.0f,-38.0f)); 
-
-		spline.addPoint(8, glm::vec3(-60.0f,120.0f,-38.0f)); 
-
-		spline.addPoint(11, glm::vec3(59.0f,55.0f,4.0f));  
-
-		spline.addPoint(13, glm::vec3(9.0f,40.0f,-21.0f));  
-		spline.addPoint(16,INITIAL_POINTER_POSITION);
-		//spline.addPoint(20,glm::vec3(-20.0f,40.0f,-21.0f));
-
-		//spline.addPoint(10,INITIAL_POINTER_POSITION + glm::vec3(60.0f,15.0f,0.0f)); // they will affect the curve, but yeah
 
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL);
 		model_dartmaul->Scale(glm::vec3(3,3,3));
 		//model_dartmaul->Translate(glm::vec3(0,5,0));
-		player = new Player(model_dartmaul);
 
 		//model_bob = new Model(shaderBones, BOB_MODEL);
 		//model_max = new Model(shaderBones, MAX_MODEL);
 		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 		float deg =   glm::radians(90.0f);
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
 			drone->Translate(glm::vec3(-100.0f,0.0f ,1.0f * (i+1) * 2));
@@ -135,14 +170,31 @@ public:
 		mFireAnimationClip = new AnimationClip(0.5f, SHOOT_ACTION, "shoot");
 		AnimationManager::AnimationSet["shoot"] = mFireAnimationClip;
 
+
+
+		mIdleAnimationClip = new AnimationClip(1.0f, IDLE_ACTION, "idle");
+		AnimationManager::AnimationSet["idle"] = mIdleAnimationClip;
+
 		mWalkAnimationClip = new AnimationClip(1.0f, WALK_ACTION, "walk");
 		AnimationManager::AnimationSet["walk"] = mWalkAnimationClip;
 
 		mRunAnimationClip = new AnimationClip(1.0f, RUN_ACTION, "run");
 		AnimationManager::AnimationSet["run"] = mRunAnimationClip;
+		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+
+		spline.addPoint(-1, model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+		spline.addPoint(0, glm::vec3(1759.0f,105.0f,1481.0f));  
+		spline.addPoint(3, glm::vec3(1352.0f,112.0f,-594.0f));  
+		spline.addPoint(6, glm::vec3(-637.0f,111.0f,-296.0f)); 
+
+		spline.addPoint(9, glm::vec3(119.0f,86.0f,-32.0f)); 
+
+		spline.addPoint(12, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition());  
+		spline.addPoint(14, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+		spline.addPoint(15, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		//model_floor = new Model(shader, FLOOR_MODEL);
-		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
+		//	model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
 		speed = 1.0f; 
 		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
 		//model_battlecruise->Scale(glm::vec3(5000.0f,5000.0f,5000.0f));
@@ -155,14 +207,31 @@ public:
 		//	animationMap["MAX_IK"] =(IAnimation*) new IKAnimator(model_max->skeleton);
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 
+		player = new Player(model_dartmaul);
+
 		conesOn = false;
 		dofOn = false;
 		humansOn = false;
 		isRunning = false;
 		splineOn = false;
+		m_introIsOver = true;
 		global_clock = 0;
+		m_gameState = INTRO;
+		timeAtReset = glutGet(GLUT_ELAPSED_TIME);
 	}
 
+	void Intro()
+	{
+		if (m_introIsOver) return;
+
+
+		camera->Position = spline.getPosition();
+
+		spline.Update(deltaTime);
+
+		m_introIsOver = spline.m_isSplinePathEnded;
+
+	}
 
 	void Draw()
 	{
@@ -180,34 +249,32 @@ public:
 
 		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 10000.0f);  
 
+		if (m_introIsOver)
+		{ 
+			camera->MoveCamera();
+			////camera->Front = glm::vec3(0,150,0);
 
+		}
 		player->HandleInput(keys);
 
 		player->Update(deltaTime);
-
-		camera->MoveCamera(deltaTime);
-		//camera->Front = glm::vec3(0,150,0);
-
-		model_dartmaul->m_Direction = camera->Front * glm::vec3(1,0,1);
 
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		view = camera->GetViewMatrix();
 
-		//shader->SetModelViewProjection(model_floor->GetModelMatrix(),view,projection);
+		//shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
-		//tennisModel->Draw();
-
-		//shader->SetModel(model_floor->model);
-
-		//model_floor->Draw();
-		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
-
-		model_battlecruise->Draw();
+		//model_battlecruise->Draw();
 
 		shaderBones->Use(); 
 
-		model_dartmaul->Rotate(camera->ModelRotation *  glm::quat(glm::vec3(0.0f,glm::radians(220.0f),0.0f)));
+		 
+		model_dartmaul->m_Direction = glm::vec3(camera->Front.x,0,camera->Front.z);
+	 	model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
+		dartMaulModelWorldPosition = model_dartmaul->GetPosition();
+		// 
+
 
 		shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),view,projection);
 
@@ -236,7 +303,7 @@ public:
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
 
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i <1; i++)
 		{
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
@@ -244,9 +311,9 @@ public:
 			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
 			droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
-			
+
 			mFireAnimationClip->Update(deltaTime);
-			
+
 			models_drone[i]->Draw();
 		}
 
@@ -315,15 +382,7 @@ public:
 		{
 		shaderNoTexture->Use();
 
-		glm::vec3 position;
 
-		position = spline.getPosition();
-
-		tennisModel->model = glm::translate( glm::mat4(1) ,position) * glm::scale(glm::mat4(1),glm::vec3(2.1f, 2.1f, 2.1f)); 
-
-		shaderNoTexture->SetModelViewProjection(glm::mat4(1),view,projection); 
-
-		spline.Update(deltaTime);
 
 		for (int i = 1; i < spline.interpolationValues.size() - 1; i++)
 		{
@@ -334,6 +393,9 @@ public:
 		}
 		}
 		*/
+		Intro();
+
+
 		shaderNoTexture->Use();
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
@@ -406,51 +468,6 @@ public:
 	}
 
 
-private:
-
-	glm::vec3 dartMaulModelWorldPosition;
-
-	void Controller::setupCurrentInstance();
-	GLuint* boneLocation;
-
-	int boneIndex;
-	int simulationIteration;
-
-	glm::mat4* animations;
-	Camera *camera;
-	Spline spline;
-
-	Player* player;
-
-	Shader *shader;
-	Shader *shaderBones;
-	Shader* shaderBonesNoTexture;
-	Shader* shaderNoTexture;
-
-	Model *model_bob;
-	Model *tennisModel,*model_max;
-	//Model* model_floor;
-	Model*  model_cones;
-	Model* model_dartmaul;
-	std::vector<Model*> models_drone;
-	KeyFrameAnimator* droidAnimator;
-	KeyFrameAnimator* dartMaulAnimator;
-
-	IKInfo ikInfo;
-	glm::uint numberOfBones ;
-	float oldTimeSinceStart;
-	float deltaTime;
-	float global_clock;
-	float speed; 
-	bool splineOn;
-	bool conesOn;
-	bool dofOn;
-	bool humansOn;
-	AnimationClip* mFireAnimationClip;
-	AnimationClip* mRunAnimationClip;
-	AnimationClip* mWalkAnimationClip;
-	bool isRunning;
-	Model* model_battlecruise;
 	void ReadInput()
 	{
 		if(keys[KEY_p])
@@ -514,9 +531,9 @@ private:
 				boneIndex--;
 		}
 
-		if (keys[KEY_SPACE])
+		if (keys[KEY_c])
 		{
-			animationStep = true;
+			camera->CameraType++;
 		}
 
 		if (keys[KEY_1])
@@ -563,24 +580,25 @@ private:
 		model_max->setJointLimit("L_Finger1",fingers);
 	}
 
-
 	inline void update_timer()
 	{
-		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+
+		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME) - timeAtReset;
 		deltaTime = timeSinceStart - oldTimeSinceStart;
 		oldTimeSinceStart = timeSinceStart; 
 
-		global_clock += deltaTime/1000 * ANIMATION_SPEED;
+		global_clock += deltaTime/1000;
 	}
 
 
 	void TextToScreen()
-	{
-		string splineStatus = splineOn ? "ON" : "OFF";
-		string splineMessage = ("1 - Enable/Disable Spline - STATUS: " + splineStatus );
-		screen_output(10, VIEWPORT_HEIGHT - 30, (char*) splineMessage.c_str());
+	{ 
+		string cameraType = camera->CameraType == FREE_FLY ? "Free Fly" :" Third Person";
 
-		string conesStatus = conesOn ? "ON" : "OFF";
+		string cameraTypeMessage = ("C - Camera Type - STATUS: " + cameraType);
+		screen_output(10, VIEWPORT_HEIGHT - 30, (char*) cameraTypeMessage.c_str());
+
+		/*	string conesStatus = conesOn ? "ON" : "OFF";
 		string conesMessage = ("2 - Show/Hide Cones - STATUS: " + conesStatus );
 		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) conesMessage.c_str());
 
@@ -591,8 +609,8 @@ private:
 		string humanStatus = humansOn? "ON" : "OFF";
 		string humanMessage = "4 - Show/Hide Humans - STATUS: " + humanStatus;
 		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) humanMessage.c_str());
-
-		string controls = "Camera W,A,S,D - Tennis Ball Control I,J,K,L,U,O";
+		*/
+		string controls = "Player/Camera W,A,S,D";
 		screen_output(10, 20, (char*) controls.c_str());
 
 
@@ -608,9 +626,17 @@ private:
 		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
 
+		char cameraDirectionPosition[100];
+		sprintf_s(cameraDirectionPosition, "Camera Direction (%f,%f,%f)",camera->Direction.x,camera->Direction.y,camera->Direction.z);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,cameraDirectionPosition);
+
 		char animationTime[100];
 		sprintf_s(animationTime, "Animation Time %f",global_clock);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,animationTime);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 170 ,animationTime);
+
+		char splineTime[100];
+		sprintf_s(splineTime, "Spline Time %f",spline.timer);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 150 ,splineTime);
 
 		char playerState[200];
 		if (player->mState != nullptr)

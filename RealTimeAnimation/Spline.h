@@ -10,10 +10,13 @@
 class Spline {
 
 public :
+	bool m_isSplinePathEnded;
+	double timer;
 
 	Spline()
 	{
 		timer = 0;
+		m_isSplinePathEnded = false;
 	}
 	std::vector<std::pair<float, glm::vec3>> interpolationValues;
 
@@ -26,6 +29,11 @@ public :
 	void addPoint(double time, glm::vec3 position)
 	{
 		interpolationValues.push_back(std::make_pair(time,position));
+	}
+
+	void Reset()
+	{
+		m_isSplinePathEnded = false;
 	}
 
 	glm::vec3 getPosition()
@@ -50,6 +58,7 @@ public :
 
 		if(reset)
 		{
+			m_isSplinePathEnded = true;
 			prev_key = 1;
 			next_key = 2;
 			timer = 0;
@@ -64,8 +73,6 @@ public :
 	}
 
 private:
-
-	double timer;
 
 
 
