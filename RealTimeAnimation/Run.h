@@ -40,7 +40,7 @@ PlayerState* Run::handleInput(bool* inputKeys)
 	if (IDLE)
 		return new Idle(this->m_currentStateClipName);
 
-	return this;
+	return new Run(this->m_currentStateClipName);
 }
 
 void Run::Update(Player* player, double deltaTime)

@@ -7,29 +7,32 @@
 class Blender
 {
 public:
-	static AnimationClip* LinearBlend(AnimationClip&  animation1, AnimationClip& animation2, double deltaTime)
-	{
-		double anim1LocalTimer = animation1.GetLocalTimer();
-		double anim2LocalTimer = animation2.GetLocalTimer();
-		double anim1TotalDuration = animation1.GetTotalDuration();
-		double anim2TotalDuration = animation2.GetTotalDuration();
+	static AnimationClip* LinearBlend(std::vector<AnimationClip*> animationClips, double deltaTime)
+	{ 
+		AnimationClip* animation1 = animationClips[0];
+		AnimationClip* animation2 = animationClips[1];
 
-		AnimationClip* animationClip = new AnimationClip(animation2.mAnimationSpeed, anim2TotalDuration, animation2.mAnimationName, anim2LocalTimer);
+		double anim1LocalTimer = animation1->GetLocalTimer();
+		double anim2LocalTimer = animation2->GetLocalTimer();
+		double anim1TotalDuration = animation1->GetTotalDuration();
+		double anim2TotalDuration = animation2->GetTotalDuration();
+
+		AnimationClip* animationClip = new AnimationClip(animation2->mAnimationSpeed, anim2TotalDuration, animation2->mAnimationName, anim2LocalTimer);
 
 		AnimationPose sourcePose;
 		AnimationPose targetPose;
 
 
-		for (std::map<string,AnimationPose>::iterator it=animation1.mBoneMapping.begin(); it!=animation1.mBoneMapping.end(); ++it)
+		for (std::map<string,AnimationPose>::iterator it=animation1->mBoneMapping.begin(); it!=animation1->mBoneMapping.end(); ++it)
 		{
 			string boneName = it->first;
 
-			if ( animation2.GetAnimationPose(boneName) != nullptr) 
+			if ( animation2->GetAnimationPose(boneName) != nullptr) 
 			{
 				AnimationPose blended(true);
 				float beta = 0.0f;
-				sourcePose = animation1.mBoneMapping[boneName];
-				targetPose = animation2.mBoneMapping[boneName]; 
+				sourcePose = animation1->mBoneMapping[boneName];
+				targetPose = animation2->mBoneMapping[boneName]; 
 
 				beta =  anim2LocalTimer / (anim1TotalDuration - anim1LocalTimer + anim2LocalTimer);
 
@@ -44,7 +47,7 @@ public:
 		}
 
 		// I update the timer update ratio of the first animation
-		animation1.SetBlendUpdateRatio( CalculateBlendRatio(animation1,animation2));
+		animation1->SetBlendUpdateRatio( CalculateBlendRatio(*animation1,*animation2));
 
 		return animationClip;
 	}

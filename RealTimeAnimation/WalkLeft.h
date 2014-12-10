@@ -50,7 +50,7 @@ PlayerState* WalkLeft::handleInput(bool* inputKeys)
 		 ;//implement 
 
 
-	return this;
+	return new WalkLeft(this->m_currentStateClipName);
 }  
 
 

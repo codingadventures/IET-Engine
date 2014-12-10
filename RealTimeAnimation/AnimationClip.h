@@ -31,15 +31,17 @@ public:
 	double GetTotalDuration() const;
 	float GetBlendUpdateRatio() const;
 	void SetBlendUpdateRatio(float val);
-
+	bool IsOver(double deltaTime);
 private: 
 	double mLocalTimer;
 	double mTotalDuration;
 	float m_blendUpdateRatio;
+	double timeStep(double deltaTime);
+
+
 	void loadAnimations(string file_name );
 
 	void Init();
-	
 };
 
 double AnimationClip::GetLocalTimer() const { return mLocalTimer; }
@@ -150,13 +152,23 @@ void AnimationClip::SetAnimationPose(string boneName,AnimationPose animationPose
 
 void AnimationClip::Update(double deltaTime)
 {
-	mLocalTimer += deltaTime / 1000  * mAnimationSpeed * this->m_blendUpdateRatio;
+	mLocalTimer += timeStep(deltaTime);
 
 	if (mLocalTimer > mTotalDuration)
 	{
 		Reset();
 		//signal animation is done.
 	}
+}
+
+bool AnimationClip::IsOver(double deltaTime)
+{
+	return mLocalTimer + timeStep(deltaTime) >= mTotalDuration;
+}
+
+double AnimationClip::timeStep(double deltaTime)
+{
+	return deltaTime / 1000  * mAnimationSpeed  * this->m_blendUpdateRatio;
 }
 
 #endif // AnimationClip_h__

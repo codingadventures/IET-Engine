@@ -38,7 +38,7 @@ PlayerState* WalkRight::handleInput(bool* inputKeys)
 		return new Idle(this->m_currentStateClipName);
 
 	if (WALK_LEFT)
-		return new WalkRight(this->m_currentStateClipName);
+		return new WalkLeft(this->m_currentStateClipName);
 
 	if (WALK_FORWARD)
 		return new WalkForward(this->m_currentStateClipName);
@@ -47,7 +47,7 @@ PlayerState* WalkRight::handleInput(bool* inputKeys)
 		;//implement it please
 
 
-	return this;
+	return new WalkRight(this->m_currentStateClipName);
 }
 
 void WalkRight::Update(Player* player, double deltaTime)

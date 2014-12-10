@@ -312,10 +312,10 @@ public:
 
 			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
-			droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
+			/*droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
 
 			mFireAnimationClip->Update(deltaTime);
-
+*/
 			models_drone[i]->Draw();
 		}
 

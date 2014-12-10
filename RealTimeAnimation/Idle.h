@@ -46,7 +46,7 @@ PlayerState* Idle::handleInput(bool* inputKeys)
 	/*if (inputKeys[KEY_r] && inputKeys[KEY_i])
 	return new Run(this->mAnimationClip);*/
 
-	return this;
+	return new Idle(this->m_currentStateClipName);
 }
 
 void Idle::Update(Player* player, double deltaTime){

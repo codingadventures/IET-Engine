@@ -31,7 +31,7 @@ private:
 };
 
 const float Player::MOVE_SPEED = 0.2f;
-const float Player::RUN_SPEED = 0.7f;
+const float Player::RUN_SPEED = 0.4f;
 
 #include "Idle.h"
 #include "PlayerState.h"
@@ -39,11 +39,12 @@ const float Player::RUN_SPEED = 0.7f;
 
 Player::Player(Model* model) : model(model)
 {
-	mState = new Idle(nullptr);
+	mState = new Idle("");
 }
 
 Player::~Player()
 { 
+ 
 }   
 
 void Player::HandleInput(bool* inputKeys)
@@ -52,10 +53,11 @@ void Player::HandleInput(bool* inputKeys)
 
 	if (state != nullptr)
 	{
-		//delete mState;
+		delete mState;
 
 		m_animationManager.AddAnimationOnQueue(state->GetCurrentAnimationName());
 		m_animationManager.AddAnimationOnQueue(state->GetNextAnimationName());
+
 
 		mState = state;
 	}

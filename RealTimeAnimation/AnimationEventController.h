@@ -9,7 +9,7 @@ class AnimationEventController
 public:
 	void AddAnimation(AnimationClip* animationClip);
 	std::vector<AnimationClip*> GetNextAnimations();
-	void RemoveEndedAnimation(); 
+	void PurgeEndedClips(double deltaTime);
 private:
 	std::deque<AnimationClip*> mEventQueue;
 	std::map<string,bool> mAnimationOnQueue;
@@ -19,7 +19,7 @@ void AnimationEventController::AddAnimation(AnimationClip* animationClip)
 {
 	if (animationClip == nullptr) return;
 
-	if (mAnimationOnQueue.find(animationClip->mAnimationName) == mAnimationOnQueue.end())	
+	if (mAnimationOnQueue.find(animationClip->mAnimationName) == mAnimationOnQueue.end())	//if it's not already there
 	{
 		this->mEventQueue.push_back(animationClip);
 		mAnimationOnQueue[animationClip->mAnimationName] = true;	
@@ -36,15 +36,33 @@ std::vector<AnimationClip*> AnimationEventController::GetNextAnimations()
 
 	for (int i = 0; i < queueSize; i++)
 	{
-		lReturnVector.push_back(mEventQueue.back());
-		mAnimationOnQueue.erase(this->mEventQueue.back()->mAnimationName);
-		mEventQueue.pop_back();
+		AnimationClip* clip = mEventQueue[i];
+
+		lReturnVector.push_back(clip);
 	} 
 
 	return lReturnVector;
 } 
 
-void AnimationEventController::RemoveEndedAnimation(){  
+void AnimationEventController::PurgeEndedClips(double deltaTime)
+{
+	if (this->mEventQueue.empty()) return;
+	int dequeSize = this->mEventQueue.size();
+
+	for (int i = dequeSize - 1; i > -1 ; i--)
+	{
+		auto clip = this->mEventQueue.front();
+		this->mEventQueue.pop_front();
+
+		if (clip->IsOver(deltaTime)){
+			mAnimationOnQueue.erase(clip->mAnimationName);
+			continue;
+		}
+
+		this->mEventQueue.push_back(clip);
+	}
 }
+
+
 
 #endif // AnimationEventController_h__

@@ -57,7 +57,7 @@ PlayerState* WalkForward::handleInput(bool* inputKeys)
 		;//Implement
 
 
-	return this;
+	return new WalkForward(this->m_currentStateClipName);
 }  
 
 

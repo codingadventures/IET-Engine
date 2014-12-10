@@ -25,7 +25,7 @@ protected:
 
 public:
 	PlayerState(){}
-	virtual ~PlayerState() {}
+	~PlayerState() {}
 	virtual PlayerState* handleInput(bool* inputKeys) = 0;
 	virtual void Update(Player* player, double deltaTime);
 	string GetCurrentAnimationName() const;
@@ -37,7 +37,6 @@ public:
 
 
 void PlayerState::Update(Player* player, double deltaTime){
-
 	int c_numOfClip = 0;
 	AnimationClip* clipToAnimate;
 	player->m_animationManager.Animate(player->model, deltaTime); 

@@ -94,7 +94,7 @@ glm::vec3 AnimationPose::GetInterpolatedTranslationKeyFrame(double time)
 		float total_t = 0.0f;
 		float t = 0.0f;
 		int curr_key = FindTranslationKeyFrame(time);
-		int next_key = curr_key + 1;
+		int next_key = curr_key + 1 == lTranslationsSize ? 0 : curr_key + 1;
 		
 
 		total_t =  GetTranslationKeyFrame(next_key).GetTime() - GetTranslationKeyFrame(curr_key).GetTime();
@@ -116,7 +116,7 @@ glm::quat  AnimationPose::GetInterpolatedRotationKeyFrame(double time)
 	if (lRotationsSize > 0) {
 		// find next and current keys
 		int curr_key = FindRotationKeyFrame(time);
-		int next_key = curr_key + 1;
+		int next_key = curr_key + 1 == lRotationsSize ? 0 : curr_key + 1;
 		float total_t = 0.0f;
 		float t = 0.0f;
 
@@ -152,10 +152,10 @@ int AnimationPose::FindTranslationKeyFrame(double time)
 	int lTranslationsSize =  GetTranslationsSize();
 	int curr_key = 0; 
 
-	for (int i = 0; i < lTranslationsSize - 1; i++) 
+	for (int i = 0; i < lTranslationsSize; i++) 
 	{
 		curr_key = i; 
-		if ( GetTranslationKeyFrame(curr_key + 1).GetTime() > time) {
+		if (curr_key + 1 == lTranslationsSize || GetTranslationKeyFrame(curr_key + 1).GetTime() > time) {
 			break;
 		}
 	} 
@@ -167,9 +167,9 @@ int AnimationPose::FindRotationKeyFrame(double time)
 {
 	int lRotationsSize = GetRotationsSize();
 	int curr_key = 0;
-	for (int i = 0; i < lRotationsSize - 1; i++) {
+	for (int i = 0; i < lRotationsSize; i++) {
 		curr_key = i; 
-		if (GetRotationKeyFrame(curr_key + 1).GetTime() > time) {
+		if (curr_key + 1 == lRotationsSize || GetRotationKeyFrame(curr_key + 1).GetTime() > time) {
 			break;
 		}
 	}
