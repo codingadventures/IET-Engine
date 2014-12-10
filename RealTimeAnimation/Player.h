@@ -1,11 +1,12 @@
 #ifndef Player_h__
 #define Player_h__
+
 #include "AnimationEventController.h"
 #include "Model.h"
 #include "Blender.h"
-#include "PlayerState.h"
 
 class Idle;
+class PlayerState;
 
 class Player
 {
@@ -35,7 +36,8 @@ private:
 const float Player::MOVE_SPEED = 0.2f;
 const float Player::RUN_SPEED = 0.7f;
 
-#include "State.h"
+#include "Idle.h"
+#include "PlayerState.h"
 
 
 Player::Player(Model* model) : model(model)
@@ -68,7 +70,7 @@ void Player::HandleInput(bool* inputKeys)
 
 void Player::Update(double deltaTime)
 {
-	mState->update(this, deltaTime); 
+	mState->Update(this, deltaTime); 
 	 
 }
 

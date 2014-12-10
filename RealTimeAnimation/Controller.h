@@ -194,12 +194,10 @@ public:
 		spline.addPoint(15, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		//model_floor = new Model(shader, FLOOR_MODEL);
-		//	model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
+		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
 		speed = 1.0f; 
 		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
-		//model_battlecruise->Scale(glm::vec3(5000.0f,5000.0f,5000.0f));
-		//
-		////dartmaulModel->model =  glm::rotate(dartmaulModel->model, deg , glm::vec3(0.0f, 1.0f, 0.0f));
+
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 
 
@@ -262,16 +260,16 @@ public:
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		view = camera->GetViewMatrix();
+		
+		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
-		//shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
-
-		//model_battlecruise->Draw();
+		model_battlecruise->Draw();
 
 		shaderBones->Use(); 
 
-		 
+
 		model_dartmaul->m_Direction = glm::vec3(camera->Front.x,0,camera->Front.z);
-	 	model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
+		model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
 		dartMaulModelWorldPosition = model_dartmaul->GetPosition();
 		// 
 
@@ -648,6 +646,12 @@ public:
 		char cameraAngles[200];
 		sprintf_s(cameraAngles,"Camera Angles: Yaw %f - Pitch %f",camera->Yaw,camera->Pitch);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 130 ,cameraAngles);
+
+		char loadTime[100];
+		sprintf_s(loadTime,"Load Time: %f",timeAtReset);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 190 ,loadTime);
+
+
 
 	}
 };

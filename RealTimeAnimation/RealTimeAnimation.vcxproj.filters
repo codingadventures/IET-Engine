@@ -152,7 +152,22 @@
     <ClInclude Include="Helper.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="State.h">
+    <ClInclude Include="Idle.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Walk.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Run.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="WalkLeft.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="WalkRight.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="SwingSword.h">
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
   </ItemGroup>

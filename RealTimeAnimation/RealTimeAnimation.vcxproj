@@ -59,7 +59,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimpd.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,7 +96,8 @@
     <ClInclude Include="AngleRestriction.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Helper.h" />
-    <ClInclude Include="State.h" />
+    <ClInclude Include="Idle.h" />
+    <ClInclude Include="Run.h" />
     <ClInclude Include="KeyFrame.h" />
     <ClInclude Include="KeyFrameAnimator.h" />
     <ClInclude Include="Callbacks.h" />
@@ -116,9 +117,13 @@
     <ClInclude Include="Skeleton.h" />
     <ClInclude Include="ScreenOutput.h" />
     <ClInclude Include="Spline.h" />
+    <ClInclude Include="SwingSword.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />
+    <ClInclude Include="Walk.h" />
+    <ClInclude Include="WalkLeft.h" />
+    <ClInclude Include="WalkRight.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag" />
