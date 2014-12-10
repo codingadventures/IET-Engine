@@ -18,16 +18,17 @@ public:
 	AnimationManager m_animationManager; 
 
 	void HandleInput(bool* inputKeys);
-	void Update(double deltaTime);
+	void Update(double deltaTime,glm::vec3 direction);
 	~Player();
 
 	void Run(glm::vec3 direction);
 	void Move(glm::vec3 direction);
-	 
+	glm::vec3 GetDirection() const; 
 
 private:
 	static const float MOVE_SPEED;
 	static const float RUN_SPEED;
+	glm::vec3 m_direction;
 };
 
 const float Player::MOVE_SPEED = 0.2f;
@@ -63,8 +64,9 @@ void Player::HandleInput(bool* inputKeys)
 	}
 }
 
-void Player::Update(double deltaTime)
+void Player::Update(double deltaTime, glm::vec3 direction)
 {
+	this->m_direction = direction * glm::vec3(1,0,1); //I set to 0 the y
 	mState->Update(this, deltaTime); 
 	 
 }
@@ -78,6 +80,11 @@ void Player::Run(glm::vec3 direction)
 {
 	this->model->Translate(direction * RUN_SPEED);
 	 
+}
+
+glm::vec3 Player::GetDirection() const
+{
+	return m_direction;
 }
 
 

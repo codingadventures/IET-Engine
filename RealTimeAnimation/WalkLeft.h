@@ -28,8 +28,7 @@ public:
 WalkLeft::WalkLeft(string transitionClipName) 
 { 
 	m_currentStateClipName = "walkleft";
-	this->m_nextStateClipName = transitionClipName;
-	this->m_direction = glm::vec3(0,0,1);
+	this->m_nextStateClipName = transitionClipName; 
 
 }
 
@@ -58,8 +57,9 @@ void WalkLeft::Update(Player* player, double deltaTime)
 {
 	PlayerState::Update(player,deltaTime);
 
+	glm::vec3 direction = glm::rotate(player->GetDirection(),glm::radians(90.0f),glm::vec3(0,1,0));
 
-	player->Move(m_direction);
+	player->Move(direction);
 
 }
 #endif // Walk_h__

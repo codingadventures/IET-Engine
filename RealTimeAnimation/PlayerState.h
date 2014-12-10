@@ -5,6 +5,7 @@
 
 #include "AnimationClip.h"
 #include "Keys.h"  
+#include <glm/gtx/rotate_vector.hpp>
 
 class Player;
 
@@ -20,7 +21,7 @@ class PlayerState
 {
 protected: 
 	string m_nextStateClipName;
-	glm::vec3 m_direction;
+	//glm::vec3 m_direction;
 	string m_currentStateClipName;
 
 public:

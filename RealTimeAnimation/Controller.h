@@ -259,7 +259,7 @@ public:
 		}
 		player->HandleInput(keys);
 
-		player->Update(deltaTime);
+		player->Update(deltaTime, camera->Front);
 
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
@@ -315,7 +315,7 @@ public:
 			/*droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
 
 			mFireAnimationClip->Update(deltaTime);
-*/
+			*/
 			models_drone[i]->Draw();
 		}
 

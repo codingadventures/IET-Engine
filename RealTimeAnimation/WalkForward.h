@@ -30,8 +30,7 @@ public:
 WalkForward::WalkForward(string transitionClipName) 
 { 
 	m_currentStateClipName = "walk";
-	this->m_nextStateClipName = transitionClipName;
-	this->m_direction = glm::vec3(-1,0,0);
+	this->m_nextStateClipName = transitionClipName; 
 
 }
 
@@ -44,9 +43,7 @@ PlayerState* WalkForward::handleInput(bool* inputKeys)
 
 	if (IDLE)
 		return new Idle(this->m_currentStateClipName);
-
-	
-
+	  
 	if (WALK_RIGHT)
 		return new WalkRight(this->m_currentStateClipName);
 
@@ -65,7 +62,7 @@ void WalkForward::Update(Player* player, double deltaTime)
 {
 	PlayerState::Update(player,deltaTime);
 
-	player->Move(m_direction);
+	player->Move(player->GetDirection());
 
 }
 #endif // Walk_h__

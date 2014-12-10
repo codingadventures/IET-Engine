@@ -26,7 +26,7 @@ Run::Run(string transitionClipName)
 	 
 	m_currentStateClipName = "run";
 	this->m_nextStateClipName = transitionClipName; 
-	this->m_direction = glm::vec3(-1,0,0);
+	//this->m_direction = glm::vec3(-1,0,0);
 
 }
 
@@ -48,7 +48,7 @@ void Run::Update(Player* player, double deltaTime)
 
 	PlayerState::Update(player,deltaTime);
 
-	player->Run(m_direction);
+	player->Run(player->GetDirection());
 
 } 
 
