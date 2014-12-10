@@ -6,6 +6,7 @@
 #include "Blender.h"
 
 class Idle;
+class SwordIdle;
 class PlayerState;
 
 class Player
@@ -13,7 +14,9 @@ class Player
 public:
 	Model* model;
 
-	PlayerState* mState;
+	PlayerState* m_walkingState;
+	PlayerState* m_swordState;
+
 	Player(Model* model);
 	AnimationManager m_animationManager; 
 
@@ -35,51 +38,64 @@ const float Player::MOVE_SPEED = 0.2f;
 const float Player::RUN_SPEED = 0.4f;
 
 #include "Idle.h"
+#include "SwordIdle.h"
 #include "PlayerState.h"
 
 
 Player::Player(Model* model) : model(model)
 {
-	mState = new Idle("");
+	m_walkingState = new Idle("");
+	m_swordState = new SwordIdle("");
 }
 
 Player::~Player()
 { 
- 
+
 }   
 
 void Player::HandleInput(bool* inputKeys)
 {
-	PlayerState* state = mState->handleInput(inputKeys);
+	PlayerState* walkState = m_walkingState->handleInput(inputKeys);
+	PlayerState* fightState = m_swordState->handleInput(inputKeys);
 
-	if (state != nullptr)
+	if (walkState != nullptr)
 	{
-		delete mState;
+		delete m_walkingState;
 
-		m_animationManager.AddAnimationOnQueue(state->GetCurrentAnimationName());
-		m_animationManager.AddAnimationOnQueue(state->GetNextAnimationName());
+		m_animationManager.AddAnimationOnQueue(walkState->GetCurrentAnimationName());
+		m_animationManager.AddAnimationOnQueue(walkState->GetNextAnimationName());
 
-
-		mState = state;
+		m_walkingState = walkState;
 	}
+
+	if(fightState != nullptr)
+	{
+		delete m_swordState;
+
+		m_animationManager.AddAnimationOnQueue(fightState->GetCurrentAnimationName());
+		m_animationManager.AddAnimationOnQueue(fightState->GetNextAnimationName());
+
+		m_swordState = fightState;
+	}
+
 }
 
 void Player::Update(double deltaTime, glm::vec3 direction)
 {
 	this->m_direction = direction * glm::vec3(1,0,1); //I set to 0 the y
-	mState->Update(this, deltaTime); 
-	 
+	m_walkingState->Update(this, deltaTime); 
+
 }
 
 void Player::Move(glm::vec3 direction)
 {
-	 this->model->Translate(direction * MOVE_SPEED);
+	this->model->Translate(direction * MOVE_SPEED);
 }
 
 void Player::Run(glm::vec3 direction)
 {
 	this->model->Translate(direction * RUN_SPEED);
-	 
+
 }
 
 glm::vec3 Player::GetDirection() const

@@ -26,8 +26,6 @@ Run::Run(string transitionClipName)
 	 
 	m_currentStateClipName = "run";
 	this->m_nextStateClipName = transitionClipName; 
-	//this->m_direction = glm::vec3(-1,0,0);
-
 }
 
 

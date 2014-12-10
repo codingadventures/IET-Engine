@@ -12,10 +12,12 @@ bool firstMouse = true;
 typedef std::function<void(GLfloat,GLfloat)> MouseCallbackFunction;
 typedef std::function<void(GLfloat)> MouseScrollCallbackFunction;
 typedef std::function<void(void)> KeyboardCallbackFunction;
+typedef std::function<void(MOUSE,KEY_STATE)> MouseClickCallbackFunction;
 
 static MouseCallbackFunction UserMouseCallback;
 static MouseScrollCallbackFunction UserMouseScrollCallback;
 static KeyboardCallbackFunction UserKeyboardCallback;
+static MouseClickCallbackFunction UserMouseClickCallback;
 
 class Callbacks{
 
@@ -40,9 +42,9 @@ public:
 
 		/*if(firstMouse)
 		{
-			lastX = xpos;
-			lastY = ypos;
-			firstMouse = false;
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
 		}*/
 
 		GLfloat xoffset = xpos - VIEWPORT_WIDTH/2;
@@ -50,7 +52,7 @@ public:
 
 		lastX = xpos;
 		lastY = ypos;
-		
+
 		UserMouseCallback(xoffset, yoffset);
 
 		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
@@ -75,6 +77,13 @@ public:
 		UserKeyboardCallback();
 	}   
 
+	static void Callbacks::mouseClickCallback(int Button, int State, int x, int y){
+		MOUSE mouse = GLUTMouseToMouse(Button);
+		KEY_STATE KeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
+
+		UserMouseClickCallback(mouse,KeyState);
+		
+	}
 	/*
 	static void  Callbacks::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
@@ -103,9 +112,9 @@ private:
 	static void handleKeyboardInput(KEY_STATE action, KEY key)
 	{
 		if(action ==  KEY_STATE_PRESS)
-			keys[key] = true;
+			g_keyMappings[key] = true;
 		else if(action == KEY_STATE_RELEASE)
-			keys[key] = false;  	 
+			g_keyMappings[key] = false;  	 
 	}
 };
 

@@ -6,16 +6,20 @@
 #include "AnimationClip.h"
 #include "Keys.h"  
 #include <glm/gtx/rotate_vector.hpp>
+#include "common.h"
 
 class Player;
 
-#define WALK_LEFT inputKeys[KEY_a]
-#define WALK_RIGHT inputKeys[KEY_d]
-#define WALK_FORWARD inputKeys[KEY_w] && !RUN
+#define WALK_LEFT inputKeys[KEY_a] && !inputKeys[KEY_w]
+#define WALK_FORWARD_LEFT  inputKeys[KEY_a] && inputKeys[KEY_w]
+#define WALK_FORWARD_RIGHT  inputKeys[KEY_d] && inputKeys[KEY_w]
+#define WALK_RIGHT inputKeys[KEY_d] && !inputKeys[KEY_w]
+#define WALK_FORWARD inputKeys[KEY_w] && !(inputKeys[KEY_d] || inputKeys[KEY_a] || inputKeys[KEY_r])
 #define WALK_BACKWARD inputKeys[KEY_s]
 #define RUN inputKeys[KEY_r] && inputKeys[KEY_w]
-#define IDLE !(WALK_LEFT || WALK_RIGHT || WALK_FORWARD || WALK_BACKWARD || RUN )
-
+#define IDLE !( inputKeys[KEY_a]  || inputKeys[KEY_d] || inputKeys[KEY_w] || inputKeys[KEY_s] || inputKeys[KEY_r] )
+#define SWING_SWORD g_leftMouseButtonIsPressed 
+#define BLOCK_SWORD g_rightMouseButtonIsPressed 
 
 class PlayerState
 {

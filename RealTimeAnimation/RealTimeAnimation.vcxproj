@@ -92,6 +92,7 @@
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
+    <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />
     <ClInclude Include="Enemy.h" />
@@ -118,10 +119,12 @@
     <ClInclude Include="ScreenOutput.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="SwingSword.h" />
+    <ClInclude Include="SwordIdle.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />
     <ClInclude Include="WalkForward.h" />
+    <ClInclude Include="WalkForwardLeft.h" />
     <ClInclude Include="WalkLeft.h" />
     <ClInclude Include="WalkRight.h" />
   </ItemGroup>

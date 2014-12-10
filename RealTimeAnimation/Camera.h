@@ -153,13 +153,13 @@ public:
 			this->Position = Offset * Rotation + Target;
 			break;
 		case FREE_FLY:
-			if(keys[KEY_w])
+			if(g_keyMappings[KEY_w])
 				this->ProcessKeyboard(FORWARD, SPEED_STEP);
-			if(keys[KEY_s])
+			if(g_keyMappings[KEY_s])
 				this->ProcessKeyboard(BACKWARD, SPEED_STEP);
-			if(keys[KEY_a])
+			if(g_keyMappings[KEY_a])
 				this->ProcessKeyboard(LEFT, SPEED_STEP);
-			if(keys[KEY_d])
+			if(g_keyMappings[KEY_d])
 				this->ProcessKeyboard(RIGHT, SPEED_STEP);
 			break;
 		default:

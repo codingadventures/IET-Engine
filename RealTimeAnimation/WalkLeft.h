@@ -7,6 +7,7 @@ class Idle;
 class Player; 
 class WalkRight;
 class WalkForward;
+class WalkForwardLeft;
 
 class WalkLeft : public PlayerState
 {
@@ -24,6 +25,7 @@ public:
 #include "AnimationManager.h" 
 #include "WalkRight.h"
 #include "WalkForward.h"
+#include "WalkForwardLeft.h"
 
 WalkLeft::WalkLeft(string transitionClipName) 
 { 
@@ -48,6 +50,8 @@ PlayerState* WalkLeft::handleInput(bool* inputKeys)
 	 if (WALK_BACKWARD)
 		 ;//implement 
 
+	 if (WALK_FORWARD_LEFT)
+		 return new WalkForwardLeft();
 
 	return new WalkLeft(this->m_currentStateClipName);
 }  

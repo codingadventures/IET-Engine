@@ -56,6 +56,9 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
 #define WALK_RIGHT_ACTION "models\\DartMaul\\rightwalk.dae"
 #define WALK_LEFT_ACTION "models\\DartMaul\\leftwalk.dae"
+#define SWING_SWORD_ACTION "models\\DartMaul\\swing_1.dae"
+#define BLOCK_SWORD_ACTION "models\\DartMaul\\block_2.dae"
+
 #pragma endregion [ ANIMATIONS ]
 
 
@@ -66,7 +69,9 @@ enum GameState
 	GAME
 };
 
-bool keys[1024];
+bool g_keyMappings[1024];
+bool g_leftMouseButtonIsPressed;
+bool g_rightMouseButtonIsPressed;
 
 using  std::cout;
 using  std::endl;

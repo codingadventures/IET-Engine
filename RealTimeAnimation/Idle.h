@@ -42,6 +42,8 @@ PlayerState* Idle::handleInput(bool* inputKeys)
 	if (WALK_BACKWARD)
 		;//implement 
 
+	if (WALK_FORWARD_LEFT)
+		return new WalkForwardLeft();
 
 	/*if (inputKeys[KEY_r] && inputKeys[KEY_i])
 	return new Run(this->mAnimationClip);*/

@@ -170,6 +170,15 @@
     <ClInclude Include="WalkForward.h">
       <Filter>Header Files\Player\States</Filter>
     </ClInclude>
+    <ClInclude Include="WalkForwardLeft.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordIdle.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordBlock.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag">

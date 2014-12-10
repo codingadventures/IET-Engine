@@ -27,6 +27,7 @@ class Controller
 {
 
 private:
+	
 
 	glm::vec3 dartMaulModelWorldPosition;
 
@@ -77,6 +78,7 @@ private:
 	AnimationClip* mIdleAnimationClip;
 	bool m_introIsOver;
 	float timeAtReset;
+	
 public:
 	Controller(void)
 	{
@@ -118,10 +120,13 @@ public:
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
 		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,camera,_1);
 		UserKeyboardCallback = std::bind(&Controller::ReadInput,this); 
+		UserMouseClickCallback = std::bind(&Controller::ReadMouse,this,_1,_2); 
 
 		glutKeyboardFunc(Callbacks::keyboardCallback);
 		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 		glutPassiveMotionFunc(Callbacks::mouseCallback);
+		glutMouseFunc(Callbacks::mouseClickCallback);
+
 
 		glutSetCursor(GLUT_CURSOR_NONE); 
 
@@ -220,6 +225,8 @@ public:
 		player->m_animationManager.Load(1.0f, WALK_RIGHT_ACTION,"walkright");
 		player->m_animationManager.Load(1.0f, WALK_LEFT_ACTION,"walkleft");
 		player->m_animationManager.Load(1.0f, IDLE_ACTION, "idle");
+		player->m_animationManager.Load(1.5f, SWING_SWORD_ACTION, "swingsword");
+		player->m_animationManager.Load(1.5f, BLOCK_SWORD_ACTION, "blocksword");
 	}
 
 	void Intro()
@@ -257,7 +264,7 @@ public:
 			////camera->Front = glm::vec3(0,150,0);
 
 		}
-		player->HandleInput(keys);
+		player->HandleInput(g_keyMappings);
 
 		player->Update(deltaTime, camera->Front);
 
@@ -399,6 +406,7 @@ public:
 
 
 		shaderNoTexture->Use();
+		g_leftMouseButtonIsPressed = g_rightMouseButtonIsPressed = false;
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
 		//v2.Position = cubeWorldPosition;
@@ -469,10 +477,16 @@ public:
 
 	}
 
-
+	void ReadMouse(MOUSE mouse, KEY_STATE state){
+		if (mouse ==  MOUSE_BUTTON_LEFT)  
+			g_leftMouseButtonIsPressed = (state ==  KEY_STATE_PRESS);
+	 
+		if (mouse == MOUSE_BUTTON_RIGHT)
+			g_rightMouseButtonIsPressed = (state ==  KEY_STATE_PRESS);
+	}
 	void ReadInput()
 	{
-		if(keys[KEY_p])
+		if(g_keyMappings[KEY_p])
 		{
 			pause = !pause;
 		}
@@ -519,7 +533,7 @@ public:
 		//	camera->Position = decomposeT(model_bob->model);
 		//}
 
-		if(keys[KEY_PLUS])
+		if(g_keyMappings[KEY_PLUS])
 		{
 			if (boneIndex < numberOfBones)
 				boneIndex++;
@@ -527,30 +541,30 @@ public:
 
 
 
-		if(keys[KEY_MINUS])
+		if(g_keyMappings[KEY_MINUS])
 		{
 			if (boneIndex > 0)
 				boneIndex--;
 		}
 
-		if (keys[KEY_c])
+		if (g_keyMappings[KEY_c])
 		{
 			camera->CameraType++;
 		}
 
-		if (keys[KEY_1])
+		if (g_keyMappings[KEY_1])
 		{
 			splineOn = !splineOn;
 		}
-		if (keys[KEY_2])
+		if (g_keyMappings[KEY_2])
 		{
 			conesOn = !conesOn;
 		}
-		if (keys[KEY_3])
+		if (g_keyMappings[KEY_3])
 		{
 			dofOn = !dofOn;
 		}
-		if (keys[KEY_4])
+		if (g_keyMappings[KEY_4])
 		{
 			humansOn = !humansOn;
 		}
@@ -641,9 +655,9 @@ public:
 		screen_output(500.0f,VIEWPORT_HEIGHT - 150 ,splineTime);
 
 		char playerState[200];
-		if (player->mState != nullptr)
+		if (player->m_walkingState != nullptr)
 		{
-			sprintf_s(playerState, "Player State %s", player->mState->GetCurrentAnimationName().c_str());
+			sprintf_s(playerState, "Player State %s", player->m_walkingState->GetCurrentAnimationName().c_str());
 			screen_output(500.0f,VIEWPORT_HEIGHT - 110 ,playerState);
 		}
 
