@@ -72,6 +72,7 @@ private:
 	AnimationManager m_animationManager;
 
 	bool isRunning;
+	bool isdead[10];
 	Model* model_battlecruise;
 	AnimationClip* mIdleAnimationClip;
 	bool m_introIsOver;
@@ -79,6 +80,7 @@ private:
 	Model* model_laser;
 	glm::vec3 laserTranslate;
 	Player* enemy;
+	bool goAhead;
 public:
 	Controller(void)
 	{
@@ -151,6 +153,7 @@ public:
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL_MODEL);
 		model_dartmaul->Scale(glm::vec3(3,3,3));
+		model_dartmaul->Translate(glm::vec3(0,-2,0));
 		//model_dartmaul->Translate(glm::vec3(0,5,0));
 
 		//model_bob = new Model(shaderBones, BOB_MODEL);
@@ -158,17 +161,17 @@ public:
 		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 		float deg =   glm::radians(90.0f);
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
-			drone->Translate(glm::vec3(-100.0f,0.0f ,1.0f * (i+3) * 2));
+			drone->Translate(glm::vec3(-100.0f,-2.0f ,1.0f * (i+3) * 2));
 			drone->Scale(glm::vec3(3.0f, 3.0f, 3.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
 			drone->Rotate(glm::vec3(0,1,0),deg);
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
 			droidAnimator =  new  KeyFrameAnimator(drone->mSkeleton);
 			models_drone.push_back(drone);
-
+			isdead[i] = false;
 			//free(drone);
 		}
 
@@ -182,12 +185,16 @@ public:
 
 		spline.addPoint(9, glm::vec3(119.0f,86.0f,-32.0f)); 
 
-		spline.addPoint(12, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition());  
-		spline.addPoint(14, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
-		spline.addPoint(15, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+		spline.addPoint(12, glm::vec3(-52.0f,16.0f,-10.0f));
+		spline.addPoint(15, glm::vec3(-40.0f,14.0f,-10.0f));
+
+		spline.addPoint(18, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition());   
+
+		spline.addPoint(19, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+		spline.addPoint(20, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		//model_floor = new Model(shader, FLOOR_MODEL);
-		//	model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
+		 model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
 		speed = 1.0f; 
 		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
@@ -210,6 +217,7 @@ public:
 		isRunning = false;
 		splineOn = false;
 		m_introIsOver = true;
+		goAhead = false;
 		global_clock = 0;
 		m_gameState = INTRO;
 		timeAtReset = glutGet(GLUT_ELAPSED_TIME);
@@ -234,8 +242,8 @@ public:
 		player->m_animationManagerWalk.Load(1.0f, WALK_LEFT_ACTION,"walkleft");
 		player->m_animationManagerWalk.Load(1.0f, IDLE_ACTION, "idle");
 
-		player->m_animationManagerFight.Load(1.0f, SWING_SWORD_ACTION, "swingsword",swingSwordBones);
-		player->m_animationManagerFight.Load(1.0f, BLOCK_SWORD_ACTION, "blocksword",swingSwordBones);
+		player->m_animationManagerFight.Load(1.5f, SWING_SWORD_ACTION, "swingsword",swingSwordBones);
+		player->m_animationManagerFight.Load(1.5f, BLOCK_SWORD_ACTION, "blocksword",swingSwordBones);
 	}
 
 	void LoadEnemyAction()
@@ -267,6 +275,7 @@ public:
 		shootingBones["chest"] = true;
 
 		m_animationManager.Load(1.0f, SHOOT_ACTION, "shoot", shootingBones);
+		m_animationManager.Load(1.0f, DEATH_ACTION, "death");
 		m_animationManager.Load(1.0f, WALK_ACTION, "walk",walkingBones); 
 	}
 
@@ -274,13 +283,26 @@ public:
 	{
 		if (m_introIsOver) return;
 
+		if (g_keyMappings[KEY_SPACE])
+			goAhead = true;
 
-		camera->Position = spline.getPosition();
+		if (goAhead)
+		{
+			camera->Position = spline.getPosition();
 
-		spline.Update(deltaTime);
+			spline.Update(deltaTime);
 
-		m_introIsOver = spline.m_isSplinePathEnded;
+			m_introIsOver = spline.m_isSplinePathEnded;
 
+		}
+		else{
+			string text = "A long time ago in a galaxy far, far away...";
+			screen_output(VIEWPORT_WIDTH/2 - 200, VIEWPORT_HEIGHT/2,(char*)  text.c_str());
+
+			string text2 = "The rebel Darth Maul is trying to escape from the space station.";
+			screen_output(VIEWPORT_WIDTH/2 - 200, VIEWPORT_HEIGHT/2 - 50,(char*)  text2.c_str());
+
+		}
 	}
 
 	void Draw()
@@ -314,16 +336,16 @@ public:
 
 		view = camera->GetViewMatrix();
 
-		//shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
+		 shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
-		//model_battlecruise->Draw();
+		 model_battlecruise->Draw();
 
 		shader->SetModelViewProjection(model_laser->GetModelMatrix(),view,projection);
 
 		/*float acos = glm::acos(glm::fastNormalizeDot(model_laser->GetPosition(),model_dartmaul->GetPosition()));*/
 
-		 
-	 
+
+
 
 
 
@@ -362,34 +384,42 @@ public:
 
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
 
+		if (m_introIsOver){
+			for (int i = 0; i < models_drone.size(); i++)
+			{
 
-		for (int i = 0; i <10; i++)
-		{
-			char animationName[20];
-			sprintf_s(animationName, "DRONE_KF_%d",i);
+				char animationName[20];
+				sprintf_s(animationName, "DRONE_KF_%d",i);
 
-			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
+				shaderBones->SetModel(models_drone[i]->GetModelMatrix());
+				float totalDist = glm::distance( models_drone[i]->GetPosition(),model_dartmaul->GetPosition());
+				bool isAttacking = player->m_swordState->m_stateName == "SwingSword";
+				double anim;
+				if(i==0)
+					anim = deltaTime;
+				else
+					anim = 0.0f;
 
-			m_animationManager.AddAnimationOnQueue("shoot");
+				if (!isdead[i] && isAttacking && totalDist < 3.0f)
+				{
+					m_animationManager.AddAnimationOnQueue("death");
+				 
+					isdead[i] = true;
+				}
+				else
+				{
+					if (!isdead[i]){
+						m_animationManager.AddAnimationOnQueue("shoot");
+						m_animationManager.AddAnimationOnQueue("walk");
+						glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  (models_drone[i]->GetPosition() - model_dartmaul->GetPosition())  * glm::vec3(-1,0,0);
+						models_drone[i]->Translate(trans);
 
-			m_animationManager.AddAnimationOnQueue("walk");
-			double anim;
-			if(i==0)
-				anim = deltaTime;
-			else
-				anim = 0.0f;
-			m_animationManager.AnimateTruncate(models_drone[i],anim );
+					}
+				} 
+				m_animationManager.AnimateTruncate(models_drone[i],anim );
 
-			float totalDist = glm::distance( models_drone[i]->GetPosition(),model_dartmaul->GetPosition());
-
-			glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  (models_drone[i]->GetPosition() - model_dartmaul->GetPosition())  * glm::vec3(-1,0,0);
-			models_drone[i]->Translate(trans);
-
-			//droidAnimator->Animate(,deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
-
-			//mFireAnimationClip->Update(deltaTime);
-
-			models_drone[i]->Draw();
+				models_drone[i]->Draw();
+			}
 		}
 
 
@@ -468,11 +498,17 @@ public:
 		}
 		}
 		*/
-		Intro();
-
 		shaderNoTexture->Use();
 
+
+		Intro();
+
+
 		g_leftMouseButtonIsPressed = g_rightMouseButtonIsPressed = false;
+
+		if (m_introIsOver)
+			TextToScreen();
+
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
 		//v2.Position = cubeWorldPosition;
@@ -538,7 +574,6 @@ public:
 
 		//vector<glm::vec3> bonespos = model_bob->getBonesOrientation();
 
-		TextToScreen();
 		glutSwapBuffers();
 
 	}

@@ -27,7 +27,6 @@ protected:
 	string m_nextStateClipName;
 	//glm::vec3 m_direction;
 	string m_currentStateClipName;
-
 public:
 	PlayerState(){}
 	~PlayerState() {}
@@ -35,6 +34,7 @@ public:
 	virtual void Update(Player* player, double deltaTime);
 	string GetCurrentAnimationName() const;
 	string GetNextAnimationName() const;
+	string m_stateName;
 
 };
 

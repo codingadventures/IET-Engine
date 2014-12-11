@@ -21,6 +21,7 @@ private:
 
 SwingSword::SwingSword(string transitionClipName)
 {
+	this->m_stateName = "SwingSword";
 	this->m_currentStateClipName = "swingsword";
 	this->m_nextStateClipName = transitionClipName;
 }

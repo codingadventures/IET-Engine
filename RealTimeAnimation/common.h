@@ -56,6 +56,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define RUN_ACTION "models\\DartMaul\\run.dae"
 #define IDLE_ACTION "models\\DartMaul\\idle.dae"
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
+#define DEATH_ACTION "models\\Droids\\death.dae"
 #define WALK_RIGHT_ACTION "models\\DartMaul\\rightwalk.dae"
 #define WALK_LEFT_ACTION "models\\DartMaul\\leftwalk.dae"
 #define SWING_SWORD_ACTION "models\\DartMaul\\swing_1.dae"
