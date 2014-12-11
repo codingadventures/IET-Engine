@@ -4,6 +4,7 @@
 #define GLM_FORCE_RADIANS
 
 #include <glm/glm.hpp> 
+#include <glm/gtx/random.hpp>
 #include <queue>
 #include "Callbacks.h"
 #include "ScreenOutput.h"
@@ -267,7 +268,7 @@ public:
 		for (int i = 0; i < 10; i++)
 		{
 			Model* droid = new Model(shaderBones, DROID_MODEL);
-			droid->Translate(glm::vec3(-100.0f,-2.0f ,1.0f * (i+3) * 2));
+			droid->Translate(glm::vec3(-100.0f + (glm::linearRand(-1.0f,1.0f) * 2 + i ),-2.0f ,1.0f * (i+3) * 2));
 			droid->Scale(glm::vec3(3.0f, 3.0f, 3.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
 			droid->Rotate(glm::vec3(0,1,0),deg);  
 
@@ -388,23 +389,15 @@ public:
 
 
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
-
+		bool isAttacking = player->m_swordState->m_stateName == "SwingSword";
+		int droidsSize = droids.size();
 		if (m_introIsOver){
-			for (int i = 0; i < droids.size(); i++)
-			{
-
-				char animationName[20];
-				sprintf_s(animationName, "DRONE_KF_%d",i);
-
+			for (int i = 0; i < droidsSize; i++)
+			{  
 				shaderBones->SetModel(droids[i]->model->GetModelMatrix());
 				float totalDist = glm::distance(droids[i]->model->GetPosition(),model_dartmaul->GetPosition());
-				bool isAttacking = player->m_swordState->m_stateName == "SwingSword";
-				double anim;
-				if(i==0)
-					anim = deltaTime;
-				else
-					anim = 0.0f;
-
+				auto vec = droids[i]->model->GetPosition() - model_dartmaul->GetPosition();
+				  
 				if (!droids[i]->IsDead() && isAttacking && totalDist < 3.0f)
 				{
 					droids[i]->Kill();
@@ -413,9 +406,8 @@ public:
 				{
 					if (!droids[i]->IsDead()){
 
-						glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  (droids[i]->model->GetPosition() - model_dartmaul->GetPosition())  * glm::vec3(-1,0,0);
+						glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  vec  * glm::vec3(-1,0,0);
 						droids[i]->model->Translate(trans);
-
 					}
 				} 
 
