@@ -45,6 +45,9 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define SPACE_MODEL "models\\Space\\space.dae"
 #define BATTLECRUISE_MODEL "models\\BattleCruise\\BattleCruise.dae"
 #define BOB_MODEL "models\\boblampclean.md5mesh"
+#define LASER_MODEL "models\\Droids\\laser.dae"
+
+#define DROID_MODEL "models\\Droids\\droid.dae"
 #pragma endregion [ MODELS ]
 
 #pragma region [ ANIMATIONS ]
@@ -52,7 +55,6 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define WALK_ACTION "models\\DartMaul\\walk_1.dae"
 #define RUN_ACTION "models\\DartMaul\\run.dae"
 #define IDLE_ACTION "models\\DartMaul\\idle.dae"
-#define DROID_MODEL "models\\Droids\\droid.dae"
 #define SHOOT_ACTION "models\\Droids\\shoot.dae"
 #define WALK_RIGHT_ACTION "models\\DartMaul\\rightwalk.dae"
 #define WALK_LEFT_ACTION "models\\DartMaul\\leftwalk.dae"

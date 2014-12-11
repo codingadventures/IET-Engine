@@ -17,7 +17,7 @@
 #include "KeyFrameAnimator.h" 
 #include "AnimationEventController.h"
 #include "AnimationManager.h"
-#include "Player.h"
+#include "Player.h" 
 
 using namespace std::placeholders;
 
@@ -27,7 +27,7 @@ class Controller
 {
 
 private:
-	
+
 
 	glm::vec3 dartMaulModelWorldPosition;
 
@@ -67,18 +67,17 @@ private:
 	bool splineOn;
 	bool conesOn;
 	bool dofOn;
-	bool humansOn;
-	AnimationClip* mFireAnimationClip;
-	AnimationClip* mRunAnimationClip;
-	AnimationClip* mWalkForwardAnimationClip;
-	AnimationClip* mWalkLeftAnimationClip;
-	AnimationClip* mWalkRightAnimationClip;
+	bool humansOn; 
+
+	AnimationManager m_animationManager;
+
 	bool isRunning;
 	Model* model_battlecruise;
 	AnimationClip* mIdleAnimationClip;
 	bool m_introIsOver;
 	float timeAtReset;
-	
+	Model* model_laser;
+	Player* enemy;
 public:
 	Controller(void)
 	{
@@ -89,11 +88,7 @@ public:
 
 		free(animations);
 		free(boneLocation);
-		free(mFireAnimationClip);
-		free(mRunAnimationClip);
-		free(mWalkForwardAnimationClip);
-		free(mWalkLeftAnimationClip);
-		free(mWalkRightAnimationClip);
+
 
 	}
 	void Run(){
@@ -151,7 +146,7 @@ public:
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-
+		model_laser = new Model(shader,LASER_MODEL);
 		//tennisModel =  new Model(shader, TENNIS_MODEL);
 		model_dartmaul = new Model(shaderBones, DART_MAUL_MODEL);
 		model_dartmaul->Scale(glm::vec3(3,3,3));
@@ -191,10 +186,9 @@ public:
 		spline.addPoint(15, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		//model_floor = new Model(shader, FLOOR_MODEL);
-		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
+		//	model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
 		speed = 1.0f; 
 		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
-
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 
 
@@ -203,6 +197,11 @@ public:
 		//	animationMap["CONES_IK"] =(IAnimation*) new IKAnimator(model_cones->skeleton);
 
 		LoadPlayer();
+		LoadEnemyAction();
+
+		model_laser->Translate(models_drone[0]->mSkeleton->getBonePosition("chest",models_drone[0]->GetModelMatrix()));
+		model_laser->Rotate(glm::vec3(0,0,1),glm::radians(90.0f));
+		model_laser->Scale(glm::vec3(0.5f,1.0f,0.5f));
 
 		conesOn = false;
 		dofOn = false;
@@ -218,15 +217,56 @@ public:
 	void LoadPlayer()
 	{
 		player = new Player(model_dartmaul);
+		std::map<string,bool> swingSwordBones;
+		std::map<string,bool> walkBones;
 
-		player->m_animationManager.Load(1.0f, SHOOT_ACTION, "shoot");
-		player->m_animationManager.Load(1.0f, WALK_ACTION, "walk");
-		player->m_animationManager.Load(1.0f, RUN_ACTION, "run");
-		player->m_animationManager.Load(1.0f, WALK_RIGHT_ACTION,"walkright");
-		player->m_animationManager.Load(1.0f, WALK_LEFT_ACTION,"walkleft");
-		player->m_animationManager.Load(1.0f, IDLE_ACTION, "idle");
-		player->m_animationManager.Load(1.5f, SWING_SWORD_ACTION, "swingsword");
-		player->m_animationManager.Load(1.5f, BLOCK_SWORD_ACTION, "blocksword");
+		swingSwordBones["hand.R"] = true;
+		swingSwordBones["forearm.R"] = true;
+		swingSwordBones["upper_arm.R"] = true;
+		swingSwordBones["shoulder.R"] = true;
+		swingSwordBones["saber"] = true;
+
+		 
+		player->m_animationManagerWalk.Load(1.0f, WALK_ACTION, "walk");
+		player->m_animationManagerWalk.Load(1.0f, RUN_ACTION, "run");
+		player->m_animationManagerWalk.Load(1.0f, WALK_RIGHT_ACTION,"walkright");
+		player->m_animationManagerWalk.Load(1.0f, WALK_LEFT_ACTION,"walkleft");
+		player->m_animationManagerWalk.Load(1.0f, IDLE_ACTION, "idle");
+
+		player->m_animationManagerFight.Load(1.0f, SWING_SWORD_ACTION, "swingsword",swingSwordBones);
+		player->m_animationManagerFight.Load(1.0f, BLOCK_SWORD_ACTION, "blocksword",swingSwordBones);
+	}
+
+	void LoadEnemyAction()
+	{
+		std::map<string,bool> shootingBones;
+		std::map<string,bool> walkingBones;
+
+		walkingBones["thigh.R"] = true;
+		walkingBones["shin.R"] = true;
+		walkingBones["foot.R"] = true;
+
+		walkingBones["thigh.L"] = true;
+		walkingBones["shin.L"] = true;
+		walkingBones["foot.L"] = true;
+		walkingBones["hips"] = true;
+		walkingBones["spine"] = true;
+		shootingBones["head"] = true;
+
+		shootingBones["gun"] = true;
+		shootingBones["hand.R"] = true;
+		shootingBones["forearm.R"] = true;
+		shootingBones["upper_arm.R"] = true;
+		shootingBones["shoulder.R"] = true;
+		shootingBones["hand.L"] = true;
+		shootingBones["forearm.L"] = true;
+		shootingBones["upper_arm.L"] = true;
+		shootingBones["shoulder.L"] = true;
+		shootingBones["neck"] = true;
+		shootingBones["chest"] = true;
+
+		m_animationManager.Load(1.0f, SHOOT_ACTION, "shoot", shootingBones);
+		m_animationManager.Load(1.0f, WALK_ACTION, "walk",walkingBones); 
 	}
 
 	void Intro()
@@ -268,14 +308,17 @@ public:
 
 		player->Update(deltaTime, camera->Front);
 
+
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
+		//shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
 
-		model_battlecruise->Draw();
+		//model_battlecruise->Draw();
 
+		shader->SetModelViewProjection(model_laser->GetModelMatrix(),view,projection);
+		model_laser->Draw();
 		shaderBones->Use(); 
 
 
@@ -319,10 +362,15 @@ public:
 
 			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
-			/*droidAnimator->Animate(models_drone[i]->GetModelMatrix(),deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
+			m_animationManager.AddAnimationOnQueue("shoot");
+			 
+			m_animationManager.AddAnimationOnQueue("walk");
+			m_animationManager.AnimateTruncate(models_drone[i],deltaTime);
 
-			mFireAnimationClip->Update(deltaTime);
-			*/
+			//droidAnimator->Animate(,deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
+
+			//mFireAnimationClip->Update(deltaTime);
+
 			models_drone[i]->Draw();
 		}
 
@@ -404,8 +452,8 @@ public:
 		*/
 		Intro();
 
-
 		shaderNoTexture->Use();
+
 		g_leftMouseButtonIsPressed = g_rightMouseButtonIsPressed = false;
 		//Vertex v1,v2;
 		//v1.Position = ikInfo.currentWorldPosition;
@@ -480,7 +528,7 @@ public:
 	void ReadMouse(MOUSE mouse, KEY_STATE state){
 		if (mouse ==  MOUSE_BUTTON_LEFT)  
 			g_leftMouseButtonIsPressed = (state ==  KEY_STATE_PRESS);
-	 
+
 		if (mouse == MOUSE_BUTTON_RIGHT)
 			g_rightMouseButtonIsPressed = (state ==  KEY_STATE_PRESS);
 	}
@@ -491,47 +539,7 @@ public:
 			pause = !pause;
 		}
 
-		/*	if(keys[KEY_i])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,speed,0.0));
-		moved = true;
-		}
 
-		if(keys[KEY_k])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,-speed,0.0));
-		moved = true;
-		}
-
-		if(keys[KEY_j])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(speed,0.0,0.0));
-		moved = true;
-		}
-
-		if(keys[KEY_o])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,speed));
-		moved = true;
-		}
-
-		if(keys[KEY_u])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(0.0,0.0,-speed));
-		moved = true;
-		}
-
-		if(keys[KEY_l])
-		{
-		tennisModel->model = glm::translate(tennisModel->model,glm::vec3(-speed,0.0,0.0));
-		moved = true;
-		}*/
-
-
-		//if (keys[KEY_e])
-		//{
-		//	camera->Position = decomposeT(model_bob->model);
-		//}
 
 		if(g_keyMappings[KEY_PLUS])
 		{

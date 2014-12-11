@@ -18,7 +18,8 @@ public:
 	PlayerState* m_swordState;
 
 	Player(Model* model);
-	AnimationManager m_animationManager; 
+	AnimationManager m_animationManagerWalk; 
+	AnimationManager m_animationManagerFight; 
 
 	void HandleInput(bool* inputKeys);
 	void Update(double deltaTime,glm::vec3 direction);
@@ -62,8 +63,8 @@ void Player::HandleInput(bool* inputKeys)
 	{
 		delete m_walkingState;
 
-		m_animationManager.AddAnimationOnQueue(walkState->GetCurrentAnimationName());
-		m_animationManager.AddAnimationOnQueue(walkState->GetNextAnimationName());
+		m_animationManagerWalk.AddAnimationOnQueue(walkState->GetCurrentAnimationName());
+		m_animationManagerWalk.AddAnimationOnQueue(walkState->GetNextAnimationName());
 
 		m_walkingState = walkState;
 	}
@@ -72,8 +73,8 @@ void Player::HandleInput(bool* inputKeys)
 	{
 		delete m_swordState;
 
-		m_animationManager.AddAnimationOnQueue(fightState->GetCurrentAnimationName());
-		m_animationManager.AddAnimationOnQueue(fightState->GetNextAnimationName());
+		m_animationManagerFight.AddAnimationOnQueue(fightState->GetCurrentAnimationName());
+		m_animationManagerFight.AddAnimationOnQueue(fightState->GetNextAnimationName());
 
 		m_swordState = fightState;
 	}

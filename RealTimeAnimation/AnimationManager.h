@@ -5,23 +5,23 @@
 #include <string>
 #include "AnimationClip.h"
 #include "Blender.h"
+#include <vector>
 
 
 class AnimationManager
 {
 public:
 	~AnimationManager();
-	void Load(double animationSpeed, string file_name, string animationName);
-	void LoadAndBlend(double animationSpeed, string file_name_animation1, string file_name_animation2, string animationName);
+	void Load(double animationSpeed, string file_name, string animationName,std::map<string,bool> bonesToInclude = std::map<string,bool>()); 
 	void AddAnimationOnQueue(string animation_name);
 	void Animate(Model* model, double deltaTime);
-
+	void AnimateTruncate(Model* model, double deltaTime);
 private:
 	std::map<string,AnimationClip*> m_animationSet;
 	AnimationEventController m_animationEventController;
 };
 
-void AnimationManager::Load(double animationSpeed, string file_name, string animationName)
+void AnimationManager::Load(double animationSpeed, string file_name, string animationName, std::map<string,bool> bonesToInclude )
 {
 	if (file_name.empty())
 		throw new std::exception("AnimationManager::Load - Insert a Valid Not Empty File Name");
@@ -30,27 +30,14 @@ void AnimationManager::Load(double animationSpeed, string file_name, string anim
 		throw new std::exception("AnimationManager::Load - Insert a Valid Not Empty Animation Name");
 
 	AnimationClip* animationLoad = new AnimationClip(animationSpeed, file_name, animationName); //I'm not sure this works
+	
+	animationLoad->m_bonesToInclude = bonesToInclude;
 
 	this->m_animationSet[animationName] = animationLoad;
+	 
+
 }
-
-void AnimationManager::LoadAndBlend(double animationSpeed, string file_name_animation1, string file_name_animation2, string animationName){
-	
-	if (file_name_animation1.empty())
-		throw new std::exception("AnimationManager::LoadAndBlend - Insert a Valid Not Empty File Name");
-	
-	if (file_name_animation2.empty())
-		throw new std::exception("AnimationManager::LoadAndBlend - Insert a Valid Not Empty File Name");
-
-	if (animationName.empty())
-		throw new std::exception("AnimationManager::LoadAndBlend - Insert a Valid Not Empty Animation Name");
-
-	AnimationClip* animationLoad1 = new AnimationClip(animationSpeed, file_name_animation1, animationName);  
-	AnimationClip* animationLoad2 = new AnimationClip(animationSpeed, file_name_animation2, animationName);  
-
-//	this->m_animationSet[animationName] = animationLoad;
-}
-
+ 
 
 void AnimationManager::AddAnimationOnQueue(string animation_name)
 {
@@ -63,7 +50,7 @@ void AnimationManager::AddAnimationOnQueue(string animation_name)
 
 	m_animationEventController.AddAnimation(pAnimation);
 }
-
+ 
 void AnimationManager::Animate(Model* model, double deltaTime)
 {
 	AnimationClip* clipToAnimate;
@@ -100,6 +87,25 @@ void AnimationManager::Animate(Model* model, double deltaTime)
 		delete clipToAnimate;
 
 
+}
+
+void AnimationManager::AnimateTruncate(Model* model, double deltaTime)
+{ 
+	auto clips = this->m_animationEventController.GetNextAnimations();
+	
+	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->mSkeleton);
+
+	for (int i = 0; i < clips.size(); i++)
+	{
+		pKeyFrameAnimator->Animate(model->GetModelMatrix(), deltaTime,  model->mAnimationMatrix, clips[i]);
+	}
+	 
+	m_animationEventController.PurgeEndedClips(deltaTime);
+
+	for (AnimationClip* clip : clips)
+		clip->Update(deltaTime);
+
+	delete pKeyFrameAnimator;
 }
 
 AnimationManager::~AnimationManager()

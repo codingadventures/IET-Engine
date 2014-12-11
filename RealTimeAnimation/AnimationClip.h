@@ -21,6 +21,8 @@ public:
 	std::string mAnimationName;
 
 
+	std::map<string,bool> m_bonesToInclude; 
+
 	double mAnimationSpeed; 
 	AnimationPose* GetAnimationPose( string boneName);
 	void SetAnimationPose(string boneName,AnimationPose animationPose);

@@ -42,9 +42,9 @@ public:
 
 
 void PlayerState::Update(Player* player, double deltaTime){
-	int c_numOfClip = 0;
-	AnimationClip* clipToAnimate;
-	player->m_animationManager.Animate(player->model, deltaTime); 
+ 
+	player->m_animationManagerWalk.Animate(player->model, deltaTime); 
+	player->m_animationManagerFight.Animate(player->model, deltaTime); 
 }
 
 

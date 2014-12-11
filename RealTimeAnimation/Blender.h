@@ -15,7 +15,7 @@ public:
 		{
 			AnimationClip* animation1 = animationClips[i];
 			AnimationClip* animation2 = animationClips[i+1];
-			
+
 			double anim1LocalTimer = animation1->GetLocalTimer();
 			double anim2LocalTimer = animation2->GetLocalTimer();
 			double anim1TotalDuration = animation1->GetTotalDuration();
@@ -24,7 +24,7 @@ public:
 
 			AnimationPose sourcePose;
 			AnimationPose targetPose;
-
+			bool isBoneToIncludeEmpty = animation2->m_bonesToInclude.empty();
 
 			for (std::map<string,AnimationPose>::iterator it=animation1->mBoneMapping.begin(); it!=animation1->mBoneMapping.end(); ++it)
 			{
@@ -32,20 +32,23 @@ public:
 
 				if ( animation2->GetAnimationPose(boneName) != nullptr) 
 				{
-					AnimationPose blended(true);
-					float beta = 0.0f;
-					sourcePose = animation1->mBoneMapping[boneName];
-					targetPose = animation2->mBoneMapping[boneName]; 
+					if (isBoneToIncludeEmpty || (animation2->m_bonesToInclude[boneName] && animation1->m_bonesToInclude[boneName])) 
+					{
+						AnimationPose blended(true);
+						float beta = 0.0f;
+						sourcePose = animation1->mBoneMapping[boneName];
+						targetPose = animation2->mBoneMapping[boneName]; 
 
-					beta =  anim2LocalTimer / (anim1TotalDuration - anim1LocalTimer + anim2LocalTimer);
+						beta =  anim2LocalTimer / (anim1TotalDuration - anim1LocalTimer + anim2LocalTimer);
 
-					glm::vec3 lerp_T =  sourcePose.GetInterpolatedTranslationKeyFrame(anim1LocalTimer) * (1 - beta)  + targetPose.GetInterpolatedTranslationKeyFrame(anim2LocalTimer) * beta;
-					glm::quat slerp_R =  glm::slerp(sourcePose.GetInterpolatedRotationKeyFrame(anim1LocalTimer), targetPose.GetInterpolatedRotationKeyFrame(anim2LocalTimer), beta);
+						glm::vec3 lerp_T =   sourcePose.GetInterpolatedTranslationKeyFrame(anim1LocalTimer) * (1 - beta)  + targetPose.GetInterpolatedTranslationKeyFrame(anim2LocalTimer) * beta;
+						glm::quat slerp_R =  glm::slerp(sourcePose.GetInterpolatedRotationKeyFrame(anim1LocalTimer), targetPose.GetInterpolatedRotationKeyFrame(anim2LocalTimer), beta);
 
-					blended.AddRotationKeyFrame(slerp_R,anim2LocalTimer);
-					blended.AddTranslationKeyFrame(lerp_T,anim2LocalTimer);
+						blended.AddRotationKeyFrame(slerp_R,anim2LocalTimer);
+						blended.AddTranslationKeyFrame(lerp_T,anim2LocalTimer);
 
-					animationClip->SetAnimationPose(boneName, blended); 
+						animationClip->SetAnimationPose(boneName, blended); 
+					}
 				}
 				//else
 				//{  //basically add the keyframes from the first
@@ -69,9 +72,9 @@ public:
 			animation1->SetBlendUpdateRatio( CalculateBlendRatio(*animation1,*animation2));
 
 		}
-	
 
-	
+
+
 
 		return animationClip;
 	}
