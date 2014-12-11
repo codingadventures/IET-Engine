@@ -104,7 +104,7 @@ public:
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
 		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		glutCreateWindow("The Revenge of Dart Maul  - Directed By: Mr. Stark"); 
+		glutCreateWindow("The Revenge of Darth Maul  - Directed By: Mr. Stark"); 
 
 		glewExperimental = GL_TRUE;
 		glewInit();
