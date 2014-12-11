@@ -95,14 +95,13 @@ glm::vec3 AnimationPose::GetInterpolatedTranslationKeyFrame(double time)
 		float t = 0.0f;
 		int curr_key = FindTranslationKeyFrame(time);
 		int next_key = /*curr_key == 0 ? lTranslationsSize - 1 : */curr_key + 1;
-		if (curr_key > 0)
-		{
 
-			total_t =  GetTranslationKeyFrame(next_key).GetTime() - GetTranslationKeyFrame(curr_key).GetTime();
-			t = (time - GetTranslationKeyFrame(curr_key).GetTime()) / total_t;
-		}
-	/*	else
-			t  = TRANSITION_TIME;*/
+
+		total_t =  GetTranslationKeyFrame(next_key).GetTime() - GetTranslationKeyFrame(curr_key).GetTime();
+		t = (time - GetTranslationKeyFrame(curr_key).GetTime()) / total_t;
+
+		/*	else
+		t  = TRANSITION_TIME;*/
 
 		glm::vec3 vi =  GetTranslationKeyFrame(curr_key).mTranslation;
 		glm::vec3 vf =  GetTranslationKeyFrame(next_key).mTranslation;
@@ -124,13 +123,12 @@ glm::quat  AnimationPose::GetInterpolatedRotationKeyFrame(double time)
 		float total_t = 0.0f;
 		float t = 0.0f;
 
-		if (curr_key > 0)
-		{
-			total_t = GetRotationKeyFrame(next_key).GetTime() - GetRotationKeyFrame(curr_key).GetTime();
-			t = (time -  GetRotationKeyFrame(curr_key).GetTime()) / total_t;
-		}
+
+		total_t = GetRotationKeyFrame(next_key).GetTime() - GetRotationKeyFrame(curr_key).GetTime();
+		t = (time -  GetRotationKeyFrame(curr_key).GetTime()) / total_t;
+
 		/*else
-			t  = TRANSITION_TIME;*/
+		t  = TRANSITION_TIME;*/
 
 		glm::quat qi = GetRotationKeyFrame(curr_key).mRotation;
 		glm::quat qf = GetRotationKeyFrame(next_key).mRotation;
