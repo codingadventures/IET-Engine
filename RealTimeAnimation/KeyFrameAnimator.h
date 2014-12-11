@@ -18,7 +18,7 @@ public:
 		assert(pSkeleton);   
 	}
 
-	void Animate(glm::mat4 model, float deltaTime, glm::mat4* outAnimationSequence, AnimationClip* animationClip)
+	void Animate(glm::mat4* outAnimationSequence, AnimationClip* animationClip)
 	{
 		assert(outAnimationSequence);
 

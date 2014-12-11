@@ -77,6 +77,7 @@ private:
 	bool m_introIsOver;
 	float timeAtReset;
 	Model* model_laser;
+	glm::vec3 laserTranslate;
 	Player* enemy;
 public:
 	Controller(void)
@@ -157,10 +158,10 @@ public:
 		//model_cones = new Model(shaderBonesNoTexture, CONES_MODEL);
 		float deg =   glm::radians(90.0f);
 
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			Model* drone = new Model(shaderBones, DROID_MODEL);
-			drone->Translate(glm::vec3(-100.0f,0.0f ,1.0f * (i+1) * 2));
+			drone->Translate(glm::vec3(-100.0f,0.0f ,1.0f * (i+3) * 2));
 			drone->Scale(glm::vec3(3.0f, 3.0f, 3.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
 			drone->Rotate(glm::vec3(0,1,0),deg);
 			char animationName[20];
@@ -226,7 +227,7 @@ public:
 		swingSwordBones["shoulder.R"] = true;
 		swingSwordBones["saber"] = true;
 
-		 
+
 		player->m_animationManagerWalk.Load(1.0f, WALK_ACTION, "walk");
 		player->m_animationManagerWalk.Load(1.0f, RUN_ACTION, "run");
 		player->m_animationManagerWalk.Load(1.0f, WALK_RIGHT_ACTION,"walkright");
@@ -318,7 +319,14 @@ public:
 		//model_battlecruise->Draw();
 
 		shader->SetModelViewProjection(model_laser->GetModelMatrix(),view,projection);
-		model_laser->Draw();
+
+		/*float acos = glm::acos(glm::fastNormalizeDot(model_laser->GetPosition(),model_dartmaul->GetPosition()));*/
+
+		 
+	 
+
+
+
 		shaderBones->Use(); 
 
 
@@ -355,7 +363,7 @@ public:
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
 
 
-		for (int i = 0; i <1; i++)
+		for (int i = 0; i <10; i++)
 		{
 			char animationName[20];
 			sprintf_s(animationName, "DRONE_KF_%d",i);
@@ -363,9 +371,19 @@ public:
 			shaderBones->SetModel(models_drone[i]->GetModelMatrix());
 
 			m_animationManager.AddAnimationOnQueue("shoot");
-			 
+
 			m_animationManager.AddAnimationOnQueue("walk");
-			m_animationManager.AnimateTruncate(models_drone[i],deltaTime);
+			double anim;
+			if(i==0)
+				anim = deltaTime;
+			else
+				anim = 0.0f;
+			m_animationManager.AnimateTruncate(models_drone[i],anim );
+
+			float totalDist = glm::distance( models_drone[i]->GetPosition(),model_dartmaul->GetPosition());
+
+			glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  (models_drone[i]->GetPosition() - model_dartmaul->GetPosition())  * glm::vec3(-1,0,0);
+			models_drone[i]->Translate(trans);
 
 			//droidAnimator->Animate(,deltaTime,models_drone[i]->mAnimationMatrix, mFireAnimationClip);
 

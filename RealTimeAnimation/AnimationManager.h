@@ -74,7 +74,7 @@ void AnimationManager::Animate(Model* model, double deltaTime)
  
 	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->mSkeleton);
 
-	pKeyFrameAnimator->Animate(model->GetModelMatrix(), deltaTime,  model->mAnimationMatrix, clipToAnimate);
+	pKeyFrameAnimator->Animate(model->mAnimationMatrix, clipToAnimate);
 
 	m_animationEventController.PurgeEndedClips(deltaTime);
 
@@ -97,7 +97,7 @@ void AnimationManager::AnimateTruncate(Model* model, double deltaTime)
 
 	for (int i = 0; i < clips.size(); i++)
 	{
-		pKeyFrameAnimator->Animate(model->GetModelMatrix(), deltaTime,  model->mAnimationMatrix, clips[i]);
+		pKeyFrameAnimator->Animate(model->mAnimationMatrix, clips[i]);
 	}
 	 
 	m_animationEventController.PurgeEndedClips(deltaTime);
@@ -120,6 +120,7 @@ AnimationManager::~AnimationManager()
 	}
 }
 
+ 
 
 
 //std::map<string,AnimationClip*> AnimationManager::AnimationSet;

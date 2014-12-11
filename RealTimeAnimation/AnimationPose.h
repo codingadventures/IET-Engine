@@ -137,19 +137,7 @@ glm::quat  AnimationPose::GetInterpolatedRotationKeyFrame(double time)
 
 	return slerped;
 }
-
-//void AnimationPose::ReplaceTranslationKeyFrame(glm::vec3 translation, double time)
-//{
-//	int keyFrameIndex = FindTranslationKeyFrame(time);
-//	mTranslations[keyFrameIndex] = TranslationKeyFrame(translation,time);
-//}
-//
-//
-//void AnimationPose::ReplaceRotationKeyFrame(glm::quat rotation,double time)
-//{
-//	int keyFrameIndex = FindRotationKeyFrame(time);
-//	mRotations[keyFrameIndex] = RotationKeyFrame(rotation,time);
-//}
+ 
 
 
 int AnimationPose::FindTranslationKeyFrame(double time)
