@@ -20,6 +20,7 @@ private:
 
 SwordIdle::SwordIdle(string transitionClipName)
 {
+	this->m_stateName = "swordidle";
 	this->m_currentStateClipName = "";
 	this->m_nextStateClipName = transitionClipName;
 

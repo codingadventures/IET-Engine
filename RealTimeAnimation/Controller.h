@@ -81,6 +81,7 @@ private:
 	glm::vec3 laserTranslate;
 	Player* enemy;
 	bool goAhead;
+	string lastSwordState;
 public:
 	Controller(void)
 	{
@@ -331,6 +332,7 @@ public:
 
 		player->Update(deltaTime, camera->Front);
 
+		lastSwordState = player->m_swordState->m_stateName;
 
 		camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
@@ -694,37 +696,30 @@ public:
 		char pos[100];
 		sprintf_s(pos,"Dart Maul Position - (%f,%f,%f)",dartMaulModelWorldPosition.x,dartMaulModelWorldPosition.y,dartMaulModelWorldPosition.z);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
+		 
 
-		char cameraPosition[100];
-		sprintf_s(cameraPosition, "Camera Position (%f,%f,%f)",camera->Position.x,camera->Position.y,camera->Position.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,cameraPosition);
+		char playerState[200];
+		if (player->m_walkingState != nullptr)
+		{
+			sprintf_s(playerState, "FSM 1: Player Walk State %s ", player->m_walkingState->GetCurrentAnimationName().c_str() );
+			screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,playerState);
+		}
 
-		char cameraFrontPosition[100];
-		sprintf_s(cameraFrontPosition, "Camera Front (%f,%f,%f)",camera->Front.x,camera->Front.y,camera->Front.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,cameraFrontPosition);
-
-		char cameraDirectionPosition[100];
-		sprintf_s(cameraDirectionPosition, "Camera Direction (%f,%f,%f)",camera->Direction.x,camera->Direction.y,camera->Direction.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 90 ,cameraDirectionPosition);
-
-		char animationTime[100];
-		sprintf_s(animationTime, "Animation Time %f",global_clock);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 170 ,animationTime);
+		char playerFightState[200];
+		if (player->m_swordState != nullptr)
+		{
+			sprintf_s(playerFightState, "FSM 2: Player Fight State %s ", player->m_swordState->GetCurrentAnimationName().c_str() );
+			screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,playerFightState);
+		}
+ 
 
 		char splineTime[100];
 		sprintf_s(splineTime, "Spline Time %f",spline.timer);
 		screen_output(500.0f,VIEWPORT_HEIGHT - 150 ,splineTime);
 
-		char playerState[200];
-		if (player->m_walkingState != nullptr)
-		{
-			sprintf_s(playerState, "Player State %s", player->m_walkingState->GetCurrentAnimationName().c_str());
-			screen_output(500.0f,VIEWPORT_HEIGHT - 110 ,playerState);
-		}
-
-		char cameraAngles[200];
-		sprintf_s(cameraAngles,"Camera Angles: Yaw %f - Pitch %f",camera->Yaw,camera->Pitch);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 130 ,cameraAngles);
+		char animationTime[100];
+		sprintf_s(animationTime, "Animation Time %f",global_clock);
+		screen_output(500.0f,VIEWPORT_HEIGHT - 170 ,animationTime);
 
 		char loadTime[100];
 		sprintf_s(loadTime,"Load Time: %f",timeAtReset);

@@ -23,6 +23,7 @@ private:
 
 SwordBlock::SwordBlock(string transitionClipName)
 {
+	this->m_stateName = "blocksword";
 	this->m_currentStateClipName = "blocksword";
 	this->m_nextStateClipName = transitionClipName;
 }
