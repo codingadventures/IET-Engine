@@ -30,15 +30,31 @@ class Model
 {
 public:
 
-	double mAnimationDuration;
+	glm::mat4* mAnimationMatrix;
+	Skeleton* mSkeleton;
+	glm::vec3 m_Direction;
+private:
+	 Shader* shader;
 
+	vector<Mesh> meshes;
+	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
+	string directory;
+	GLuint* boneLocation;
+	int m_numberOfBone;
+	glm::mat4 mModelMatrix;
+
+	glm::mat4 m_Scale,m_Position,m_Rotation;
+public:
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
-	Model(const Shader* shader, GLchar* path) :shader(shader)
+	Model(Shader* shader, GLchar* path) :
+		shader(shader),
+		m_numberOfBone(0)
 	{
 		assert(shader);
-		m_numberOfBone = 0;
+		assert(path);
+	 
 		mSkeleton = new Skeleton( ); 
 
 		this->loadModel(path);
@@ -62,11 +78,14 @@ public:
 	{
 		free(mAnimationMatrix);
 		free(boneLocation);
+		free(mSkeleton);
 
 	}
 	// Draws the model, and thus all its meshes
 	void Draw()
 	{
+		this->shader->Use();
+
 		this->mModelMatrix = GetModelMatrix();
 
 		if (mSkeleton->getNumberOfBones()>0)
@@ -150,21 +169,11 @@ public:
 	void ClearJointsLimit(){
 		mSkeleton->ResetAllJointLimits();
 	}
-	glm::mat4* mAnimationMatrix;
-	Skeleton* mSkeleton;
-	glm::vec3 m_Direction;
+	
 
 private:
 	/*  Model Data  */
-	vector<Mesh> meshes;
-	const Shader* shader;
-	string directory;
-	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-	GLuint* boneLocation;
-	int m_numberOfBone;
-	glm::mat4 mModelMatrix;
-
-	glm::mat4 m_Scale,m_Position,m_Rotation;
+	
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)

@@ -27,6 +27,12 @@ public:
 		viewUniform = glGetUniformLocation(Program, viewUniformName.c_str());
 		projectionUniform = glGetUniformLocation(Program, projectionUniformName.c_str());
 	}
+
+	~Shader()
+	{
+		delete vertexSourcePath;
+		delete fragmentSourcePath;
+	}
 	// Use our program
 	void Use()
 	{
@@ -50,11 +56,12 @@ private:
 	GLint modelUniform;
 	GLint viewUniform ;
 	GLint projectionUniform;
+	GLint vertexShader;
+	GLint fragmentShader;
 
 	const GLchar* vertexSourcePath;
 	const GLchar* fragmentSourcePath;
-	GLint vertexShader;
-	GLint fragmentShader;
+
 	string vCode,fCode;
 
 

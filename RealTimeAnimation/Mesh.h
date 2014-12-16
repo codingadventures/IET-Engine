@@ -35,7 +35,7 @@ public:
 		this->setupMesh();
 	}   
 	// Render the mesh
-	void Draw(Shader shader ) 
+	void Draw(Shader& shader ) 
 	{
 		// Bind appropriate textures
 		GLuint diffuseNr = 1;

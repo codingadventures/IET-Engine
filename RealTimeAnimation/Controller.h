@@ -30,6 +30,7 @@ class Controller
 
 private:
 
+	glm::mat4 projection,view;
 
 	glm::vec3 dartMaulModelWorldPosition;
 
@@ -51,10 +52,6 @@ private:
 	Shader* shaderBonesNoTexture;
 	Shader* shaderNoTexture;
 
-	Model *model_bob;
-	Model *tennisModel,*model_max;
-	//Model* model_floor;
-	Model*  model_cones;
 	Model* model_dartmaul;
 	std::vector<Enemy*> droids;
 	KeyFrameAnimator* droidAnimator;
@@ -152,12 +149,10 @@ public:
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-		model_laser = new Model(shader,LASER_MODEL);
-		//tennisModel =  new Model(shader, TENNIS_MODEL);
+		//model_laser = new Model(shader,LASER_MODEL); 
 		model_dartmaul = new Model(shaderBones, DART_MAUL_MODEL);
 		model_dartmaul->Scale(glm::vec3(3,3,3));
-		model_dartmaul->Translate(glm::vec3(0,-2,0));
-		//model_dartmaul->Translate(glm::vec3(0,5,0));
+		model_dartmaul->Translate(glm::vec3(0,-2,0)); 
 
 		//model_bob = new Model(shaderBones, BOB_MODEL);
 		//model_max = new Model(shaderBones, MAX_MODEL);
@@ -183,9 +178,7 @@ public:
 		spline.addPoint(19, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 		spline.addPoint(20, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
 
-		//model_floor = new Model(shader, FLOOR_MODEL);
-		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL);
-		speed = 1.0f; 
+		model_battlecruise = new Model(shader, BATTLECRUISE_MODEL); 
 		//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
 		//model_cones->model = glm::translate(glm::mat4(1), glm::vec3(10.f,10.0f,-50.0f)) * glm::scale(glm::mat4(1), glm::vec3(20.0f,20.0f, 20.0f));	
 
@@ -201,11 +194,6 @@ public:
 		model_laser->Rotate(glm::vec3(0,0,1),glm::radians(90.0f));
 		model_laser->Scale(glm::vec3(0.5f,1.0f,0.5f));*/
 
-		conesOn = false;
-		dofOn = false;
-		humansOn = false;
-		isRunning = false;
-		splineOn = false;
 		m_introIsOver = true;
 		goAhead = false;
 		global_clock = 0;
@@ -265,10 +253,11 @@ public:
 		shootingBones["neck"] = true;
 		shootingBones["chest"] = true;
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < TOTAL_ENEMIES; i++)
 		{
 			Model* droid = new Model(shaderBones, DROID_MODEL);
-			droid->Translate(glm::vec3(-100.0f + (glm::linearRand(-1.0f,1.0f) * 2 + i ),-2.0f ,1.0f * (i+3) * 2));
+			glm::vec3 offset = glm::sphericalRand(30.0f);
+			droid->Translate(glm::vec3(-100.0f + offset.x, -2.0f , offset.z));
 			droid->Scale(glm::vec3(3.0f, 3.0f, 3.0f));//= glm::translate(glm::mat4(1), ) * glm::scale(glm::mat4(1), );	
 			droid->Rotate(glm::vec3(0,1,0),deg);  
 
@@ -278,10 +267,6 @@ public:
 			enemy->m_animationManagerWalk.Load(1.0f, WALK_ACTION, "walk",walkingBones); 
 			droids.push_back(enemy);
 		}
-
-
-
-
 	}
 
 	void Intro()
@@ -304,10 +289,31 @@ public:
 			string text = "A long time ago in a galaxy far, far away...";
 			screen_output(VIEWPORT_WIDTH/2 - 200, VIEWPORT_HEIGHT/2,(char*)  text.c_str());
 
-			string text2 = "The rebel Darth Maul is trying to escape from the space station.";
+			string text2 = "The rebel Darth Maul is fighting the droids to escape from the space station.";
 			screen_output(VIEWPORT_WIDTH/2 - 200, VIEWPORT_HEIGHT/2 - 50,(char*)  text2.c_str());
 
 		}
+	}
+
+	void Render()
+	{
+		if (!pause)
+		{
+			model_dartmaul->m_Direction = glm::vec3(camera->Front.x,0,camera->Front.z);
+			model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
+			dartMaulModelWorldPosition = model_dartmaul->GetPosition();
+		}
+		shader->Use();
+
+		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
+
+		model_battlecruise->Draw();
+
+		shaderBones->Use(); 
+
+		shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),view,projection);
+
+		model_dartmaul->Draw();
 	}
 
 	void Draw()
@@ -317,24 +323,20 @@ public:
 
 		update_timer(); 
 
-		//model_bob->ClearJointsLimit();
-		//model_max->ClearJointsLimit();
+		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 15000.0f);  
 
-		shader->Use();
-
-		glm::mat4 projection,view;
-
-		projection = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 10000.0f);  
-
-		if (m_introIsOver)
+		if (m_introIsOver && !pause)
 		{ 
 			camera->MoveCamera();
 			////camera->Front = glm::vec3(0,150,0);
 
-		}
-		player->HandleInput(g_keyMappings);
 
-		player->Update(deltaTime, camera->Front);
+			player->HandleInput(g_keyMappings);
+
+			player->Update(deltaTime, camera->Front);
+
+		}
+
 
 		lastSwordState = player->m_swordState->m_stateName;
 
@@ -342,31 +344,6 @@ public:
 
 		view = camera->GetViewMatrix();
 
-		shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),view,projection);
-
-		model_battlecruise->Draw();
-
-		shader->SetModelViewProjection(model_laser->GetModelMatrix(),view,projection);
-
-		/*float acos = glm::acos(glm::fastNormalizeDot(model_laser->GetPosition(),model_dartmaul->GetPosition()));*/
-
-
-
-
-
-
-		shaderBones->Use(); 
-
-
-		model_dartmaul->m_Direction = glm::vec3(camera->Front.x,0,camera->Front.z);
-		model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
-		dartMaulModelWorldPosition = model_dartmaul->GetPosition();
-		// 
-
-
-		shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),view,projection);
-
-		model_dartmaul->Draw();
 
 		/*	
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
@@ -386,32 +363,34 @@ public:
 		dartMaulAnimator->Animate(model_dartmaul->model,deltaTime,model_dartmaul->animationMatrix,mWalkAnimationClip);*/
 
 
-
+		Render();
 
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
 		bool isAttacking = player->m_swordState->m_stateName == "SwingSword";
 		int droidsSize = droids.size();
-		if (m_introIsOver){
+		if (m_introIsOver ){
 			for (int i = 0; i < droidsSize; i++)
 			{  
 				shaderBones->SetModel(droids[i]->model->GetModelMatrix());
 				float totalDist = glm::distance(droids[i]->model->GetPosition(),model_dartmaul->GetPosition());
 				auto vec = droids[i]->model->GetPosition() - model_dartmaul->GetPosition();
-				  
-				if (!droids[i]->IsDead() && isAttacking && totalDist < 3.0f)
+				if (!pause)
 				{
-					droids[i]->Kill();
-				}
-				else
-				{
-					if (!droids[i]->IsDead()){
-
-						glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  vec  * glm::vec3(-1,0,0);
-						droids[i]->model->Translate(trans);
+					if (!droids[i]->IsDead() && isAttacking && totalDist < 3.0f)
+					{
+						droids[i]->Kill();
 					}
-				} 
+					else
+					{
+						if (!droids[i]->IsDead()){
 
-				droids[i]->Update(deltaTime);
+							glm::vec3 trans = totalDist * (deltaTime /1000.0f * 0.001f) *  vec  * glm::vec3(-1,0,0);
+							droids[i]->model->Translate(trans);
+						}
+					} 
+
+					droids[i]->Update(deltaTime);
+				}
 				droids[i]->model->Draw();
 			}
 		}
@@ -583,6 +562,7 @@ public:
 	{
 		if(g_keyMappings[KEY_p])
 		{
+
 			pause = !pause;
 		}
 
@@ -634,7 +614,7 @@ public:
 		AngleRestriction arms(-30.0f,30.0f,-60.0f,60.0f,-30.0f,30.0f);
 		AngleRestriction fingers(0.0f,0.0f,-10.0f,10.0f,-10.0f,10.0f);
 
-		model_bob->setJointLimit("neck",head);
+		/*model_bob->setJointLimit("neck",head);
 		model_bob->setJointLimit("head",head);
 		model_bob->setJointLimit("upperarm.L",arms);
 		model_bob->setJointLimit("forearm.L",arms);
@@ -648,19 +628,23 @@ public:
 		model_max->setJointLimit("L_UpperArm",arms);
 		model_max->setJointLimit("L_Finger12",fingers);
 		model_max->setJointLimit("L_Finger11",fingers);
-		model_max->setJointLimit("L_Finger1",fingers);
+		model_max->setJointLimit("L_Finger1",fingers);*/
 	}
 
 	inline void update_timer()
 	{
-
 		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME) - timeAtReset;
 		deltaTime = timeSinceStart - oldTimeSinceStart;
-		oldTimeSinceStart = timeSinceStart; 
 
-		global_clock += deltaTime/1000;
+		if (pause)
+			timeAtReset+=deltaTime;
+		else
+		{	
+			oldTimeSinceStart = timeSinceStart;
+			global_clock += deltaTime/1000;
+		}
 	}
-
+	
 
 	void TextToScreen()
 	{ 
@@ -687,36 +671,36 @@ public:
 
 		char pos[100];
 		sprintf_s(pos,"Dart Maul Position - (%f,%f,%f)",dartMaulModelWorldPosition.x,dartMaulModelWorldPosition.y,dartMaulModelWorldPosition.z);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 30 ,pos);
+		screen_output(600.0f,VIEWPORT_HEIGHT - 30 ,pos);
 
 
 		char playerState[200];
 		if (player->m_walkingState != nullptr)
 		{
 			sprintf_s(playerState, "FSM 1: Player Walk State %s ", player->m_walkingState->GetCurrentAnimationName().c_str() );
-			screen_output(500.0f,VIEWPORT_HEIGHT - 50 ,playerState);
+			screen_output(600.0f,VIEWPORT_HEIGHT - 50 ,playerState);
 		}
 
 		char playerFightState[200];
 		if (player->m_swordState != nullptr)
 		{
 			sprintf_s(playerFightState, "FSM 2: Player Fight State %s ", player->m_swordState->GetCurrentAnimationName().c_str() );
-			screen_output(500.0f,VIEWPORT_HEIGHT - 70 ,playerFightState);
+			screen_output(600.0f,VIEWPORT_HEIGHT - 70 ,playerFightState);
 		}
 
 
 		char splineTime[100];
 		sprintf_s(splineTime, "Spline Time %f",spline.timer);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 150 ,splineTime);
+		screen_output(600.0f,VIEWPORT_HEIGHT - 150 ,splineTime);
 
 		char animationTime[100];
 		sprintf_s(animationTime, "Animation Time %f",global_clock);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 170 ,animationTime);
+		screen_output(600.0f,VIEWPORT_HEIGHT - 170 ,animationTime);
 
-		char loadTime[100];
+		/*char loadTime[100];
 		sprintf_s(loadTime,"Load Time: %f",timeAtReset);
-		screen_output(500.0f,VIEWPORT_HEIGHT - 190 ,loadTime);
-
+		screen_output(600.0f,VIEWPORT_HEIGHT - 190 ,loadTime);
+*/
 
 
 	}

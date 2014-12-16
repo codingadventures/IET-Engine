@@ -28,7 +28,7 @@
 #define VIEWPORT_HEIGHT 768
 #define INVALID_UNIFORM_LOCATION 0xffffffff
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
-
+#define TOTAL_ENEMIES 5
 #define INITIAL_POINTER_POSITION glm::vec3(50.0f, 50.0f, -5.0f)
 
 #define CAMERA_OFFSET glm::vec3(0.0f,15.0f,10.0f)
@@ -69,7 +69,8 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 enum GameState
 {
 	INTRO,
-	GAME
+	GAME,
+	PAUSE
 };
 
 bool g_keyMappings[1024];
