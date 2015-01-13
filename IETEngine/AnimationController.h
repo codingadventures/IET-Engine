@@ -25,7 +25,7 @@ using namespace std::placeholders;
 
 extern "C" static void drawCallback();
 
-class Controller
+class AnimationController
 {
 
 private:
@@ -34,7 +34,7 @@ private:
 
 	glm::vec3 dartMaulModelWorldPosition;
 
-	void Controller::setupCurrentInstance();
+	void AnimationController::setupCurrentInstance();
 	GLuint* boneLocation;
 
 	int boneIndex;
@@ -82,12 +82,12 @@ private:
 	bool goAhead;
 	string lastSwordState;
 public:
-	Controller(void)
+	AnimationController(void)
 	{
 		setupCurrentInstance();
 	}
 
-	~Controller(){ 
+	~AnimationController(){ 
 
 		free(animations);
 		free(boneLocation);
@@ -117,8 +117,8 @@ public:
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,camera, _1, _2);
 		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,camera,_1);
-		UserKeyboardCallback = std::bind(&Controller::ReadInput,this); 
-		UserMouseClickCallback = std::bind(&Controller::ReadMouse,this,_1,_2); 
+		UserKeyboardCallback = std::bind(&AnimationController::ReadInput,this); 
+		UserMouseClickCallback = std::bind(&AnimationController::ReadMouse,this,_1,_2); 
 
 		glutKeyboardFunc(Callbacks::keyboardCallback);
 		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
@@ -706,7 +706,7 @@ public:
 	}
 };
 
-static Controller* g_CurrentInstance;
+static AnimationController* g_CurrentInstance;
 
 
 static void drawCallback()
@@ -714,7 +714,7 @@ static void drawCallback()
 	g_CurrentInstance->Draw();
 }
 
-void Controller::setupCurrentInstance(){
+void AnimationController::setupCurrentInstance(){
 	::g_CurrentInstance = this; 
 }
 

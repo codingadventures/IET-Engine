@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationClip.h" />
+    <ClInclude Include="AnimationController.h" />
     <ClInclude Include="AnimationEventController.h" />
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AnimationPose.h" />
@@ -105,7 +106,6 @@
     <ClInclude Include="Callbacks.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="common.h" />
-    <ClInclude Include="Controller.h" />
     <ClInclude Include="IKAnimator.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerState.h" />

@@ -1,6 +1,6 @@
 
 #include <math.h>
-#include "Controller.h"
+#include "AnimationController.h"
  
 
 
@@ -9,7 +9,7 @@ int totalAnimationTime;
  
 int main(int argc, char* argv[])
 { 
-	Controller* controller = new Controller();
+	AnimationController* controller = new AnimationController();
 
 	controller->Init(argc,argv);
 
