@@ -94,6 +94,8 @@
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
+    <ClInclude Include="Controller.h" />
+    <ClInclude Include="PhysicsController.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />

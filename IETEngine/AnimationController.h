@@ -1,5 +1,6 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+ #ifndef AnimationController_h__
+#define AnimationController_h__
+
 
 #define GLM_FORCE_RADIANS
 
@@ -631,19 +632,7 @@ public:
 		model_max->setJointLimit("L_Finger1",fingers);*/
 	}
 
-	inline void update_timer()
-	{
-		int timeSinceStart = glutGet(GLUT_ELAPSED_TIME) - timeAtReset;
-		deltaTime = timeSinceStart - oldTimeSinceStart;
 
-		if (pause)
-			timeAtReset+=deltaTime;
-		else
-		{	
-			oldTimeSinceStart = timeSinceStart;
-			global_clock += deltaTime/1000;
-		}
-	}
 	
 
 	void TextToScreen()
@@ -717,5 +706,5 @@ static void drawCallback()
 void AnimationController::setupCurrentInstance(){
 	::g_CurrentInstance = this; 
 }
-
-#endif // CONTROLLER_H
+ 
+#endif // AnimationController_h__

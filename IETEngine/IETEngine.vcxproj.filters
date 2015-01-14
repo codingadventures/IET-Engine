@@ -179,6 +179,12 @@
     <ClInclude Include="AnimationController.h">
       <Filter>Header Files\Controller</Filter>
     </ClInclude>
+    <ClInclude Include="PhysicsController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag">
