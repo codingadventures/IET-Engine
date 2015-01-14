@@ -1,13 +1,9 @@
 #ifndef PhysicsController_h__
 #define PhysicsController_h__
 
-#define GLM_FORCE_RADIANS
-
-
-#include <glm/glm.hpp> 
-#include <glm/gtx/random.hpp>
-
-#include "Callbacks.h"
+#include "Controller.h"
+ 
+ 
 #include "Shader.h"
 #include "Point.h"
 #include "Camera.h"
@@ -17,7 +13,7 @@ using namespace std::placeholders;
 
 extern "C" static void drawCallback();
 
-class PhysicsController {
+class PhysicsController : public Controller {
 public:
 	void PhysicsController::setupCurrentInstance();
 	void Init(int argc, char* argv[]);
@@ -32,12 +28,17 @@ private:
 
 static PhysicsController* g_CurrentInstance;
 
+static void drawCallback()
+{
+	g_CurrentInstance->Draw();
+}
+
 void PhysicsController::Init(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
 	glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-	glutCreateWindow("The Revenge of Darth Maul  - Directed By: Mr. Stark"); 
+	glutCreateWindow("Particle System"); 
 
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -78,10 +79,7 @@ void PhysicsController::Draw()
 
 }
 
-static void drawCallback()
-{
-	g_CurrentInstance->Draw();
-}
+
 
 void PhysicsController::setupCurrentInstance(){
 	::g_CurrentInstance = this; 
@@ -93,12 +91,11 @@ PhysicsController::~PhysicsController()
 	free(m_shader);
 }
 
-PhysicsController::PhysicsController()
-	: 
-	m_camera(nullptr),
-	m_shader(nullptr)
+PhysicsController::PhysicsController() 	
+	: m_camera(nullptr),
+	  m_shader(nullptr)
 {
-
+	setupCurrentInstance();
 }
 
 

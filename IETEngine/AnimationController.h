@@ -1,14 +1,9 @@
  #ifndef AnimationController_h__
 #define AnimationController_h__
 
+#include "Controller.h"
 
-#define GLM_FORCE_RADIANS
-
-#include <glm/glm.hpp> 
-#include <glm/gtx/random.hpp>
 #include <queue>
-#include "Callbacks.h"
-#include "ScreenOutput.h"
 #include "Shader.h"
 #include "Spline.h"
 #include "Model.h"
@@ -26,7 +21,7 @@ using namespace std::placeholders;
 
 extern "C" static void drawCallback();
 
-class AnimationController
+class AnimationController : Controller
 {
 
 private:
