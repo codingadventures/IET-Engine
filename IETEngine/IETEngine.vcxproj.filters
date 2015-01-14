@@ -64,6 +64,15 @@
     <Filter Include="Header Files\Physics\Particles\Generator">
       <UniqueIdentifier>{76f3fa68-1f96-4132-9c80-eac34eb71d7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\Particles\Renderer">
+      <UniqueIdentifier>{d14772a1-2e04-41e6-9139-b81a82d80636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Vertex">
+      <UniqueIdentifier>{7e5da4ee-7de6-4fd2-8d90-46cd003113eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Fragment">
+      <UniqueIdentifier>{ee1ad862-a86f-43ad-acc6-562af027f5c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -218,22 +227,34 @@
     <ClInclude Include="EulerUpdater.h">
       <Filter>Header Files\Physics\Particles\Updater</Filter>
     </ClInclude>
+    <ClInclude Include="IParticleRenderer.h">
+      <Filter>Header Files\Physics\Particles\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="GLParticleRenderer.h">
+      <Filter>Header Files\Physics\Particles\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment.frag">
-      <Filter>Header Files\Shaders</Filter>
-    </None>
-    <None Include="fragment_bone.frag">
-      <Filter>Header Files\Shaders</Filter>
-    </None>
     <None Include="vertex.vert">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
     <None Include="vertex_bone.vert">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="fragment.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="fragment_bone.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
     <None Include="fragment_notexture.frag">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="particle.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="particle.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -32,8 +32,8 @@ namespace Physics
 			virtual void update(double dt);
 			virtual void reset();
 
-			virtual size_t numAllParticles() const { return d_particles.m_count; }
-			virtual size_t numAliveParticles() const { return d_particles.m_count_alive; }
+			virtual size_t particles_count() const { return d_particles.m_count; }
+			virtual size_t alive_particles_count() const { return d_particles.m_count_alive; }
 
 			void addEmitter(std::shared_ptr<ParticleEmitter> emitter) { d_emitters.push_back(emitter); }
 			void addUpdater(std::shared_ptr<ParticleUpdater> updater) { d_emitters.push_back(updater); }
