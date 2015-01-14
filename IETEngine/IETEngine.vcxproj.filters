@@ -52,6 +52,18 @@
     <Filter Include="Header Files\Helper">
       <UniqueIdentifier>{12538098-441a-4e3f-bea3-b6f17840c358}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{1ffaf99d-b427-4baa-9edc-87871f97acae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles">
+      <UniqueIdentifier>{91282fcf-9e6c-44a9-96cc-6bff57a67c52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles\Updater">
+      <UniqueIdentifier>{54c4f782-d468-4f52-8f9a-8c57b81059fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles\Generator">
+      <UniqueIdentifier>{76f3fa68-1f96-4132-9c80-eac34eb71d7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -182,8 +194,29 @@
     <ClInclude Include="PhysicsController.h">
       <Filter>Header Files\Controller</Filter>
     </ClInclude>
-    <ClInclude Include="Controller.h">
+    <ClInclude Include="AbstractController.h">
       <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleData.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxGenerator.h">
+      <Filter>Header Files\Physics\Particles\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleGenerator.h">
+      <Filter>Header Files\Physics\Particles\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleUpdater.h">
+      <Filter>Header Files\Physics\Particles\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="EulerUpdater.h">
+      <Filter>Header Files\Physics\Particles\Updater</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

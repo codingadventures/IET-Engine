@@ -94,7 +94,14 @@
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
-    <ClInclude Include="Controller.h" />
+    <ClInclude Include="AbstractController.h" />
+    <ClInclude Include="BoxGenerator.h" />
+    <ClInclude Include="EulerUpdater.h" />
+    <ClInclude Include="ParticleData.h" />
+    <ClInclude Include="ParticleEmitter.h" />
+    <ClInclude Include="ParticleGenerator.h" />
+    <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="ParticleUpdater.h" />
     <ClInclude Include="PhysicsController.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />

@@ -1,106 +1,103 @@
 #ifndef PhysicsController_h__
 #define PhysicsController_h__
 
-#include "Controller.h"
- 
- 
-#include "Shader.h"
-#include "Point.h"
-#include "Camera.h"
+#include "AbstractController.h"
 
 
-using namespace std::placeholders;
+#include "Point.h" 
 
-extern "C" static void drawCallback();
-
-class PhysicsController : public Controller {
-public:
-	void PhysicsController::setupCurrentInstance();
-	void Init(int argc, char* argv[]);
-	void Draw();
-	void Run();
-	~PhysicsController();
-	PhysicsController();
-private:
-	Camera* m_camera;
-	Shader* m_shader;
-};
-
-static PhysicsController* g_CurrentInstance;
-
-static void drawCallback()
+namespace Controller
 {
-	g_CurrentInstance->Draw();
-}
 
-void PhysicsController::Init(int argc, char* argv[])
-{
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-	glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-	glutCreateWindow("Particle System"); 
+	using namespace std::placeholders;
 
-	glewExperimental = GL_TRUE;
-	glewInit();
-
-	glutDisplayFunc(drawCallback);
-	glutIdleFunc(drawCallback);
-
-	this->m_camera = new Camera(glm::vec3(0.0f,10.0f,0.0f));
+	class PhysicsController : public AbstractController {
+	public:
+		void PhysicsController::setupCurrentInstance();
+		void Init(int argc, char* argv[]);
+		void Draw();
+		void Run();
+		~PhysicsController();
+		PhysicsController();
+	private:
+		Camera* m_camera;
+		Shader* m_shader;
+	};
 
 
-	//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-	UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,m_camera, _1, _2);
-	UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,m_camera,_1);
+	/*static void drawCallback()
+	{
+		g_CurrentInstance->Draw();
+	}
+*/
+	void PhysicsController::Init(int argc, char* argv[])
+	{
+		glutInit(&argc, argv);
+		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+		glutCreateWindow("Particle System"); 
+
+		glewExperimental = GL_TRUE;
+		glewInit();
+
+		glutDisplayFunc(drawCallback);
+		glutIdleFunc(drawCallback);
+
+		this->m_camera = new Camera(glm::vec3(0.0f,10.0f,0.0f));
 
 
-	glutKeyboardFunc(Callbacks::keyboardCallback);
-	glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
+		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
+		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,m_camera, _1, _2);
+		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,m_camera,_1);
 
 
-	glutSetCursor(GLUT_CURSOR_NONE); 
+		glutKeyboardFunc(Callbacks::keyboardCallback);
+		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 
-	glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
 
-	glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
+		glutSetCursor(GLUT_CURSOR_NONE); 
+
+		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
+
+		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
+
+		m_shader = new Shader("vertex.vert","fragment.frag"); 
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_PROGRAM_POINT_SIZE);
+	}
+
+	void PhysicsController::Run(){
+		glutMainLoop();
+	}
+
+	void PhysicsController::Draw()
+	{
+
+	}
+
 	 
-	m_shader = new Shader("vertex.vert","fragment.frag"); 
+	void PhysicsController::setupCurrentInstance(){
+		Controller::g_CurrentInstance = this; 
+	}
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_PROGRAM_POINT_SIZE);
+	PhysicsController::~PhysicsController()
+	{
+		free(m_camera);
+		free(m_shader);
+	}
+
+	PhysicsController::PhysicsController() 	
+		: m_camera(nullptr),
+		m_shader(nullptr)
+	{
+		setupCurrentInstance();
+	}
+
+
+
+
+
 }
-
-void PhysicsController::Run(){
-	glutMainLoop();
-}
-
-void PhysicsController::Draw()
-{
-
-}
-
-
-
-void PhysicsController::setupCurrentInstance(){
-	::g_CurrentInstance = this; 
-}
-
-PhysicsController::~PhysicsController()
-{
-	free(m_camera);
-	free(m_shader);
-}
-
-PhysicsController::PhysicsController() 	
-	: m_camera(nullptr),
-	  m_shader(nullptr)
-{
-	setupCurrentInstance();
-}
-
-
-
-
-
 
 #endif // PhysicsController_h__

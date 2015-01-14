@@ -2,10 +2,9 @@
 #include <math.h> 
 #include "PhysicsController.h"
  
+using namespace Controller;
 
-
-float rot_speed = 50.0f; // 50 radians per second
-int totalAnimationTime;
+float rot_speed = 50.0f; // 50 radians per second 
  
 int main(int argc, char* argv[])
 { 
