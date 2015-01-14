@@ -13,14 +13,18 @@ namespace Physics
 			class GLParticleRenderer : public IParticleRenderer
 			{
 			protected:
-				ParticleSystem *d_system{ nullptr };
+				ParticleSystem *d_system;
 
-				size_t d_buffer_position{ 0 };
-				size_t d_buffer_column{ 0 };
-				size_t d_vao{ 0 };
+				size_t d_buffer_position;
+				size_t d_buffer_column;
+				size_t d_vao;
 
 			public:
-				GLParticleRenderer() { }
+				GLParticleRenderer():
+					d_buffer_position(0),
+					d_buffer_column(0),
+					d_vao(0),
+					d_system(nullptr) { }
 				~GLParticleRenderer() { destroy(); }
 
 				void generate(ParticleSystem *sys, bool useQuads) override;
@@ -45,14 +49,14 @@ namespace Physics
 				glBufferData(GL_ARRAY_BUFFER, sizeof(float)* 4 * count, nullptr, GL_STREAM_DRAW);
 				glEnableVertexAttribArray(0);
 
-			/*	if (ogl_ext_ARB_vertex_attrib_binding)
+				/*	if (ogl_ext_ARB_vertex_attrib_binding)
 				{
-					glBindVertexBuffer(0, d_buffer_position, 0, sizeof(float)* 4);
-					glVertexAttribFormat(0, 4, GL_FLOAT, GL_FALSE, 0);
-					glVertexAttribBinding(0, 0);
+				glBindVertexBuffer(0, d_buffer_position, 0, sizeof(float)* 4);
+				glVertexAttribFormat(0, 4, GL_FLOAT, GL_FALSE, 0);
+				glVertexAttribBinding(0, 0);
 				}
 				else*/
-					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
+				glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
 
 
 				glGenBuffers(1, &d_buffer_column);
@@ -62,12 +66,12 @@ namespace Physics
 
 				/*if (ogl_ext_ARB_vertex_attrib_binding)
 				{
-					glBindVertexBuffer(1, d_buffer_column, 0, sizeof(float)* 4);
-					glVertexAttribFormat(1, 4, GL_FLOAT, GL_FALSE, 0);
-					glVertexAttribBinding(1, 1);
+				glBindVertexBuffer(1, d_buffer_column, 0, sizeof(float)* 4);
+				glVertexAttribFormat(1, 4, GL_FLOAT, GL_FALSE, 0);
+				glVertexAttribBinding(1, 1);
 				}
 				else*/
-					glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
+				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
 
 				glBindVertexArray(0);
 
@@ -86,7 +90,7 @@ namespace Physics
 				{
 					glDeleteBuffers(1, &d_buffer_column);
 					d_buffer_column = 0;
-				}
+				} 
 			}
 
 			void GLParticleRenderer::update()
@@ -98,7 +102,7 @@ namespace Physics
 				if (count > 0)
 				{
 					glBindBuffer(GL_ARRAY_BUFFER, d_buffer_position);
-					float *ptr = (float *)(d_system->finalData()->m_pos.get());
+					float *ptr = (float *)(d_system->finalData()->m_position.get());
 					glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float)* 4, ptr);
 
 					glBindBuffer(GL_ARRAY_BUFFER, d_buffer_column);

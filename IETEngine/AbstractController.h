@@ -26,16 +26,19 @@ namespace Controller
 
 		virtual void Draw() = 0;
 	protected:
-		double d_delta_time; 
-		double d_old_time_since_start;
-		double d_global_clock;
-		bool   d_pause;
+		double				d_delta_time; 
+		double				d_old_time_since_start;
+		double				d_global_clock;
+		double				d_time_at_reset;
+		bool				d_pause;
+		glm::mat4			d_projection_matrix;
+		glm::mat4 			d_view_matrix;
 
-
+	protected:
 		virtual void Init(int argc, char* argv[]) = 0;
 		virtual void Run() = 0;
 
-		inline float update_timer(double);
+		inline float update_timer( );
 	private:
 
 	};
@@ -44,18 +47,19 @@ namespace Controller
 		d_delta_time(0.0),
 		d_old_time_since_start(0.0),
 		d_global_clock(0.0),
+		d_time_at_reset(0.0),
 		d_pause(false)
 	{
 
 	}
 
-	inline float AbstractController::update_timer(double time_at_reset)
+	inline float AbstractController::update_timer( )
 	{
-		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - time_at_reset;
+		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
 		d_delta_time = time_since_start - d_old_time_since_start;
 
 		if (d_pause)
-			time_at_reset+=d_delta_time;
+			d_time_at_reset+=d_delta_time;
 		else
 		{	
 			d_old_time_since_start = time_since_start;

@@ -10,6 +10,8 @@ namespace Physics
 {
 	namespace Particles
 	{
+		using namespace Generator;
+
 		class ParticleEmitter
 		{
 		protected:

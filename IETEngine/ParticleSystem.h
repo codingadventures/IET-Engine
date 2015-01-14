@@ -11,6 +11,8 @@ namespace Physics
 {
 	namespace Particles
 	{
+		using namespace Updater;
+		
 		class ParticleSystem
 		{
 		protected:
