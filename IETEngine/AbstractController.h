@@ -38,7 +38,7 @@ namespace Controller
 		virtual void Init(int argc, char* argv[]) = 0;
 		virtual void Run() = 0;
 
-		inline float update_timer( );
+		inline void update_timer( );
 	private:
 
 	};
@@ -53,13 +53,13 @@ namespace Controller
 
 	}
 
-	inline float AbstractController::update_timer( )
+	inline void AbstractController::update_timer( )
 	{
 		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
 		d_delta_time = time_since_start - d_old_time_since_start;
 
 		if (d_pause)
-			d_time_at_reset+=d_delta_time;
+			d_time_at_reset+=d_delta_time; // this increments the initial load time
 		else
 		{	
 			d_old_time_since_start = time_since_start;

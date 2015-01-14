@@ -1,8 +1,10 @@
 // vertex shader
 #version 330
  
-uniform mat4x4 matModelview;
-uniform mat4x4 matProjection;
+uniform mat4 view;
+uniform mat4 projection;
+uniform mat4 model; 
+
  
 layout(location = 0) in vec4 vVertex;
 layout(location = 1) in vec4 vColor;
@@ -11,8 +13,8 @@ out vec4 outColor;
  
 void main() 
 {
-    vec4 eyePos = matModelview * gl_Vertex;
-    gl_Position = matProjection * eyePos;
+    vec4 eyePos = view * vVertex;
+    gl_Position = projection * eyePos;
  
 	outColor = vColor;
 	

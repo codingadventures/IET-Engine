@@ -5,6 +5,7 @@
 #include "Point.h" 
 #include "GLParticleRenderer.h"
 #include "ParticleSystem.h"
+#include "BoxGenerator.h"
 
 namespace Controller
 {
@@ -25,7 +26,9 @@ namespace Controller
 		Camera* d_camera;
 		Shader* d_shader;
 		GLParticleRenderer* d_particle_renderer;
-		ParticleSystem* d_particle_system;
+		ParticleSystem* d_particle_system; 
+		std::shared_ptr<BoxGenerator> d_box_generator;
+		std::shared_ptr<ParticleEmitter> d_particle_emitter;
 	};
 
  
@@ -45,7 +48,13 @@ namespace Controller
 		this->d_camera = new Camera(glm::vec3(0.0f,10.0f,0.0f));
 		this->d_particle_renderer = new GLParticleRenderer();
 		this->d_particle_system = new ParticleSystem(1000);
-		d_particle_system->
+		
+		d_box_generator = std::make_shared<BoxGenerator>();
+		d_particle_emitter = std::make_shared<ParticleEmitter>();
+		d_particle_emitter->m_emit_rate = 100;
+		d_particle_emitter->addGenerator(d_box_generator);
+		d_particle_system->addEmitter(d_particle_emitter);
+
 		d_particle_renderer->generate(d_particle_system, false);
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
@@ -90,8 +99,12 @@ namespace Controller
 		d_view_matrix = d_camera->GetViewMatrix();
 
 		d_shader->Use();
+		
+		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
 
 		d_particle_renderer->render();
+
+		d_particle_system->update(d_delta_time);
 
 		d_particle_renderer->update();
 
@@ -108,7 +121,7 @@ namespace Controller
 		free(d_camera);
 		free(d_shader);
 		free(d_particle_renderer);
-		free(d_particle_system);
+		free(d_particle_system); 
 	}
 
 	PhysicsController::PhysicsController() 	

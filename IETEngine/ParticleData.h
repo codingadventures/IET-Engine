@@ -27,8 +27,8 @@ namespace Physics
 			explicit ParticleData(size_t max_count);
 			~ParticleData() { }
 
-			ParticleData(const ParticleData &) = delete;
-			ParticleData &operator=(const ParticleData &) = delete;
+			/*ParticleData(const ParticleData &) = delete;
+			ParticleData &operator=(const ParticleData &) = delete;*/
 
 			void generate(size_t max_size);
 			void kill(size_t id);
