@@ -99,6 +99,7 @@
     <ClInclude Include="EulerUpdater.h" />
     <ClInclude Include="GLParticleRenderer.h" />
     <ClInclude Include="IParticleRenderer.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleData.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleGenerator.h" />

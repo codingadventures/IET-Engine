@@ -45,8 +45,6 @@ namespace Physics
 			void addUpdater(std::shared_ptr<ParticleUpdater> updater) { d_updaters.push_back(updater); }
 
 			ParticleData *finalData() { return d_particles; }
-
-			static size_t computeMemoryUsage(const ParticleSystem &p);
 		};
 
 		ParticleSystem::ParticleSystem(size_t max_count)
@@ -72,10 +70,10 @@ namespace Physics
 				d_particles->m_acceleration[i] = glm::vec4(0.0f);
 			}
 
-			for (auto & up : d_updaters)
+			/*	for (auto & up : d_updaters)
 			{
-				up->update(delta_time, d_particles);
-			}
+			up->update(delta_time, d_particles);
+			}*/
 
 			//ParticleData::copyOnlyAlive(&m_particles, &m_aliveParticles);
 		}

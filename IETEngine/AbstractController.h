@@ -27,6 +27,7 @@ namespace Controller
 		virtual void Draw() = 0;
 	protected:
 		double				d_delta_time; 
+		double				d_delta_time_secs;
 		double				d_old_time_since_start;
 		double				d_global_clock;
 		double				d_time_at_reset;
@@ -47,6 +48,7 @@ namespace Controller
 		d_delta_time(0.0),
 		d_old_time_since_start(0.0),
 		d_global_clock(0.0),
+		d_delta_time_secs(0.0),
 		d_time_at_reset(0.0),
 		d_pause(false)
 	{
@@ -57,13 +59,13 @@ namespace Controller
 	{
 		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
 		d_delta_time = time_since_start - d_old_time_since_start;
-
+		d_delta_time_secs = d_delta_time / 1000.0f;
 		if (d_pause)
 			d_time_at_reset+=d_delta_time; // this increments the initial load time
 		else
 		{	
 			d_old_time_since_start = time_since_start;
-			d_global_clock += d_delta_time / 1000.0f;
+			d_global_clock += d_delta_time_secs;
 		}
 	}
 

@@ -17,8 +17,8 @@ namespace Physics
 				glm::vec4 m_position;
 				glm::vec4 m_max_start_pos_offset;
 			public:
-				BoxGenerator() :
-					m_position(0.0),
+				BoxGenerator(glm::vec4 initial_position) :
+					m_position(initial_position),
 					m_max_start_pos_offset(0.0)
 				{ }
 

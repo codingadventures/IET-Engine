@@ -233,6 +233,9 @@
     <ClInclude Include="GLParticleRenderer.h">
       <Filter>Header Files\Physics\Particles\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">

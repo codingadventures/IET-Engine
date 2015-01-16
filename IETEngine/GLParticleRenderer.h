@@ -106,7 +106,7 @@ namespace Physics
 					glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float)* 4, ptr);
 
 					glBindBuffer(GL_ARRAY_BUFFER, d_buffer_column);
-					ptr = (float*)(d_system->finalData()->m_col.get());
+					ptr = (float*)(d_system->finalData()->m_color.get());
 					glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float)* 4, ptr);
 
 					glBindBuffer(GL_ARRAY_BUFFER, 0);

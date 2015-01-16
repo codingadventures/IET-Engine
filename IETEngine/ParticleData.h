@@ -13,9 +13,9 @@ namespace Physics
 		{
 		public:
 			std::unique_ptr<glm::vec4[]> m_position;
-			std::unique_ptr<glm::vec4[]> m_col;
-			std::unique_ptr<glm::vec4[]> m_startCol;
-			std::unique_ptr<glm::vec4[]> m_endCol;
+			std::unique_ptr<glm::vec4[]> m_color;
+			std::unique_ptr<glm::vec4[]> m_start_color;
+			std::unique_ptr<glm::vec4[]> m_end_color;
 			std::unique_ptr<glm::vec4[]> m_velocity;
 			std::unique_ptr<glm::vec4[]> m_acceleration;
 			std::unique_ptr<glm::vec4[]> m_time;
@@ -49,9 +49,9 @@ namespace Physics
 			m_count_alive = 0;
 
 			m_position.reset(new glm::vec4[maxSize]);
-			m_col.reset(new glm::vec4[maxSize]);
-			m_startCol.reset(new glm::vec4[maxSize]);
-			m_endCol.reset(new glm::vec4[maxSize]);
+			m_color.reset(new glm::vec4[maxSize]);
+			m_start_color.reset(new glm::vec4[maxSize]);
+			m_end_color.reset(new glm::vec4[maxSize]);
 			m_velocity.reset(new glm::vec4[maxSize]);
 			m_acceleration.reset(new glm::vec4[maxSize]);
 			m_time.reset(new glm::vec4[maxSize]);
@@ -81,9 +81,9 @@ namespace Physics
 		void ParticleData::swapData(size_t a, size_t b)
 		{
 			std::swap(m_position[a], m_position[b]);
-			std::swap(m_col[a], m_col[b]);
-			std::swap(m_startCol[a], m_startCol[b]);
-			std::swap(m_endCol[a], m_endCol[b]);
+			std::swap(m_color[a], m_color[b]);
+			std::swap(m_start_color[a], m_start_color[b]);
+			std::swap(m_end_color[a], m_end_color[b]);
 			std::swap(m_velocity[a], m_velocity[b]);
 			std::swap(m_acceleration[a], m_acceleration[b]);
 			std::swap(m_time[a], m_time[b]);
