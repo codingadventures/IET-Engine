@@ -236,6 +236,9 @@
     <ClInclude Include="Particle.h">
       <Filter>Header Files\Physics\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleSystem2.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">

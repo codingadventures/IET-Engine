@@ -8,6 +8,7 @@
 #include "BoxGenerator.h"
 #include "EulerUpdater.h"
 #include "Line.h"
+#include "ParticleSystem2.h"
 
 namespace Controller
 {
@@ -22,6 +23,7 @@ namespace Controller
 		void Init(int argc, char* argv[]);
 		void Draw();
 		void Run();
+		void ReadInput();
 		~PhysicsController();
 		PhysicsController();
 	private:
@@ -29,6 +31,7 @@ namespace Controller
 		Shader* d_shader;
 		GLParticleRenderer* d_particle_renderer;
 		ParticleSystem* d_particle_system; 
+		ParticleSystem2* d_particle_system2; 
 		std::shared_ptr<BoxGenerator> d_box_generator;
 		std::shared_ptr<ParticleEmitter> d_particle_emitter;
 		std::shared_ptr<EulerUpdater> d_particle_updater;
@@ -51,7 +54,8 @@ namespace Controller
 		this->d_camera = new Camera(glm::vec3(0.0f,0.0f,4.0f));
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 2.0f;
-		this->d_particle_renderer = new GLParticleRenderer();
+		d_particle_system2 = new ParticleSystem2(1000);
+		/*this->d_particle_renderer = new GLParticleRenderer();
 		this->d_particle_system = new ParticleSystem(1000);
 		
 		d_box_generator = std::make_shared<BoxGenerator>(glm::vec4(0.0f,0.0f,0.0f,1.0f));
@@ -65,12 +69,12 @@ namespace Controller
 		d_particle_system->addUpdater(d_particle_updater);
 		d_particle_system->addEmitter(d_particle_emitter);
 
-		d_particle_renderer->generate(d_particle_system, false);
+		d_particle_renderer->generate(d_particle_system, false);*/
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,d_camera, _1, _2);
 		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,d_camera,_1);
-
+		UserKeyboardCallback = std::bind(&PhysicsController::ReadInput,this); 
 
 		glutKeyboardFunc(Callbacks::keyboardCallback);
 		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
@@ -113,26 +117,22 @@ namespace Controller
 		d_shader->Use();
 		
 		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
-		Vertex vertex;
-		vertex.Position = glm::vec3(0.5f,0.5f,0.5f);
-		vertex.Color = glm::vec3(1.0f,1.0f,1.0f);
 
-		Vertex vertex1;
-		vertex1.Position = glm::vec3(1.0f,1.0f,1.0f);
-		vertex.Color = glm::vec3(1.0f,1.0f,1.0f);
+		d_particle_system2->Update(d_delta_time_secs);
 
-	/*	Point p(vertex);
-		Point p2(vertex1);
-		Line(vertex,vertex1).Draw();
+		vector<Vertex> vertices;
+		d_particle_system2->GetVertices(vertices);
+
+		Point p(vertices);
 
 		p.Draw();
-		p2.Draw();*/
+	 /*
 		d_particle_renderer->update();
 		
 		d_particle_system->update(d_delta_time_secs);
 
 		d_particle_renderer->render();
-
+*/
 
 
 		glutSwapBuffers();
@@ -159,7 +159,8 @@ namespace Controller
 	}
 
 
-
+	void 	PhysicsController::ReadInput()
+	{}
 
 
 }

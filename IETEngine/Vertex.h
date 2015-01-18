@@ -15,6 +15,6 @@ struct Vertex {
 	//BoneData
 	VertexWeight WeightData;
 	//Color
-	glm::vec3 Color;
+	glm::vec4 Color;
 };
 

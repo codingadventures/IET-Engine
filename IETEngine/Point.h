@@ -14,9 +14,8 @@ public:
 	}
 
 	Point(vector<Vertex> &positions) { 
-		for (auto vertex : positions)
-			vertices.push_back(vertex); 
-
+		if(positions.size()==0) return;
+		vertices = positions;
 		Init();
 	}
 
@@ -37,7 +36,7 @@ public:
 		// Load data into vertex buffers
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW);  
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STREAM_DRAW);  
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -46,7 +45,7 @@ public:
 
 
 		glEnableVertexAttribArray(1);	
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
 	}
 
 	void Update()
