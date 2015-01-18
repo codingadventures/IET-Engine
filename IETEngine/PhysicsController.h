@@ -29,15 +29,19 @@ namespace Controller
 	private:
 		Camera* d_camera;
 		Shader* d_shader;
+
+//		Model* d_plane_model;
+
 		GLParticleRenderer* d_particle_renderer;
 		ParticleSystem* d_particle_system; 
 		ParticleSystem2* d_particle_system2; 
+
 		std::shared_ptr<BoxGenerator> d_box_generator;
 		std::shared_ptr<ParticleEmitter> d_particle_emitter;
 		std::shared_ptr<EulerUpdater> d_particle_updater;
 	};
 
- 
+
 	void PhysicsController::Init(int argc, char* argv[])
 	{
 		glutInit(&argc, argv);
@@ -51,13 +55,13 @@ namespace Controller
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
-		this->d_camera = new Camera(glm::vec3(0.0f,0.0f,4.0f));
+		this->d_camera = new Camera(glm::vec3(0.0f,20.0f,4.0f));
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 2.0f;
-		d_particle_system2 = new ParticleSystem2(1000);
+		d_camera->MovementSpeed = 1.0f;
+		d_particle_system2 = new ParticleSystem2(10000);
 		/*this->d_particle_renderer = new GLParticleRenderer();
 		this->d_particle_system = new ParticleSystem(1000);
-		
+
 		d_box_generator = std::make_shared<BoxGenerator>(glm::vec4(0.0f,0.0f,0.0f,1.0f));
 		d_particle_emitter = std::make_shared<ParticleEmitter>();
 		d_particle_emitter->m_emit_rate = 100;
@@ -90,9 +94,9 @@ namespace Controller
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-		//glEnable(GL_BLEND);
-		
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glEnable(GL_BLEND);
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -109,13 +113,13 @@ namespace Controller
 		update_timer(); 
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
-		
+
 		d_camera->MoveCamera();
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
 		d_shader->Use();
-		
+
 		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
 
 		d_particle_system2->Update(d_delta_time_secs);
@@ -126,19 +130,19 @@ namespace Controller
 		Point p(vertices);
 
 		p.Draw();
-	 /*
+		/*
 		d_particle_renderer->update();
-		
+
 		d_particle_system->update(d_delta_time_secs);
 
 		d_particle_renderer->render();
-*/
+		*/
 
 
 		glutSwapBuffers();
 	}
 
-	 
+
 	void PhysicsController::setupCurrentInstance(){
 		Controller::g_CurrentInstance = this; 
 	}

@@ -13,6 +13,9 @@ using namespace std;
 #define	 ELASTICITY				0.5f
 #define	 EMIT_PERCENTAGE		0.25f
 
+#define  AIR_DENSITY			1.225f
+#define  DRAG_COEFFICIENT		0.47f		//For Spheres
+
 class ParticleSystem2
 {
 
@@ -23,6 +26,8 @@ private:
 	size_t d_max_count;
 	size_t d_count_alive;
 	float d_emit_rate;
+	float d_wind_speed;
+	glm::vec3 d_wind;
 public:
 
 	ParticleSystem2(size_t max_count) : d_count_alive(0)
@@ -39,6 +44,9 @@ public:
 	}
 
 	void Update(float delta_time){
+		static float time = 0.0;
+
+		time += delta_time;
 
 		const size_t max_new_particles = static_cast<size_t>(delta_time*d_emit_rate);
 		const size_t start_id = d_count_alive;
@@ -49,6 +57,9 @@ public:
 		{ 
 
 			m_particles[i].is_alive = true;
+		/*	m_particles[i].vertex.Position.x = 4.5f*sin((float)time*2.5f);
+			m_particles[i].vertex.Position.z = 4.5f*cos((float)time*2.5f);
+*/
 			std::swap(m_particles[i],m_particles[d_count_alive]);
 			d_count_alive++;
 		}
@@ -59,8 +70,9 @@ public:
 
 			m_particles[i].vertex.Position = m_particles[i].vertex.Position + m_particles[i].velocity * delta_time;
 			m_particles[i].velocity.y -= GLOBAL_ACCELERATION * delta_time;
-			m_particles[i].life -= delta_time;
+			m_particles[i].velocity += WindDrag(m_particles[i],d_wind,d_wind_speed) * delta_time;
 
+			m_particles[i].life -= delta_time;
 
 
 			if(m_particles[i].vertex.Position.y < EPSILON)
@@ -70,6 +82,8 @@ public:
 				m_particles[i].vertex.Position.y += (ELASTICITY * delta_x);
 				m_particles[i].velocity.y = -ELASTICITY * m_particles[i].velocity.y;
 			}
+
+
 
 			if (m_particles[i].life < 0)
 			{
@@ -93,6 +107,8 @@ public:
 
 private:
 	void Init(){
+		d_wind = glm::linearRand(glm::vec3(-2.5f, -0.2f, -2.5f),glm::vec3(2.5f, 0.2, 2.5f));
+		d_wind_speed =  glm::linearRand(1.0f,2.0f);
 		for (int i = 0; i < d_max_count; i++)
 			Reset(i);
 
@@ -106,10 +122,21 @@ private:
 
 
 		m_particles[index].vertex.Color = glm::mix(min_start_color,max_start_color, 0.0f);
-		m_particles[index].velocity = glm::linearRand(glm::vec3(-0.5f, 0.22f, -0.5f),glm::vec3(0.5f, 5.55f, 0.5f));
+		m_particles[index].velocity = glm::linearRand(glm::vec3(-5.5f, 0.22f, -5.5f),glm::vec3(5.5f, 25.55f, 5.5f));
 		m_particles[index].life = PARTICLE_LIFE;
-
 	}
+
+	// This is the wind formula 0.5 * rho * A * Cd * v^2
+	glm::vec3 WindDrag(Particle particle, glm::vec3 wind, float wind_speed)
+	{
+		glm::vec3 wind_drag = particle.velocity - (wind*wind_speed);
+		float wind_drag_magnitude = glm::length(wind_drag);
+		float pi = glm::pi<float>();
+
+		return -0.5f * AIR_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * (wind_drag_magnitude * wind_drag);
+
+	} //try now...that is how it looked originally //looks fine apart from that...hmmm
+
 };
 
 

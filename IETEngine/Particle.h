@@ -9,12 +9,12 @@ namespace Physics
 	{
 		struct Particle
 		{
-//			static const float M = 1;
 			Vertex vertex;
 			glm::vec3 velocity;
 			glm::vec3 acceleration;
 			glm::vec3 f; 
 			float life;
+			float m;
 			bool is_alive;
 		};
 
