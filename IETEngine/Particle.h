@@ -13,6 +13,8 @@ namespace Physics
 			glm::vec3 velocity;
 			glm::vec3 acceleration;
 			glm::vec3 f; 
+			glm::vec4 min_start_color;
+			glm::vec4 max_start_color;
 			float life;
 			float m;
 			bool is_alive;
