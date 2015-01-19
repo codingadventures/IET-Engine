@@ -18,7 +18,7 @@ using namespace std;
 #define  DRAG_COEFFICIENT		0.47f		//For Spheres
 #define  WIND_LIFE				8.0f 
 #define  AIR_DRAG_ENABLED		false
- 
+
 class ParticleSystem2
 {
 
@@ -27,6 +27,8 @@ public:
 	bool d_wind_enabled;
 	bool d_spinning_enabled;
 	bool d_waterfall_enabled;
+	bool d_euler_enabled;
+
 private: 
 	size_t d_max_count;
 	size_t d_count_alive;
@@ -36,7 +38,12 @@ private:
 	glm::vec3 d_wind;
 public:
 
-	ParticleSystem2(size_t max_count) : d_count_alive(0)
+	ParticleSystem2(size_t max_count) : 
+		d_count_alive(0),
+		d_waterfall_enabled(false),
+		d_spinning_enabled(false),
+		d_wind_enabled(false),
+		d_euler_enabled(true)
 	{
 		d_max_count = max_count;
 		d_wind_life = WIND_LIFE;
@@ -85,8 +92,10 @@ public:
 		{
 			if (!m_particles[i].is_alive) continue;
 
-			//Euler_Integration(m_particles[i],delta_time) ;
-			Runge_Kutta_4(	m_particles[i], delta_time);
+			if (d_euler_enabled)
+				Euler_Integration(m_particles[i],delta_time) ;
+			else
+				Runge_Kutta_4(	m_particles[i], delta_time);
 
 
 			m_particles[i].life -= delta_time;
@@ -123,8 +132,8 @@ private:
 	void Euler_Integration(Particle& p, float delta_time)
 	{ 
 		p.vertex.Position += p.velocity * delta_time; 
-		p.velocity += p.acceleration * delta_time; 
-		p.acceleration  = GLOBAL_ACCELERATION + CalculateDrags(p.velocity);
+		p.velocity += p.acceleration * delta_time + CalculateDrags(p.velocity)* delta_time; 
+		p.acceleration  = GLOBAL_ACCELERATION ;
 	}
 
 	void Runge_Kutta_4(Particle& p, float delta_time) {
@@ -152,7 +161,7 @@ private:
 	inline void Reset(size_t index)
 	{
 		m_particles[index].is_alive = false;
-		m_particles[index].vertex.Position = d_waterfall_enabled? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
+		m_particles[index].vertex.Position = d_waterfall_enabled ? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
 		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
@@ -175,7 +184,7 @@ private:
 
 	void ChangeWind()
 	{
-		d_wind = glm::linearRand(glm::vec3(-2.5f, 0.0f, -2.5f),glm::vec3(2.5f,  0.0f, 2.5f));
+		d_wind = glm::linearRand(glm::vec3(-2.5f, -3.0f, -2.5f),glm::vec3(2.5f,  7.0f, 2.5f));
 		d_wind_speed =  glm::linearRand(1.0f,2.0f);
 	}
 
@@ -209,19 +218,41 @@ private:
 		{
 			if(p.vertex.Position.y < 5 + EPSILON)
 			{
-				float delta_x = 5 + EPSILON - p.vertex.Position.y;
+				/*float delta_x = 5 + EPSILON - p.vertex.Position.y;
 
 				p.vertex.Position.y += (ELASTICITY * delta_x);
-				p.velocity.y = -ELASTICITY * p.velocity.y;
+				p.velocity.y = -ELASTICITY * p.velocity.y;*/
+
+				glm::vec3 force = p.acceleration;
+				float normalFactor = glm::dot(force, glm::vec3(0.0f, 1.0f, 0.0f));
+				if (normalFactor < 0.0f)
+					force -= glm::vec3(0.0f, 1.0f, 0.0f) * normalFactor;
+
+				float velFactor = glm::dot(p.velocity, glm::vec3(0.0f, 1.0f, 0.0f));
+				 
+				p.velocity -= glm::vec3(0.0f, 1.0f, 0.0f) * (1.0f + ELASTICITY) * velFactor;
+
+				p.acceleration = force;
+
 			}
 		}
 
 		if(p.vertex.Position.y < EPSILON)
 		{
-			float delta_x = EPSILON - p.vertex.Position.y;
+			/*float delta_x = EPSILON - p.vertex.Position.y;
 
 			p.vertex.Position.y += (ELASTICITY * delta_x);
-			p.velocity.y = -ELASTICITY * p.velocity.y;
+			p.velocity.y = -ELASTICITY * p.velocity.y;*/
+			glm::vec3 force = p.acceleration;
+			float normalFactor = glm::dot(force, glm::vec3(0.0f, 1.0f, 0.0f));
+			if (normalFactor < 0.0f)
+				force -= glm::vec3(0.0f, 1.0f, 0.0f) * normalFactor;
+
+			float velFactor = glm::dot(p.velocity, glm::vec3(0.0f, 1.0f, 0.0f));
+
+			p.velocity -= glm::vec3(0.0f, 1.0f, 0.0f) * (1.0f + ELASTICITY) * velFactor;
+
+			p.acceleration = force;
 		} 
 	}
 

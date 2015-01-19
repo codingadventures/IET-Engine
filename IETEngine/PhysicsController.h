@@ -45,6 +45,7 @@ namespace Controller
 		bool waterfall_on;
 		bool spinning_on;
 		bool wind_on;
+		bool euler_on;
 	};
 
 
@@ -127,6 +128,7 @@ namespace Controller
 		d_particle_system2->d_wind_enabled = wind_on;
 		d_particle_system2->d_spinning_enabled = spinning_on;
 		d_particle_system2->d_waterfall_enabled = waterfall_on;
+		d_particle_system2->d_euler_enabled = euler_on;
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 
@@ -193,6 +195,11 @@ namespace Controller
 		string wind_message = "3 - Enable/Disable Wind - STATUS: " + wind_status;
 		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
 
+		string integration_status = euler_on ? "Euler" : "Runge-Kutta 4";
+		string integration_message = "4 - Integration Method - STATUS: " + integration_status;
+		screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
+
+
 
 
 		/*	*/
@@ -219,6 +226,8 @@ namespace Controller
 		if (g_keyMappings[KEY_3])
 			wind_on = !wind_on;
 
+		if (g_keyMappings[KEY_4])
+			euler_on = !euler_on;
 	}
 
 
