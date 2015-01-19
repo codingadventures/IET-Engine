@@ -27,10 +27,13 @@ namespace Controller
 		~PhysicsController();
 		PhysicsController();
 	private:
+		void TextToScreen();
+	private:
 		Camera* d_camera;
 		Shader* d_shader;
+		Shader* d_shader_no_texture;
 
-//		Model* d_plane_model;
+		//		Model* d_plane_model;
 
 		GLParticleRenderer* d_particle_renderer;
 		ParticleSystem* d_particle_system; 
@@ -39,6 +42,9 @@ namespace Controller
 		std::shared_ptr<BoxGenerator> d_box_generator;
 		std::shared_ptr<ParticleEmitter> d_particle_emitter;
 		std::shared_ptr<EulerUpdater> d_particle_updater;
+		bool waterfall_on;
+		bool spinning_on;
+		bool wind_on;
 	};
 
 
@@ -52,6 +58,9 @@ namespace Controller
 		glewExperimental = GL_TRUE;
 		glewInit();
 
+
+		glutKeyboardFunc(Callbacks::keyboardCallback);
+		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
@@ -92,6 +101,8 @@ namespace Controller
 		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
 
 		d_shader = new Shader("particle.vert","particle.frag"); 
+		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
+
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE); 
@@ -113,6 +124,10 @@ namespace Controller
 
 		update_timer(); 
 
+		d_particle_system2->d_wind_enabled = wind_on;
+		d_particle_system2->d_spinning_enabled = spinning_on;
+		d_particle_system2->d_waterfall_enabled = waterfall_on;
+
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 
 		d_camera->MoveCamera();
@@ -131,7 +146,12 @@ namespace Controller
 		Point p(vertices);
 
 		p.Draw();
-	  
+
+		d_shader_no_texture->Use();
+
+		TextToScreen();
+
+
 		glutSwapBuffers();
 	}
 
@@ -150,14 +170,56 @@ namespace Controller
 
 	PhysicsController::PhysicsController() 	
 		: d_camera(nullptr),
-		d_shader(nullptr)
+		d_shader(nullptr),
+		spinning_on(false),
+		waterfall_on(false),
+		wind_on(false)
 	{
 		setupCurrentInstance();
 	}
 
+	void PhysicsController::TextToScreen()
+	{ 
+		 
+		string waterfall_status = waterfall_on ? "ON" : "OFF";
+		string waterfall_message = ("1 - Enable/Disable Waterfall - STATUS: " + waterfall_status );
+		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) waterfall_message.c_str());
 
-	void 	PhysicsController::ReadInput()
-	{}
+		string spinning_status = spinning_on ? "ON" : "OFF";
+		string spinning_message = "2 - Enable/Disable Spinning - STATUS: " + spinning_status;
+		screen_output(10, VIEWPORT_HEIGHT - 70, (char*) spinning_message.c_str());
+
+		string wind_status = wind_on ? "ON" : "OFF";
+		string wind_message = "3 - Enable/Disable Wind - STATUS: " + wind_status;
+		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
+
+
+
+		/*	*/
+		string controls = "Player/Camera W,A,S,D";
+		screen_output(10, 20, (char*) controls.c_str());
+
+
+
+
+		/*char loadTime[100];
+		sprintf_s(loadTime,"Load Time: %f",timeAtReset);
+		screen_output(600.0f,VIEWPORT_HEIGHT - 190 ,loadTime);
+		*/
+
+
+	}
+
+	void PhysicsController::ReadInput()
+	{
+		if (g_keyMappings[KEY_1])
+			waterfall_on = !waterfall_on;
+		if (g_keyMappings[KEY_2])
+			spinning_on = !spinning_on;
+		if (g_keyMappings[KEY_3])
+			wind_on = !wind_on;
+
+	}
 
 
 }

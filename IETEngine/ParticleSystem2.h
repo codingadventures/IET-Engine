@@ -16,17 +16,17 @@ using namespace std;
 #define  AIR_DENSITY			1.225f
 #define  WATER_DENSITY			1.000f
 #define  DRAG_COEFFICIENT		0.47f		//For Spheres
-#define  WIND_LIFE				8.0f
-#define  WIND_ENABLED			false
+#define  WIND_LIFE				8.0f 
 #define  AIR_DRAG_ENABLED		false
-#define  WATERFALL				false
-#define  SPINNING				false
+ 
 class ParticleSystem2
 {
 
 public:
 	Particle* m_particles;
-
+	bool d_wind_enabled;
+	bool d_spinning_enabled;
+	bool d_waterfall_enabled;
 private: 
 	size_t d_max_count;
 	size_t d_count_alive;
@@ -71,7 +71,7 @@ public:
 		for (int i = start_id; i < end_id; i++)
 		{ 
 			m_particles[i].is_alive = true;
-			if (SPINNING)
+			if (d_spinning_enabled)
 			{
 				m_particles[i].vertex.Position.x = 4.5f*sin((float)time*2.5f);
 				m_particles[i].vertex.Position.z = 4.5f*cos((float)time*2.5f); 
@@ -115,7 +115,7 @@ public:
 	}
 
 private:
-	void Init(){
+	void Init(){ 
 		for (int i = 0; i < d_max_count; i++)
 			Reset(i);
 	}
@@ -152,12 +152,12 @@ private:
 	inline void Reset(size_t index)
 	{
 		m_particles[index].is_alive = false;
-		m_particles[index].vertex.Position = WATERFALL? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
+		m_particles[index].vertex.Position = d_waterfall_enabled? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
 		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
 		float spread = 2.5f;
-		glm::vec3 maindir = WATERFALL? glm::vec3(10.0f, 0.0f, 0.0f):glm::vec3(0.0f, 10.0f, 0.0f); 
+		glm::vec3 maindir = d_waterfall_enabled? glm::vec3(10.0f, 0.0f, 0.0f):glm::vec3(0.0f, 10.0f, 0.0f); 
 
 		glm::vec3 randomdir = glm::vec3(
 			(rand()%2000 - 1000.0f)/1000.0f,
@@ -181,8 +181,8 @@ private:
 
 	glm::vec3 CalculateDrags(glm::vec3 particle_velocity)
 	{
-		glm::vec3 wind = WIND_ENABLED ? WindDrag(particle_velocity) : glm::vec3(0,0,0);
-		glm::vec3 air_drag =AIR_DRAG_ENABLED ? WaterDrag(particle_velocity): glm::vec3(0,0,0);;
+		glm::vec3 wind = d_wind_enabled ? WindDrag(particle_velocity) : glm::vec3(0,0,0);
+		glm::vec3 air_drag = AIR_DRAG_ENABLED ? WaterDrag(particle_velocity): glm::vec3(0,0,0);;
 		return wind + air_drag;
 	}
 
@@ -205,7 +205,7 @@ private:
 
 	void CollisionDetection(Particle& p)
 	{
-		if (p.vertex.Position.x > 5 && p.vertex.Position.x < 20 && WATERFALL)
+		if (p.vertex.Position.x > 5 && p.vertex.Position.x < 20 && d_waterfall_enabled)
 		{
 			if(p.vertex.Position.y < 5 + EPSILON)
 			{
