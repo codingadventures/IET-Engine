@@ -10,7 +10,7 @@ using namespace std;
 #define  GLOBAL_ACCELERATION	glm::vec3(0.0f,-9.8f,0.0f)
 #define	 PARTICLE_LIFE			6.0f
 #define  EPSILON				0.01f
-#define	 ELASTICITY				0.5f
+#define	 ELASTICITY				0.2f
 #define	 EMIT_PERCENTAGE		0.45f
 
 #define  AIR_DENSITY			1.225f
@@ -161,7 +161,7 @@ private:
 	inline void Reset(size_t index)
 	{
 		m_particles[index].is_alive = false;
-		m_particles[index].vertex.Position = d_waterfall_enabled ? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
+		m_particles[index].vertex.Position = d_waterfall_enabled ? glm::vec3(-20.0f,20.0f,-0.0f):glm::vec3(0.0f,0.0f,0.0f); 
 		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
@@ -214,7 +214,7 @@ private:
 
 	void CollisionDetection(Particle& p)
 	{
-		if (p.vertex.Position.x > 5 && p.vertex.Position.x < 20 && d_waterfall_enabled)
+		if (p.vertex.Position.x > -10 && p.vertex.Position.x < 10 && d_waterfall_enabled)
 		{
 			if(p.vertex.Position.y < 5 + EPSILON)
 			{
