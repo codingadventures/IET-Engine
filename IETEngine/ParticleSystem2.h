@@ -14,18 +14,24 @@ using namespace std;
 #define	 EMIT_PERCENTAGE		0.45f
 
 #define  AIR_DENSITY			1.225f
+#define  WATER_DENSITY			1.000f
 #define  DRAG_COEFFICIENT		0.47f		//For Spheres
-
+#define  WIND_LIFE				8.0f
+#define  WIND_ENABLED			false
+#define  AIR_DRAG_ENABLED		false
+#define  WATERFALL				false
+#define  SPINNING				false
 class ParticleSystem2
 {
 
 public:
 	Particle* m_particles;
 
-private:
+private: 
 	size_t d_max_count;
 	size_t d_count_alive;
 	float d_emit_rate;
+	float d_wind_life;
 	float d_wind_speed;
 	glm::vec3 d_wind;
 public:
@@ -33,9 +39,12 @@ public:
 	ParticleSystem2(size_t max_count) : d_count_alive(0)
 	{
 		d_max_count = max_count;
+		d_wind_life = WIND_LIFE;
+
 		d_emit_rate = d_max_count * EMIT_PERCENTAGE;
 		m_particles = new Particle[max_count];
 		Init();
+		ChangeWind();
 	}
 
 	~ParticleSystem2()
@@ -47,7 +56,13 @@ public:
 		static float time = 0.0;
 
 		time += delta_time;
+		d_wind_life -= delta_time;
 
+		if (d_wind_life < 0)
+		{
+			ChangeWind();
+			d_wind_life = WIND_LIFE;
+		}
 		const size_t max_new_particles = static_cast<size_t>(delta_time*d_emit_rate);
 		const size_t start_id = d_count_alive;
 		const size_t end_id = std::min(start_id + max_new_particles, d_max_count-1);
@@ -55,10 +70,12 @@ public:
 		//Euler Update
 		for (int i = start_id; i < end_id; i++)
 		{ 
-
 			m_particles[i].is_alive = true;
-			m_particles[i].vertex.Position.x = 4.5f*sin((float)time*2.5f);
-			m_particles[i].vertex.Position.z = 4.5f*cos((float)time*2.5f);
+			if (SPINNING)
+			{
+				m_particles[i].vertex.Position.x = 4.5f*sin((float)time*2.5f);
+				m_particles[i].vertex.Position.z = 4.5f*cos((float)time*2.5f); 
+			}
 
 			std::swap(m_particles[i],m_particles[d_count_alive]);
 			d_count_alive++;
@@ -68,32 +85,14 @@ public:
 		{
 			if (!m_particles[i].is_alive) continue;
 
-			//m_particles[i].vertex.Position  =		Euler_Integration(m_particles[i],delta_time);
-			m_particles[i].acceleration =  GLOBAL_ACCELERATION + WindDrag(m_particles[i]);
-
-			//where does acceleration get applied to velocity in the euler?
-			 //nope in the Runge_kutta
-
+			//Euler_Integration(m_particles[i],delta_time) ;
 			Runge_Kutta_4(	m_particles[i], delta_time);
-
-
-			//m_particles[i].velocity.y -= GLOBAL_ACCELERATION * delta_time;
-
 
 
 			m_particles[i].life -= delta_time;
 			m_particles[i].vertex.Color = glm::mix(m_particles[i].min_start_color,m_particles[i].max_start_color, 1.0f - m_particles[i].life / PARTICLE_LIFE);
 
-
-			if(m_particles[i].vertex.Position.y < EPSILON)
-			{
-				float delta_x = EPSILON - m_particles[i].vertex.Position.y;
-
-				m_particles[i].vertex.Position.y += (ELASTICITY * delta_x);
-				m_particles[i].velocity.y = -ELASTICITY * m_particles[i].velocity.y;
-			}
-
-
+			CollisionDetection(m_particles[i]);
 
 			if (m_particles[i].life < 0)
 			{
@@ -120,40 +119,14 @@ private:
 		for (int i = 0; i < d_max_count; i++)
 			Reset(i);
 	}
-	glm::vec3 Euler_Integration(Particle p, float delta_time)
+
+	void Euler_Integration(Particle& p, float delta_time)
 	{ 
-		return p.vertex.Position + p.velocity * delta_time; 
-
-		//i don't like the way euler integration is one line
-		// when integrating you should also be setting the velocity
-		// and calculating the acceleration by adding the forces
-
-		//i'm not sure what's wrong with yours tbh but you have it organised differently than
-		//me 
-		// well this euler is not in use atm, but I'll change it as you said. 
-		//there is another thing that I don't understand about the fnet function
-		// you pass position and velocity but then you just sum up gravity and drag
-		// do you use pos and vel at all?
-		// drag uses velocity
-		// position isn't used at all
-		// i've just seen that the function that calculates acceleration usually takes those in
-		// not sure why the position is considered
-		// gravity could have no parameters really
-		// it does need the particle mass though, but i just have that as a variable of the particle system now
-		// (i used to pass in environment and particle data to the functions that calculated the forces.
-		//the functions we use for gravity and drag work fine so just send whatever they need
-		// ok I see, I think I have a clearer idea now. thanks man :-)
-
-		//position += vel * timestep
-		// vel += acc * timestep
-		// acc = fnet(pos, vel) //this is the way i learned it anyways :) ok Pat, thanks for your help, I'll try to use Forces although I don't like them :D ahhahaha
-
-		//fnet(pos, vel)
-		//{
-			//return gravity + drag;
-
-		//}
+		p.vertex.Position += p.velocity * delta_time; 
+		p.velocity += p.acceleration * delta_time; 
+		p.acceleration  = GLOBAL_ACCELERATION + CalculateDrags(p.velocity);
 	}
+
 	void Runge_Kutta_4(Particle& p, float delta_time) {
 
 		glm::vec3 x1 = p.vertex.Position;
@@ -161,49 +134,100 @@ private:
 
 		glm::vec3 x2 = p.vertex.Position + 0.5f * v1 * delta_time;
 		glm::vec3 v2 = v1 + 0.5f * p.acceleration * delta_time; // there is 0.5
-	 
-		//i use fnet wherever you have p.acceleration
-		//i always use acceleration to determine velocity when integrating
-		// except for after the integration step (Collision)
-		// there i set velocity directly like he says in the notes
+		glm::vec3 a2 = GLOBAL_ACCELERATION + CalculateDrags(v2);   
 
-		glm::vec3 x3 = x1 + 0.5f* v2 * delta_time;
-		glm::vec3 v3 = v1 + 0.5f * p.acceleration * delta_time;
-	 
+		glm::vec3 x3 = x1 + 0.5f * v2 * delta_time;
+		glm::vec3 v3 = v1 + 0.5f * a2 * delta_time;
+		glm::vec3 a3 = GLOBAL_ACCELERATION + CalculateDrags(v3);   
+
 		glm::vec3 x4 = x1 + v3 * delta_time;
-		glm::vec3 v4 = v1 + p.acceleration * delta_time;
+		glm::vec3 v4 = v1 + a3 * delta_time;
+		glm::vec3 a4 = GLOBAL_ACCELERATION + CalculateDrags(v4);   
 
-		//it looks alright
-		//it does work well only with gravity. but when I apply wind it looks very wierd
-		
-	 
-		p.vertex.Position += (delta_time / 6) * (v1 + 2.0f * v2 + 2.0f * v3 + v4);
-		p.velocity		  += delta_time * p.acceleration;// + 2.0f * p.acceleration + 2.0f * p.acceleration + p.acceleration);
+		p.vertex.Position +=  (delta_time / 6) * (v1 + 2.0f * v2 + 2.0f * v3 + v4);
+		p.velocity		  +=  (delta_time / 6) * (p.acceleration + (2.0f * a2) + (2.0f * a3) + a4);
+		p.acceleration	  = GLOBAL_ACCELERATION + CalculateDrags(p.velocity); 
 	}
 
-	inline void Reset(size_t index){
+	inline void Reset(size_t index)
+	{
 		m_particles[index].is_alive = false;
-		m_particles[index].vertex = Vertex(); 
+		m_particles[index].vertex.Position = WATERFALL? glm::vec3(0.0f,10.0f,-10.0f):glm::vec3(0.0f,0.0f,0.0f); 
 		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
-		m_particles[index].velocity = glm::linearRand(glm::vec3(-5.5f, 0.22f, -5.5f),glm::vec3(5.5f, 25.55f, 5.5f));
+
+		float spread = 2.5f;
+		glm::vec3 maindir = WATERFALL? glm::vec3(10.0f, 0.0f, 0.0f):glm::vec3(0.0f, 10.0f, 0.0f); 
+
+		glm::vec3 randomdir = glm::vec3(
+			(rand()%2000 - 1000.0f)/1000.0f,
+			(rand()%2000 - 1000.0f)/1000.0f,
+			(rand()%2000 - 1000.0f)/1000.0f
+			);
+		//m_particles[index].velocity = glm::linearRand(glm::vec3(-5.5f, 0.22f, -5.5f),glm::vec3(5.5f, 25.55f, 5.5f));
 		m_particles[index].life = PARTICLE_LIFE;
-		d_wind = glm::linearRand(glm::vec3(-2.5f, 0.0f, -2.5f),glm::vec3(2.5f,  0.0f, 2.5f));
-		d_wind_speed =  glm::linearRand(1.0f,2.0f);
+		m_particles[index].velocity = maindir + randomdir * spread;
 		m_particles[index].acceleration = glm::vec3();
 		m_particles[index].m = 1.0f;
 	}
 
-	// This is the wind formula 0.5 * rho * A * Cd * v^2
-	glm::vec3 WindDrag(Particle particle)
+
+
+	void ChangeWind()
 	{
-		glm::vec3 wind_drag = particle.velocity - (d_wind*d_wind_speed);
+		d_wind = glm::linearRand(glm::vec3(-2.5f, 0.0f, -2.5f),glm::vec3(2.5f,  0.0f, 2.5f));
+		d_wind_speed =  glm::linearRand(1.0f,2.0f);
+	}
+
+	glm::vec3 CalculateDrags(glm::vec3 particle_velocity)
+	{
+		glm::vec3 wind = WIND_ENABLED ? WindDrag(particle_velocity) : glm::vec3(0,0,0);
+		glm::vec3 air_drag =AIR_DRAG_ENABLED ? WaterDrag(particle_velocity): glm::vec3(0,0,0);;
+		return wind + air_drag;
+	}
+
+	// This is the wind formula 0.5 * rho * A * Cd * v^2
+	glm::vec3 WindDrag(glm::vec3 particle_velocity)
+	{
+		glm::vec3 wind_drag =  particle_velocity - (d_wind*d_wind_speed);
 		float wind_drag_magnitude = glm::length(wind_drag);
 		float pi = glm::pi<float>();
 
 		return -0.5f * AIR_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * (wind_drag_magnitude * wind_drag);
-
 	}  
+	glm::vec3 WaterDrag(glm::vec3 particle_velocity)
+	{
+		float particle_velocity_magnitude = glm::length(particle_velocity);
+		float pi = glm::pi<float>();
+
+		return -0.5f * WATER_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * particle_velocity_magnitude * particle_velocity;
+	}
+
+	void CollisionDetection(Particle& p)
+	{
+		if (p.vertex.Position.x > 5 && p.vertex.Position.x < 20 && WATERFALL)
+		{
+			if(p.vertex.Position.y < 5 + EPSILON)
+			{
+				float delta_x = 5 + EPSILON - p.vertex.Position.y;
+
+				p.vertex.Position.y += (ELASTICITY * delta_x);
+				p.velocity.y = -ELASTICITY * p.velocity.y;
+			}
+		}
+
+		if(p.vertex.Position.y < EPSILON)
+		{
+			float delta_x = EPSILON - p.vertex.Position.y;
+
+			p.vertex.Position.y += (ELASTICITY * delta_x);
+			p.velocity.y = -ELASTICITY * p.velocity.y;
+		} 
+	}
+
+
+
+
 
 };
 

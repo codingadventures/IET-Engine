@@ -57,9 +57,9 @@ namespace Controller
 
 		this->d_camera = new Camera(glm::vec3(0.0f,20.0f,20.0f));
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 1.0f;
+		d_camera->MovementSpeed = 3.0f;
 		d_camera->SetTarget(glm::vec3(0,0,0));
-		d_particle_system2 = new ParticleSystem2(10000);
+		d_particle_system2 = new ParticleSystem2(5000);
 		/*this->d_particle_renderer = new GLParticleRenderer();
 		this->d_particle_system = new ParticleSystem(1000);
 
@@ -131,15 +131,7 @@ namespace Controller
 		Point p(vertices);
 
 		p.Draw();
-		/*
-		d_particle_renderer->update();
-
-		d_particle_system->update(d_delta_time_secs);
-
-		d_particle_renderer->render();
-		*/
-
-
+	  
 		glutSwapBuffers();
 	}
 
