@@ -8,5 +8,5 @@ out vec4 vFragColor;
  
 void main() 
 {
-	vFragColor = outColor; // texture(tex, gl_PointCoord) * outColor;
+	vFragColor =   outColor;
 }

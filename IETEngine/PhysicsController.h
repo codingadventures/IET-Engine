@@ -8,8 +8,9 @@
 #include "BoxGenerator.h"
 #include "EulerUpdater.h"
 #include "Line.h"
-#include "ParticleSystem2.h"
+#include "ParticleSystem2.h" 
 
+#include <Magick++.h>
 namespace Controller
 {
 
@@ -28,11 +29,14 @@ namespace Controller
 		PhysicsController();
 	private:
 		void TextToScreen();
+		void CalculateFps( );
 	private:
+		GLint TextureFromFile(const char* fileName, string directory);
 		Camera* d_camera;
 		Shader* d_shader;
 		Shader* d_shader_no_texture;
-
+		GLint d_textureId;
+		float d_fps;
 		//		Model* d_plane_model;
 
 		GLParticleRenderer* d_particle_renderer;
@@ -48,6 +52,56 @@ namespace Controller
 		bool euler_on;
 	};
 
+	void PhysicsController::CalculateFps( )
+	{
+		static unsigned int frame = 0;
+		static int timeBase = 0;
+
+		frame++;
+
+		int t = glutGet(GLUT_ELAPSED_TIME);
+		if (t - timeBase > 1000) 
+		{
+			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - timeBase));
+			timeBase = t;		
+			frame = 0;
+		}
+
+	}
+
+	GLint PhysicsController::TextureFromFile(const char* fileName, string directory)
+	{
+		Magick::Blob m_blob;
+		Magick::Image* m_pImage; 
+		string stringFileName(fileName);
+		string fullPath = directory + "\\" + stringFileName;
+		try {
+			m_pImage = new Magick::Image(fullPath.c_str());
+			m_pImage->write(&m_blob, "RGB");
+		}
+		catch (Magick::Error& Error) {
+			std::cout << "Error loading texture '" << fullPath << "': " << Error.what() << std::endl;
+			return false;
+		}
+
+		//Generate texture ID and load texture data 
+		//
+		//filename = directory + '/' + filename;
+		GLuint textureID;
+
+
+		//SOIL_load_OGL_texture(filename.c_str(),SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);;
+		glGenTextures(1, &textureID);
+		//int width,height,channels;
+		//unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, nullptr, 0);
+		// Assign texture to ID
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D,  0, GL_RGB, m_pImage->columns(), m_pImage->rows(), 0, GL_RGB, GL_UNSIGNED_BYTE, m_blob.data());
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		//	SOIL_free_image_data(image);
+		return textureID;
+	}
 
 	void PhysicsController::Init(int argc, char* argv[])
 	{
@@ -70,6 +124,9 @@ namespace Controller
 		d_camera->MovementSpeed = 3.0f;
 		d_camera->SetTarget(glm::vec3(0,0,0));
 		d_particle_system2 = new ParticleSystem2(5000);
+
+
+
 		/*this->d_particle_renderer = new GLParticleRenderer();
 		this->d_particle_system = new ParticleSystem(1000);
 
@@ -104,12 +161,13 @@ namespace Controller
 		d_shader = new Shader("particle.vert","particle.frag"); 
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
 
+		d_shader->Use();
+		d_textureId = TextureFromFile("particle.png","textures");
+		GLint i = glGetUniformLocation(d_shader->Program, "tex");
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_PROGRAM_POINT_SIZE); 
-		glEnable(GL_BLEND);
+		glUniform1i(i,0);
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -121,10 +179,14 @@ namespace Controller
 	void PhysicsController::Draw()
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_2D); 
+		glBindTexture(GL_TEXTURE_2D, d_textureId);
+		glEnable(GL_PROGRAM_POINT_SIZE); 
 
 		update_timer(); 
-
+		CalculateFps( );
 		d_particle_system2->d_wind_enabled = wind_on;
 		d_particle_system2->d_spinning_enabled = spinning_on;
 		d_particle_system2->d_waterfall_enabled = waterfall_on;
@@ -140,6 +202,8 @@ namespace Controller
 
 		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
 
+
+
 		d_particle_system2->Update(d_delta_time_secs);
 
 		vector<Vertex> vertices;
@@ -147,12 +211,18 @@ namespace Controller
 
 		Point p(vertices);
 
+		/**/
+		glEnable(GL_BLEND);
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 		p.Draw();
 
 		d_shader_no_texture->Use();
 
 		TextToScreen();
 
+		glDisable(GL_BLEND);
 
 		glutSwapBuffers();
 	}
@@ -175,14 +245,15 @@ namespace Controller
 		d_shader(nullptr),
 		spinning_on(false),
 		waterfall_on(false),
-		wind_on(false)
+		wind_on(false),
+		d_fps(0.0f)
 	{
 		setupCurrentInstance();
 	}
 
 	void PhysicsController::TextToScreen()
 	{ 
-		 
+
 		string waterfall_status = waterfall_on ? "ON" : "OFF";
 		string waterfall_message = ("1 - Enable/Disable Waterfall - STATUS: " + waterfall_status );
 		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) waterfall_message.c_str());
@@ -199,7 +270,10 @@ namespace Controller
 		string integration_message = "4 - Integration Method - STATUS: " + integration_status;
 		screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
 
-
+		char fps[100];
+		sprintf_s(fps,"FPS: %f",d_fps);
+		screen_output(VIEWPORT_WIDTH-200, VIEWPORT_HEIGHT - 50 ,fps);
+		 
 
 
 		/*	*/
@@ -209,9 +283,7 @@ namespace Controller
 
 
 
-		/*char loadTime[100];
-		sprintf_s(loadTime,"Load Time: %f",timeAtReset);
-		screen_output(600.0f,VIEWPORT_HEIGHT - 190 ,loadTime);
+		/*
 		*/
 
 

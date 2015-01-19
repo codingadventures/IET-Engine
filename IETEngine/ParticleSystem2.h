@@ -132,8 +132,8 @@ private:
 	void Euler_Integration(Particle& p, float delta_time)
 	{ 
 		p.vertex.Position += p.velocity * delta_time; 
-		p.velocity += p.acceleration * delta_time + CalculateDrags(p.velocity)* delta_time; 
-		p.acceleration  = GLOBAL_ACCELERATION ;
+		p.velocity += p.acceleration * delta_time  ; 
+		p.acceleration  = GLOBAL_ACCELERATION + CalculateDrags(p.velocity);
 	}
 
 	void Runge_Kutta_4(Particle& p, float delta_time) {
