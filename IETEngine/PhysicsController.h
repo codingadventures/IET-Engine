@@ -11,6 +11,7 @@
 #include "ParticleSystem2.h" 
 
 #include <Magick++.h>
+#include "Model.h"
 namespace Controller
 {
 
@@ -35,7 +36,11 @@ namespace Controller
 		Camera* d_camera;
 		Shader* d_shader;
 		Shader* d_shader_no_texture;
+
+		Model* d_cube_model;
+
 		GLint d_textureId;
+
 		float d_fps;
 		//		Model* d_plane_model;
 
@@ -121,10 +126,9 @@ namespace Controller
 
 		this->d_camera = new Camera(glm::vec3(0.0f,20.0f,20.0f));
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 3.0f;
+		d_camera->MovementSpeed = 2.0f;
 		d_camera->SetTarget(glm::vec3(0,0,0));
-		d_particle_system2 = new ParticleSystem2(5000);
-
+		d_particle_system2 = new ParticleSystem2(10000);
 
 
 		/*this->d_particle_renderer = new GLParticleRenderer();
@@ -160,13 +164,14 @@ namespace Controller
 
 		d_shader = new Shader("particle.vert","particle.frag"); 
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
+		d_cube_model = new Model(d_shader, "models\\Cones3.dae");
 
-		d_shader->Use();
-		d_textureId = TextureFromFile("particle.png","textures");
-		GLint i = glGetUniformLocation(d_shader->Program, "tex");
+		/*d_shader->Use();
+		d_textureId = TextureFromFile("particle.png","textures");*/
+		/*	GLint i = glGetUniformLocation(d_shader->Program, "tex");
 
 		glUniform1i(i,0);
-
+		*/
 
 
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
@@ -184,13 +189,15 @@ namespace Controller
 		glEnable(GL_TEXTURE_2D); 
 		glBindTexture(GL_TEXTURE_2D, d_textureId);
 		glEnable(GL_PROGRAM_POINT_SIZE); 
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		update_timer(); 
 		CalculateFps( );
-		d_particle_system2->d_wind_enabled = wind_on;
+		/*d_particle_system2->d_wind_enabled = wind_on;
 		d_particle_system2->d_spinning_enabled = spinning_on;
 		d_particle_system2->d_waterfall_enabled = waterfall_on;
-		d_particle_system2->d_euler_enabled = euler_on;
+		d_particle_system2->d_euler_enabled = euler_on;*/
+		d_shader->Use();
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 
@@ -198,31 +205,35 @@ namespace Controller
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
-		d_shader->Use();
+		//d_shader->Use();
 
 		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
 
+		d_cube_model->Draw();
+		Vertex v;
+		v.Position = d_cube_model->m_center_of_mass;
+		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
+		Point p(v);
+		p.Draw();
 
-
-		d_particle_system2->Update(d_delta_time_secs);
+		/*d_particle_system2->Update(d_delta_time_secs);
 
 		vector<Vertex> vertices;
 		d_particle_system2->GetVertices(vertices);
 
 		Point p(vertices);
-
+		*/
 		/**/
-		glEnable(GL_BLEND);
+		/*glEnable(GL_BLEND);
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
 
-		p.Draw();
-
+		//p.Draw();
 		d_shader_no_texture->Use();
 
 		TextToScreen();
 
-		glDisable(GL_BLEND);
+	//	glDisable(GL_BLEND);
 
 		glutSwapBuffers();
 	}
@@ -273,7 +284,7 @@ namespace Controller
 		char fps[100];
 		sprintf_s(fps,"FPS: %f",d_fps);
 		screen_output(VIEWPORT_WIDTH-200, VIEWPORT_HEIGHT - 50 ,fps);
-		 
+
 
 
 		/*	*/

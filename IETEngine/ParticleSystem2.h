@@ -184,8 +184,8 @@ private:
 
 	void ChangeWind()
 	{
-		d_wind = glm::linearRand(glm::vec3(-2.5f, -3.0f, -2.5f),glm::vec3(2.5f,  7.0f, 2.5f));
-		d_wind_speed =  glm::linearRand(1.0f,2.0f);
+		d_wind = glm::linearRand(glm::vec3(0.0, 0.0f,0.0f),glm::vec3(1.0f,  1.0f, 1.0f));
+		d_wind_speed =  glm::linearRand(-2.0f,2.0f);
 	}
 
 	glm::vec3 CalculateDrags(glm::vec3 particle_velocity)

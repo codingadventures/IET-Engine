@@ -30,9 +30,11 @@ class Model
 {
 public:
 
-	glm::mat4* mAnimationMatrix;
-	Skeleton* mSkeleton;
+	glm::mat4* m_animation_matrix;
+	Skeleton* m_skeleton;
 	glm::vec3 m_Direction;
+	glm::vec3 m_center_of_mass;
+
 private:
 	 Shader* shader;
 
@@ -55,20 +57,20 @@ public:
 		assert(shader);
 		assert(path);
 	 
-		mSkeleton = new Skeleton( ); 
+		m_skeleton = new Skeleton( ); 
 
 		this->loadModel(path);
-
+		this->calculate_center_of_mass();
 		//this->m_Direction = glm::vec3(1.0f,0.0f,1.0f);
 
-		if (mSkeleton->getNumberOfBones()>0)
+		if (m_skeleton->getNumberOfBones()>0)
 		{
-			mAnimationMatrix = (glm::mat4*) malloc(mSkeleton->getNumberOfBones() * sizeof(glm::mat4));
+			m_animation_matrix = (glm::mat4*) malloc(m_skeleton->getNumberOfBones() * sizeof(glm::mat4));
 
 			CleanAnimationMatrix();
 
-			mSkeleton->updateSkeleton();
-			mSkeleton->updateAnimationMatrix(mAnimationMatrix); 
+			m_skeleton->updateSkeleton();
+			m_skeleton->updateAnimationMatrix(m_animation_matrix); 
 		}
 
 
@@ -76,9 +78,9 @@ public:
 
 	~Model()
 	{
-		free(mAnimationMatrix);
+		free(m_animation_matrix);
 		free(boneLocation);
-		free(mSkeleton);
+		free(m_skeleton);
 
 	}
 	// Draws the model, and thus all its meshes
@@ -88,14 +90,30 @@ public:
 
 		this->mModelMatrix = GetModelMatrix();
 
-		if (mSkeleton->getNumberOfBones()>0)
-			glUniformMatrix4fv (boneLocation[0], mSkeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(mAnimationMatrix[0]));
+		if (m_skeleton->getNumberOfBones()>0)
+			glUniformMatrix4fv (boneLocation[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
 
 		for(GLuint i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].Draw(*shader);
 	}
 
+	void CalculateArea()
+	{
+		 /*
+			int i,j;
+			double area = 0;
+
+			for (i=0;i<N;i++) {
+				j = (i + 1) % N;
+				area += polygon[i].x * polygon[j].y;
+				area -= polygon[i].y * polygon[j].x;
+			}
+
+			area /= 2;
+			return(area < 0 ? -area : area);*/
+		 
+	}
 	void Scale(glm::vec3 scale_vector)
 	{
 		this->m_Scale = glm::scale(this->m_Scale,scale_vector);
@@ -128,30 +146,30 @@ public:
 	{
 		assert(animationInvoker);
 
-		Bone *effector = mSkeleton->GetBone(boneEffector.c_str());
+		Bone *effector = m_skeleton->GetBone(boneEffector.c_str());
 
 		assert(effector);
 
 		animationInvoker->Animate(this->mModelMatrix, effector ,target,numParent);
 
-		mSkeleton->updateAnimationMatrix(mAnimationMatrix);
+		m_skeleton->updateAnimationMatrix(m_animation_matrix);
 	}
 
 	vector<glm::vec3> getBonesOrientation( )
 	{
-		return mSkeleton->getBonePositions(this->mModelMatrix);
+		return m_skeleton->getBonePositions(this->mModelMatrix);
 	}
 
 	glm::vec3 getBoneOrientation(const char* name)
 	{
-		return mSkeleton->GetBone(name)->getWorldSpacePosition(this->mModelMatrix);
+		return m_skeleton->GetBone(name)->getWorldSpacePosition(this->mModelMatrix);
 	}
 
 	void CleanAnimationMatrix()
 	{
 		//Initialize bones in the shader for the uniform 
-		for (unsigned int i = 0 ; i < mSkeleton->getNumberOfBones(); i++) 
-			mAnimationMatrix[i] = glm::mat4(1); 
+		for (unsigned int i = 0 ; i < m_skeleton->getNumberOfBones(); i++) 
+			m_animation_matrix[i] = glm::mat4(1); 
 	}
 
 	void resetAnimation()
@@ -161,13 +179,13 @@ public:
 
 	void setJointLimit(string boneName, AngleRestriction angleRestriction )
 	{ 
-		mSkeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
+		m_skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 	}
 
 	 
 
 	void ClearJointsLimit(){
-		mSkeleton->ResetAllJointLimits();
+		m_skeleton->ResetAllJointLimits();
 	}
 	
 
@@ -195,14 +213,14 @@ private:
 		this->processNode(scene->mRootNode, scene);
 
 		// there should always be a 'root node', even if no skeleton exists
-		if (!mSkeleton->importSkeletonBone ( scene->mRootNode)) {
+		if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
 			fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 		} // endif 
-		mSkeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
-		int numOfBones = mSkeleton->getNumberOfBones();
+		m_skeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
+		int numOfBones = m_skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
-			boneLocation = (GLuint*) malloc( mSkeleton->getNumberOfBones()* sizeof(GLuint));
+			boneLocation = (GLuint*) malloc( m_skeleton->getNumberOfBones()* sizeof(GLuint));
 
 			for (unsigned int i = 0 ; i < numOfBones; i++) {
 
@@ -334,17 +352,17 @@ private:
 				int BoneIndex = 0;        
 				string BoneName(ai_mesh->mBones[i]->mName.data);
 
-				if ( mSkeleton->boneMapping.find(BoneName) == mSkeleton->boneMapping.end()) {
+				if ( m_skeleton->boneMapping.find(BoneName) == m_skeleton->boneMapping.end()) {
 					// Allocate an index for a new bone
 					BoneInfo info;
 
 					BoneIndex = m_numberOfBone++; 
 					info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
 					info.index = BoneIndex;
-					mSkeleton->boneMapping[BoneName] = info;
+					m_skeleton->boneMapping[BoneName] = info;
 				}
 				else
-					BoneIndex = mSkeleton->boneMapping[BoneName].index;
+					BoneIndex = m_skeleton->boneMapping[BoneName].index;
 
 				for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
 					int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
@@ -400,6 +418,17 @@ private:
 		}
 		return textures;
 	}
+
+	void calculate_center_of_mass()
+	{
+		for (auto mesh : meshes)
+		{
+			m_center_of_mass += mesh.m_center_of_mass;
+		}
+
+		m_center_of_mass /= meshes.size();
+	}
+
 
 };
 

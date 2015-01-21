@@ -72,9 +72,9 @@ void AnimationManager::Animate(Model* model, double deltaTime)
 		break;
 	}
  
-	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->mSkeleton);
+	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
 
-	pKeyFrameAnimator->Animate(model->mAnimationMatrix, clipToAnimate);
+	pKeyFrameAnimator->Animate(model->m_animation_matrix, clipToAnimate);
 
 	m_animationEventController.PurgeEndedClips(deltaTime);
 
@@ -93,11 +93,11 @@ void AnimationManager::AnimateTruncate(Model* model, double deltaTime)
 { 
 	auto clips = this->m_animationEventController.GetNextAnimations();
 	
-	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->mSkeleton);
+	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
 
 	for (int i = 0; i < clips.size(); i++)
 	{
-		pKeyFrameAnimator->Animate(model->mAnimationMatrix, clips[i]);
+		pKeyFrameAnimator->Animate(model->m_animation_matrix, clips[i]);
 	}
 	 
 	m_animationEventController.PurgeEndedClips(deltaTime);

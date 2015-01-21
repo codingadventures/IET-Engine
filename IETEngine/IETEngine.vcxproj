@@ -107,6 +107,7 @@
     <ClInclude Include="ParticleSystem2.h" />
     <ClInclude Include="ParticleUpdater.h" />
     <ClInclude Include="PhysicsController.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />

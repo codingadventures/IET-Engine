@@ -21,9 +21,9 @@ void main()
     gl_Position = projection * eyePos;
     
 	outColor = vColor;
-	
-	float dist = length(eyePos.xyz);
-	float att = inversesqrt(0.1f*dist);
-	gl_PointSize = att * 2.0;
+	gl_PointSize = 5.0;
+	//float dist = length(eyePos.xyz);
+	//float att = inversesqrt(0.1f*dist);
+	//gl_PointSize = att * 2.0;
 
 }
