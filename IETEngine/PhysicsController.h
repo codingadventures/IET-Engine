@@ -12,12 +12,14 @@
 
 #include <Magick++.h>
 #include "Model.h"
+#include "RigidBody.h"
 namespace Controller
 {
 
 	using namespace std::placeholders;
 	using namespace Physics::Particles::Renderer;
 	using namespace Physics::Particles;
+	using namespace Physics;
 
 	class PhysicsController : public AbstractController {
 	public:
@@ -33,11 +35,11 @@ namespace Controller
 		void CalculateFps( );
 	private:
 		GLint TextureFromFile(const char* fileName, string directory);
-		Camera* d_camera;
-		Shader* d_shader;
-		Shader* d_shader_no_texture;
-
-		Model* d_cube_model;
+		Camera*		d_camera;
+		Shader*		d_shader;
+		Shader*		d_shader_no_texture;
+		RigidBody*	d_rigid_body;
+		Model*		d_cube_model;
 
 		GLint d_textureId;
 
@@ -162,10 +164,12 @@ namespace Controller
 
 		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
 
-		d_shader = new Shader("particle.vert","particle.frag"); 
+		d_shader = new Shader("vertex.vert","particle.frag"); 
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
-		d_cube_model = new Model(d_shader, "models\\Cones3.dae");
+		d_cube_model = new Model(d_shader, "models\\cubetri.obj");
 
+		d_rigid_body = new RigidBody(*d_cube_model);
+		d_rigid_body->Set_Force(glm::vec3(0.0f,1.0f,0.0f) * 10000000000.0f,glm::vec3(1.0f,1.0f,1.0f));
 		/*d_shader->Use();
 		d_textureId = TextureFromFile("particle.png","textures");*/
 		/*	GLint i = glGetUniformLocation(d_shader->Program, "tex");
@@ -185,9 +189,7 @@ namespace Controller
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_TEXTURE_2D); 
-		glBindTexture(GL_TEXTURE_2D, d_textureId);
+		  
 		glEnable(GL_PROGRAM_POINT_SIZE); 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -207,15 +209,16 @@ namespace Controller
 
 		//d_shader->Use();
 
-		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
+		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
 		d_cube_model->Draw();
 		Vertex v;
-		v.Position = d_cube_model->m_center_of_mass;
+		v.Position = d_cube_model->Center_of_mass();
 		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
 		Point p(v);
 		p.Draw();
 
+		d_rigid_body->Update(d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);
 
 		vector<Vertex> vertices;

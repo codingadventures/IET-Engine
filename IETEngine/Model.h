@@ -10,7 +10,6 @@
 #include <map>
 #include <vector>
 #include "Skeleton.h"
-using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
@@ -23,6 +22,12 @@ using namespace std;
 #include "Mesh.h"
 #include "IAnimation.h"
 #include "KeyFrameAnimator.h"
+#include "Inertia.h"
+
+
+using namespace std;
+using namespace Physics::Tensor;
+
 
 GLint TextureFromFile(const char* path, string directory);
 
@@ -33,34 +38,44 @@ public:
 	glm::mat4* m_animation_matrix;
 	Skeleton* m_skeleton;
 	glm::vec3 m_Direction;
-	glm::vec3 m_center_of_mass;
 
 private:
-	 Shader* shader;
+	Shader* d_shader;
 
-	vector<Mesh> meshes;
-	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+	vector<Mesh>	d_meshes;
+	vector<Texture> d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
-	string directory;
-	GLuint* boneLocation;
-	int m_numberOfBone;
-	glm::mat4 mModelMatrix;
+	string		d_directory;
 
-	glm::mat4 m_Scale,m_Position,m_Rotation;
+	GLuint*		d_bone_location;
+	int			d_numberOfBone;
+
+	glm::mat4	d_model_matrix;
+	glm::mat4	d_scale;
+	glm::mat4	d_position;
+	glm::mat4	d_rotation;
+	glm::mat3	d_inertia_tensor;
+
+	glm::vec3	d_center_of_mass;
+	float		d_area;
+	float		d_mass;
 public:
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
 	Model(Shader* shader, GLchar* path) :
-		shader(shader),
-		m_numberOfBone(0)
+		d_shader(shader),
+		d_numberOfBone(0)
 	{
 		assert(shader);
 		assert(path);
-	 
+
 		m_skeleton = new Skeleton( ); 
 
 		this->loadModel(path);
 		this->calculate_center_of_mass();
+		this->calculate_area();
+		
+
 		//this->m_Direction = glm::vec3(1.0f,0.0f,1.0f);
 
 		if (m_skeleton->getNumberOfBones()>0)
@@ -76,70 +91,64 @@ public:
 
 	} 
 
+	glm::mat3 Inertia_tensor() const { return d_inertia_tensor; }
+	float Mass() const { return d_mass; } 
+	glm::vec3 Center_of_mass() const { return d_center_of_mass; } 
+
+	float Area() const { return d_area; }
+
 	~Model()
 	{
 		free(m_animation_matrix);
-		free(boneLocation);
+		free(d_bone_location);
 		free(m_skeleton);
 
 	}
 	// Draws the model, and thus all its meshes
 	void Draw()
 	{
-		this->shader->Use();
+		this->d_shader->Use();
 
-		this->mModelMatrix = GetModelMatrix();
+		this->d_model_matrix = GetModelMatrix();
 
 		if (m_skeleton->getNumberOfBones()>0)
-			glUniformMatrix4fv (boneLocation[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
+			glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
 
-		for(GLuint i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].Draw(*shader);
+		for(GLuint i = 0; i < this->d_meshes.size(); i++)
+			this->d_meshes[i].Draw(*d_shader);
 	}
 
-	void CalculateArea()
-	{
-		 /*
-			int i,j;
-			double area = 0;
-
-			for (i=0;i<N;i++) {
-				j = (i + 1) % N;
-				area += polygon[i].x * polygon[j].y;
-				area -= polygon[i].y * polygon[j].x;
-			}
-
-			area /= 2;
-			return(area < 0 ? -area : area);*/
-		 
-	}
 	void Scale(glm::vec3 scale_vector)
 	{
-		this->m_Scale = glm::scale(this->m_Scale,scale_vector);
+		this->d_scale = glm::scale(this->d_scale,scale_vector);
 	}
 	void Translate(glm::vec3 translation_vector)
 	{
-		this->m_Position = glm::translate(this->m_Position,translation_vector);
+		this->d_position = glm::translate(this->d_position,translation_vector);
 	}
 	void Rotate(glm::vec3 rotation_vector, float radians)
 	{
-		this->m_Rotation = glm::rotate(glm::mat4(),radians,rotation_vector);
+		this->d_rotation = glm::rotate(glm::mat4(),radians,rotation_vector);
 	}
+
+	glm::mat4 Rotation() const { return d_rotation; } 
+
+
 	void Rotate(glm::quat rotation)
 	{
-		this->m_Rotation = glm::toMat4(rotation);
+		this->d_rotation = glm::toMat4(rotation);
 	}
 
 
 	glm::vec3 GetPosition()
 	{
-		return decomposeT(m_Position);
+		return decomposeT(d_position);
 	}
 
-	glm::mat4 GetModelMatrix()
+	glm::mat4 GetModelMatrix() const
 	{
-		return m_Position * m_Rotation * m_Scale;
+		return d_position * d_rotation * d_scale;
 	}
 
 	void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
@@ -150,19 +159,19 @@ public:
 
 		assert(effector);
 
-		animationInvoker->Animate(this->mModelMatrix, effector ,target,numParent);
+		animationInvoker->Animate(this->d_model_matrix, effector ,target,numParent);
 
 		m_skeleton->updateAnimationMatrix(m_animation_matrix);
 	}
 
 	vector<glm::vec3> getBonesOrientation( )
 	{
-		return m_skeleton->getBonePositions(this->mModelMatrix);
+		return m_skeleton->getBonePositions(this->d_model_matrix);
 	}
 
 	glm::vec3 getBoneOrientation(const char* name)
 	{
-		return m_skeleton->GetBone(name)->getWorldSpacePosition(this->mModelMatrix);
+		return m_skeleton->GetBone(name)->getWorldSpacePosition(this->d_model_matrix);
 	}
 
 	void CleanAnimationMatrix()
@@ -182,16 +191,16 @@ public:
 		m_skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 	}
 
-	 
+
 
 	void ClearJointsLimit(){
 		m_skeleton->ResetAllJointLimits();
 	}
-	
+
 
 private:
 	/*  Model Data  */
-	
+
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -207,7 +216,7 @@ private:
 		}
 
 		// Retrieve the directory path of the filepath
-		this->directory = path.substr(0, path.find_last_of('\\'));
+		this->d_directory = path.substr(0, path.find_last_of('\\'));
 
 		// Process ASSIMP's root node recursively
 		this->processNode(scene->mRootNode, scene);
@@ -220,7 +229,7 @@ private:
 		int numOfBones = m_skeleton->getNumberOfBones();
 		if (numOfBones > 0)
 		{ 
-			boneLocation = (GLuint*) malloc( m_skeleton->getNumberOfBones()* sizeof(GLuint));
+			d_bone_location = (GLuint*) malloc( m_skeleton->getNumberOfBones()* sizeof(GLuint));
 
 			for (unsigned int i = 0 ; i < numOfBones; i++) {
 
@@ -229,12 +238,12 @@ private:
 
 				memset(Name, 0, sizeof(Name));
 				sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-				GLint location = glGetUniformLocation(shader->Program, Name);
+				GLint location = glGetUniformLocation(d_shader->Program, Name);
 				if (location == INVALID_UNIFORM_LOCATION) {
 					fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
 				}
 
-				boneLocation[i] = location;
+				d_bone_location[i] = location;
 			}
 		}
 
@@ -252,7 +261,7 @@ private:
 			aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
 			Mesh mesh = this->processMesh(ai_mesh, scene );
 
-			this->meshes.push_back(mesh);			
+			this->d_meshes.push_back(mesh);			
 		}
 		// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
 		for(GLuint i = 0; i < node->mNumChildren; i++)
@@ -356,7 +365,7 @@ private:
 					// Allocate an index for a new bone
 					BoneInfo info;
 
-					BoneIndex = m_numberOfBone++; 
+					BoneIndex = d_numberOfBone++; 
 					info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
 					info.index = BoneIndex;
 					m_skeleton->boneMapping[BoneName] = info;
@@ -396,11 +405,11 @@ private:
 			mat->GetTexture(type, i, &str);
 			// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 			GLboolean skip = false;
-			for(GLuint j = 0; j < textures_loaded.size(); j++)
+			for(GLuint j = 0; j < d_textures_loaded.size(); j++)
 			{
-				if(textures_loaded[j].path == str)
+				if(d_textures_loaded[j].path == str)
 				{
-					textures.push_back(textures_loaded[j]);
+					textures.push_back(d_textures_loaded[j]);
 					skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
 					break;
 				}
@@ -409,25 +418,33 @@ private:
 			if(!skip)
 			{   // If texture hasn't been loaded already, load it
 				Texture texture;
-				texture.id = TextureFromFile(str.C_Str(), this->directory);
+				texture.id = TextureFromFile(str.C_Str(), this->d_directory);
 				texture.type = typeName;
 				texture.path = str;
 				textures.push_back(texture);
-				this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+				this->d_textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
 			}
 		}
 		return textures;
 	}
 
 	void calculate_center_of_mass()
-	{
-		for (auto mesh : meshes)
+	{ 
+		for (auto mesh : d_meshes)
 		{
-			m_center_of_mass += mesh.m_center_of_mass;
+			Inertia::Compute(mesh,d_mass,d_inertia_tensor);
+			d_center_of_mass += mesh.m_center_of_mass;
 		}
 
-		m_center_of_mass /= meshes.size();
+		d_center_of_mass /= d_meshes.size();
 	}
+
+	void calculate_area()
+	{
+		for (auto mesh : d_meshes)
+			d_area += mesh.m_area;
+	}
+
 
 
 };

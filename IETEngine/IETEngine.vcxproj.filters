@@ -73,6 +73,12 @@
     <Filter Include="Header Files\Shaders\Fragment">
       <UniqueIdentifier>{ee1ad862-a86f-43ad-acc6-562af027f5c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\Tensor">
+      <UniqueIdentifier>{494aee99-dc6a-4f91-ba18-c8722d1e4e78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Drag">
+      <UniqueIdentifier>{a2d04bf1-0ee9-43a9-a38a-acf7592b0771}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -241,6 +247,12 @@
     </ClInclude>
     <ClInclude Include="RigidBody.h">
       <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Inertia.h">
+      <Filter>Header Files\Physics\Tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Friction.h">
+      <Filter>Header Files\Physics\Drag</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

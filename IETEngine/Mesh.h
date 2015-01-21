@@ -22,9 +22,10 @@ public:
 	vector<GLuint> m_indices;
 	vector<Texture> m_textures; 
 	vector<VertexWeight> m_boneWeights;
-
-	float m_mesh_area;
+	 
 	glm::vec3 m_center_of_mass;
+	float m_area;
+	glm::mat3 m_inertia_tensor;
 
 private:
 	/*  Render data  */
@@ -35,13 +36,13 @@ public:
 	/*  Functions  */
 	// Constructor
 	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights) 
-		: m_mesh_area(0.0f)
 	{
 		this->m_vertices = vertices;
 		this->m_indices = indices;
 		this->m_textures = textures; 
 		this->m_boneWeights = boneWeights; 
-		this->calculate_center_of_mass();
+		//this->calculate_center_of_mass();
+		this->calculate_area();
 		this->setupMesh();
 	}   
 	// Render the mesh
@@ -135,7 +136,8 @@ private:
 	void calculate_center_of_mass()
 	{
 		size_t N = m_vertices.size();
-		glm::vec3* area  = new glm::vec3[N];
+		
+		float* area  = new float[N];
 		glm::vec3* R	 = new glm::vec3[N];
 		glm::vec3 numerator;
 		glm::vec3 denominator;
@@ -145,7 +147,7 @@ private:
 			glm::vec3 v2 = m_vertices[i+1].Position;
 			glm::vec3 v3 = m_vertices[i+2].Position;
 			R[i] = (v1 + v2 + v3) / 3.0f;
-			area[i] = glm::abs(glm::cross(v2 - v1,v3 - v1));
+			area[i] = glm::length(glm::cross(v2 - v1,v3 - v1));
 			numerator += R[i]*area[i];
 			denominator +=area[i];
 		}
@@ -157,6 +159,20 @@ private:
 		delete[] area;
 		delete[] R;
 	}
+
+	void calculate_area()
+	{
+		 
+		 size_t N = m_vertices.size();
+		 for (int i = 0; i < N; i = i + 3)
+		 {
+			 glm::vec3 v1 = m_vertices[i].Position;
+			 glm::vec3 v2 = m_vertices[i+1].Position;
+			 glm::vec3 v3 = m_vertices[i+2].Position;
+			 m_area += glm::length(glm::cross(v2 - v1,v3 - v1)) * 0.5f;
+		 }
+	}
+
 
 
 };

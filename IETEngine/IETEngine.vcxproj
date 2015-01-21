@@ -97,7 +97,9 @@
     <ClInclude Include="AbstractController.h" />
     <ClInclude Include="BoxGenerator.h" />
     <ClInclude Include="EulerUpdater.h" />
+    <ClInclude Include="Friction.h" />
     <ClInclude Include="GLParticleRenderer.h" />
+    <ClInclude Include="Inertia.h" />
     <ClInclude Include="IParticleRenderer.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleData.h" />

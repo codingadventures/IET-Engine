@@ -14,7 +14,6 @@ using namespace std;
 #define	 EMIT_PERCENTAGE		0.45f
 
 #define  AIR_DENSITY			1.225f
-#define  WATER_DENSITY			1.000f
 #define  DRAG_COEFFICIENT		0.47f		//For Spheres
 #define  WIND_LIFE				8.0f 
 #define  AIR_DRAG_ENABLED		false
@@ -191,8 +190,8 @@ private:
 	glm::vec3 CalculateDrags(glm::vec3 particle_velocity)
 	{
 		glm::vec3 wind = d_wind_enabled ? WindDrag(particle_velocity) : glm::vec3(0,0,0);
-		glm::vec3 air_drag = AIR_DRAG_ENABLED ? WaterDrag(particle_velocity): glm::vec3(0,0,0);;
-		return wind + air_drag;
+	//	glm::vec3 air_drag = AIR_DRAG_ENABLED ? WaterDrag(particle_velocity): glm::vec3(0,0,0);;
+		return wind ;
 	}
 
 	// This is the wind formula 0.5 * rho * A * Cd * v^2
@@ -204,13 +203,7 @@ private:
 
 		return -0.5f * AIR_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * (wind_drag_magnitude * wind_drag);
 	}  
-	glm::vec3 WaterDrag(glm::vec3 particle_velocity)
-	{
-		float particle_velocity_magnitude = glm::length(particle_velocity);
-		float pi = glm::pi<float>();
-
-		return -0.5f * WATER_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * particle_velocity_magnitude * particle_velocity;
-	}
+	
 
 	void CollisionDetection(Particle& p)
 	{
