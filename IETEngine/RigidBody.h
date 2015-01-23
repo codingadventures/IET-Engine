@@ -73,8 +73,11 @@ namespace Physics
 		d_model.Translate(d_linear_momentum / d_mass);
 
 		//Calculate drag
-		//d_force -= Friction::Air(d_velocity, d_model.Area());
+		d_linear_momentum += Friction::Air(d_velocity, d_model.Area()) * delta_time;
+		 d_angular_momentum += Friction::Air(d_angular_velocity, d_model.Area()) * delta_time;
 
+		 d_linear_momentum = glm::clamp(d_linear_momentum,glm::vec3(0.0f),d_linear_momentum);
+		 d_angular_momentum = glm::clamp(d_angular_momentum,glm::vec3(0.0f),d_angular_momentum);
 
 	}
 

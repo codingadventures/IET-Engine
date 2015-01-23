@@ -15,18 +15,18 @@ namespace Physics
 		class Friction
 		{
 		public:
-			 static glm::vec3 Air(glm::vec3 velocity, float area);
+			static glm::vec3 Air(glm::vec3 velocity, float area);
 		private:
 
 		};
-		static glm::vec3 Air(glm::vec3 velocity, float area)
+		glm::vec3 Friction::Air(glm::vec3 velocity, float area)
 		{
 			float particle_velocity_magnitude = glm::length(velocity);
 			float pi = glm::pi<float>();
 
 			return -0.5f * AIR_DENSITY *  area * DRAG_COEFFICIENT * particle_velocity_magnitude * velocity;
 		}
-		 
+
 	}
 }
 

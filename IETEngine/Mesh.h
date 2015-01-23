@@ -44,6 +44,7 @@ namespace Rendering
 		/*  Functions  */
 		// Constructor
 		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights) 
+			: d_area(0.0f)
 		{
 			this->m_vertices = vertices;
 			this->m_indices = indices;

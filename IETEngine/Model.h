@@ -69,7 +69,8 @@ namespace Rendering
 		// Constructor, expects a filepath to a 3D model.
 		Model(Shader* shader, GLchar* path) :
 			d_shader(shader),
-			d_numberOfBone(0)
+			d_numberOfBone(0),
+			d_area(0.0f)
 		{
 			assert(shader);
 			assert(path);
