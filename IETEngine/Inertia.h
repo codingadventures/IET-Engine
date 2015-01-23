@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include "Mesh.h"
+using namespace Rendering;
 
 namespace Physics
 {
@@ -82,7 +83,10 @@ namespace Physics
 				inertia[1][2]=-(intg[8]-mass*mesh.m_center_of_mass.y*mesh.m_center_of_mass.z);
 				inertia[0][2]=-(intg[9]-mass*mesh.m_center_of_mass.z*mesh.m_center_of_mass.x);
 			}
+			static void Compute_Tensor_With_AABB(Mesh& mesh, float& mass, glm::mat3 &inertia)
+			{
 
+			}
 		private:	
 			static void Subexpressions(float& w0,float& w1,float& w2,float& f1,float& f2,float& f3,float& g0,float& g1,float& g2)
 			{

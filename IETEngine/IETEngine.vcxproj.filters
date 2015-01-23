@@ -254,6 +254,9 @@
     <ClInclude Include="Friction.h">
       <Filter>Header Files\Physics\Drag</Filter>
     </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">

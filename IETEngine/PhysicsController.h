@@ -126,7 +126,7 @@ namespace Controller
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
-		this->d_camera = new Camera(glm::vec3(0.0f,20.0f,20.0f));
+		this->d_camera = new Camera(glm::vec3(0.0f,0.0f,20.0f));
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 2.0f;
 		d_camera->SetTarget(glm::vec3(0,0,0));

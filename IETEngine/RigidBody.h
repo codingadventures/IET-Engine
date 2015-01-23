@@ -3,7 +3,7 @@
 
 #include "Model.h"
 #include "Friction.h"
-
+#include <glm/gtx/orthonormalize.hpp>
 
 namespace Physics
 {
@@ -54,18 +54,17 @@ namespace Physics
 		float inertia = 0.0f;
 		glm::quat orientation = glm::quat(d_model.Rotation());
 
-
 		d_center_of_mass = d_model.GetModelMatrix() * glm::vec4(d_model.Center_of_mass(),0.0f);  
 
-		d_angular_velocity = d_angular_momentum * d_inverse_inertial_tensor ;
+		d_angular_velocity = d_inverse_inertial_tensor * d_angular_momentum;
 
-		orientation += delta_time * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) * orientation ;
-
-		d_torque = glm::cross(d_point - glm::vec3(d_center_of_mass), d_force);
+		orientation += delta_time * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) *  orientation ;
+		 
+	 	d_torque = glm::cross(d_point - glm::vec3(d_center_of_mass), d_force);
 
 		d_linear_momentum	=	d_force  * delta_time;
 
-		d_velocity = d_linear_momentum / d_mass;
+	//	d_velocity = d_linear_momentum / d_mass;
 
 		if (test)
 		{
@@ -86,16 +85,18 @@ namespace Physics
 	void RigidBody::Set_Force(glm::vec3 force, glm::vec3 application_point)
 	{
 		d_force = force;
-		d_acceleration = force / d_mass;
+		d_acceleration = force / 1.0f;
 		d_point = application_point;
 
 	}
 
 	glm::mat3 RigidBody::set_as_cross_product_matrix(glm::vec3 v )
 	{
-		return glm::mat3(0, -v.z,  v.y,
-			v.z,    0, -v.x,
-			-v.y,  v.x,    0 );
+		return glm::transpose(
+			glm::mat3(0,	-v.z,	v.y,
+					  v.z,    0,	-v.x,
+					  -v.y,  v.x,    0 )
+					  );
 	}
 
 }

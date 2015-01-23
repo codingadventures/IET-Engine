@@ -95,6 +95,7 @@
     <ClInclude Include="AnimationPose.h" />
     <ClInclude Include="Blender.h" />
     <ClInclude Include="AbstractController.h" />
+    <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BoxGenerator.h" />
     <ClInclude Include="EulerUpdater.h" />
     <ClInclude Include="Friction.h" />
