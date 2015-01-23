@@ -65,7 +65,7 @@ public:
 	GLboolean HasMoved;
 	Camera_Type CameraType;
 	// Constructor with vectors
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = -90.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = -90.0f, GLfloat pitch = 0.0f) : Front(glm::vec3(0.0f, 0.0f, 1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
 	{
 		this->Position = position;
 		this->WorldUp = up;
@@ -75,7 +75,7 @@ public:
 		this->updateCameraVectors();  
 	}
 	// Constructor with scalar values
-	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)  : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
+	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)  : Front(glm::vec3(0.0f, 0.0f, 1.0f)), MovementSpeed(5.0f), MouseSensitivity(0.25f), Zoom(45.0f)
 	{
 		this->Position = glm::vec3(posX, posY, posZ);
 		this->WorldUp = glm::vec3(upX, upY, upZ);
@@ -205,6 +205,6 @@ private:
 		//this->Front = glm::normalize(front);
 		// Also re-calculate the Right and Up vector
 		this->Right = glm::normalize(glm::cross(this->Front, this->WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-		this->Up = glm::normalize(glm::cross(this->Front, this->Right));
+		this->Up = glm::normalize(glm::cross(this->Right, this->Front));
 	}
 };

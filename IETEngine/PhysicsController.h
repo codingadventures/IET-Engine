@@ -12,7 +12,10 @@
 
 #include <Magick++.h>
 #include "Model.h"
+#include "UI.h"
 #include "RigidBody.h"
+#include "AntTweakBar.h"
+
 namespace Controller
 {
 
@@ -23,28 +26,31 @@ namespace Controller
 
 	class PhysicsController : public AbstractController {
 	public:
-		void PhysicsController::setupCurrentInstance();
 		void Init(int argc, char* argv[]);
 		void Draw();
 		void Run();
-		void ReadInput();
+		void Read_Input();
 		~PhysicsController();
 		PhysicsController();
 	private:
-		void TextToScreen();
-		void CalculateFps( );
-	private:
+		void text_to_screen();
+		void calculate_fps( );
+		void tweak_bar_setup();
+		void setup_current_instance();
+
 		GLint TextureFromFile(const char* fileName, string directory);
+
+	private:
 		Camera*		d_camera;
 		Shader*		d_shader;
 		Shader*		d_shader_no_texture;
 		RigidBody*	d_rigid_body;
 		Model*		d_cube_model;
 
-		GLint d_textureId;
+		GLint		d_textureId;
 
-		float d_fps;
-		//		Model* d_plane_model;
+		float		d_fps;
+		float   	d_force_impulse_magnitude; 
 
 		GLParticleRenderer* d_particle_renderer;
 		ParticleSystem* d_particle_system; 
@@ -53,13 +59,107 @@ namespace Controller
 		std::shared_ptr<BoxGenerator> d_box_generator;
 		std::shared_ptr<ParticleEmitter> d_particle_emitter;
 		std::shared_ptr<EulerUpdater> d_particle_updater;
+
+		glm::vec3 d_force_impulse_direction;
+		glm::vec3 d_force_impulse_application_point;
+
 		bool waterfall_on;
 		bool spinning_on;
 		bool wind_on;
 		bool euler_on;
 	};
 
-	void PhysicsController::CalculateFps( )
+	void PhysicsController::setup_current_instance(){
+		Controller::g_CurrentInstance = this; 
+	}
+
+#pragma region Constructor/Destructor
+	PhysicsController::~PhysicsController()
+	{
+		free(d_camera);
+		free(d_shader);
+		free(d_particle_renderer);
+		free(d_particle_system); 
+	}
+
+	PhysicsController::PhysicsController() 	
+		: d_camera(nullptr),
+		d_shader(nullptr),
+		spinning_on(false),
+		waterfall_on(false),
+		wind_on(false),
+		d_fps(0.0f),
+		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
+		d_force_impulse_magnitude(10.0f),
+		d_force_impulse_application_point(0.0f)
+	{
+		setup_current_instance();
+	}
+#pragma endregion
+
+#pragma region Private Methods
+	void PhysicsController::text_to_screen()
+	{ 
+
+		//string waterfall_status = waterfall_on ? "ON" : "OFF";
+		//string waterfall_message = ("1 - Enable/Disable Waterfall - STATUS: " + waterfall_status );
+		//screen_output(10, VIEWPORT_HEIGHT - 50, (char*) waterfall_message.c_str());
+
+		//string spinning_status = spinning_on ? "ON" : "OFF";
+		//string spinning_message = "2 - Enable/Disable Spinning - STATUS: " + spinning_status;
+		//screen_output(10, VIEWPORT_HEIGHT - 70, (char*) spinning_message.c_str());
+
+		//string wind_status = wind_on ? "ON" : "OFF";
+		//string wind_message = "3 - Enable/Disable Wind - STATUS: " + wind_status;
+		//screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
+
+		//string integration_status = euler_on ? "Euler" : "Runge-Kutta 4";
+		//string integration_message = "4 - Integration Method - STATUS: " + integration_status;
+		//screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
+
+		char camera[100];
+		sprintf_s(camera,"Camera Position: %f,%f,%f",d_camera->Position.x,d_camera->Position.y,d_camera->Position.z);
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,camera);
+	
+		char Up[100];
+		sprintf_s(Up,"Camera Up: %f,%f,%f",d_camera->Up.x,d_camera->Up.y,d_camera->Up.z);
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,Up);
+
+
+
+		/*	*/
+		string controls = "Player/Camera W,A,S,D";
+		screen_output(10, 20, (char*) controls.c_str());
+
+
+
+
+		/*
+		*/
+
+
+	}
+
+	void PhysicsController::Read_Input()
+	{
+		if (g_keyMappings[KEY_1])
+			waterfall_on = !waterfall_on;
+		if (g_keyMappings[KEY_2])
+			spinning_on = !spinning_on;
+		if (g_keyMappings[KEY_3])
+			wind_on = !wind_on;
+
+		if (g_keyMappings[KEY_4])
+			euler_on = !euler_on;
+
+		if (g_keyMappings[KEY_SPACE])
+			d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point, d_delta_time_secs);
+
+
+
+	}
+
+	void PhysicsController::calculate_fps( )
 	{
 		static unsigned int frame = 0;
 		static int timeBase = 0;
@@ -75,6 +175,28 @@ namespace Controller
 		}
 
 	}
+
+	void PhysicsController::tweak_bar_setup()
+	{
+		TwInit(TW_OPENGL_CORE, NULL);
+		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+		TwBar *myBar;
+		myBar = TwNewBar("TweakBar");
+		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=150 "); // change default tweak bar size and color
+
+
+
+		TwAddVarRO(myBar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
+		TwAddVarCB(myBar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_cube_model, "");
+		TwAddVarCB(myBar, "cube.Com", TW_TYPE_DIR3F, NULL, Helper::UI::GetComCallback, d_cube_model, "");
+
+		TwAddVarRW(myBar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
+		TwAddVarRW(myBar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
+		TwAddVarRW(myBar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
+
+		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
+	}
+#pragma endregion  
 
 	GLint PhysicsController::TextureFromFile(const char* fileName, string directory)
 	{
@@ -116,13 +238,13 @@ namespace Controller
 		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
 		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 		glutCreateWindow("Particle System"); 
+		glutInitContextProfile(GLUT_CORE_PROFILE);
+
 
 		glewExperimental = GL_TRUE;
 		glewInit();
 
 
-		glutKeyboardFunc(Callbacks::keyboardCallback);
-		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
@@ -152,11 +274,17 @@ namespace Controller
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
 		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,d_camera, _1, _2);
 		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,d_camera,_1);
-		UserKeyboardCallback = std::bind(&PhysicsController::ReadInput,this); 
+		UserKeyboardCallback = std::bind(&PhysicsController::Read_Input,this); 
 
 		glutKeyboardFunc(Callbacks::keyboardCallback);
 		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 		glutPassiveMotionFunc(Callbacks::mouseCallback);
+		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
+		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
+
+		glutMouseFunc((GLUTmousebuttonfun)TwEventMouseButtonGLUT);
+		// send the ''glutGetModifers'' function pointer to AntTweakBar
+		TwGLUTModifiersFunc(glutGetModifiers);
 
 		glutSetCursor(GLUT_CURSOR_NONE); 
 
@@ -169,32 +297,35 @@ namespace Controller
 		d_cube_model = new Model(d_shader, "models\\cubetri.obj");
 
 		d_rigid_body = new RigidBody(*d_cube_model);
-		d_rigid_body->Set_Force(glm::vec3(0.0f,1.0f,0.0f) * 10000000000.0f,glm::vec3(1.0f,1.0f,1.0f));
+		tweak_bar_setup();
+
 		/*d_shader->Use();
 		d_textureId = TextureFromFile("particle.png","textures");*/
 		/*	GLint i = glGetUniformLocation(d_shader->Program, "tex");
 
 		glUniform1i(i,0);
 		*/
-
-
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
 
 	void PhysicsController::Run(){
 		glutMainLoop();
+
+		TwTerminate();
 	}
 
 	void PhysicsController::Draw()
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		  
+ 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		update_timer(); 
-		CalculateFps( );
+		calculate_fps( );
 		/*d_particle_system2->d_wind_enabled = wind_on;
 		d_particle_system2->d_spinning_enabled = spinning_on;
 		d_particle_system2->d_waterfall_enabled = waterfall_on;
@@ -211,12 +342,22 @@ namespace Controller
 
 		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
+		BoundingBox b = d_cube_model->Bounding_box();
+
+		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,b.min_coordinate,b.min_coordinate);
+
 		d_cube_model->Draw();
+
+
 		Vertex v;
-		v.Position = d_cube_model->Center_of_mass();
-		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
+		v.Position = d_force_impulse_application_point;
+		v.Color = glm::vec4(1.0f,1.0f,0.0f,0.0f);
 		Point p(v);
 		p.Draw();
+
+		v.Position = d_cube_model->Center_of_mass();
+		Point p1(v);
+		p1.Draw();
 
 		d_rigid_body->Update(d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);
@@ -234,87 +375,19 @@ namespace Controller
 		//p.Draw();
 		d_shader_no_texture->Use();
 
-		TextToScreen();
+			text_to_screen();
 
-	//	glDisable(GL_BLEND);
+		//	glDisable(GL_BLEND);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+		TwDraw();
 		glutSwapBuffers();
 	}
 
 
-	void PhysicsController::setupCurrentInstance(){
-		Controller::g_CurrentInstance = this; 
-	}
-
-	PhysicsController::~PhysicsController()
-	{
-		free(d_camera);
-		free(d_shader);
-		free(d_particle_renderer);
-		free(d_particle_system); 
-	}
-
-	PhysicsController::PhysicsController() 	
-		: d_camera(nullptr),
-		d_shader(nullptr),
-		spinning_on(false),
-		waterfall_on(false),
-		wind_on(false),
-		d_fps(0.0f)
-	{
-		setupCurrentInstance();
-	}
-
-	void PhysicsController::TextToScreen()
-	{ 
-
-		string waterfall_status = waterfall_on ? "ON" : "OFF";
-		string waterfall_message = ("1 - Enable/Disable Waterfall - STATUS: " + waterfall_status );
-		screen_output(10, VIEWPORT_HEIGHT - 50, (char*) waterfall_message.c_str());
-
-		string spinning_status = spinning_on ? "ON" : "OFF";
-		string spinning_message = "2 - Enable/Disable Spinning - STATUS: " + spinning_status;
-		screen_output(10, VIEWPORT_HEIGHT - 70, (char*) spinning_message.c_str());
-
-		string wind_status = wind_on ? "ON" : "OFF";
-		string wind_message = "3 - Enable/Disable Wind - STATUS: " + wind_status;
-		screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
-
-		string integration_status = euler_on ? "Euler" : "Runge-Kutta 4";
-		string integration_message = "4 - Integration Method - STATUS: " + integration_status;
-		screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
-
-		char fps[100];
-		sprintf_s(fps,"FPS: %f",d_fps);
-		screen_output(VIEWPORT_WIDTH-200, VIEWPORT_HEIGHT - 50 ,fps);
 
 
 
-		/*	*/
-		string controls = "Player/Camera W,A,S,D";
-		screen_output(10, 20, (char*) controls.c_str());
-
-
-
-
-		/*
-		*/
-
-
-	}
-
-	void PhysicsController::ReadInput()
-	{
-		if (g_keyMappings[KEY_1])
-			waterfall_on = !waterfall_on;
-		if (g_keyMappings[KEY_2])
-			spinning_on = !spinning_on;
-		if (g_keyMappings[KEY_3])
-			wind_on = !wind_on;
-
-		if (g_keyMappings[KEY_4])
-			euler_on = !euler_on;
-	}
 
 
 }

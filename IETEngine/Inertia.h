@@ -83,8 +83,12 @@ namespace Physics
 				inertia[1][2]=-(intg[8]-mass*mesh.m_center_of_mass.y*mesh.m_center_of_mass.z);
 				inertia[0][2]=-(intg[9]-mass*mesh.m_center_of_mass.z*mesh.m_center_of_mass.x);
 			}
-			static void Compute_Tensor_With_AABB(Mesh& mesh, float& mass, glm::mat3 &inertia)
+			static void Compute_Tensor_With_AABB(BoundingBox& bb, float mass, glm::mat3 &inertia)
 			{
+				float divisor = 0.0833f;
+				inertia[0][0] = divisor * mass * (glm::pow2(bb.height) + glm::pow2(bb.depth));
+				inertia[1][1] = divisor * mass * (glm::pow2(bb.width)  + glm::pow2(bb.depth));
+				inertia[2][2] = divisor * mass * (glm::pow2(bb.width)  + glm::pow2(bb.height));
 
 			}
 		private:	

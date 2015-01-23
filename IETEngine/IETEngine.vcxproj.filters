@@ -257,6 +257,9 @@
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">

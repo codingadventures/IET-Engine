@@ -35,7 +35,10 @@ namespace Physics
 		glm::mat3 d_inverse_inertial_tensor;
 	public:
 		void Update(float delta_time);
-		void Set_Force(glm::vec3 force, glm::vec3 application_point);
+
+		void calculate_torque();
+
+		void Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
 	private:
 		glm::mat3 set_as_cross_product_matrix(glm::vec3 v);
 	};
@@ -52,29 +55,22 @@ namespace Physics
 	{
 		static bool test = true;
 		float inertia = 0.0f;
-		glm::quat orientation = glm::quat(d_model.Rotation());
+		glm::quat orientation =  d_model.Rotation();
 
 		d_center_of_mass = d_model.GetModelMatrix() * glm::vec4(d_model.Center_of_mass(),0.0f);  
 
-		d_angular_velocity = d_inverse_inertial_tensor * d_angular_momentum;
+		d_angular_velocity =  d_angular_momentum * d_inverse_inertial_tensor;
 
-		orientation += delta_time * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) *  orientation ;
-		 
-	 	d_torque = glm::cross(d_point - glm::vec3(d_center_of_mass), d_force);
+		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity))  ;
 
-		d_linear_momentum	=	d_force  * delta_time;
+		calculate_torque();
 
-	//	d_velocity = d_linear_momentum / d_mass;
 
-		if (test)
-		{
-			d_angular_momentum +=	d_torque * delta_time;
-			test = false;
-		}
+		d_velocity = d_linear_momentum / d_mass;
 
 		orientation = glm::normalize(orientation);
 		d_model.Rotate(orientation);
-		//d_model.Translate(d_linear_momentum / d_mass);
+		d_model.Translate(d_linear_momentum / d_mass);
 
 		//Calculate drag
 		//d_force -= Friction::Air(d_velocity, d_model.Area());
@@ -82,21 +78,36 @@ namespace Physics
 
 	}
 
-	void RigidBody::Set_Force(glm::vec3 force, glm::vec3 application_point)
+	void RigidBody::Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time)
 	{
 		d_force = force;
 		d_acceleration = force / 1.0f;
 		d_point = application_point;
+		calculate_torque();
+		d_angular_momentum +=	d_torque * delta_time;
+		d_linear_momentum +=	d_force  * delta_time;
 
 	}
 
 	glm::mat3 RigidBody::set_as_cross_product_matrix(glm::vec3 v )
 	{
-		return glm::transpose(
-			glm::mat3(0,	-v.z,	v.y,
-					  v.z,    0,	-v.x,
-					  -v.y,  v.x,    0 )
-					  );
+		glm::mat3 bollox;
+
+		bollox[1][0] = -v.z;
+		bollox[2][0] =	v.y;
+		bollox[0][1] =	v.z;
+		bollox[2][1] = -v.x;
+		bollox[0][2] = -v.y;
+		bollox[1][2] =  v.x;
+
+		return bollox;		
+	}
+
+	void RigidBody::calculate_torque()
+	{
+
+		d_torque = glm::cross(d_point - glm::vec3(d_center_of_mass), d_force);
+
 	}
 
 }

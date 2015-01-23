@@ -6,7 +6,7 @@
 #include "Keys.h"
 #include <gl/freeglut.h>
 #include "ScreenOutput.h"
-
+#include "AntTweakBar.h"
 bool firstMouse = true;
 
 typedef std::function<void(GLfloat,GLfloat)> MouseCallbackFunction;
@@ -18,6 +18,7 @@ static MouseCallbackFunction UserMouseCallback;
 static MouseScrollCallbackFunction UserMouseScrollCallback;
 static KeyboardCallbackFunction UserKeyboardCallback;
 static MouseClickCallbackFunction UserMouseClickCallback;
+static enum cursor_state {None, Pointer} g_cursor;
 
 class Callbacks{
 
@@ -40,6 +41,10 @@ public:
 			return;
 		}
 
+		TwEventMouseMotionGLUT(xpos, ypos);
+
+		if (g_cursor == Pointer)
+			 return;
 		/*if(firstMouse)
 		{
 		lastX = xpos;
@@ -68,11 +73,26 @@ public:
 	{
 		handleKeyboardInput(KEY_STATE_PRESS,(KEY)key);
 
-
 		// When a user presses the escape key, break the main loop; 
 		// closing the application
 		if(key == KEY_ESCAPE)
 			glutLeaveMainLoop();
+
+		if(key == KEY_q)
+			switch (g_cursor)
+		{
+			case None:
+				g_cursor = Pointer;
+				glutSetCursor(GLUT_CURSOR_LEFT_ARROW); 
+				break;
+			case Pointer:
+				g_cursor = None;
+				glutSetCursor(GLUT_CURSOR_NONE); 
+				break;
+
+		}
+
+		TwEventKeyboardGLUT(key,x,y);
 
 		UserKeyboardCallback();
 	}   
@@ -82,7 +102,7 @@ public:
 		KEY_STATE KeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
 
 		UserMouseClickCallback(mouse,KeyState);
-		
+
 	}
 	/*
 	static void  Callbacks::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
@@ -90,6 +110,7 @@ public:
 	UserMouseScrollCallback(yoffset); 
 	}
 	*/
+
 
 private:
 
