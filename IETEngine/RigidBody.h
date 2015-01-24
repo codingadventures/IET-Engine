@@ -17,8 +17,6 @@ namespace Physics
 
 		RigidBody(Model&);
 
-	protected:
-
 	private:
 		float d_mass;
 
@@ -34,7 +32,7 @@ namespace Physics
 		glm::vec3 d_point;
 		glm::mat3 d_inverse_inertial_tensor;
 	public:
-		void Update(float delta_time);
+		void Update(float total_time, float delta_time);
 
 		void calculate_torque();
 
@@ -51,10 +49,9 @@ namespace Physics
 
 
 
-	void RigidBody::Update(float delta_time)
-	{
-		static bool test = true;
-		float inertia = 0.0f;
+	void RigidBody::Update(float total_time, float delta_time)
+	{ 
+
 		glm::quat orientation =  d_model.Rotation();
 
 		d_center_of_mass = d_model.GetModelMatrix() * glm::vec4(d_model.Center_of_mass(),0.0f);  
@@ -65,19 +62,16 @@ namespace Physics
 
 		calculate_torque();
 
+		float damping = glm::pow(0.6f,delta_time);
 
-		d_velocity = d_linear_momentum / d_mass;
+		d_linear_momentum  *= damping ;
+		d_angular_momentum *= damping ;
 
 		orientation = glm::normalize(orientation);
+
+
 		d_model.Rotate(orientation);
-		d_model.Translate(d_linear_momentum / d_mass);
-
-		//Calculate drag
-		d_linear_momentum += Friction::Air(d_velocity, d_model.Area()) * delta_time;
-		 d_angular_momentum += Friction::Air(d_angular_velocity, d_model.Area()) * delta_time;
-
-		 d_linear_momentum = glm::clamp(d_linear_momentum,glm::vec3(0.0f),d_linear_momentum);
-		 d_angular_momentum = glm::clamp(d_angular_momentum,glm::vec3(0.0f),d_angular_momentum);
+		d_model.Translate(d_linear_momentum * delta_time / d_mass);
 
 	}
 
@@ -94,16 +88,16 @@ namespace Physics
 
 	glm::mat3 RigidBody::set_as_cross_product_matrix(glm::vec3 v )
 	{
-		glm::mat3 bollox;
+		glm::mat3 cross_product_matrix;
 
-		bollox[1][0] = -v.z;
-		bollox[2][0] =	v.y;
-		bollox[0][1] =	v.z;
-		bollox[2][1] = -v.x;
-		bollox[0][2] = -v.y;
-		bollox[1][2] =  v.x;
+		cross_product_matrix[1][0] = -v.z;
+		cross_product_matrix[2][0] =  v.y;
+		cross_product_matrix[0][1] =  v.z;
+		cross_product_matrix[2][1] = -v.x;
+		cross_product_matrix[0][2] = -v.y;
+		cross_product_matrix[1][2] =  v.x;
 
-		return bollox;		
+		return cross_product_matrix;		
 	}
 
 	void RigidBody::calculate_torque()

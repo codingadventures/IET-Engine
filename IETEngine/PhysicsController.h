@@ -344,7 +344,7 @@ namespace Controller
 
 		BoundingBox b = d_cube_model->Bounding_box();
 
-		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,b.min_coordinate,b.min_coordinate);
+		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,b.min_coordinate,b.max_coordinate);
 
 		d_cube_model->Draw();
 
@@ -356,10 +356,12 @@ namespace Controller
 		p.Draw();
 
 		v.Position = d_cube_model->Center_of_mass();
+		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
+
 		Point p1(v);
 		p1.Draw();
 
-		d_rigid_body->Update(d_delta_time_secs);
+		d_rigid_body->Update(d_global_clock, d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);
 
 		vector<Vertex> vertices;
