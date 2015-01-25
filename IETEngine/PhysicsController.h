@@ -12,13 +12,12 @@
 
 #include <Magick++.h>
 #include "Model.h"
-#include "UI.h"
 #include "RigidBody.h"
-#include "AntTweakBar.h"
+
+#include "UI.h"
 
 namespace Controller
 {
-
 	using namespace std::placeholders;
 	using namespace Physics::Particles::Renderer;
 	using namespace Physics::Particles;
@@ -117,9 +116,9 @@ namespace Controller
 		//string integration_message = "4 - Integration Method - STATUS: " + integration_status;
 		//screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
 
-		char camera[100];
-		sprintf_s(camera,"Camera Position: %f,%f,%f",d_camera->Position.x,d_camera->Position.y,d_camera->Position.z);
-		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,camera);
+		char com[100];
+		sprintf_s(com,"Center of Mass: %f,%f,%f",d_rigid_body->Center_of_mass().x,d_rigid_body->Center_of_mass().y,d_rigid_body->Center_of_mass().z);
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,com);
 	
 		char Up[100];
 		sprintf_s(Up,"Camera Up: %f,%f,%f",d_camera->Up.x,d_camera->Up.y,d_camera->Up.z);
@@ -153,7 +152,7 @@ namespace Controller
 			euler_on = !euler_on;
 
 		if (g_keyMappings[KEY_SPACE])
-			d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point, d_delta_time_secs);
+			d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point , d_delta_time_secs);
 
 
 
@@ -180,19 +179,18 @@ namespace Controller
 	{
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		TwBar *myBar;
-		myBar = TwNewBar("TweakBar");
+		
+		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=150 "); // change default tweak bar size and color
 
 
 
-		TwAddVarRO(myBar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
-		TwAddVarCB(myBar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_cube_model, "");
-		TwAddVarCB(myBar, "cube.Com", TW_TYPE_DIR3F, NULL, Helper::UI::GetComCallback, d_cube_model, "");
+		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
+		TwAddVarCB(Helper::g_tweak_bar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_cube_model, ""); 
 
-		TwAddVarRW(myBar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
-		TwAddVarRW(myBar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
-		TwAddVarRW(myBar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
 
 		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
 	}
@@ -342,9 +340,9 @@ namespace Controller
 
 		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-		BoundingBox b = d_cube_model->Bounding_box();
+		BoundingBox bounding_box = d_cube_model->Bounding_box();
 
-		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,b.min_coordinate,b.max_coordinate);
+		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);
 
 		d_cube_model->Draw();
 
@@ -355,11 +353,29 @@ namespace Controller
 		Point p(v);
 		p.Draw();
 
-		v.Position = d_cube_model->Center_of_mass();
+		v.Position = glm::vec3(d_cube_model->Center_of_mass());
 		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
 
 		Point p1(v);
 		p1.Draw();
+
+		Vertex v1,v2;
+		v1.Position = d_force_impulse_application_point;
+		v1.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
+		v2.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
+		v2.Position = d_force_impulse_application_point + d_force_impulse_direction * d_force_impulse_magnitude;
+		Line l(v1,v2);
+		l.Draw();
+		
+		/*float theta = glm::radians(30.0f);
+		glm::vec3 b = (v2.Position - 0.1f*v2.Position);
+		glm::vec3 a = b * glm::tan(theta);
+		v1.Position =   b * glm::cos(theta) + a * sin(theta);
+	*/
+		
+		v2.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
+		Point p2(v2);
+		p2.Draw();
 
 		d_rigid_body->Update(d_global_clock, d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);

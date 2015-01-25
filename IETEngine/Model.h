@@ -41,7 +41,7 @@ namespace Rendering
 		glm::mat4*		m_animation_matrix;
 		Skeleton*		m_skeleton;
 		glm::vec3		m_Direction;
-		 
+
 	private:
 		Shader*			d_shader;
 
@@ -100,13 +100,15 @@ namespace Rendering
 		} 
 
 		glm::mat3 Inertia_tensor() const { return d_inertia_tensor; }
-		glm::vec3 Center_of_mass() const { return d_center_of_mass; } 
+		glm::vec3 Center_of_mass() const { 
+			return  d_center_of_mass ;
+		} 
 
 		float Mass() const   { return d_mass; } 
 		float Area() const { return d_area; }
 		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
 
-		
+
 
 		~Model()
 		{

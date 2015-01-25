@@ -5,6 +5,7 @@
 #include "Friction.h"
 #include <glm/gtx/orthonormalize.hpp>
 
+
 namespace Physics
 {
 	using namespace Drag;
@@ -20,8 +21,7 @@ namespace Physics
 	private:
 		float d_mass;
 
-		glm::vec4 d_center_of_mass;
-
+		glm::vec3 d_center_of_mass;
 		glm::vec3 d_force;
 		glm::vec3 d_velocity;
 		glm::vec3 d_acceleration;
@@ -31,12 +31,18 @@ namespace Physics
 		glm::vec3 d_angular_velocity;
 		glm::vec3 d_point;
 		glm::mat3 d_inverse_inertial_tensor;
+		glm::vec3 d_position;
 	public:
 		void Update(float total_time, float delta_time);
 
 		void calculate_torque();
 
 		void Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
+
+		glm::vec3 Center_of_mass() const;
+
+	 
+
 	private:
 		glm::mat3 set_as_cross_product_matrix(glm::vec3 v);
 	};
@@ -45,16 +51,16 @@ namespace Physics
 	{
 		d_mass = model.Mass();
 		d_inverse_inertial_tensor = glm::inverse(model.Inertia_tensor());
+		d_center_of_mass = d_model.Center_of_mass();
+		 
 	}
 
-
+	glm::vec3  RigidBody::Center_of_mass() const { return d_center_of_mass; } 
 
 	void RigidBody::Update(float total_time, float delta_time)
 	{ 
 
 		glm::quat orientation =  d_model.Rotation();
-
-		d_center_of_mass = d_model.GetModelMatrix() * glm::vec4(d_model.Center_of_mass(),0.0f);  
 
 		d_angular_velocity =  d_angular_momentum * d_inverse_inertial_tensor;
 
@@ -68,10 +74,12 @@ namespace Physics
 		d_angular_momentum *= damping ;
 
 		orientation = glm::normalize(orientation);
+		d_position =  d_linear_momentum * delta_time / d_mass;
+		d_center_of_mass += d_position ;
 
 
 		d_model.Rotate(orientation);
-		d_model.Translate(d_linear_momentum * delta_time / d_mass);
+		d_model.Translate(d_position);
 
 	}
 
@@ -79,7 +87,7 @@ namespace Physics
 	{
 		d_force = force;
 		d_acceleration = force / 1.0f;
-		d_point = application_point;
+		d_point = application_point ;
 		calculate_torque();
 		d_angular_momentum +=	d_torque * delta_time;
 		d_linear_momentum +=	d_force  * delta_time;
@@ -102,8 +110,11 @@ namespace Physics
 
 	void RigidBody::calculate_torque()
 	{
+		glm::vec3 point_world_space =  d_point + d_center_of_mass ;
 
-		d_torque = glm::cross(d_point - glm::vec3(d_center_of_mass), d_force);
+		glm::vec3 point_com_distance =  point_world_space -  d_center_of_mass ;
+
+		d_torque = glm::cross(point_com_distance, d_force);
 
 	}
 
