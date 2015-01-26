@@ -37,8 +37,8 @@ namespace Controller
 		void tweak_bar_setup();
 		void setup_current_instance();
 
-		GLint TextureFromFile(const char* fileName, string directory);
-
+		GLint	TextureFromFile(const char* fileName, string directory);
+		void TW_CALL apply_impulse_callback(void *clientData);
 	private:
 		Camera*		d_camera;
 		Shader*		d_shader;
@@ -66,6 +66,7 @@ namespace Controller
 		bool spinning_on;
 		bool wind_on;
 		bool euler_on;
+		bool d_is_springe_enabled;
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -175,6 +176,12 @@ namespace Controller
 
 	}
 
+	void TW_CALL  apply_impulse_callback(void *clientData)
+	{ 
+		//d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point , d_delta_time_secs);
+
+	}
+
 	void PhysicsController::tweak_bar_setup()
 	{
 		TwInit(TW_OPENGL_CORE, NULL);
@@ -191,9 +198,12 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
-
+		TwAddVarRW(Helper::g_tweak_bar, "Spring Force", TW_TYPE_BOOLCPP, &d_is_springe_enabled, "");
+ 		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", apply_impulse_callback, NULL, " label='Apply Impulse' ");
 		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
 	}
+
+	
 #pragma endregion  
 
 	GLint PhysicsController::TextureFromFile(const char* fileName, string directory)

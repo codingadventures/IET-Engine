@@ -84,6 +84,9 @@
     <ClCompile Include="RealTimeAnimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SpringGenerator.cpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
