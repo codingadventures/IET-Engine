@@ -31,8 +31,8 @@ namespace Rendering
 		vector<Texture> m_textures; 
 		vector<VertexWeight> m_boneWeights;
 		 
-		glm::vec3 m_center_of_mass;
-		glm::mat3 m_inertia_tensor;
+		glm::vec3 m_center_of_mass; 
+		glm::vec3 m_polyhedral_center_of_mass;
 	
 	private:
 		BoundingBox d_bounding_box;
@@ -155,7 +155,7 @@ namespace Rendering
 			glm::vec3* R	 = new glm::vec3[N];
 			glm::vec3 numerator;
 			glm::vec3 denominator;
-			for (int i = 0; i < N; i = i + 3) // for each facets --> numerator += R[i] * area[i], denominator += area[i] 
+			for (int i = 0; i < N; i = i + 3) // for each facet --> numerator += R[i] * area[i], denominator += area[i] 
 			{
 				glm::vec3 v1 = m_vertices[i].Position;
 				glm::vec3 v2 = m_vertices[i+1].Position;

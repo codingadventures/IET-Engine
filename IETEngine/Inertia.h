@@ -12,7 +12,7 @@ namespace Physics
 		static class Inertia
 		{
 		public:
-			static void Compute(Mesh& mesh, float& mass, glm::mat3 &inertia)
+			static void Compute_Polyhedral_Tensor(Mesh& mesh, float& mass, glm::mat3 &inertia)
 			{
 				static float mult[10]={1.0f/6.0f,1.0f/24.0f,1.0f/24.0f,1.0f/24.0f,1.0f/60.0f,1.0f/60.0f,1.0f/60.0f,1.0f/120.0f,1.0f/120.0f,1.0f/120.0f};
 				float intg[10]= {0,0,0,0,0,0,0,0,0,0}; 
@@ -71,17 +71,17 @@ namespace Physics
 				mass=intg[0];
 
 				//center of mass
-				mesh.m_center_of_mass.x=intg[1]/mass;
-				mesh.m_center_of_mass.y=intg[2]/mass;
-				mesh.m_center_of_mass.z=intg[3]/mass;
+				mesh.m_polyhedral_center_of_mass.x=intg[1]/mass;
+				mesh.m_polyhedral_center_of_mass.y=intg[2]/mass;
+				mesh.m_polyhedral_center_of_mass.z=intg[3]/mass;
 
 				//inertia tensor relative to center of mass
-				inertia[0][0]=intg[5]+intg[6]-mass*(mesh.m_center_of_mass.y*mesh.m_center_of_mass.y+mesh.m_center_of_mass.z*mesh.m_center_of_mass.z);
-				inertia[1][1]=intg[4]+intg[6]-mass*(mesh.m_center_of_mass.z*mesh.m_center_of_mass.z+mesh.m_center_of_mass.x*mesh.m_center_of_mass.x);
-				inertia[2][2]=intg[4]+intg[5]-mass*(mesh.m_center_of_mass.x*mesh.m_center_of_mass.x+mesh.m_center_of_mass.y*mesh.m_center_of_mass.y);
-				inertia[0][1]=-(intg[7]-mass*mesh.m_center_of_mass.x*mesh.m_center_of_mass.y);
-				inertia[1][2]=-(intg[8]-mass*mesh.m_center_of_mass.y*mesh.m_center_of_mass.z);
-				inertia[0][2]=-(intg[9]-mass*mesh.m_center_of_mass.z*mesh.m_center_of_mass.x);
+				inertia[0][0]=intg[5]+intg[6]-mass*(mesh.m_polyhedral_center_of_mass.y*mesh.m_polyhedral_center_of_mass.y+mesh.m_polyhedral_center_of_mass.z*mesh.m_polyhedral_center_of_mass.z);
+				inertia[1][1]=intg[4]+intg[6]-mass*(mesh.m_polyhedral_center_of_mass.z*mesh.m_polyhedral_center_of_mass.z+mesh.m_polyhedral_center_of_mass.x*mesh.m_polyhedral_center_of_mass.x);
+				inertia[2][2]=intg[4]+intg[5]-mass*(mesh.m_polyhedral_center_of_mass.x*mesh.m_polyhedral_center_of_mass.x+mesh.m_polyhedral_center_of_mass.y*mesh.m_polyhedral_center_of_mass.y);
+				inertia[0][1]=-(intg[7]-mass*mesh.m_polyhedral_center_of_mass.x*mesh.m_polyhedral_center_of_mass.y);
+				inertia[1][2]=-(intg[8]-mass*mesh.m_polyhedral_center_of_mass.y*mesh.m_polyhedral_center_of_mass.z);
+				inertia[0][2]=-(intg[9]-mass*mesh.m_polyhedral_center_of_mass.z*mesh.m_polyhedral_center_of_mass.x);
 
 				inertia = glm::transpose(inertia);
 			}

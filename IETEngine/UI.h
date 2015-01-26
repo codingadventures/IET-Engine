@@ -21,6 +21,11 @@ namespace Helper
 		{
 			*static_cast<float *>(value) = static_cast<const Model *>(clientData)->PolyhedralMass();
 		}
+
+		static void TW_CALL GetAreaCallback(void *value, void *clientData)
+		{
+			*static_cast<float *>(value) = static_cast<const Model *>(clientData)->Area();
+		}
 	 
 
 	};

@@ -62,6 +62,7 @@ namespace Rendering
 		glm::mat3		d_polyhedral_tensor;
 
 		glm::vec3		d_center_of_mass;
+		glm::vec3		d_polyhedral_center_of_mass;
 
 		BoundingBox		d_bounding_box;
 		float			d_area;
@@ -454,7 +455,7 @@ namespace Rendering
 			for (auto mesh : d_meshes)
 			{
 				Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertial_tensor);
-				Inertia::Compute(mesh,d_polyhedral_mass,d_polyhedral_tensor);
+				Inertia::Compute_Polyhedral_Tensor(mesh,d_polyhedral_mass,d_polyhedral_tensor);
 			}
 		}
 
@@ -485,6 +486,16 @@ namespace Rendering
 
 			d_center_of_mass /= d_meshes.size();
 		}
+
+		void calculate_polyhedral_center_of_mass(){
+			for (auto mesh : d_meshes)
+			{
+				d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;
+			}
+
+			d_polyhedral_center_of_mass /= d_meshes.size();
+		}
+
 
 
 
