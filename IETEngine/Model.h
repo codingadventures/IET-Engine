@@ -57,13 +57,18 @@ namespace Rendering
 		glm::mat4		d_scale;
 		glm::mat4		d_position;
 		glm::quat		d_rotation;
-		glm::mat3		d_inertia_tensor;
+		
+		glm::mat3		d_inertial_tensor;
+		glm::mat3		d_polyhedral_tensor;
 
 		glm::vec3		d_center_of_mass;
 
 		BoundingBox		d_bounding_box;
 		float			d_area;
 		float			d_mass;
+
+		float			d_polyhedral_mass;
+		float			d_calculated_area;
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
@@ -99,12 +104,15 @@ namespace Rendering
 
 		} 
 
-		glm::mat3 Inertia_tensor() const { return d_inertia_tensor; }
+		glm::mat3 InertialTensor() const { return d_inertial_tensor; }
+		glm::mat3 PolyhedralTensor() const { return d_polyhedral_tensor; }
+
 		glm::vec3 Center_of_mass() const { 
 			return  d_center_of_mass ;
 		} 
 
 		float Mass() const   { return d_mass; } 
+		float PolyhedralMass() const   { return d_polyhedral_mass; } 
 		float Area() const { return d_area; }
 		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
 
@@ -444,9 +452,13 @@ namespace Rendering
 		void calculate_inertia_tensor()
 		{ 
 			for (auto mesh : d_meshes)
-				Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertia_tensor);
-
+			{
+				Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertial_tensor);
+				Inertia::Compute(mesh,d_polyhedral_mass,d_polyhedral_tensor);
+			}
 		}
+
+		
 
 		void calculate_area()
 		{

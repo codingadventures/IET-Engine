@@ -25,7 +25,7 @@ namespace Physics
 	}  
 
 	//F = -k(distance - l0) d 
-	glm::vec3 SpringGenerator::GenerateForce( glm::vec3 end_point)
+	glm::vec3 SpringGenerator::GenerateForce(glm::vec3 end_point)
 	{
 		glm::vec3 l = d_start_point - end_point;
 		glm::vec3 d = glm::normalize(l);
@@ -34,6 +34,8 @@ namespace Physics
 
 
 		glm::vec3 F = - d_spring_coefficient * (distance - d_start_point) * d;
+
+		return F;
 	}
 
 

@@ -82,6 +82,8 @@ namespace Physics
 				inertia[0][1]=-(intg[7]-mass*mesh.m_center_of_mass.x*mesh.m_center_of_mass.y);
 				inertia[1][2]=-(intg[8]-mass*mesh.m_center_of_mass.y*mesh.m_center_of_mass.z);
 				inertia[0][2]=-(intg[9]-mass*mesh.m_center_of_mass.z*mesh.m_center_of_mass.x);
+
+				inertia = glm::transpose(inertia);
 			}
 			static void Compute_Tensor_With_AABB(BoundingBox& bb, float mass, glm::mat3 &inertia)
 			{

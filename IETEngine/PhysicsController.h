@@ -9,7 +9,7 @@
 #include "EulerUpdater.h"
 #include "Line.h"
 #include "ParticleSystem2.h" 
-
+#include "SpringGenerator.h" 
 #include <Magick++.h>
 #include "Model.h"
 #include "RigidBody.h"
@@ -66,7 +66,9 @@ namespace Controller
 		bool spinning_on;
 		bool wind_on;
 		bool euler_on;
-		bool d_is_springe_enabled;
+		bool d_is_spring_enabled;
+		bool d_use_polyhedral_tensor;
+		SpringGenerator* d_spring_generator;
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -120,7 +122,7 @@ namespace Controller
 		char com[100];
 		sprintf_s(com,"Center of Mass: %f,%f,%f",d_rigid_body->Center_of_mass().x,d_rigid_body->Center_of_mass().y,d_rigid_body->Center_of_mass().z);
 		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,com);
-	
+
 		char Up[100];
 		sprintf_s(Up,"Camera Up: %f,%f,%f",d_camera->Up.x,d_camera->Up.y,d_camera->Up.z);
 		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,Up);
@@ -131,11 +133,6 @@ namespace Controller
 		string controls = "Player/Camera W,A,S,D";
 		screen_output(10, 20, (char*) controls.c_str());
 
-
-
-
-		/*
-		*/
 
 
 	}
@@ -186,7 +183,7 @@ namespace Controller
 	{
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		
+
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=150 "); // change default tweak bar size and color
 
@@ -194,16 +191,17 @@ namespace Controller
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
 		TwAddVarCB(Helper::g_tweak_bar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_cube_model, ""); 
+		TwAddVarCB(Helper::g_tweak_bar, "cube.Polyhedral Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetCalculatedMassCallback, d_cube_model, ""); 
 
 		TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
-		TwAddVarRW(Helper::g_tweak_bar, "Spring Force", TW_TYPE_BOOLCPP, &d_is_springe_enabled, "");
- 		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", apply_impulse_callback, NULL, " label='Apply Impulse' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_use_polyhedral_tensor, "");
+		// 		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", apply_impulse_callback, NULL, " label='Apply Impulse' ");
 		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
 	}
 
-	
+
 #pragma endregion  
 
 	GLint PhysicsController::TextureFromFile(const char* fileName, string directory)
@@ -316,6 +314,7 @@ namespace Controller
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
+		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 	}
 
 	void PhysicsController::Run(){
@@ -328,7 +327,7 @@ namespace Controller
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- 
+
 		glEnable(GL_PROGRAM_POINT_SIZE); 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -375,19 +374,22 @@ namespace Controller
 		v2.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
 		v2.Position = d_force_impulse_application_point + d_force_impulse_direction * d_force_impulse_magnitude;
 		Line l(v1,v2);
-		l.Draw();
-		
+		//l.Draw();
+
 		/*float theta = glm::radians(30.0f);
 		glm::vec3 b = (v2.Position - 0.1f*v2.Position);
 		glm::vec3 a = b * glm::tan(theta);
 		v1.Position =   b * glm::cos(theta) + a * sin(theta);
-	*/
-		
+		*/
+
 		v2.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
 		Point p2(v2);
-		p2.Draw();
+		//p2.Draw();
 
-		d_rigid_body->Update(d_global_clock, d_delta_time_secs);
+		d_rigid_body->Update(d_delta_time_secs, d_use_polyhedral_tensor);
+		glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
+
+		//d_rigid_body->Apply_Impulse(spring_force,d_force_impulse_application_point + d_rigid_body->Center_of_mass(),d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);
 
 		vector<Vertex> vertices;
@@ -403,7 +405,7 @@ namespace Controller
 		//p.Draw();
 		d_shader_no_texture->Use();
 
-			text_to_screen();
+		text_to_screen();
 
 		//	glDisable(GL_BLEND);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

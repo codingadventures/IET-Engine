@@ -86,7 +86,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp" />
-    <ClCompile Include="SpringGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationClip.h" />
@@ -112,6 +111,7 @@
     <ClInclude Include="ParticleUpdater.h" />
     <ClInclude Include="PhysicsController.h" />
     <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />

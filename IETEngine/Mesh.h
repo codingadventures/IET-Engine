@@ -175,8 +175,7 @@ namespace Rendering
 		}
 	
 		void calculate_area()
-		{
-			 
+		{	 
 			 size_t N = m_vertices.size();
 			 for (int i = 0; i < N; i = i + 3)
 			 {

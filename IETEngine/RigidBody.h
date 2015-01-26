@@ -19,7 +19,8 @@ namespace Physics
 		RigidBody(Model&);
 
 	private:
-		float d_mass;
+		float d_mass; 
+		float d_polyhedral_mass;
 
 		glm::vec3 d_center_of_mass;
 		glm::vec3 d_force;
@@ -31,9 +32,11 @@ namespace Physics
 		glm::vec3 d_angular_velocity;
 		glm::vec3 d_point;
 		glm::mat3 d_inverse_inertial_tensor;
+		glm::mat3 d_inverse_polyhedral_tensor;
+
 		glm::vec3 d_position;
 	public:
-		void Update(float total_time, float delta_time);
+		void Update(float delta_time, bool use_polyhedral);
 
 		void calculate_torque();
 
@@ -41,7 +44,7 @@ namespace Physics
 
 		glm::vec3 Center_of_mass() const;
 
-	 
+
 
 	private:
 		glm::mat3 set_as_cross_product_matrix(glm::vec3 v);
@@ -50,21 +53,25 @@ namespace Physics
 	RigidBody::RigidBody(Model& model) : d_model(model)
 	{
 		d_mass = model.Mass();
-		d_inverse_inertial_tensor = glm::inverse(model.Inertia_tensor());
+		d_polyhedral_mass = model.PolyhedralMass();
+		d_inverse_inertial_tensor = glm::inverse(model.InertialTensor());
+		d_inverse_polyhedral_tensor = glm::inverse(model.PolyhedralTensor());
 		d_center_of_mass = d_model.Center_of_mass();
-		 
+
 	}
 
 	glm::vec3  RigidBody::Center_of_mass() const { return d_center_of_mass; } 
 
-	void RigidBody::Update(float total_time, float delta_time)
+	void RigidBody::Update(float delta_time, bool use_polyhedral)
 	{ 
-
 		glm::quat orientation =  d_model.Rotation();
+		glm::mat3 tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
-		d_angular_velocity =  d_angular_momentum * d_inverse_inertial_tensor;
 
-		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity))  ;
+		d_angular_velocity =  d_angular_momentum * tensor;
+
+		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) ;
 
 		calculate_torque();
 
@@ -74,7 +81,7 @@ namespace Physics
 		d_angular_momentum *= damping ;
 
 		orientation = glm::normalize(orientation);
-		d_position =  d_linear_momentum * delta_time / d_mass;
+		d_position =  d_linear_momentum * delta_time / mass;
 		d_center_of_mass += d_position ;
 
 
@@ -86,7 +93,7 @@ namespace Physics
 	void RigidBody::Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time)
 	{
 		d_force = force;
-		d_acceleration = force / 1.0f;
+		//d_acceleration = force / d_mass;
 		d_point = application_point ;
 		calculate_torque();
 		d_angular_momentum +=	d_torque * delta_time;
