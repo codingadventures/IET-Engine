@@ -263,6 +263,12 @@
     <ClInclude Include="SpringGenerator.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="RenderingController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingType.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">
@@ -284,6 +290,12 @@
       <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
     <None Include="particle.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="toon.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="toon.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
   </ItemGroup>

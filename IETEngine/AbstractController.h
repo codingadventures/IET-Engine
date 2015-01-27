@@ -34,12 +34,14 @@ namespace Controller
 		bool				d_pause;
 		glm::mat4			d_projection_matrix;
 		glm::mat4 			d_view_matrix;
+		float				d_fps;
 
 	protected:
 		virtual void Init(int argc, char* argv[]) = 0;
 		virtual void Run() = 0;
 
 		inline void update_timer( );
+		inline void calculate_fps( );
 	private:
 
 	};
@@ -50,8 +52,26 @@ namespace Controller
 		d_global_clock(0.0),
 		d_delta_time_secs(0.0),
 		d_time_at_reset(0.0),
+		d_fps(0.0f),
 		d_pause(false)
 	{
+
+	}
+
+	void AbstractController::calculate_fps( )
+	{
+		static unsigned int frame = 0;
+		static int timeBase = 0;
+
+		frame++;
+
+		int t = glutGet(GLUT_ELAPSED_TIME);
+		if (t - timeBase > 1000) 
+		{
+			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - timeBase));
+			timeBase = t;		
+			frame = 0;
+		}
 
 	}
 

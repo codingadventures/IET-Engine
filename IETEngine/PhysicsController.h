@@ -32,8 +32,7 @@ namespace Controller
 		~PhysicsController();
 		PhysicsController();
 	private:
-		void text_to_screen();
-		void calculate_fps( );
+		void text_to_screen(); 
 		void tweak_bar_setup();
 		void setup_current_instance();
 
@@ -48,7 +47,6 @@ namespace Controller
 
 		GLint		d_textureId;
 
-		float		d_fps;
 		float   	d_force_impulse_magnitude; 
 
 		GLParticleRenderer* d_particle_renderer;
@@ -90,7 +88,6 @@ namespace Controller
 		spinning_on(false),
 		waterfall_on(false),
 		wind_on(false),
-		d_fps(0.0f),
 		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
 		d_force_impulse_magnitude(10.0f),
 		d_force_impulse_application_point(0.0f)
@@ -155,23 +152,7 @@ namespace Controller
 
 
 	}
-
-	void PhysicsController::calculate_fps( )
-	{
-		static unsigned int frame = 0;
-		static int timeBase = 0;
-
-		frame++;
-
-		int t = glutGet(GLUT_ELAPSED_TIME);
-		if (t - timeBase > 1000) 
-		{
-			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - timeBase));
-			timeBase = t;		
-			frame = 0;
-		}
-
-	}
+	 
 
 	void TW_CALL  apply_impulse_callback(void *clientData)
 	{ 
@@ -301,7 +282,7 @@ namespace Controller
 
 		d_shader = new Shader("vertex.vert","particle.frag"); 
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
-		d_cube_model = new Model(d_shader, "models\\cubetri.obj");
+		d_cube_model = new Model("models\\cubetri.obj");
 
 		d_rigid_body = new RigidBody(*d_cube_model);
 		tweak_bar_setup();
@@ -354,7 +335,7 @@ namespace Controller
 
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);
 
-		d_cube_model->Draw();
+		d_cube_model->Draw(*d_shader);
 
 
 		Vertex v;

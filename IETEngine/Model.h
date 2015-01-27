@@ -42,9 +42,7 @@ namespace Rendering
 		Skeleton*		m_skeleton;
 		glm::vec3		m_Direction;
 
-	private:
-		Shader*			d_shader;
-
+	private:  
 		vector<Mesh>	d_meshes;
 		vector<Texture> d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
@@ -73,12 +71,11 @@ namespace Rendering
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
-		Model(Shader* shader, GLchar* path) :
-			d_shader(shader),
+		Model(GLchar* path) :
+		 
 			d_numberOfBone(0),
 			d_area(0.0f)
-		{
-			assert(shader);
+		{ 
 			assert(path);
 
 			m_skeleton = new Skeleton(); 
@@ -127,9 +124,9 @@ namespace Rendering
 
 		}
 		// Draws the model, and thus all its meshes
-		void Draw()
+		void Draw(Shader& shader)
 		{
-			this->d_shader->Use();
+			shader.Use();
 
 			this->d_model_matrix = GetModelMatrix();
 
@@ -138,7 +135,7 @@ namespace Rendering
 
 
 			for(GLuint i = 0; i < this->d_meshes.size(); i++)
-				this->d_meshes[i].Draw(*d_shader);
+				this->d_meshes[i].Draw(shader);
 		}
 
 		void Scale(glm::vec3 scale_vector)

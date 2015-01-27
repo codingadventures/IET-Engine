@@ -110,6 +110,8 @@
     <ClInclude Include="ParticleSystem2.h" />
     <ClInclude Include="ParticleUpdater.h" />
     <ClInclude Include="PhysicsController.h" />
+    <ClInclude Include="RenderingController.h" />
+    <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SwordBlock.h" />
@@ -154,6 +156,8 @@
     <None Include="fragment_notexture.frag" />
     <None Include="particle.frag" />
     <None Include="particle.vert" />
+    <None Include="toon.frag" />
+    <None Include="toon.vert" />
     <None Include="vertex.vert" />
     <None Include="vertex_bone.vert" />
   </ItemGroup>

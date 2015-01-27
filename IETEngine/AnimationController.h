@@ -298,13 +298,13 @@ namespace Controller
 
 			shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-			model_battlecruise->Draw();
+			model_battlecruise->Draw(TODO);
 
 			shaderBones->Use(); 
 
 			shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-			model_dartmaul->Draw();
+			model_dartmaul->Draw(TODO);
 		}
 
 		void Draw()
@@ -382,7 +382,7 @@ namespace Controller
 
 						droids[i]->Update(deltaTime);
 					}
-					droids[i]->model->Draw();
+					droids[i]->model->Draw(TODO);
 				}
 			}
 
