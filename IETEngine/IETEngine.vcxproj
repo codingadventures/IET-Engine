@@ -151,6 +151,10 @@
     <ClInclude Include="WalkRight.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ambient.frag" />
+    <None Include="ambient.vert" />
+    <None Include="diffuse.frag" />
+    <None Include="diffuse.vert" />
     <None Include="fragment.frag" />
     <None Include="fragment_bone.frag" />
     <None Include="fragment_notexture.frag" />

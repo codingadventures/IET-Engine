@@ -51,6 +51,11 @@ public:
 		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 	}
+
+	void SetUniform(string name, glm::vec3 value){
+		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		glUniform3fv(uniform, 1, glm::value_ptr(value));
+	}
 private:
 	 
 	GLint modelUniform;

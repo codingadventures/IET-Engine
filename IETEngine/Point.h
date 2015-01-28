@@ -12,7 +12,13 @@ public:
 		vertices.push_back(position); 
 		Init();
 	}
-
+	Point(glm::vec3 position, glm::vec4 color) { 
+		Vertex v;
+		v.Color = color;
+		v.Position = position;
+		vertices.push_back(v); 
+		Init();
+	}
 	Point(vector<Vertex> &positions) { 
 		if(positions.size()==0) return;
 		vertices = positions;

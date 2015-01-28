@@ -129,6 +129,7 @@ namespace Rendering
 			shader.Use();
 
 			this->d_model_matrix = GetModelMatrix();
+			
 
 			if (m_skeleton->getNumberOfBones()>0)
 				glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
@@ -257,12 +258,12 @@ namespace Rendering
 
 					memset(Name, 0, sizeof(Name));
 					sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-					GLint location = glGetUniformLocation(d_shader->Program, Name);
-					if (location == INVALID_UNIFORM_LOCATION) {
-						fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
-					}
+				//	GLint location = glGetUniformLocation(d_shader->Program, Name);
+//					if (location == INVALID_UNIFORM_LOCATION) {
+						//fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
+					//}
 
-					d_bone_location[i] = location;
+					//d_bone_location[i] = location;
 				}
 			}
 

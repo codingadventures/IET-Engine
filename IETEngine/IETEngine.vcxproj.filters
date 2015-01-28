@@ -298,5 +298,17 @@
     <None Include="toon.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="ambient.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="ambient.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="diffuse.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="diffuse.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

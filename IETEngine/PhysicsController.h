@@ -395,13 +395,7 @@ namespace Controller
 		TwDraw();
 		glutSwapBuffers();
 	}
-
-
-
-
-
-
-
+	 
 }
 
 #endif // PhysicsController_h__

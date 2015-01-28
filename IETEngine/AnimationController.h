@@ -298,13 +298,13 @@ namespace Controller
 
 			shader->SetModelViewProjection(model_battlecruise->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-			model_battlecruise->Draw(TODO);
+			model_battlecruise->Draw(*shader);
 
 			shaderBones->Use(); 
 
 			shaderBones->SetModelViewProjection(model_dartmaul->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-			model_dartmaul->Draw(TODO);
+			model_dartmaul->Draw(*shaderBones);
 		}
 
 		void Draw()

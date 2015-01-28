@@ -3,6 +3,8 @@
 
 enum RenderingType{
 	NONE,
+	AMBIENT,
+	DIFFUSE,
 	PHONG,
 	TOON,
 	GOURAUD
