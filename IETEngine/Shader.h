@@ -56,6 +56,11 @@ public:
 		GLint uniform =  glGetUniformLocation(Program, name.c_str());
 		glUniform3fv(uniform, 1, glm::value_ptr(value));
 	}
+
+	void SetUniform(string name, float value){
+		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		glUniform1f(uniform, value);
+	}
 private:
 	 
 	GLint modelUniform;

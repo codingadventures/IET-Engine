@@ -5,6 +5,7 @@ enum RenderingType{
 	NONE,
 	AMBIENT,
 	DIFFUSE,
+	SPECULAR,
 	PHONG,
 	TOON,
 	GOURAUD

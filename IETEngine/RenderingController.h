@@ -35,12 +35,22 @@ namespace Controller
 		RenderingType	d_rendering_type;
 
 		glm::vec3		d_light_direction;
-		glm::vec3		d_ambient_color;
 		glm::vec3		d_object_color;
-		glm::vec3		d_diffuse_color;
+		glm::vec3		d_ambient_component;
+		glm::vec3		d_diffuse_component;
+		glm::vec3		d_specular_component;
+
 		glm::vec3		d_light_position;
 
 		glm::quat		d_quaternion_rotation;
+
+		string			d_ambient_uniform_name;
+		string			d_diffuse_uniform_name;
+		string			d_specular_uniform_name;
+
+		float			d_shininess_component;
+
+		Shader* d_shader_specular;
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -50,6 +60,13 @@ namespace Controller
 		: d_rendering_type(NONE)
 	{
 		setup_current_instance();
+		d_ambient_component = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_diffuse_component = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_specular_component = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_ambient_uniform_name = "ambient_component";
+		d_diffuse_uniform_name = "diffuse_component";
+		d_specular_uniform_name = "specular_component";
+		d_shininess_component = 32.0f;
 	}
 	RenderingController::~RenderingController()
 	{
@@ -86,8 +103,8 @@ namespace Controller
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-		TwEnumVal lightEv[] = { { NONE, "None"}, {AMBIENT, "Ambient"},{DIFFUSE,"Diffuse"}, {GOURAUD, "Gouraud"}, {PHONG, "Phong"}, {TOON, "Toon"} };
-		TwType lightType = TwDefineEnum("LightType", lightEv, 6);
+		TwEnumVal lightEv[] = { { NONE, "None"}, {AMBIENT, "Ambient"},{DIFFUSE,"Diffuse"},{SPECULAR,"Specular"}, {GOURAUD, "Gouraud"}, {PHONG, "Phong"}, {TOON, "Toon"} };
+		TwType lightType = TwDefineEnum("LightType", lightEv, 7);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
@@ -95,14 +112,19 @@ namespace Controller
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
 		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
-		TwAddVarRW(Helper::g_tweak_bar, "ObjectColor", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
 
 	//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
-		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "ObjRotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" label='Object rotation' opened=true help='Change the object orientation.' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_ambient_color, " group='Light' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_diffuse_color, " group='Light' ");
+
+		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
+
+		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
+		TwAddVarRW(Helper::g_tweak_bar, "ObjectColor", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
+		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_ambient_component, " group='Light' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_diffuse_component, " group='Light' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_specular_component, " group='Light' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Shininess", TW_TYPE_FLOAT, &d_shininess_component, " group='Light' ");
 
 	}
 
@@ -153,7 +175,8 @@ namespace Controller
 		d_shader_ambient = new Shader("ambient.vert","ambient.frag");
 		d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
-
+		d_shader_specular = new Shader("specular.vert","specular.frag");
+		
 		d_cube_model = new Model("models\\cubetri.obj");
 
 		tweak_bar_setup();
@@ -189,16 +212,29 @@ namespace Controller
 		case AMBIENT:
 			current_shader = d_shader_ambient ;
 			current_shader->Use();
-			current_shader->SetUniform("ambient_color",d_ambient_color); 
+			current_shader->SetUniform(d_ambient_uniform_name,d_ambient_component); 
 			current_shader->SetUniform("model_color",d_object_color); 
 			break;
 		case DIFFUSE:
 			current_shader = d_shader_diffuse ;
 			current_shader->Use();
-			current_shader->SetUniform("ambient_color", d_ambient_color); 
-			current_shader->SetUniform("diffuse_color", d_diffuse_color); 
+			current_shader->SetUniform(d_ambient_uniform_name, d_ambient_component); 
+			current_shader->SetUniform(d_diffuse_uniform_name, d_diffuse_component); 
 			current_shader->SetUniform("model_color",  d_object_color); 
 			current_shader->SetUniform("light_position", d_light_position); 
+			break;
+		case SPECULAR:
+			current_shader = d_shader_specular ;
+			current_shader->Use();
+			current_shader->SetUniform(d_ambient_uniform_name, d_ambient_component); 
+			current_shader->SetUniform(d_diffuse_uniform_name, d_diffuse_component);  
+			current_shader->SetUniform(d_specular_uniform_name, d_specular_component);  
+			current_shader->SetUniform("eye_position", d_camera->Position); 
+			current_shader->SetUniform("model_color",  d_object_color); 
+
+			current_shader->SetUniform("shininess", d_shininess_component); 
+			current_shader->SetUniform("light_position", d_light_position); 
+
 			break;
 		case PHONG:
 			current_shader = d_shader_phong;

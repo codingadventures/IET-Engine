@@ -310,5 +310,11 @@
     <None Include="diffuse.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="specular.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="specular.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
