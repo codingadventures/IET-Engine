@@ -14,7 +14,7 @@ out vec3 Position;
 
 void main()
 {  
-	N = normals;
+	N = mat3(transpose(inverse(model))) * normals;
 
 	Position = vec3(model * vec4(position, 1.0f));
 

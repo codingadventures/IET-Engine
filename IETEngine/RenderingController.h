@@ -29,16 +29,18 @@ namespace Controller
 		Shader*			d_shader_toon;
 		Shader*			d_shader_ambient;
 		Shader*			d_shader_diffuse;
+		Shader*			d_shader_no_texture;
 
 		Model*			d_cube_model;
 		RenderingType	d_rendering_type;
+
 		glm::vec3		d_light_direction;
 		glm::vec3		d_ambient_color;
+		glm::vec3		d_object_color;
 		glm::vec3		d_diffuse_color;
 		glm::vec3		d_light_position;
 
 		glm::quat		d_quaternion_rotation;
-		Shader* d_shader_no_texture;
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -93,8 +95,9 @@ namespace Controller
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
 		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
-	
-		TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
+		TwAddVarRW(Helper::g_tweak_bar, "ObjectColor", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
+
+	//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "ObjRotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" label='Object rotation' opened=true help='Change the object orientation.' ");
@@ -156,7 +159,7 @@ namespace Controller
 		tweak_bar_setup();
  
 
-		d_light_position = glm::vec3(-10.0f,10.0f,0.0f);
+		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_LIGHTING); //enable lighting
@@ -187,12 +190,14 @@ namespace Controller
 			current_shader = d_shader_ambient ;
 			current_shader->Use();
 			current_shader->SetUniform("ambient_color",d_ambient_color); 
+			current_shader->SetUniform("model_color",d_object_color); 
 			break;
 		case DIFFUSE:
 			current_shader = d_shader_diffuse ;
 			current_shader->Use();
 			current_shader->SetUniform("ambient_color", d_ambient_color); 
 			current_shader->SetUniform("diffuse_color", d_diffuse_color); 
+			current_shader->SetUniform("model_color",  d_object_color); 
 			current_shader->SetUniform("light_position", d_light_position); 
 			break;
 		case PHONG:
