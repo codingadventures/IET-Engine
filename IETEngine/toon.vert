@@ -9,8 +9,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model; 
 
-
-varying vec3 N;
+out vec3 N;
 
 void main()
 {

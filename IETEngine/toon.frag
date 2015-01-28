@@ -1,6 +1,6 @@
 #version 330
  
-varying vec3 N;
+in vec3 N;
 uniform vec3 lightDir;
 
 void main()

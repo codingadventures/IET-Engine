@@ -34,6 +34,7 @@ namespace Controller
 		RenderingType	d_rendering_type;
 		glm::vec3		d_light_direction;
 		glm::vec3		d_ambient_color;
+		glm::vec3		d_diffuse_color;
 		glm::vec3		d_light_position;
 
 		glm::quat		d_quaternion_rotation;
@@ -92,11 +93,13 @@ namespace Controller
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
 		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
+	
 		TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "ObjRotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" label='Object rotation' opened=true help='Change the object orientation.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_ambient_color, " group='Light' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_diffuse_color, " group='Light' ");
 
 	}
 
@@ -146,18 +149,12 @@ namespace Controller
 		d_shader_toon = new Shader("toon.vert","toon.frag");
 		d_shader_ambient = new Shader("ambient.vert","ambient.frag");
 		d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
-
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
+
 		d_cube_model = new Model("models\\cubetri.obj");
 
 		tweak_bar_setup();
-
-		/*d_shader->Use();
-		d_textureId = TextureFromFile("particle.png","textures");*/
-		/*	GLint i = glGetUniformLocation(d_shader->Program, "tex");
-
-		glUniform1i(i,0);
-		*/
+ 
 
 		d_light_position = glm::vec3(-10.0f,10.0f,0.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -195,6 +192,9 @@ namespace Controller
 			current_shader = d_shader_diffuse ;
 			current_shader->Use();
 			current_shader->SetUniform("ambient_color", d_ambient_color); 
+			current_shader->SetUniform("diffuse_color", d_diffuse_color); 
+			current_shader->SetUniform("light_position", d_light_position); 
+			break;
 		case PHONG:
 			current_shader = d_shader_phong;
 			break;
