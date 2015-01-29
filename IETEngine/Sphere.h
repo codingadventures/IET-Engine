@@ -19,21 +19,21 @@ namespace Rendering
 		GLuint d_VAO;
 		vector<Vertex> d_vertices;
 	public:
-		Sphere(float radius, int resolution);
+		Sphere(float radius, int resolution, glm::vec4 color = glm::vec4(1.0f));
 		void Draw();
 
 	protected:
 	private:
-		void Init(float radius, int resolution);
+		void Init(float radius, int resolution,  glm::vec4 color);
 
 	};
 
-	Sphere::Sphere(float radius, int resolution)
+	Sphere::Sphere(float radius, int resolution, glm::vec4 color )
 	{
-		Init(radius, resolution);
+		Init(radius, resolution,color);
 	}
 
-	void Sphere::Init(float radius, int resolution)
+	void Sphere::Init(float radius, int resolution, glm::vec4 color)
 	{
 		float X1,Y1,X2,Y2,Z1,Z2;
 		float inc1,inc2,inc3,inc4,inc5,Radius1,Radius2;
@@ -65,15 +65,15 @@ namespace Rendering
 				Z2 = radius*sin(inc4);
 				
 				// insert the triangle coordinates
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)));
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2),color));
 				 
 				 
 				 
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1),color));
 
 
 				//indexVBO(v, t, n, indices, indexed_vertices, indexed_uvs, indexed_normals);	 

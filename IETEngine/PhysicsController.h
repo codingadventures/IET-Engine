@@ -316,8 +316,8 @@ namespace Controller
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+	 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_BLEND);
 		update_timer(); 
 		calculate_fps( );
 		/*d_particle_system2->d_wind_enabled = wind_on;
@@ -336,7 +336,7 @@ namespace Controller
 
 		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-		d_sphere = new Sphere(d_cube_model->Bounding_sphere().radius,10);
+		d_sphere = new Sphere(d_cube_model->Bounding_sphere().radius,10,glm::vec4(1.0f,0.0f,0.0f,0.5f));
 
 
 		BoundingBox bounding_box = d_cube_model->Bounding_box();
@@ -345,6 +345,11 @@ namespace Controller
 
 		d_cube_model->Draw(*d_shader);
 		d_sphere->Draw();
+
+
+		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
+
+		d_cube_model->Draw(*d_shader);
 
 		
 		Vertex v;
