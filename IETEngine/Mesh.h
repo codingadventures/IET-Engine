@@ -16,6 +16,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "BoundingBox.h" 
+#include "BoundingSphere.h"
 
 namespace Rendering
 {
@@ -35,7 +36,8 @@ namespace Rendering
 		glm::vec3 m_polyhedral_center_of_mass;
 	
 	private:
-		BoundingBox d_bounding_box;
+		BoundingBox		d_bounding_box;
+		BoundingSphere	d_bounding_sphere;
 		/*  Render data  */
 		GLuint VAO, VBO, EBO, boneVBO;
 		std::map<std::string, Bone> boneMapping;
@@ -53,6 +55,7 @@ namespace Rendering
 			//this->calculate_center_of_mass();
 			this->calculate_area();
 			this->calculate_bounding_box();
+			this->calculate_bounding_sphere();
 			this->setupMesh();
 		}   
 		// Render the mesh
@@ -92,6 +95,7 @@ namespace Rendering
 		float Area() const { return d_area; } 
 
 		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
+		Physics::BoundingSphere Bounding_sphere() const { return d_bounding_sphere; } 
 
 	private:
 		bool hasBones(){
@@ -190,7 +194,11 @@ namespace Rendering
 		{
 			d_bounding_box.Calculate(this->m_vertices);
 		}
-	 
+		
+		void calculate_bounding_sphere()
+		{
+			d_bounding_sphere.Calculate(m_vertices);
+		}
 	};
 }
 

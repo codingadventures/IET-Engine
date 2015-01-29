@@ -15,6 +15,7 @@
 #include "RigidBody.h"
 
 #include "UI.h"
+#include "Sphere.h"
 
 namespace Controller
 {
@@ -46,6 +47,8 @@ namespace Controller
 		Model*		d_cube_model;
 
 		GLint		d_textureId;
+
+		Sphere*		d_sphere;
 
 		float   	d_force_impulse_magnitude; 
 
@@ -297,6 +300,8 @@ namespace Controller
 		glEnable(GL_CULL_FACE);
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
+
+		//d_sphere = new Sphere(5.0f,10);
 	}
 
 	void PhysicsController::Run(){
@@ -311,7 +316,7 @@ namespace Controller
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		update_timer(); 
 		calculate_fps( );
@@ -331,13 +336,17 @@ namespace Controller
 
 		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
+		d_sphere = new Sphere(d_cube_model->Bounding_sphere().radius,10);
+
+
 		BoundingBox bounding_box = d_cube_model->Bounding_box();
 
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);
 
 		d_cube_model->Draw(*d_shader);
+		d_sphere->Draw();
 
-
+		
 		Vertex v;
 		v.Position = d_force_impulse_application_point;
 		v.Color = glm::vec4(1.0f,1.0f,0.0f,0.0f);
@@ -368,6 +377,9 @@ namespace Controller
 		Point p2(v2);
 		//p2.Draw();
 
+		 
+
+
 		d_rigid_body->Update(d_delta_time_secs, d_use_polyhedral_tensor);
 		glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
@@ -387,12 +399,15 @@ namespace Controller
 		//p.Draw();
 		d_shader_no_texture->Use();
 
-		text_to_screen();
+		//text_to_screen();
 
 		//	glDisable(GL_BLEND);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		TwDraw();
+		
+		free(d_sphere);
+
 		glutSwapBuffers();
 	}
 	 

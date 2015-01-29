@@ -63,6 +63,9 @@ namespace Rendering
 		glm::vec3		d_polyhedral_center_of_mass;
 
 		BoundingBox		d_bounding_box;
+		BoundingSphere	d_bounding_sphere;
+
+
 		float			d_area;
 		float			d_mass;
 
@@ -88,6 +91,7 @@ namespace Rendering
 			this->calculate_inertia_tensor();
 			this->calculate_area();
 			this->calculate_center_of_mass(); 
+			this->calculate_bounding_sphere();
 
 			if (m_skeleton->getNumberOfBones()>0)
 			{
@@ -113,6 +117,7 @@ namespace Rendering
 		float PolyhedralMass() const   { return d_polyhedral_mass; } 
 		float Area() const { return d_area; }
 		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
+		Physics::BoundingSphere Bounding_sphere() const { return d_bounding_sphere; } 
 
 
 
@@ -493,6 +498,16 @@ namespace Rendering
 
 			d_polyhedral_center_of_mass /= d_meshes.size();
 		}
+
+		void calculate_bounding_sphere()
+		{
+			for (auto mesh : d_meshes)
+			{
+				d_bounding_sphere = mesh.Bounding_sphere();
+
+			}
+		}
+
 
 
 

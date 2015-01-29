@@ -96,6 +96,7 @@
     <ClInclude Include="Blender.h" />
     <ClInclude Include="AbstractController.h" />
     <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoxGenerator.h" />
     <ClInclude Include="EulerUpdater.h" />
     <ClInclude Include="Friction.h" />
@@ -115,6 +116,7 @@
     <ClInclude Include="RenderingController.h" />
     <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
