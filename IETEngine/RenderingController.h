@@ -124,17 +124,16 @@ namespace Controller
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
 
 
-		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
-		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
+		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, " group='System' ");
 
 		//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
-		TwAddVarRW(Helper::g_tweak_bar, "ObjRotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
-			" label='Object rotation' opened=true help='Change the object orientation.' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Rotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
+			" group='Model' label='Object rotation' opened=true help='Change the object orientation.' ");
+		 
+		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
-		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
-
-		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
-		TwAddVarRW(Helper::g_tweak_bar, "ObjectColor", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
+		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Model Color", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_light_ambient, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
@@ -143,7 +142,7 @@ namespace Controller
 		TwAddVarRO(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_material_ambient, " group='Material' label='Material' ");
 		TwAddVarRO(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_material_diffuse, " group='Material' ");
 		TwAddVarRO(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_material_specular, " group='Material' ");
-		TwAddVarRO(Helper::g_tweak_bar, "Shininess", TW_TYPE_FLOAT, &d_shininess_component, " group='Material' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Shininess", TW_TYPE_FLOAT, &d_shininess_component, " group='Material' ");
 
 	}
 
@@ -196,7 +195,7 @@ namespace Controller
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
 		d_shader_phong = new Shader("specular.vert","specular.frag");
 
-		d_cube_model = new Model("models\\cubetri.obj");
+		d_cube_model = new Model("models\\cube.dae");
 		d_torus_model = new Model("models\\torus.dae");
 		//d_torus_model->Translate(glm::vec3(-10,0,0));
 		d_torus_model->Scale(glm::vec3(10,10,10));
@@ -206,7 +205,7 @@ namespace Controller
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glEnable(GL_LIGHTING); //enable lighting
+		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
 
