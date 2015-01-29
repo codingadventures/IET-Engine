@@ -1,27 +1,31 @@
 #version 330
 
-  
-uniform vec3 ambient_component;
-uniform vec3 diffuse_component;
-uniform vec3 model_color;
-uniform vec3 light_position;
+struct Light {
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
 
-in vec3 N;
-in vec3 Position;
+uniform vec3 model_color; 
+uniform Light light;
+
+in  vec3 N;
+in  vec3 Position;
+out vec4 color;
 
 void main()
 {
-	vec3 light_direction = normalize(light_position - Position);
+	vec3  light_direction = normalize(light.position - Position);
 	
 	 
 
-	vec3 norm = normalize(N);
+	vec3  norm 			  = normalize(N);
+	float diffuse 		  = max(dot(norm, light_direction), 0.0);
 
-	float diffuse = max(dot(norm, light_direction), 0.0);
+	float diffuseComponent  = diffuse * light.diffuse;
 
-	float diffuseComponent  = diffuse * diffuse_component;
+	vec3  result 		  = (light.ambient + diffuseComponent) * model_color ;
 
-	vec3 result = (ambient_component + diffuseComponent) * model_color ;
-
-	gl_FragColor = vec4(result, 1.0f);
+	color 				  = vec4(result, 1.0f);
 }

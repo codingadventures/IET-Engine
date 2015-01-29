@@ -1,34 +1,49 @@
 #version 330
 
-  
-uniform vec3 ambient_component;
-uniform vec3 diffuse_component;
-uniform vec3 specular_component;
-uniform vec3 model_color;
-uniform vec3 light_position;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+}; 
+
+struct Light {
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+ 
+uniform Material material;
+uniform Light 	 light;
+
+ 
+uniform vec3 model_color; 
 uniform vec3 eye_position;
-uniform float shininess;
+ 
 
 in vec3 N;
 in vec3 Position;
+out vec4 color;
 
 void main()
 {
-	vec3 light_direction = normalize(light_position - Position);
-	vec3 eye_direction =   normalize(eye_position - Position);
+	//Properties
+	vec3 light_direction 		= 	normalize(light.position - Position);
+	vec3 eye_direction 			=   normalize(eye_position - Position);
+	vec3 norm 					= 	normalize(N);
+	vec3 reflection_direction 	= 	reflect(-light_direction, norm);
 
-	vec3 norm = normalize(N);
+	//Diffuse Shading
+	float diffuse 	= max(dot(norm, light_direction), 0.0);
 
-	float diffuse = max(dot(norm, light_direction), 0.0);
+	//Specular Shading
+	float specular 	= pow(max(dot(eye_direction, reflection_direction), 0.0), material.shininess);
 
-	float Id  = diffuse * diffuse_component;
+	 // Combine results
+    vec3 ambient_color 	= light.ambient 	* material.ambient;
+    vec3 diffuse_color 	= light.diffuse 	* diffuse  * material.diffuse;
+    vec3 specular_color = light.specular 	* specular * material.specular;
 
-	vec3 reflection_direction = reflect(-light_direction, norm);
-
-	float specular = pow(max(dot(eye_direction, reflection_direction), 0.0), shininess);
-	vec3 Is = specular * specular_component;
-
-	vec3 result = (ambient_component + Id + Is ) * model_color ;
-
-	gl_FragColor = vec4(result, 1.0f);
+	color = vec4(ambient_color + diffuse_color + specular_color, 1.0f);
 }

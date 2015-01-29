@@ -1,11 +1,12 @@
 #version 330
  
 in vec3 N;
-uniform vec3 lightDir;
+in vec3 Position;
+uniform vec3 light_position;
 
 void main()
 {
-	float intensity = dot(lightDir, N);
+	float intensity = dot(light_position - Position, N);
 	vec4 color;
 	if (intensity > 0.95)
 		color = vec4(1.0,0.5,0.5,1.0);
