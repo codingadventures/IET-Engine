@@ -1,6 +1,6 @@
 #ifndef RenderingController_h__
 #define RenderingController_h__
-
+#define GLM_FORCE_RADIANS
 #include "AbstractController.h"
 #include "UI.h"
 #include "RenderingType.h"
@@ -127,7 +127,7 @@ namespace Controller
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
 		TwAddVarRW(Helper::g_tweak_bar, "Light", lightType, &d_rendering_type,NULL);
 
-	//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
+		//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "ObjRotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" label='Object rotation' opened=true help='Change the object orientation.' ");
 
@@ -135,7 +135,7 @@ namespace Controller
 
 		TwAddVarRW(Helper::g_tweak_bar, "LightPos", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' opened=true help='Change the light Position.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "ObjectColor", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
-		
+
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_light_ambient, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_light_specular, " group='Light' ");
@@ -195,13 +195,13 @@ namespace Controller
 		d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
 		d_shader_phong = new Shader("specular.vert","specular.frag");
-		
+
 		d_cube_model = new Model("models\\cubetri.obj");
 		d_torus_model = new Model("models\\torus.dae");
 		//d_torus_model->Translate(glm::vec3(-10,0,0));
 		d_torus_model->Scale(glm::vec3(10,10,10));
 		tweak_bar_setup();
- 
+
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -238,7 +238,7 @@ namespace Controller
 			break;
 		case DIFFUSE:
 			current_shader = d_shader_diffuse ;
-		 
+
 			light.SetShader(*current_shader);
 
 			current_shader->SetUniform("model_color",  d_object_color);  
@@ -249,7 +249,7 @@ namespace Controller
 			light.SetShader(*current_shader);			
 			current_shader->SetUniform("eye_position", d_camera->Position);  
 			break;
-		 
+
 		case TOON:
 			current_shader = d_shader_toon; 
 			current_shader->SetUniform("light_position", d_light_position); 
@@ -277,16 +277,28 @@ namespace Controller
 		p.Draw();
 
 		current_shader->Use();
-		
 
-		d_cube_model->Rotate(d_quaternion_rotation);
+		static glm::quat random_cube_rotation;
+		static glm::quat random_torus_rotation;
+
+		random_cube_rotation *= glm::angleAxis(glm::radians(20.0f), glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
+		random_torus_rotation *= glm::angleAxis(glm::radians(-15.0f), glm::vec3(0,1,0));
+
+		d_cube_model->Rotate(random_cube_rotation);
+		d_torus_model->Rotate(random_torus_rotation);
+
+		d_light_position.x =  15.5f * glm::cos((float)d_global_clock* .5);
+		d_light_position.y =  15.5f * glm::sin((float) d_global_clock* .5);
+		 d_light_position.z =  15.5f * glm::cos((float)d_global_clock* .5) ;
+		
+		//d_cube_model->Rotate(d_quaternion_rotation);
 
 
 		current_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
 		d_cube_model->Draw(*current_shader);
 
-		
+
 		current_shader->SetModelViewProjection(d_torus_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
 		d_torus_model->Draw(*current_shader);
