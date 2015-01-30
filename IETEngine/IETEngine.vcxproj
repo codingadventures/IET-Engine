@@ -158,6 +158,7 @@
   <ItemGroup>
     <None Include="ambient.frag" />
     <None Include="ambient.vert" />
+    <None Include="common.vert" />
     <None Include="diffuse.frag" />
     <None Include="diffuse.vert" />
     <None Include="fragment.frag" />
