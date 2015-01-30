@@ -15,7 +15,8 @@
 #include "RigidBody.h"
 
 #include "UI.h"
-#include "Sphere.h"
+#include "Sphere.h" 
+#include "Helper.h"
 
 namespace Controller
 {
@@ -43,7 +44,10 @@ namespace Controller
 		Shader*		d_shader;
 		Shader*		d_shader_no_texture;
 		RigidBody*	d_rigid_body;
+		RigidBody*	d_rigid_body2;
+
 		Model*		d_cube_model;
+		Model*		d_another_cube;
 
 		GLint		d_textureId;
 
@@ -242,17 +246,28 @@ namespace Controller
 		glutMouseFunc((GLUTmousebuttonfun)TwEventMouseButtonGLUT);
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
-
 		
 
-		d_shader = new Shader("vertex.vert","particle.frag"); 
-		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
+
+		vector<string> v_shader = ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
+		vector<string> f_shader = ArrayConversion<string>(1,string("particle.frag"));
+		vector<string> f_shader_no_texture = ArrayConversion<string>(1,string("fragment_notexture.frag"));
+
+		 
+	 	d_shader = new Shader(v_shader,f_shader); 
+		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
+
 		d_cube_model = new Model("models\\cubetri.obj");
 
 		d_rigid_body = new RigidBody(*d_cube_model);
 		tweak_bar_setup();
 
 		 
+		d_another_cube = new Model(*d_cube_model);
+
+		d_rigid_body2 = new RigidBody(*d_another_cube);
+
+		d_another_cube->Translate(glm::vec3(-10,0,0));
 		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
@@ -302,9 +317,9 @@ namespace Controller
 		d_sphere->Draw();
 
 
-		d_shader->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
+		d_shader->SetModelViewProjection(d_another_cube->GetModelMatrix(),d_view_matrix,d_projection_matrix);
 
-		d_cube_model->Draw(*d_shader);
+		d_another_cube->Draw(*d_shader);
 
 		
 		Vertex v;

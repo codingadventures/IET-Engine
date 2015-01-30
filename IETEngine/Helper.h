@@ -3,6 +3,8 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <assimp/scene.h> 
+#include <stdarg.h>
+
 #include "GL/glew.h"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -167,6 +169,22 @@ glm::vec3 cubicLerp(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, floa
 	a3 = v1; 
 	return (a0*t*t2 + a1*t2 + a2*t + a3);
 }
+ 
+template<typename T>
+vector<T> ArrayConversion(int n_args,...)
+{
+	vector<T> t;
+	va_list ap;
+	va_start(ap, n_args); 
+	for(int i = 0; i < n_args; i++) {
+		T a = va_arg(ap, T);
+		t.push_back(a);
+	}
+	va_end(ap);
+
+	return t;
+}
+
 #pragma endregion
 
 #endif // Helper_h__

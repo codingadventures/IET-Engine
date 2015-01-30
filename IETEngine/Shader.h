@@ -17,8 +17,8 @@ public:
 	GLuint Program;
 
 private:
-	const GLchar*	d_vertex_source_path;
-	const GLchar*	d_fragment_source_path;
+	vector<string>	d_vertex_source_path;
+	vector<string>	d_fragment_source_path;
 	
 	GLchar**		d_vertex_code;
 	
@@ -34,36 +34,37 @@ private:
 	GLint			d_vertex_shader;
 	GLint			d_fragment_shader;
 
-
+	string			d_model_uniform_name;
 
 
 
 
 public:
 	// Constructor reads and builds our shader
-	Shader(const GLchar* vertexSourcePath, const GLchar* fragmentSourcePath,size_t n_vertex =  1, size_t n_fragment = 1
-		, string modelUniformName = "mvp") 
-		: 
-	d_vertex_source_path(vertexSourcePath),
-		d_fragment_source_path(fragmentSourcePath),
-		d_n_fragment(n_fragment),
-		d_n_vertex(n_vertex)
+	Shader(string vertexSourcePath, string fragmentSourcePath, string modelUniformName = "mvp") 
+		: d_n_vertex(1),d_n_fragment(1),d_model_uniform_name(modelUniformName)
 	{
-		init_pointers();
-		load_vertex();
-		load_fragment();
-		compile();
-		link(); 
-		d_mvp_uniform = glGetUniformLocation(Program, modelUniformName.c_str()); 
+		
+		d_vertex_source_path.push_back(vertexSourcePath);
+		d_fragment_source_path.push_back(fragmentSourcePath);
+		init();
 	}
 
-	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths)
+	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths, string modelUniformName = "mvp")
+		: 
+		d_n_vertex(vertex_source_paths.size()),
+		d_n_fragment(fragment_source_paths.size()),
+		d_vertex_source_path(vertex_source_paths),
+		d_fragment_source_path(fragment_source_paths),
+		d_model_uniform_name(modelUniformName)
+	{
 
+		init();
+
+	} 
 	~Shader()
 	{
-		delete d_vertex_source_path;
-		delete d_fragment_source_path;
-
+	 
 		delete[] d_vertex_code;
 		delete[] d_fragment_code;
 
@@ -99,11 +100,22 @@ public:
 	}
 private:
 
+	void init()
+	{
+		init_pointers();
+		load_vertex();
+		load_fragment();
+		compile();
+		link(); 
+		d_mvp_uniform = glGetUniformLocation(Program, d_model_uniform_name.c_str()); 
+
+	}
+
 	void load_vertex()
 	{
 		for (size_t i = 0; i < d_n_vertex; i++)
 		{
-			Load(d_vertex_source_path,   d_vertex_code[i], d_vertex_string_count[i]);
+			Load(d_vertex_source_path[i],   d_vertex_code[i], d_vertex_string_count[i]);
 		}  
 	}
 
@@ -111,12 +123,12 @@ private:
 	{
 		for (size_t i = 0; i < d_n_fragment; i++)
 		{
-			Load(d_fragment_source_path, d_fragment_code[i],d_fragment_string_count[i]);
+			Load(d_fragment_source_path[i], d_fragment_code[i],d_fragment_string_count[i]);
 		} 
 
 	}
 
-	static void Load(const GLchar* source_path,  GLchar*& output,GLint& count )
+	static void Load(string source_path,  GLchar*& output,GLint& count )
 	{
 		string return_code;
 		try 
@@ -211,8 +223,9 @@ private:
 	void init_pointers()
 	{
 		d_vertex_code = new   GLchar*[d_n_vertex];
-		d_fragment_code = new    GLchar*[d_n_fragment];
 		d_vertex_string_count = new GLint[d_n_vertex];
+
+		d_fragment_code = new    GLchar*[d_n_fragment];
 		d_fragment_string_count = new GLint[d_n_fragment];
 	}
 

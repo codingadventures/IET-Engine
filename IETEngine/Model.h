@@ -44,6 +44,7 @@ namespace Rendering
 
 	private:  
 		vector<Mesh>	d_meshes;
+	 
 		vector<Texture> d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
 		string			d_directory;
@@ -56,42 +57,23 @@ namespace Rendering
 		glm::mat4		d_position;
 		glm::quat		d_rotation;
 		
-		glm::mat3		d_inertial_tensor;
-		glm::mat3		d_polyhedral_tensor;
+		
 
-		glm::vec3		d_center_of_mass;
-		glm::vec3		d_polyhedral_center_of_mass;
-
-		BoundingBox		d_bounding_box;
-		BoundingSphere	d_bounding_sphere;
-
-
-		float			d_area;
-		float			d_mass;
-
-		float			d_polyhedral_mass;
-		float			d_calculated_area;
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
 		Model(GLchar* path) :
 		 
 			d_numberOfBone(0),
-			d_area(0.0f)
+			 
 		{ 
 			assert(path);
 
 			m_skeleton = new Skeleton(); 
 
-			d_mass = 1.0f;
+			 
 
-			this->loadModel(path);
-			this->calculate_bounding_box();
-
-			this->calculate_inertia_tensor();
-			this->calculate_area();
-			this->calculate_center_of_mass(); 
-			this->calculate_bounding_sphere();
+			this->loadModel(path); 
 
 			if (m_skeleton->getNumberOfBones()>0)
 			{
@@ -106,19 +88,7 @@ namespace Rendering
 
 		} 
 
-		glm::mat3 InertialTensor() const { return d_inertial_tensor; }
-		glm::mat3 PolyhedralTensor() const { return d_polyhedral_tensor; }
-
-		glm::vec3 Center_of_mass() const { 
-			return  d_center_of_mass ;
-		} 
-
-		float Mass() const   { return d_mass; } 
-		float PolyhedralMass() const   { return d_polyhedral_mass; } 
-		float Area() const { return d_area; }
-		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
-		Physics::BoundingSphere Bounding_sphere() const { return d_bounding_sphere; } 
-
+	 
 
 
 		~Model()
@@ -158,6 +128,10 @@ namespace Rendering
 		}
 
 		glm::quat Rotation() const { return d_rotation; } 
+		
+		vector<Mesh>* Meshes() { 
+			return &d_meshes; 
+		}
 
 
 		void Rotate(glm::quat rotation)
@@ -453,60 +427,7 @@ namespace Rendering
 			return textures;
 		}
 
-		void calculate_inertia_tensor()
-		{ 
-			for (auto mesh : d_meshes)
-			{
-				Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertial_tensor);
-				Inertia::Compute_Polyhedral_Tensor(mesh,d_polyhedral_mass,d_polyhedral_tensor);
-			}
-		}
-
 		
-
-		void calculate_area()
-		{
-			for (auto mesh : d_meshes)
-				d_area += mesh.Area();
-		}
-
-		void calculate_bounding_box()
-		{
-
-			for (auto mesh : d_meshes)
-			{
-				d_bounding_box += mesh.Bounding_box();
-
-			}
-		}
-
-		void calculate_center_of_mass()
-		{
-			for (auto mesh : d_meshes)
-			{
-				d_center_of_mass += mesh.m_center_of_mass;
-			}
-
-			d_center_of_mass /= d_meshes.size();
-		}
-
-		void calculate_polyhedral_center_of_mass(){
-			for (auto mesh : d_meshes)
-			{
-				d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;
-			}
-
-			d_polyhedral_center_of_mass /= d_meshes.size();
-		}
-
-		void calculate_bounding_sphere()
-		{
-			for (auto mesh : d_meshes)
-			{
-				d_bounding_sphere = mesh.Bounding_sphere();
-
-			}
-		}
 
 
 

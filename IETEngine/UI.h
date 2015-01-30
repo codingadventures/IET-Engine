@@ -15,16 +15,16 @@ namespace Helper
 	public:
 		static void TW_CALL GetMassCallback(void *value, void *clientData)
 		{
-			*static_cast<float *>(value) = static_cast<const Model *>(clientData)->Mass();
+			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->Mass();
 		}
 		static void TW_CALL GetCalculatedMassCallback(void *value, void *clientData)
 		{
-			*static_cast<float *>(value) = static_cast<const Model *>(clientData)->PolyhedralMass();
+			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->PolyhedralMass();
 		}
 
 		static void TW_CALL GetAreaCallback(void *value, void *clientData)
 		{
-			*static_cast<float *>(value) = static_cast<const Model *>(clientData)->Area();
+			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->Area();
 		}
 	 
 

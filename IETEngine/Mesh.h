@@ -27,17 +27,17 @@ namespace Rendering
 	class Mesh {
 	public:
 		/*  Mesh Data  */
-		vector<Vertex> m_vertices;
-		vector<GLuint> m_indices;
-		vector<Texture> m_textures; 
-		vector<VertexWeight> m_boneWeights;
+		vector<Vertex>			 m_vertices;
+		vector<GLuint>			 m_indices;
+		vector<Texture>			 m_textures; 
+		vector<VertexWeight>	 m_boneWeights;
 		 
-		glm::vec3 m_center_of_mass; 
-		glm::vec3 m_polyhedral_center_of_mass;
+		glm::vec3				 m_center_of_mass; 
+		glm::vec3				 m_polyhedral_center_of_mass;
 	
 	private:
-		BoundingBox		d_bounding_box;
-		BoundingSphere	d_bounding_sphere;
+		BoundingBox				 d_bounding_box;
+		BoundingSphere			 d_bounding_sphere;
 		/*  Render data  */
 		GLuint VAO, VBO, EBO, boneVBO;
 		std::map<std::string, Bone> boneMapping;

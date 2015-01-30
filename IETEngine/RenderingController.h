@@ -169,12 +169,12 @@ namespace Controller
 
 		 
 
-		d_shader = new Shader("vertex.vert","particle.frag"); 
-		d_shader_toon = new Shader("toon.vert","toon.frag");
-		d_shader_ambient = new Shader("ambient.vert","ambient.frag");
-		d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
-		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
-		d_shader_phong = new Shader("specular.vert","specular.frag");
+		//d_shader = new Shader("vertex.vert","particle.frag"); 
+		//d_shader_toon = new Shader("toon.vert","toon.frag");
+		//d_shader_ambient = new Shader("ambient.vert","ambient.frag");
+		//d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
+		//d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
+		//d_shader_phong = new Shader("specular.vert","specular.frag");
 
 		d_cube_model = new Model("models\\cube.dae");
 		d_torus_model = new Model("models\\torus.dae");
