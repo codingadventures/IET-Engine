@@ -117,6 +117,7 @@
     <ClInclude Include="RenderingController.h" />
     <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="RigidBodyManager.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SwordBlock.h" />
