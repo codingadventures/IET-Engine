@@ -18,13 +18,15 @@ namespace Controller
 	extern "C" static void drawCallback();
 
 	using namespace std::placeholders;
+	namespace Cam = Camera;
 
 	class AbstractController
 	{
 	public: 
-		AbstractController();
-
+		AbstractController(string window_name);
+		~AbstractController();
 		virtual void Draw() = 0;
+
 	protected:
 		double				d_delta_time; 
 		double				d_delta_time_secs;
@@ -36,8 +38,10 @@ namespace Controller
 		glm::mat4 			d_view_matrix;
 		float				d_fps;
 
+		Cam::Camera*		d_camera;						//Freed in destructor
+		string				d_window_name;
 	protected:
-		virtual void Init(int argc, char* argv[]) = 0;
+		virtual void Init(int argc, char* argv[]);
 		virtual void Run() = 0;
 
 		inline void update_timer( );
@@ -46,16 +50,18 @@ namespace Controller
 
 	};
 
-	AbstractController::AbstractController():
+	AbstractController::AbstractController(string window_name):
 		d_delta_time(0.0),
 		d_old_time_since_start(0.0),
 		d_global_clock(0.0),
 		d_delta_time_secs(0.0),
 		d_time_at_reset(0.0),
 		d_fps(0.0f),
-		d_pause(false)
+		d_pause(false),
+		d_camera(nullptr),
+		d_window_name(window_name)
 	{
-
+		
 	}
 
 	void AbstractController::calculate_fps( )
@@ -87,6 +93,46 @@ namespace Controller
 			d_old_time_since_start = time_since_start;
 			d_global_clock += d_delta_time_secs;
 		}
+	}
+
+	void AbstractController::Init(int argc, char* argv[])
+	{
+		glutInit(&argc, argv);
+		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+		glutCreateWindow(d_window_name.c_str()); 
+		glutInitContextProfile(GLUT_CORE_PROFILE);
+
+		this->d_camera = new Cam::Camera();
+
+
+		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P 
+		UserMouseCallback = std::bind(&Cam::Camera::ProcessMouseMovement,d_camera, _1, _2);
+		UserMouseScrollCallback = std::bind(&Cam::Camera::ProcessMouseScroll,d_camera,_1);
+
+		glewExperimental = GL_TRUE;
+		glewInit();
+
+
+		glutDisplayFunc(drawCallback);
+		glutIdleFunc(drawCallback);
+
+		glutKeyboardFunc(Callbacks::keyboardCallback);
+		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
+		glutPassiveMotionFunc(Callbacks::mouseCallback);
+
+		glutSetCursor(GLUT_CURSOR_NONE); 
+		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
+		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
+
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
+
+	AbstractController::~AbstractController()
+	{
+		free(d_camera);
 	}
 
 	static AbstractController* g_CurrentInstance;

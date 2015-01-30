@@ -39,8 +39,7 @@ namespace Controller
 
 		GLint	TextureFromFile(const char* fileName, string directory);
 		void TW_CALL apply_impulse_callback(void *clientData);
-	private:
-		Camera*		d_camera;
+	private: 
 		Shader*		d_shader;
 		Shader*		d_shader_no_texture;
 		RigidBody*	d_rigid_body;
@@ -86,7 +85,8 @@ namespace Controller
 	}
 
 	PhysicsController::PhysicsController() 	
-		: d_camera(nullptr),
+		: 
+		AbstractController("Physics Simulations"),
 		d_shader(nullptr),
 		spinning_on(false),
 		waterfall_on(false),
@@ -225,51 +225,17 @@ namespace Controller
 
 	void PhysicsController::Init(int argc, char* argv[])
 	{
-		glutInit(&argc, argv);
-		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		glutCreateWindow("Particle System"); 
-		glutInitContextProfile(GLUT_CORE_PROFILE);
+		
+		AbstractController::Init(argc,argv);
 
-
-		glewExperimental = GL_TRUE;
-		glewInit();
-
-
-		glutDisplayFunc(drawCallback);
-		glutIdleFunc(drawCallback);
-
-		this->d_camera = new Camera(glm::vec3(0.0f,0.0f,20.0f));
+		d_camera->Position = glm::vec3(0,0,20);
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 2.0f;
-		d_camera->SetTarget(glm::vec3(0,0,0));
-		d_particle_system2 = new ParticleSystem2(10000);
+		d_camera->MovementSpeed = 2.0f; 
+		 
 
-
-		/*this->d_particle_renderer = new GLParticleRenderer();
-		this->d_particle_system = new ParticleSystem(1000);
-
-		d_box_generator = std::make_shared<BoxGenerator>(glm::vec4(0.0f,0.0f,0.0f,1.0f));
-		d_particle_emitter = std::make_shared<ParticleEmitter>();
-		d_particle_emitter->m_emit_rate = 100;
-		d_particle_emitter->addGenerator(d_box_generator);
-
-		d_particle_updater = std::make_shared<EulerUpdater>();
-		d_particle_updater->m_globalAcceleration = glm::vec4(0.0f,-9.8f,0.0f,0.0f);
-
-		d_particle_system->addUpdater(d_particle_updater);
-		d_particle_system->addEmitter(d_particle_emitter);
-
-		d_particle_renderer->generate(d_particle_system, false);*/
-
-		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,d_camera, _1, _2);
-		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,d_camera,_1);
 		UserKeyboardCallback = std::bind(&PhysicsController::Read_Input,this); 
 
-		glutKeyboardFunc(Callbacks::keyboardCallback);
-		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
-		glutPassiveMotionFunc(Callbacks::mouseCallback);
+		
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
@@ -277,11 +243,7 @@ namespace Controller
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
 
-		glutSetCursor(GLUT_CURSOR_NONE); 
-
-		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
-
-		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
+		
 
 		d_shader = new Shader("vertex.vert","particle.frag"); 
 		d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
@@ -290,18 +252,11 @@ namespace Controller
 		d_rigid_body = new RigidBody(*d_cube_model);
 		tweak_bar_setup();
 
-		/*d_shader->Use();
-		d_textureId = TextureFromFile("particle.png","textures");*/
-		/*	GLint i = glGetUniformLocation(d_shader->Program, "tex");
-
-		glUniform1i(i,0);
-		*/
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
+		 
 		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 
-		//d_sphere = new Sphere(5.0f,10);
+		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
+
 	}
 
 	void PhysicsController::Run(){

@@ -8,7 +8,7 @@
 #include "Material.h"
 
 namespace Controller
-{
+{ 
 	class RenderingController : public AbstractController
 	{
 	public: 
@@ -23,7 +23,6 @@ namespace Controller
 		void tweak_bar_setup();
 		void setup_current_instance();
 	private:
-		Camera*			d_camera;
 
 		Shader*			d_shader;
 		Shader*			d_shader_gouraud;
@@ -65,7 +64,9 @@ namespace Controller
 	}
 
 	RenderingController::RenderingController()
-		: d_rendering_type(NONE)
+		: 
+		AbstractController("Real Time Rendering"),
+		d_rendering_type(NONE)
 	{
 		setup_current_instance();
 		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
@@ -148,33 +149,17 @@ namespace Controller
 
 	void RenderingController::Init(int argc, char* argv[])
 	{
-		glutInit(&argc, argv);
-		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		glutCreateWindow("Real Time Rendering"); 
-		glutInitContextProfile(GLUT_CORE_PROFILE);
+		AbstractController::Init(argc,argv);  
 
-
-		glewExperimental = GL_TRUE;
-		glewInit();
-
-
-		glutDisplayFunc(drawCallback);
-		glutIdleFunc(drawCallback);
-
-		this->d_camera = new Camera(glm::vec3(0.0f,0.0f,20.0f));
+		this->d_camera->Position = glm::vec3(0.0f,0.0f,20.0f);
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 2.0f;
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-		UserMouseCallback = std::bind(&Camera::ProcessMouseMovement,d_camera, _1, _2);
-		UserMouseScrollCallback = std::bind(&Camera::ProcessMouseScroll,d_camera,_1);
+		
 		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
-
-		glutKeyboardFunc(Callbacks::keyboardCallback);
-		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
-		glutPassiveMotionFunc(Callbacks::mouseCallback);
+		 
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
@@ -182,11 +167,7 @@ namespace Controller
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
 
-		glutSetCursor(GLUT_CURSOR_NONE); 
-
-		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
-
-		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
+		 
 
 		d_shader = new Shader("vertex.vert","particle.frag"); 
 		d_shader_toon = new Shader("toon.vert","toon.frag");
@@ -203,8 +184,7 @@ namespace Controller
 
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		 
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}

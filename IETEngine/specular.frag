@@ -17,8 +17,7 @@ struct Light {
 uniform Material material;
 uniform Light 	 light;
 
- 
-uniform vec3 model_color; 
+  
 uniform vec3 eye_position;
  
 

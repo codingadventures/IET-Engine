@@ -10,28 +10,65 @@ using namespace std;
 
 class Shader
 {
+
+
 public:
 	// Our program ID
 	GLuint Program;
+
+private:
+	const GLchar*	d_vertex_source_path;
+	const GLchar*	d_fragment_source_path;
+	
+	GLchar**		d_vertex_code;
+	
+	GLchar**		d_fragment_code;
+
+	GLint*			d_vertex_string_count;
+	GLint*			d_fragment_string_count;
+
+	const size_t	d_n_vertex;
+	const size_t	d_n_fragment;
+
+	GLint			d_mvp_uniform; 
+	GLint			d_vertex_shader;
+	GLint			d_fragment_shader;
+
+
+
+
+
+
+public:
 	// Constructor reads and builds our shader
-	Shader(const GLchar* vertexSourcePath, const GLchar* fragmentSourcePath
-		, string modelUniformName = "model"
-		, string viewUniformName = "view"
-		, string projectionUniformName = "projection") 
-		: vertexSourcePath(vertexSourcePath),fragmentSourcePath(fragmentSourcePath)
+	Shader(const GLchar* vertexSourcePath, const GLchar* fragmentSourcePath,size_t n_vertex =  1, size_t n_fragment = 1
+		, string modelUniformName = "mvp") 
+		: 
+	d_vertex_source_path(vertexSourcePath),
+		d_fragment_source_path(fragmentSourcePath),
+		d_n_fragment(n_fragment),
+		d_n_vertex(n_vertex)
 	{
-		load();
+		init_pointers();
+		load_vertex();
+		load_fragment();
 		compile();
 		link(); 
-		modelUniform = glGetUniformLocation(Program, modelUniformName.c_str());
-		viewUniform = glGetUniformLocation(Program, viewUniformName.c_str());
-		projectionUniform = glGetUniformLocation(Program, projectionUniformName.c_str());
+		d_mvp_uniform = glGetUniformLocation(Program, modelUniformName.c_str()); 
 	}
+
+	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths)
 
 	~Shader()
 	{
-		delete vertexSourcePath;
-		delete fragmentSourcePath;
+		delete d_vertex_source_path;
+		delete d_fragment_source_path;
+
+		delete[] d_vertex_code;
+		delete[] d_fragment_code;
+
+		delete d_vertex_string_count;
+		delete d_fragment_string_count;
 	}
 	// Use our program
 	void Use()
@@ -41,15 +78,14 @@ public:
 
 	void SetModel(glm::mat4 model)
 	{
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(d_mvp_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
 	}
 
 	void SetModelViewProjection(glm::mat4 model,  glm::mat4 view, glm::mat4 projection)
 	{
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
+		glm::mat4 mvp = projection * view * model;
+		glUniformMatrix4fv(d_mvp_uniform, 1, GL_FALSE, glm::value_ptr(mvp)); 
 	}
 
 	void SetUniform(string name, glm::vec3 value){
@@ -62,80 +98,94 @@ public:
 		glUniform1f(uniform, value);
 	}
 private:
-	 
-	GLint modelUniform;
-	GLint viewUniform ;
-	GLint projectionUniform;
-	GLint vertexShader;
-	GLint fragmentShader;
 
-	const GLchar* vertexSourcePath;
-	const GLchar* fragmentSourcePath;
-
-	string vCode,fCode;
-
-
-	void load()
+	void load_vertex()
 	{
-		// 1. Retrieve the vertex/fragment source code from filePath
+		for (size_t i = 0; i < d_n_vertex; i++)
+		{
+			Load(d_vertex_source_path,   d_vertex_code[i], d_vertex_string_count[i]);
+		}  
+	}
+
+	void load_fragment()
+	{
+		for (size_t i = 0; i < d_n_fragment; i++)
+		{
+			Load(d_fragment_source_path, d_fragment_code[i],d_fragment_string_count[i]);
+		} 
+
+	}
+
+	static void Load(const GLchar* source_path,  GLchar*& output,GLint& count )
+	{
+		string return_code;
 		try 
 		{
 			// Open files
-			ifstream vShaderFile(vertexSourcePath);
-			ifstream fShaderFile(fragmentSourcePath);
-			stringstream vShaderStream, fShaderStream;
+			ifstream vShaderFile(source_path);
+			//ifstream fShaderFile(d_fragment_source_path);
+			stringstream vShaderStream;
 			// Read file's buffer contents into streams
 			vShaderStream << vShaderFile.rdbuf();
-			fShaderStream << fShaderFile.rdbuf();		
+			//fShaderStream << fShaderFile.rdbuf();		
 			// close file handlers
 			vShaderFile.close();
-			fShaderFile.close();
+			//fShaderFile.close();
 			// Convert stream into GLchar array
-			vCode = vShaderStream.str();
-			fCode = fShaderStream.str();		
-
-
+			return_code = vShaderStream.str();
+			//	d_fragment_code = fShaderStream.str();		
 		}
 		catch(exception e)
 		{
-			cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << endl;
+			cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << source_path << endl;
 		}
+		 
+		count = return_code.length(); 
+		output = new GLchar[count];
+		std::size_t length = return_code.copy(output,count,0);
+		output[length]= '\0';
 	}
+
 	void compile()
 	{
-		vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-		const GLchar* vertexCode =  vCode.c_str();;
-		const GLchar* fragmentCode = fCode.c_str();
-#pragma region [ Vertex Shader ]
-		glShaderSource(vertexShader, 1, &vertexCode , nullptr);
-		glCompileShader(vertexShader);
-
+		const GLchar* vertex_code_char;
+		const GLchar* fragment_code_char;
 		GLint success;
 		GLchar infoLog[512];
-		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+
+		d_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+		d_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+
+#pragma region [ Vertex Shader ]
+		glShaderSource(d_vertex_shader, d_n_vertex, d_vertex_code , d_vertex_string_count);
+		glCompileShader(d_vertex_shader);
+
+		glGetShaderiv(d_vertex_shader, GL_COMPILE_STATUS, &success);
 		if(!success)
 		{
-			glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+			glGetShaderInfoLog(d_vertex_shader, 512, nullptr, infoLog);
 			cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog <<  endl;
 		}
 #pragma endregion
+
 #pragma region [ Fragment Shader ]
-		glShaderSource(fragmentShader, 1, &fragmentCode, nullptr);
-		glCompileShader(fragmentShader);
-		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+		glShaderSource(d_fragment_shader, d_n_fragment, d_fragment_code, d_fragment_string_count);
+		glCompileShader(d_fragment_shader);
+		glGetShaderiv(d_fragment_shader, GL_COMPILE_STATUS, &success);
 		if(!success)
 		{
-			glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+			glGetShaderInfoLog(d_fragment_shader, 512, nullptr, infoLog);
 			cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog <<  endl;
 		} 
 #pragma endregion
 
 		this->Program = glCreateProgram();
-		glAttachShader(this->Program, vertexShader);
-		glAttachShader(this->Program, fragmentShader); 
+		glAttachShader(this->Program, d_vertex_shader);
+		glAttachShader(this->Program, d_fragment_shader); 
 	}
+
 	void link()
 	{
 		GLint success;
@@ -153,9 +203,18 @@ private:
 			cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog <<  endl;
 		}
 
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);  
+		glDeleteShader(d_vertex_shader);
+		glDeleteShader(d_fragment_shader);  
 
 	}
+
+	void init_pointers()
+	{
+		d_vertex_code = new   GLchar*[d_n_vertex];
+		d_fragment_code = new    GLchar*[d_n_fragment];
+		d_vertex_string_count = new GLint[d_n_vertex];
+		d_fragment_string_count = new GLint[d_n_fragment];
+	}
+
 
 };
