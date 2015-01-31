@@ -51,8 +51,6 @@ namespace Controller
 
 		GLint		d_textureId;
 
-		Sphere*		d_sphere;
-
 		float   	d_force_impulse_magnitude; 
 
 		GLParticleRenderer* d_particle_renderer;
@@ -66,11 +64,11 @@ namespace Controller
 		glm::vec3 d_force_impulse_direction;
 		glm::vec3 d_force_impulse_application_point;
 
-		bool waterfall_on;
+		/*bool waterfall_on;
 		bool spinning_on;
 		bool wind_on;
 		bool euler_on;
-		bool d_is_spring_enabled;
+		bool d_is_spring_enabled;*/
 		bool d_use_polyhedral_tensor;
 		SpringGenerator* d_spring_generator;
 	};
@@ -92,9 +90,9 @@ namespace Controller
 		: 
 		AbstractController("Physics Simulations"),
 		d_shader(nullptr),
-		spinning_on(false),
+		/*	spinning_on(false),
 		waterfall_on(false),
-		wind_on(false),
+		wind_on(false),*/
 		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
 		d_force_impulse_magnitude(10.0f),
 		d_force_impulse_application_point(0.0f)
@@ -143,15 +141,15 @@ namespace Controller
 
 	void PhysicsController::Read_Input()
 	{
-		if (g_keyMappings[KEY_1])
-			waterfall_on = !waterfall_on;
+		/*if (g_keyMappings[KEY_1])
+		waterfall_on = !waterfall_on;
 		if (g_keyMappings[KEY_2])
-			spinning_on = !spinning_on;
+		spinning_on = !spinning_on;
 		if (g_keyMappings[KEY_3])
-			wind_on = !wind_on;
+		wind_on = !wind_on;
 
 		if (g_keyMappings[KEY_4])
-			euler_on = !euler_on;
+		euler_on = !euler_on;*/
 
 		if (g_keyMappings[KEY_SPACE])
 			d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point , d_delta_time_secs);
@@ -159,7 +157,7 @@ namespace Controller
 
 
 	}
-	 
+
 
 	void TW_CALL  apply_impulse_callback(void *clientData)
 	{ 
@@ -229,46 +227,52 @@ namespace Controller
 
 	void PhysicsController::Init(int argc, char* argv[])
 	{
-		
+
 		AbstractController::Init(argc,argv);
 
 		d_camera->Position = glm::vec3(0,0,20);
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 2.0f; 
-		 
+
 
 		UserKeyboardCallback = std::bind(&PhysicsController::Read_Input,this); 
 
-		
+
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
 		glutMouseFunc((GLUTmousebuttonfun)TwEventMouseButtonGLUT);
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
-		
 
 
-		vector<string> v_shader = ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
-		vector<string> f_shader = ArrayConversion<string>(1,string("particle.frag"));
-		vector<string> f_shader_no_texture = ArrayConversion<string>(1,string("fragment_notexture.frag"));
 
-		 
-	 	d_shader = new Shader(v_shader,f_shader); 
+		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
+		vector<string> f_shader				= ArrayConversion<string>(1,string("particle.frag"));
+		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
+
+		d_rigid_body_manager = new RigidBodyManager(false);
+
+		d_shader = new Shader(v_shader,f_shader); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
 
 		d_cube_model = new Model("models\\cubetri.obj");
 
 		d_rigid_body = new RigidBody(*d_cube_model);
-		tweak_bar_setup();
 
-		 
+
 		d_another_cube = new Model(*d_cube_model);
+
+		d_another_cube->Translate(glm::vec3(-10,0,0));
 
 		d_rigid_body2 = new RigidBody(*d_another_cube);
 
-		d_another_cube->Translate(glm::vec3(-10,0,0));
 		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
+
+		d_rigid_body_manager->Add(d_rigid_body);
+		d_rigid_body_manager->Add(d_rigid_body2);
+
+		tweak_bar_setup();
 
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 
@@ -286,14 +290,13 @@ namespace Controller
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-	 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_BLEND);
-		update_timer(); 
-		calculate_fps( );
-		/*d_particle_system2->d_wind_enabled = wind_on;
-		d_particle_system2->d_spinning_enabled = spinning_on;
-		d_particle_system2->d_waterfall_enabled = waterfall_on;
-		d_particle_system2->d_euler_enabled = euler_on;*/
+		Update_Timer(); 
+		Calculate_Fps( );
+
+
+
 		d_shader->Use();
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
@@ -302,37 +305,23 @@ namespace Controller
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
-		//d_shader->Use();
+		glm::mat4 projection_view = d_projection_matrix * d_view_matrix;// * d_cube_model->GetModelMatrix();
 
-		d_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
+		d_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
 
-		d_sphere = new Sphere(d_cube_model->Bounding_sphere().radius,10,glm::vec4(1.0f,0.0f,0.0f,0.5f));
+		d_rigid_body_manager->Update(d_delta_time_secs);
 
+		d_rigid_body_manager->Check_Sphere_Collisions();
 
-		BoundingBox bounding_box = d_cube_model->Bounding_box();
-
-		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);
+		/*
+		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
 
 		d_cube_model->Draw(*d_shader);
-		d_sphere->Draw();
 
-
-		d_shader->SetModelViewProjection(d_another_cube->GetModelMatrix(),d_view_matrix,d_projection_matrix);
+		d_shader->SetUniform("mvp",projection_view * d_another_cube->GetModelMatrix());
 
 		d_another_cube->Draw(*d_shader);
 
-		
-		Vertex v;
-		v.Position = d_force_impulse_application_point;
-		v.Color = glm::vec4(1.0f,1.0f,0.0f,0.0f);
-		Point p(v);
-		p.Draw();
-
-		v.Position = glm::vec3(d_cube_model->Center_of_mass());
-		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
-
-		Point p1(v);
-		p1.Draw();
 
 		Vertex v1,v2;
 		v1.Position = d_force_impulse_application_point;
@@ -352,7 +341,7 @@ namespace Controller
 		Point p2(v2);
 		//p2.Draw();
 
-		 
+
 
 
 		d_rigid_body->Update(d_delta_time_secs, d_use_polyhedral_tensor);
@@ -371,6 +360,10 @@ namespace Controller
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
 
+		d_shader->SetUniform("mvp",projection_view);
+
+		d_rigid_body_manager->Draw_Boundings( );
+
 		//p.Draw();
 		d_shader_no_texture->Use();
 
@@ -380,12 +373,11 @@ namespace Controller
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		TwDraw();
-		
-		free(d_sphere);
+
 
 		glutSwapBuffers();
 	}
-	 
+
 }
 
 #endif // PhysicsController_h__

@@ -193,14 +193,15 @@ namespace Controller
 	void RenderingController::Draw()
 	{
 		Shader* current_shader;
+		glm::mat4 projection_view;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);  
 
-		update_timer(); 
-		calculate_fps( ); 
+		Update_Timer(); 
+		Calculate_Fps( ); 
 
 		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular);
 		Material material(d_material_ambient,d_material_diffuse,d_material_specular,d_shininess_component);
@@ -250,7 +251,8 @@ namespace Controller
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
-		d_shader_no_texture->SetModelViewProjection(glm::mat4(),d_view_matrix,d_projection_matrix);
+		projection_view = d_projection_matrix * d_view_matrix;
+		d_shader_no_texture->SetUniform("mvp",projection_view * glm::mat4(1));
 
 		Point p(d_light_position,glm::vec4(1.0f,0.0f,0.0f,1.0f));
 		p.Draw();
@@ -273,13 +275,12 @@ namespace Controller
 		//d_cube_model->Rotate(d_quaternion_rotation);
 
 
-		current_shader->SetModelViewProjection(d_cube_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
+		current_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
 
 		d_cube_model->Draw(*current_shader);
 
-
-		current_shader->SetModelViewProjection(d_torus_model->GetModelMatrix(),d_view_matrix,d_projection_matrix);
-
+		current_shader->SetUniform("mvp",projection_view * d_torus_model->GetModelMatrix());
+		 
 		d_torus_model->Draw(*current_shader);
 		//	text_to_screen();
 

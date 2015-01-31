@@ -11,11 +11,28 @@ namespace Physics
 
 	struct BoundingSphere
 	{
-	
+		 
 		glm::vec3	center;
+		glm::vec3	color;
 		float		radius;
+
+		BoundingSphere(const vector<Vertex>& vertices)
+			:radius(0.0f)
+		{
+			calculate(vertices);
+		}
 		
-		void Calculate(const vector<Vertex>& vertices) 
+
+		bool BoundingSphere::Overlaps(const BoundingSphere *other) const
+		{
+			float distanceSquared = glm::length2(center - other->center);
+			return distanceSquared < (radius+other->radius)*(radius+other->radius);
+		}
+
+		inline void Change_Color(glm::vec3 color);
+
+	private:
+		void calculate(const vector<Vertex>& vertices) 
 		{
 
 			glm::vec3  min_coordinate;
@@ -38,15 +55,13 @@ namespace Physics
 
 
 		}
-
-		bool BoundingSphere::Overlaps(const BoundingSphere *other) const
-		{
-			float distanceSquared = glm::length2(center - other->center);
-			return distanceSquared < (radius+other->radius)*(radius+other->radius);
-		}
-	private:
-
 	};
+
+	void BoundingSphere::Change_Color(glm::vec3 color)
+	{
+		this->color= color;
+	}
+
 }
 
 #endif // BoundingSphere_h__

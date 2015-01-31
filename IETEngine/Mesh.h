@@ -27,37 +27,44 @@ namespace Rendering
 	class Mesh {
 	public:
 		/*  Mesh Data  */
-		vector<Vertex>			 m_vertices;
-		vector<GLuint>			 m_indices;
-		vector<Texture>			 m_textures; 
-		vector<VertexWeight>	 m_boneWeights;
-		 
-		glm::vec3				 m_center_of_mass; 
-		glm::vec3				 m_polyhedral_center_of_mass;
-	
-	private:
-		BoundingBox				 d_bounding_box;
-		BoundingSphere			 d_bounding_sphere;
-		/*  Render data  */
-		GLuint VAO, VBO, EBO, boneVBO;
-		std::map<std::string, Bone> boneMapping;
+		vector<Vertex>				m_vertices;
+		vector<GLuint>				m_indices;
+		vector<Texture>				m_textures; 
+		vector<VertexWeight>		m_boneWeights;
+		 							
+		glm::vec3					m_center_of_mass; 
+		glm::vec3					m_polyhedral_center_of_mass;
+									
+	private:						
+		BoundingBox					d_bounding_box;
+		BoundingSphere				d_bounding_sphere;
+									
+		/*  Render data  */			
+		GLuint						d_VAO;
+		GLuint						d_VBO;
+		GLuint						d_EBO;
+		GLuint						d_bone_VBO;
+		std::map<std::string, Bone> d_bone_mapping;
 		float d_area;
 	public:
 		/*  Functions  */
 		// Constructor
 		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights) 
-			: d_area(0.0f)
-		{
+			: 
+			d_area(0.0f),
+			d_bounding_sphere(BoundingSphere(vertices))
+		{ 
 			this->m_vertices = vertices;
 			this->m_indices = indices;
 			this->m_textures = textures; 
 			this->m_boneWeights = boneWeights; 
 			//this->calculate_center_of_mass();
 			this->calculate_area();
-			this->calculate_bounding_box();
-			this->calculate_bounding_sphere();
+			this->calculate_bounding_box(); 
 			this->setupMesh();
 		}   
+
+		 
 		// Render the mesh
 		void Draw(Shader& shader ) 
 		{
@@ -87,7 +94,7 @@ namespace Rendering
 			}
 	
 			// Draw mesh
-			glBindVertexArray(this->VAO);
+			glBindVertexArray(this->d_VAO);
 			glDrawElements(GL_TRIANGLES, this->m_indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
@@ -95,7 +102,7 @@ namespace Rendering
 		float Area() const { return d_area; } 
 
 		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
-		Physics::BoundingSphere Bounding_sphere() const { return d_bounding_sphere; } 
+		Physics::BoundingSphere   Bounding_sphere()  { return  d_bounding_sphere; } 
 
 	private:
 		bool hasBones(){
@@ -106,19 +113,19 @@ namespace Rendering
 		void setupMesh()
 		{
 			// Create buffers/arrays
-			glGenVertexArrays(1, &this->VAO);
-			glGenBuffers(1, &this->VBO);
-			glGenBuffers(1, &this->EBO);
+			glGenVertexArrays(1, &this->d_VAO);
+			glGenBuffers(1, &this->d_VBO);
+			glGenBuffers(1, &this->d_EBO);
 	
-			glBindVertexArray(this->VAO);
+			glBindVertexArray(this->d_VAO);
 			// Load data into vertex buffers
-			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO);
 			// A great thing about struct is that their memory layout is sequential for all its items.
 			// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
 			// again translates to 3/2 floats which translates to a byte array.
 			glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex), &this->m_vertices[0], GL_STATIC_DRAW);  
 	
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_indices.size() * sizeof(GLuint), &this->m_indices[0], GL_STATIC_DRAW);
 	
 			// Set the vertex attribute pointers
@@ -134,10 +141,10 @@ namespace Rendering
 	
 			if (hasBones())
 			{
-				glGenBuffers(1, &this->boneVBO);
+				glGenBuffers(1, &this->d_bone_VBO);
 	
 	
-				glBindBuffer(GL_ARRAY_BUFFER, boneVBO);
+				glBindBuffer(GL_ARRAY_BUFFER, d_bone_VBO);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(m_boneWeights[0]) * m_boneWeights.size(), &m_boneWeights[0], GL_STATIC_DRAW);
 	
 				glEnableVertexAttribArray(3);
@@ -195,10 +202,7 @@ namespace Rendering
 			d_bounding_box.Calculate(this->m_vertices);
 		}
 		
-		void calculate_bounding_sphere()
-		{
-			d_bounding_sphere.Calculate(m_vertices);
-		}
+		 
 	};
 }
 

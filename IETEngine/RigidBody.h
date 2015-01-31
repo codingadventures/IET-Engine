@@ -5,6 +5,7 @@
 #include "Friction.h"
 #include <glm/gtx/orthonormalize.hpp>
 
+#define DUMPING_FACTOR 0.6f
 
 namespace Physics
 {
@@ -13,86 +14,91 @@ namespace Physics
 	class RigidBody
 	{
 	public:
-		Model& d_model;
+		Model& m_model;
 
 
 		RigidBody(Model&);
-
+		~RigidBody();
 	private: 
 
-		float			d_area;
-		float			d_calculated_area;
+		float					d_area;
+		float					d_calculated_area;
 
-		float			d_mass;
-		float			d_polyhedral_mass;
+		float					d_mass;
+		float					d_polyhedral_mass;
 
-		glm::vec3		d_center_of_mass;
-		glm::vec3		d_polyhedral_center_of_mass;
+		glm::vec3				d_center_of_mass;
+		glm::vec3				d_polyhedral_center_of_mass;
 
-		glm::vec3		d_force;
-		glm::vec3		d_velocity;
-		glm::vec3		d_acceleration;
-		glm::vec3		d_linear_momentum; 
+		glm::vec3				d_force;
+		glm::vec3				d_velocity;
+		glm::vec3				d_acceleration;
+		glm::vec3				d_linear_momentum; 
 
-		glm::vec3		d_angular_momentum;
-		glm::vec3		d_torque;
-		glm::vec3		d_angular_velocity;
-		glm::vec3		d_force_application_point;
+		glm::vec3				d_angular_momentum;
+		glm::vec3				d_torque;
+		glm::vec3				d_angular_velocity;
+		glm::vec3				d_force_application_point;
 
-		glm::mat3		d_inertial_tensor;
-		glm::mat3		d_inverse_inertial_tensor;
-		glm::mat3		d_inverse_polyhedral_tensor;
-		glm::mat3		d_polyhedral_tensor;
-		  
-
-		BoundingBox		d_bounding_box;
-		BoundingSphere	d_bounding_sphere;
+		glm::mat3				d_inertial_tensor;
+		glm::mat3				d_inverse_inertial_tensor;
+		glm::mat3				d_inverse_polyhedral_tensor;
+		glm::mat3				d_polyhedral_tensor;
 
 
-		glm::vec3		d_position;
+		BoundingBox				d_bounding_box;
+		BoundingSphere*			d_bounding_sphere;
+
+		glm::vec3				d_position;
 	public:
-		void Update(float delta_time, bool use_polyhedral);
+		void					Update(float delta_time, bool use_polyhedral);
+		void					Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
 
-		void calculate_torque();
+		glm::vec3				Center_of_mass() const;
 
-		void Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
+		float					Mass() const;
+		float					Area() const;
+		float					Polyhedral_Mass() const;
 
-		glm::vec3 Center_of_mass() const;
-
-		float Mass() const;
-		float Area() const;
-		float PolyhedralMass() const;
+		Physics::BoundingSphere* Bounding_sphere() { return  d_bounding_sphere; } 
 
 	private:
-		glm::mat3 set_as_cross_product_matrix(glm::vec3 v);
+		glm::mat3				set_as_cross_product_matrix(glm::vec3 v);
 
-		 
-		void calculate_mesh_stats(); 
+		void					calculate_torque();
+		void					calculate_mesh_stats(); 
 
 	};
 
 #pragma region [ Getters ]
-	float RigidBody::Mass() const   { return d_mass; } 
-	float RigidBody::Area() const { return d_area; }
-	float RigidBody::PolyhedralMass() const   { return d_polyhedral_mass; } 
+
+		float		RigidBody::Mass()			 const   { return d_mass; } 
+		float		RigidBody::Area()			 const	 { return d_area; }
+		float		RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
+		glm::vec3	RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
+
 #pragma endregion 
 
-	RigidBody::RigidBody(Model& model) : d_model(model)
+	RigidBody::RigidBody(Model& model) 
+		: 
+		m_model(model),
+		d_area(0.0f),
+		d_calculated_area(0.0f),
+		d_mass(1.0f),
+		d_polyhedral_mass(0.0f)
 	{
+		
 		calculate_mesh_stats();
-		  
-		d_inverse_inertial_tensor = glm::inverse(d_inertial_tensor);
-		d_inverse_polyhedral_tensor = glm::inverse(d_polyhedral_tensor);
+		d_center_of_mass += model.Position();
+		d_bounding_sphere->center += model.Position();
 	}
 
-	glm::vec3  RigidBody::Center_of_mass() const { return d_center_of_mass; } 
 
 	void RigidBody::Update(float delta_time, bool use_polyhedral)
 	{ 
-		glm::quat orientation =  d_model.Rotation();
+		glm::quat orientation =  m_model.Rotation();
 		glm::mat3 tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
-
 
 		d_angular_velocity =  d_angular_momentum * tensor;
 
@@ -100,7 +106,7 @@ namespace Physics
 
 		calculate_torque();
 
-		float damping = glm::pow(0.6f,delta_time);
+		float damping = glm::pow(DUMPING_FACTOR, delta_time);
 
 		d_linear_momentum  *= damping ;
 		d_angular_momentum *= damping ;
@@ -109,9 +115,10 @@ namespace Physics
 		d_position =  d_linear_momentum * delta_time / mass;
 		d_center_of_mass += d_position ;
 
+		d_bounding_sphere->center += d_position;
 
-		d_model.Rotate(orientation);
-		d_model.Translate(d_position);
+		m_model.Rotate(orientation);
+		m_model.Translate(d_position);
 
 	}
 
@@ -152,15 +159,17 @@ namespace Physics
 
 	void  RigidBody::calculate_mesh_stats()
 	{
-		auto meshes = *this->d_model.Meshes();
+		auto meshes = *this->m_model.Meshes();
 
 		for (auto mesh : meshes)
 		{
 			d_area += mesh.Area();
+
 			d_bounding_box += mesh.Bounding_box();
+			d_bounding_sphere = new BoundingSphere(mesh.Bounding_sphere()); 
 			d_center_of_mass += mesh.m_center_of_mass;
 			d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;
-			d_bounding_sphere = mesh.Bounding_sphere();
+
 			Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertial_tensor);
 			Inertia::Compute_Polyhedral_Tensor(mesh,d_polyhedral_mass,d_polyhedral_tensor);
 		}
@@ -168,6 +177,14 @@ namespace Physics
 		d_center_of_mass /= meshes.size();
 		d_polyhedral_center_of_mass /= meshes.size();
 
+		d_inverse_inertial_tensor	= glm::inverse(d_inertial_tensor);
+		d_inverse_polyhedral_tensor = glm::inverse(d_polyhedral_tensor);
 	} 
+
+	RigidBody::~RigidBody()
+	{
+		free(d_bounding_sphere);
+	}
+
 }
 #endif // RigidBody_h__

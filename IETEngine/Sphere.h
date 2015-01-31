@@ -15,25 +15,25 @@ namespace Rendering
 	class Sphere
 	{
 	private:
-		GLuint d_VBO;
-		GLuint d_VAO;
-		vector<Vertex> d_vertices;
+		GLuint			d_VBO;
+		GLuint			d_VAO;
+		vector<Vertex>	d_vertices;
+		glm::vec3		d_center;
 	public:
-		Sphere(float radius, int resolution, glm::vec4 color = glm::vec4(1.0f));
+		Sphere(float radius, int resolution, glm::vec3 center, glm::vec4 color = glm::vec4(1.0f));
 		void Draw();
-
-	protected:
+		 
 	private:
-		void Init(float radius, int resolution,  glm::vec4 color);
+		void Init(float radius, int resolution, glm::vec3 center, glm::vec4 color);
 
 	};
 
-	Sphere::Sphere(float radius, int resolution, glm::vec4 color )
+	Sphere::Sphere(float radius, int resolution,glm::vec3 center, glm::vec4 color )
 	{
-		Init(radius, resolution,color);
+		Init(radius, resolution,center,color);
 	}
 
-	void Sphere::Init(float radius, int resolution, glm::vec4 color)
+	void Sphere::Init(float radius, int resolution,glm::vec3 center, glm::vec4 color)
 	{
 		float X1,Y1,X2,Y2,Z1,Z2;
 		float inc1,inc2,inc3,inc4,inc5,Radius1,Radius2;
@@ -64,16 +64,17 @@ namespace Rendering
 				Z1 = radius*sin(inc3); 
 				Z2 = radius*sin(inc4);
 				
+
 				// insert the triangle coordinates
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1),color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2),color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1) + center,color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)+ center,color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center,color));
 				 
 				 
 				 
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1),color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2),color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1),color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)+ center,color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center,color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)+ center,color));
 
 
 				//indexVBO(v, t, n, indices, indexed_vertices, indexed_uvs, indexed_normals);	 

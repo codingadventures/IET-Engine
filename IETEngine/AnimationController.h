@@ -312,7 +312,7 @@ namespace Controller
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
-			update_timer( ); 
+			Update_Timer( ); 
 
 			d_projection_matrix = glm::perspective(camera->Zoom, VIEWPORT_RATIO, 0.1f, 15000.0f);  
 

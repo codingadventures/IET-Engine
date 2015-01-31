@@ -33,16 +33,15 @@ private:
 	GLint			d_mvp_uniform; 
 	GLint			d_vertex_shader;
 	GLint			d_fragment_shader;
-
-	string			d_model_uniform_name;
+	 
 
 
 
 
 public:
 	// Constructor reads and builds our shader
-	Shader(string vertexSourcePath, string fragmentSourcePath, string modelUniformName = "mvp") 
-		: d_n_vertex(1),d_n_fragment(1),d_model_uniform_name(modelUniformName)
+	Shader(string vertexSourcePath, string fragmentSourcePath) 
+		: d_n_vertex(1),d_n_fragment(1) 
 	{
 		
 		d_vertex_source_path.push_back(vertexSourcePath);
@@ -50,13 +49,12 @@ public:
 		init();
 	}
 
-	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths, string modelUniformName = "mvp")
+	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths )
 		: 
 		d_n_vertex(vertex_source_paths.size()),
 		d_n_fragment(fragment_source_paths.size()),
 		d_vertex_source_path(vertex_source_paths),
-		d_fragment_source_path(fragment_source_paths),
-		d_model_uniform_name(modelUniformName)
+		d_fragment_source_path(fragment_source_paths) 
 	{
 
 		init();
@@ -77,21 +75,15 @@ public:
 		glUseProgram(this->Program);
 	}
 
-	void SetModel(glm::mat4 model)
-	{
-		glUniformMatrix4fv(d_mvp_uniform, 1, GL_FALSE, glm::value_ptr(model));
-
-	}
-
-	void SetModelViewProjection(glm::mat4 model,  glm::mat4 view, glm::mat4 projection)
-	{
-		glm::mat4 mvp = projection * view * model;
-		glUniformMatrix4fv(d_mvp_uniform, 1, GL_FALSE, glm::value_ptr(mvp)); 
-	}
-
+	 
 	void SetUniform(string name, glm::vec3 value){
 		GLint uniform =  glGetUniformLocation(Program, name.c_str());
 		glUniform3fv(uniform, 1, glm::value_ptr(value));
+	}
+
+	void SetUniform(string name, glm::mat4 value){
+		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(value)); 
 	}
 
 	void SetUniform(string name, float value){
@@ -106,9 +98,7 @@ private:
 		load_vertex();
 		load_fragment();
 		compile();
-		link(); 
-		d_mvp_uniform = glGetUniformLocation(Program, d_model_uniform_name.c_str()); 
-
+		link();  
 	}
 
 	void load_vertex()

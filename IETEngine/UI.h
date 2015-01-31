@@ -19,7 +19,7 @@ namespace Helper
 		}
 		static void TW_CALL GetCalculatedMassCallback(void *value, void *clientData)
 		{
-			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->PolyhedralMass();
+			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->Polyhedral_Mass();
 		}
 
 		static void TW_CALL GetAreaCallback(void *value, void *clientData)

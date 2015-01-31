@@ -55,6 +55,8 @@ namespace Rendering
 		glm::mat4		d_model_matrix;
 		glm::mat4		d_scale;
 		glm::mat4		d_position;
+	
+		
 		glm::quat		d_rotation;
 		
 		
@@ -63,9 +65,7 @@ namespace Rendering
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
 		Model(GLchar* path) :
-		 
-			d_numberOfBone(0),
-			 
+			d_numberOfBone(0)
 		{ 
 			assert(path);
 
@@ -89,6 +89,7 @@ namespace Rendering
 		} 
 
 	 
+		glm::vec3		Position() const { return decomposeT(d_position); } 
 
 
 		~Model()

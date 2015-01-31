@@ -8,6 +8,7 @@
 #include "ScreenOutput.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "RigidBodyManager.h"
 
 #define GLM_FORCE_RADIANS
 
@@ -40,12 +41,13 @@ namespace Controller
 
 		Cam::Camera*		d_camera;						//Freed in destructor
 		string				d_window_name;
+		RigidBodyManager*	d_rigid_body_manager;
 	protected:
 		virtual void Init(int argc, char* argv[]);
 		virtual void Run() = 0;
 
-		inline void update_timer( );
-		inline void calculate_fps( );
+		inline void Update_Timer( );
+		inline void Calculate_Fps( );
 	private:
 
 	};
@@ -59,29 +61,30 @@ namespace Controller
 		d_fps(0.0f),
 		d_pause(false),
 		d_camera(nullptr),
-		d_window_name(window_name)
+		d_window_name(window_name),
+		d_rigid_body_manager(nullptr)
 	{
 		
 	}
 
-	void AbstractController::calculate_fps( )
+	void AbstractController::Calculate_Fps( )
 	{
 		static unsigned int frame = 0;
-		static int timeBase = 0;
+		static int time_base = 0;
 
 		frame++;
 
 		int t = glutGet(GLUT_ELAPSED_TIME);
-		if (t - timeBase > 1000) 
+		if (t - time_base > 1000) 
 		{
-			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - timeBase));
-			timeBase = t;		
+			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - time_base));
+			time_base = t;		
 			frame = 0;
 		}
 
 	}
 
-	inline void AbstractController::update_timer( )
+	inline void AbstractController::Update_Timer( )
 	{
 		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
 		d_delta_time = time_since_start - d_old_time_since_start;
