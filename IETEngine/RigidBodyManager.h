@@ -33,11 +33,6 @@ namespace Physics
 		void		draw_bounding_sphere(RigidBody& rigid_body);
 		void		draw_center_of_mass(RigidBody& rigid_body);
 		void		draw_bounding_box(RigidBody& rigid_body);
-
-
-
-
-
 	};
 
 

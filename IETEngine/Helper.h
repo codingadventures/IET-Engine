@@ -59,6 +59,61 @@ inline glm::vec3 decomposeT( const glm::mat4& m ) {
 	return translation;
 }
 
+inline glm::mat4 decomposeR( const glm::mat4& m ) {
+	// Extract col vectors of the matrix
+	glm::vec3 col1(m[0][0], m[0][1], m[0][2]);
+	glm::vec3 col2(m[1][0], m[1][1], m[1][2]);
+	glm::vec3 col3(m[2][0], m[2][1], m[2][2]);
+	glm::vec3 scaling;
+	glm::mat4 rotation;
+
+	//Extract the scaling factors
+	scaling.x = glm::length(col1);
+	scaling.y = glm::length(col2);
+	scaling.z = glm::length(col3);
+
+	// Handle negative scaling
+	if (glm::determinant(m) < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+
+	// Remove scaling from the matrix
+	if (scaling.x != 0) {
+		col1 /= scaling.x;
+	}
+
+	if (scaling.y != 0) {
+		col2 /= scaling.y;
+	}
+
+	if (scaling.z != 0) {
+		col3 /= scaling.z;
+	}
+
+	rotation[0][0] = col1.x;
+	rotation[0][1] = col1.y;
+	rotation[0][2] = col1.z;
+	rotation[0][3] = 0.0;
+
+	rotation[1][0] = col2.x;
+	rotation[1][1] = col2.y;
+	rotation[1][2] = col2.z;
+	rotation[1][3] = 0.0;
+
+	rotation[2][0] = col3.x;
+	rotation[2][1] = col3.y;
+	rotation[2][2] = col3.z;
+	rotation[2][3] = 0.0;
+
+	rotation[3][0] = 0.0;
+	rotation[3][1] = 0.0;
+	rotation[3][2] = 0.0;
+	rotation[3][3] = 1.0;
+
+	return rotation;
+}
 /**
 * Decomposes matrix M such that T * R * S = M, where T is translation matrix,
 * R is rotation matrix and S is scaling matrix.
@@ -169,7 +224,7 @@ glm::vec3 cubicLerp(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, floa
 	a3 = v1; 
 	return (a0*t*t2 + a1*t2 + a2*t + a3);
 }
- 
+
 template<typename T>
 vector<T> ArrayConversion(int n_args,...)
 {

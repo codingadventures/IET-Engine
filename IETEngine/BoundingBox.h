@@ -6,7 +6,7 @@
 
 namespace Physics
 {
-	 
+
 
 	struct BoundingBox
 	{
@@ -19,57 +19,83 @@ namespace Physics
 		glm::vec3	m_center;
 		glm::vec3	m_is_colliding;
 
-
-		BoundingBox();
+		BoundingBox(const BoundingBox& bounding_box);
+		BoundingBox(vector<Vertex> vertices);
 
 		void operator+=(BoundingBox& const other_bbox){
 			*this = Calculate(*this,  other_bbox);
 		}
-		
+
 		glm::vec3 Color() const;
 
 		/*bool operator>(BoundingBox& const other_bbox){
 		return *this->m_min_coordinate.
 		}*/
 
-		void Calculate(const vector<Vertex>& vertices);
+
+		void Recalculate_Bounding_Box(glm::mat4 model_matrix);
 
 		EndPoint Get_EndPoint_X();
 		EndPoint Get_EndPoint_Y();
 		EndPoint Get_EndPoint_Z();
-	 
+
 	private:
+
+		vector<Vertex> d_vertices;
+
 		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
+		void calculate(glm::mat4 model_matrix = glm::mat4(1.0f));
+
 	};
 
-	BoundingBox::BoundingBox()
-		: m_is_colliding(glm::vec3(false,false,false))
+	BoundingBox::BoundingBox(vector<Vertex> vertices) 
+		: d_vertices(vertices),
+		m_is_colliding(glm::vec3(false,false,false)),
+		m_width(0.0f),
+		m_depth(0.0f),
+		m_height(0.0f)
 	{
-
+		calculate();
 	}
 
-	void BoundingBox::Calculate(const vector<Vertex>& vertices)
+	BoundingBox::BoundingBox(const BoundingBox& bounding_box)
 	{
-		for (auto point : vertices)
+		this->d_vertices = bounding_box.d_vertices;
+		calculate();
+	}
+
+	void BoundingBox::calculate(glm::mat4 model_matrix)
+	{
+		glm::vec3	min_coordinate;
+		glm::vec3   max_coordinate;
+
+		for (auto point : d_vertices)
 		{
-			if(point.Position.x < m_min_coordinate.x) m_min_coordinate.x = point.Position.x;
-			if(point.Position.x > m_max_coordinate.x) m_max_coordinate.x = point.Position.x;
-			if(point.Position.y < m_min_coordinate.y) m_min_coordinate.y = point.Position.y;
-			if(point.Position.y > m_max_coordinate.y) m_max_coordinate.y = point.Position.y;
-			if(point.Position.z < m_min_coordinate.z) m_min_coordinate.z = point.Position.z;
-			if(point.Position.z > m_max_coordinate.z) m_max_coordinate.z = point.Position.z;
+			glm::vec3 newPos  = glm::vec3(decomposeR(model_matrix) * glm::vec4(point.Position,1.0f));
+
+			if(newPos.x < min_coordinate.x) min_coordinate.x = newPos.x;
+			if(newPos.x > max_coordinate.x) max_coordinate.x = newPos.x;
+
+			if(newPos.y < min_coordinate.y) min_coordinate.y = newPos.y;
+			if(newPos.y > max_coordinate.y) max_coordinate.y = newPos.y;
+
+			if(newPos.z < min_coordinate.z) min_coordinate.z = newPos.z;
+			if(newPos.z > max_coordinate.z) max_coordinate.z = newPos.z;
 		}								
 
-		m_depth = glm::distance( m_min_coordinate.z,m_max_coordinate.z);
-		m_width = glm::distance( m_min_coordinate.x,m_max_coordinate.x);
-		m_height = glm::distance( m_min_coordinate.y,m_max_coordinate.y);
+		m_depth = glm::distance( min_coordinate.z,max_coordinate.z);
+		m_width = glm::distance( min_coordinate.x,max_coordinate.x);
+		m_height = glm::distance( min_coordinate.y,max_coordinate.y);
 
-		m_center =  (m_min_coordinate + m_max_coordinate) * 0.5f;
+		m_center =  (min_coordinate + max_coordinate) * 0.5f + decomposeT(model_matrix);
+
+		m_min_coordinate = min_coordinate;
+		m_max_coordinate = max_coordinate;
 	}
 
 	Physics::BoundingBox BoundingBox::Calculate(BoundingBox& b1, BoundingBox& b2)
 	{
-		BoundingBox temp;
+		BoundingBox temp(b1.d_vertices);
 		temp.m_min_coordinate.x = glm::min(b1.m_min_coordinate.x,b2.m_min_coordinate.x);
 		temp.m_max_coordinate.x = glm::max(b1.m_max_coordinate.x,b2.m_max_coordinate.x);
 
@@ -80,10 +106,10 @@ namespace Physics
 		temp.m_max_coordinate.z = glm::max(b1.m_max_coordinate.z,b2.m_max_coordinate.z);
 
 
+		temp.m_depth  =  glm::distance( temp.m_min_coordinate.z,temp.m_max_coordinate.z);
+		temp.m_width  =  glm::distance( temp.m_min_coordinate.x,temp.m_max_coordinate.x);
+		temp.m_height =  glm::distance( temp.m_min_coordinate.y,temp.m_max_coordinate.y);
 
-		temp.m_depth = glm::distance( temp.m_min_coordinate.z,temp.m_max_coordinate.z);
-		temp.m_width = glm::distance( temp.m_min_coordinate.x,temp.m_max_coordinate.x);
-		temp.m_height = glm::distance( temp.m_min_coordinate.y,temp.m_max_coordinate.y);
 		return temp;
 	}
 
@@ -120,7 +146,12 @@ namespace Physics
 		return m_is_colliding.x &&  m_is_colliding.y && m_is_colliding.z ? glm::vec3(1.0f,0.0f,0.0f) : glm::vec3(0.0f,1.0f,0.0f);
 	}
 
-	
+	void BoundingBox::Recalculate_Bounding_Box(glm::mat4 model_matrix)
+	{
+		calculate(model_matrix);
+	}
+
+
 
 
 }

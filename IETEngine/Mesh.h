@@ -52,7 +52,8 @@ namespace Rendering
 		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights) 
 			: 
 			d_area(0.0f),
-			d_bounding_sphere(BoundingSphere(vertices))
+			d_bounding_sphere(BoundingSphere(vertices)),
+			d_bounding_box(BoundingBox(vertices))
 		{ 
 			this->m_vertices = vertices;
 			this->m_indices = indices;
@@ -101,8 +102,12 @@ namespace Rendering
 		
 		float Area() const { return d_area; } 
 
-		Physics::BoundingBox Bounding_box() const { return d_bounding_box; } 
-		Physics::BoundingSphere   Bounding_sphere()  { return  d_bounding_sphere; } 
+		Physics::BoundingBox Bounding_box() const { 
+			return d_bounding_box; 
+		} 
+		Physics::BoundingSphere   Bounding_sphere()  {
+			return  d_bounding_sphere; 
+		} 
 
 	private:
 		bool hasBones(){
@@ -199,7 +204,7 @@ namespace Rendering
 	
 		void calculate_bounding_box()
 		{
-			d_bounding_box.Calculate(this->m_vertices);
+			d_bounding_box = BoundingBox(m_vertices);
 		}
 		
 		 

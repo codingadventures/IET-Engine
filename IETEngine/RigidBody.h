@@ -46,7 +46,7 @@ namespace Physics
 		glm::mat3				d_polyhedral_tensor;
 
 
-		BoundingBox				d_bounding_box;
+		BoundingBox*			d_bounding_box;
 		BoundingSphere*			d_bounding_sphere;
 
 		glm::vec3				d_position;
@@ -77,7 +77,7 @@ namespace Physics
 		float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
 		glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
 		BoundingSphere*			RigidBody::Bounding_sphere()		 { return d_bounding_sphere; } 
-		BoundingBox*			RigidBody::Bounding_box()			 { return &d_bounding_box ; } 
+		BoundingBox*			RigidBody::Bounding_box()			 { return d_bounding_box ; } 
 
 #pragma endregion 
 
@@ -93,7 +93,7 @@ namespace Physics
 		calculate_mesh_stats();
 		d_center_of_mass += model.Position();
 		d_bounding_sphere->center += model.Position();
-		d_bounding_box.m_center += model.Position();
+		d_bounding_box->m_center += model.Position();
 	}
 	RigidBody::~RigidBody()
 	{
@@ -122,7 +122,9 @@ namespace Physics
 		d_center_of_mass += d_position ;
 
 		d_bounding_sphere->center += d_position;
-		d_bounding_box.m_center += d_position;
+		d_bounding_box->m_center += d_position;
+		
+		d_bounding_box->Recalculate_Bounding_Box(m_model.GetModelMatrix());
 
 		m_model.Rotate(orientation);
 		m_model.Translate(d_position);
@@ -172,12 +174,12 @@ namespace Physics
 		{
 			d_area += mesh.Area();
 
-			d_bounding_box += mesh.Bounding_box();
+			d_bounding_box = new BoundingBox(mesh.Bounding_box());
 			d_bounding_sphere = new BoundingSphere(mesh.Bounding_sphere()); 
 			d_center_of_mass += mesh.m_center_of_mass;
 			d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;
 
-			Inertia::Compute_Tensor_With_AABB(d_bounding_box,d_mass,d_inertial_tensor);
+			Inertia::Compute_Tensor_With_AABB(*d_bounding_box,d_mass,d_inertial_tensor);
 			Inertia::Compute_Polyhedral_Tensor(mesh,d_polyhedral_mass,d_polyhedral_tensor);
 		}
 
