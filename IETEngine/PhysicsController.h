@@ -312,6 +312,7 @@ namespace Controller
 		d_rigid_body_manager->Update(d_delta_time_secs);
 
 		d_rigid_body_manager->Check_Sphere_Collisions();
+		d_rigid_body_manager->Check_AABB_Collisions();
 
 		/*
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
@@ -321,6 +322,7 @@ namespace Controller
 		d_shader->SetUniform("mvp",projection_view * d_another_cube->GetModelMatrix());
 
 		d_another_cube->Draw(*d_shader);
+
 
 
 		Vertex v1,v2;

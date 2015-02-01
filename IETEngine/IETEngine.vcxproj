@@ -99,6 +99,8 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoxGenerator.h" />
+    <ClInclude Include="Cube.h" />
+    <ClInclude Include="EndPoint.h" />
     <ClInclude Include="EulerUpdater.h" />
     <ClInclude Include="Friction.h" />
     <ClInclude Include="GLParticleRenderer.h" />

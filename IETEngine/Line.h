@@ -5,32 +5,38 @@
 
 class Line{
 
+
+private:
+	vector<Vertex>	d_vertices;
+	GLuint			d_VAO;
+	GLuint			d_VBO; 
+
 public:
 
 	Line(Vertex origin, Vertex target) {
-		vertices.push_back(origin);
-		vertices.push_back(target);
+		d_vertices.push_back(origin);
+		d_vertices.push_back(target);
 		Init();
 	}
 
 	void Draw()
 	{ 
 		// Draw mesh
-		glBindVertexArray(this->VAO);
-		glDrawArrays(GL_LINES, 0, this->vertices.size());
+		glBindVertexArray(this->d_VAO);
+		glDrawArrays(GL_LINES, 0, this->d_vertices.size());
 		glBindVertexArray(0);
 	}
 
 	void Init()
 	{
-		glGenVertexArrays(1, &this->VAO);
-		glGenBuffers(1, &this->VBO);
+		glGenVertexArrays(1, &this->d_VAO);
+		glGenBuffers(1, &this->d_VBO);
 
-		glBindVertexArray(this->VAO);
+		glBindVertexArray(this->d_VAO);
 		// Load data into vertex buffers
-		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW);  
+		glBufferData(GL_ARRAY_BUFFER, d_vertices.size() * sizeof(Vertex), &this->d_vertices[0], GL_STATIC_DRAW);  
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -40,11 +46,5 @@ public:
 
 		glEnableVertexAttribArray(3);	
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
-	}
-
-
-
-private:
-	vector<Vertex> vertices;
-	GLuint VAO,VBO; 
+	} 
 };

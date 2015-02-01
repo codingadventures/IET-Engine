@@ -88,9 +88,9 @@ namespace Physics
 			static void Compute_Tensor_With_AABB(BoundingBox& bb, float mass, glm::mat3 &inertia)
 			{
 				float divisor = 0.0833f;
-				inertia[0][0] = divisor * mass * (glm::pow2(bb.height) + glm::pow2(bb.depth));
-				inertia[1][1] = divisor * mass * (glm::pow2(bb.width)  + glm::pow2(bb.depth));
-				inertia[2][2] = divisor * mass * (glm::pow2(bb.width)  + glm::pow2(bb.height));
+				inertia[0][0] = divisor * mass * (glm::pow2(bb.m_height) + glm::pow2(bb.m_depth));
+				inertia[1][1] = divisor * mass * (glm::pow2(bb.m_width)  + glm::pow2(bb.m_depth));
+				inertia[2][2] = divisor * mass * (glm::pow2(bb.m_width)  + glm::pow2(bb.m_height));
 
 			}
 		private:	

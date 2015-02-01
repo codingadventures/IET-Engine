@@ -284,6 +284,12 @@
     <ClInclude Include="RigidBodyManager.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="EndPoint.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">
