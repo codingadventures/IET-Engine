@@ -290,6 +290,9 @@
     <ClInclude Include="Cube.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="CollidingPair.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert">
@@ -339,6 +342,9 @@
     </None>
     <None Include="common.vert">
       <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="boundings.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
   </ItemGroup>
 </Project>

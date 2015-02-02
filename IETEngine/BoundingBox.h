@@ -27,12 +27,10 @@ namespace Physics
 		}
 
 		glm::vec3 Color() const;
+ 
 
-		/*bool operator>(BoundingBox& const other_bbox){
-		return *this->m_min_coordinate.
-		}*/
-
-
+		bool Is_Colliding() const;
+		 
 		void Recalculate_Bounding_Box(glm::mat4 model_matrix);
 
 		EndPoint Get_EndPoint_X();
@@ -45,7 +43,6 @@ namespace Physics
 
 		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
 		void calculate(glm::mat4 model_matrix = glm::mat4(1.0f));
-
 	};
 
 	BoundingBox::BoundingBox(vector<Vertex> vertices) 
@@ -141,9 +138,10 @@ namespace Physics
 		return ep;
 	}
 
-	glm::vec3 BoundingBox::Color() const
+	glm::vec3 BoundingBox::Color()  const
 	{
-		return m_is_colliding.x &&  m_is_colliding.y && m_is_colliding.z ? glm::vec3(1.0f,0.0f,0.0f) : glm::vec3(0.0f,1.0f,0.0f);
+		bool is_colliding = Is_Colliding();
+		return  is_colliding ? glm::vec3(1.0f,0.0f,0.0f) : glm::vec3(0.0f,1.0f,0.0f);
 	}
 
 	void BoundingBox::Recalculate_Bounding_Box(glm::mat4 model_matrix)
@@ -152,7 +150,10 @@ namespace Physics
 	}
 
 
-
+	bool BoundingBox::Is_Colliding()  const
+	{
+		return 	m_is_colliding.x &&  m_is_colliding.y && m_is_colliding.z;
+	}
 
 }
 

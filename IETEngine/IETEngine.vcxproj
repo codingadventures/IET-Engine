@@ -99,6 +99,7 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoxGenerator.h" />
+    <ClInclude Include="CollidingPair.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="EndPoint.h" />
     <ClInclude Include="EulerUpdater.h" />
@@ -171,6 +172,7 @@
     <None Include="particle.vert" />
     <None Include="specular.frag" />
     <None Include="specular.vert" />
+    <None Include="boundings.frag" />
     <None Include="toon.frag" />
     <None Include="toon.vert" />
     <None Include="vertex.vert" />

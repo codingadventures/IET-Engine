@@ -43,6 +43,9 @@ namespace Controller
 	private: 
 		Shader*		d_shader;
 		Shader*		d_shader_no_texture;
+
+		Shader*		d_shader_boundings;
+
 		RigidBody*	d_rigid_body;
 		RigidBody*	d_rigid_body2;
 
@@ -250,11 +253,13 @@ namespace Controller
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
 		vector<string> f_shader				= ArrayConversion<string>(1,string("particle.frag"));
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
+		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 
 		d_rigid_body_manager = new RigidBodyManager(false);
 
 		d_shader = new Shader(v_shader,f_shader); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
+		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 
 		d_cube_model = new Model("models\\cubetri.obj");
 
@@ -361,10 +366,10 @@ namespace Controller
 		/*glEnable(GL_BLEND);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
+		 
 
-		d_shader->SetUniform("mvp",projection_view);
-
-		d_rigid_body_manager->Draw_Boundings( );
+		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
+		d_rigid_body_manager->Draw_Bounding_Box(*d_shader, projection_view);
 
 		//p.Draw();
 		d_shader_no_texture->Use();

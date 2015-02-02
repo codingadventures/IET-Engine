@@ -9,7 +9,7 @@
 #include "glm\gtc\random.hpp"
 namespace Rendering
 {
-	#define PI glm::pi<float>()
+#define PI glm::pi<float>()
 	using namespace std;
 
 	class Sphere
@@ -19,25 +19,26 @@ namespace Rendering
 		GLuint			d_VAO;
 		vector<Vertex>	d_vertices;
 		glm::vec3		d_center;
+		glm::vec3		d_color;
 	public:
-		Sphere(float radius, int resolution, glm::vec3 center, glm::vec4 color = glm::vec4(1.0f));
-		void Draw();
-		 
+		Sphere(float radius, int resolution, glm::vec3 center);
+		void Draw(Shader& shader);
+		void Set_Color(glm::vec3 color); 
 	private:
-		void Init(float radius, int resolution, glm::vec3 center, glm::vec4 color);
+		void Init(float radius, int resolution, glm::vec3 center );
 
 	};
 
-	Sphere::Sphere(float radius, int resolution,glm::vec3 center, glm::vec4 color )
+	Sphere::Sphere(float radius, int resolution,glm::vec3 center )
 	{
-		Init(radius, resolution,center,color);
+		Init(radius, resolution,center);
 	}
 
-	void Sphere::Init(float radius, int resolution,glm::vec3 center, glm::vec4 color)
+	void Sphere::Init(float radius, int resolution,glm::vec3 center)
 	{
 		float X1,Y1,X2,Y2,Z1,Z2;
 		float inc1,inc2,inc3,inc4,inc5,Radius1,Radius2;
-		 
+
 		for(int w = 0; w < resolution; w++) {
 			for(int h = (-resolution/2); h < (resolution/2); h++){
 
@@ -63,18 +64,18 @@ namespace Rendering
 
 				Z1 = radius*sin(inc3); 
 				Z2 = radius*sin(inc4);
-				
+
 
 				// insert the triangle coordinates
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1) + center,color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)+ center,color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center,color));
-				 
-				 
-				 
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)+ center,color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center,color));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)+ center,color));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1) + center));
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)+ center));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center));
+
+
+
+				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)+ center ));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center ));
+				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)+ center ));
 
 
 				//indexVBO(v, t, n, indices, indexed_vertices, indexed_uvs, indexed_normals);	 
@@ -92,16 +93,20 @@ namespace Rendering
 		glEnableVertexAttribArray(0);	
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
 
-		glEnableVertexAttribArray(3);	
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
 	}
 
-	void Sphere::Draw()
+	void Sphere::Draw(Shader& shader)
 	{
+		shader.SetUniform("sphere_color",d_color);
 		// Draw mesh
 		glBindVertexArray(this->d_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, this->d_vertices.size());
 		glBindVertexArray(0);
+	}
+
+	void Sphere::Set_Color(glm::vec3 color)
+	{
+		d_color = color;
 	}
 
 }
