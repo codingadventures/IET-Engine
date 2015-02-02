@@ -50,7 +50,9 @@ namespace Controller
 		RigidBody*	d_rigid_body2;
 
 		Model*		d_cube_model;
-		Model*		d_another_cube;
+
+		vector<Model*>		
+			d_model_vector;
 
 		GLint		d_textureId;
 
@@ -262,20 +264,23 @@ namespace Controller
 		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 
 		d_cube_model = new Model("models\\cubetri.obj");
-
 		d_rigid_body = new RigidBody(*d_cube_model);
-
-
-		d_another_cube = new Model(*d_cube_model);
-
-		d_another_cube->Translate(glm::vec3(-10,0,0));
-
-		d_rigid_body2 = new RigidBody(*d_another_cube);
-
-		d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
-
 		d_rigid_body_manager->Add(d_rigid_body);
-		d_rigid_body_manager->Add(d_rigid_body2);
+
+		d_model_vector.push_back(d_cube_model);
+
+		for (int i = 0; i < 2; i++)
+		{
+			auto model = new Model(*d_cube_model);
+			model->Translate(glm::sphericalRand(20.0f));
+			
+			auto rigid_body =  new RigidBody(*model);
+			d_model_vector.push_back(model);
+			d_rigid_body_manager->Add(rigid_body);
+		}
+		 
+		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
+
 
 		tweak_bar_setup();
 
@@ -312,7 +317,7 @@ namespace Controller
 
 		glm::mat4 projection_view = d_projection_matrix * d_view_matrix;// * d_cube_model->GetModelMatrix();
 
-		d_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
+		//d_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
 
 		d_rigid_body_manager->Update(d_delta_time_secs);
 
@@ -322,11 +327,16 @@ namespace Controller
 		/*
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
 
-		d_cube_model->Draw(*d_shader);
+		//d_cube_model->Draw(*d_shader);
 
-		d_shader->SetUniform("mvp",projection_view * d_another_cube->GetModelMatrix());
+		for (auto model: d_model_vector)
+		{
+			d_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
+			model->Draw(*d_shader);
+		}
+		/*
 
-		d_another_cube->Draw(*d_shader);
+		d_another_cube->Draw(*d_shader);*/
 
 
 
@@ -351,8 +361,8 @@ namespace Controller
 
 
 
-		d_rigid_body->Update(d_delta_time_secs, d_use_polyhedral_tensor);
-		glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
+		 
+		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
 		//d_rigid_body->Apply_Impulse(spring_force,d_force_impulse_application_point + d_rigid_body->Center_of_mass(),d_delta_time_secs);
 		/*d_particle_system2->Update(d_delta_time_secs);
@@ -366,7 +376,7 @@ namespace Controller
 		/*glEnable(GL_BLEND);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
-		 
+
 
 		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader, projection_view);

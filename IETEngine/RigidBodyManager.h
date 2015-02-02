@@ -66,7 +66,9 @@ namespace Physics
 	{
 		for (auto rigid_body : d_rigid_bodies)
 		{
+			rigid_body->Bounding_sphere()->Change_Color(d_non_colliding_color);
 			rigid_body->Update(delta_time,d_use_polyhedral);
+			
 		}
 	}
 
@@ -76,17 +78,18 @@ namespace Physics
 		{
 			for (int j = i+1; j < d_rigid_bodies.size() ; j++)
 			{
+				if (i==j) continue;
+
 				auto sphere1 = d_rigid_bodies[i]->Bounding_sphere();
 				auto sphere2 = d_rigid_bodies[j]->Bounding_sphere();
+
 				bool overlap = sphere1->Overlaps(sphere2);
 
-				sphere2->Change_Color(d_non_colliding_color);
-				sphere1->Change_Color(d_non_colliding_color);
-
-				if (!overlap) continue;
-
-				sphere2->Change_Color(d_colliding_color);
-				sphere1->Change_Color(d_colliding_color);
+				if (overlap) 
+				{
+					sphere2->Change_Color(d_colliding_color);
+					sphere1->Change_Color(d_colliding_color);
+				}
 			}
 		}
 	}
@@ -157,7 +160,7 @@ namespace Physics
 			d_colliding_pairs.push_back(CollidingPair<BoundingBox>(x_current,x_next));
 		}
 	}
-	 
+
 
 	void RigidBodyManager::draw_center_of_mass(RigidBody& rigid_body)
 	{
