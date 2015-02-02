@@ -27,10 +27,11 @@ namespace Physics
 		}
 
 		glm::vec3 Color() const;
- 
+
+		bool Overlaps(const BoundingBox& second);
 
 		bool Is_Colliding() const;
-		 
+
 		void Recalculate_Bounding_Box(glm::mat4 model_matrix);
 
 		EndPoint Get_EndPoint_X();
@@ -153,6 +154,17 @@ namespace Physics
 	bool BoundingBox::Is_Colliding()  const
 	{
 		return 	m_is_colliding.x &&  m_is_colliding.y && m_is_colliding.z;
+	}
+
+	bool BoundingBox::Overlaps(const BoundingBox& second)
+	{
+
+		if ( std::fabs(m_center[0] - second.m_center[0]) >  ( m_width * 0.5f + second.m_width * 0.5 ) ) return false;
+		if ( std::fabs(m_center[1] -  second.m_center[1]) > (m_height * 0.5 + second.m_height * 0.5 ) ) return false;
+		if ( std::fabs(m_center[2] -  second.m_center[2]) > (m_depth * 0.5f + second.m_depth * 0.5) ) return false;
+
+		// We have an overlap
+		return true;
 	}
 
 }

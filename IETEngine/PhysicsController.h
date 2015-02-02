@@ -76,6 +76,7 @@ namespace Controller
 		bool d_is_spring_enabled;*/
 		bool d_use_polyhedral_tensor;
 		SpringGenerator* d_spring_generator;
+		bool d_draw_spheres;
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -189,6 +190,7 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_use_polyhedral_tensor, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Show Sphere Bound.", TW_TYPE_BOOLCPP, &d_draw_spheres, "");
 		// 		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", apply_impulse_callback, NULL, " label='Apply Impulse' ");
 		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
 	}
@@ -269,18 +271,17 @@ namespace Controller
 
 		d_model_vector.push_back(d_cube_model);
 
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			auto model = new Model(*d_cube_model);
 			model->Translate(glm::sphericalRand(20.0f));
-			
+
 			auto rigid_body =  new RigidBody(*model);
 			d_model_vector.push_back(model);
 			d_rigid_body_manager->Add(rigid_body);
 		}
-		 
-		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 
+		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 
 		tweak_bar_setup();
 
@@ -321,7 +322,9 @@ namespace Controller
 
 		d_rigid_body_manager->Update(d_delta_time_secs);
 
-		d_rigid_body_manager->Check_Sphere_Collisions();
+		if (d_draw_spheres)
+			d_rigid_body_manager->Check_Sphere_Collisions();
+
 		d_rigid_body_manager->Check_AABB_Collisions();
 
 		/*
@@ -339,7 +342,7 @@ namespace Controller
 		d_another_cube->Draw(*d_shader);*/
 
 
-
+	 
 		Vertex v1,v2;
 		v1.Position = d_force_impulse_application_point;
 		v1.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
@@ -359,9 +362,10 @@ namespace Controller
 		//p2.Draw();
 
 
+		d_rigid_body_manager->ApplyImpulseToAll(d_delta_time_secs);
 
 
-		 
+
 		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
 		//d_rigid_body->Apply_Impulse(spring_force,d_force_impulse_application_point + d_rigid_body->Center_of_mass(),d_delta_time_secs);
@@ -377,8 +381,10 @@ namespace Controller
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
 
+		if (d_draw_spheres)
+			d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 
-		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
+
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader, projection_view);
 
 		//p.Draw();
