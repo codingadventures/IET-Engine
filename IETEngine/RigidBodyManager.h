@@ -22,10 +22,12 @@ namespace Physics
 		glm::vec3							d_non_colliding_color;
 		vector<CollidingPair<BoundingBox>>  d_colliding_pairs;
 		vector<Sphere*>						d_bounding_spheres;
+		vector<Cube*>						d_bounding_cubes;
 		size_t								d_sort_axis;
 
 	public:
 		RigidBodyManager(bool use_polyedral);
+		~RigidBodyManager();
 
 		void		Add(RigidBody* rigid_body);
 		void		Update(double delta_time); 
@@ -60,8 +62,17 @@ namespace Physics
 	void RigidBodyManager::Add(RigidBody* rigid_body)
 	{
 		this->d_rigid_bodies.push_back(rigid_body);
+
 		auto sphere = new Sphere(rigid_body->Bounding_sphere()->radius,50,glm::vec3(0.0f));
+
+		auto cube = new Cube(
+			rigid_body->Bounding_box()->m_min_coordinate ,
+			rigid_body->Bounding_box()->m_max_coordinate  ,
+			glm::vec4(rigid_body->Bounding_box()->Color(),1.0f)
+			);
+
 		d_bounding_spheres.push_back(sphere);
+		d_bounding_cubes.push_back(cube);
 	}
 
 	void RigidBodyManager::Update(double delta_time)
@@ -133,31 +144,32 @@ namespace Physics
 
 			for (int j = i+1; j < d_rigid_bodies.size(); j++)
 			{
-				vector<EndPoint> current_axis;
+				vector<EndPoint>* current_axis = nullptr;
 				switch (d_sort_axis)
 				{
 				case 0:
-					current_axis = x_axis;
+					current_axis = &x_axis;
 					break;
 				case 1:
-					current_axis = y_axis;
+					current_axis = &y_axis;
 					break;
 				case 2:
-					current_axis = z_axis;
+					current_axis = &z_axis;
 					break;
 				}
 
 				// Stop when tested AABBs are beyond the end of current AABB
-				if (current_axis[j].m_min_point > current_axis[i].m_max_point)
+				if ((*current_axis)[j].m_min_point > (*current_axis)[i].m_max_point)
 				{
 					break;
 				}
 
-				if (!current_axis[j].m_bounding_box->Overlaps(*current_axis[i].m_bounding_box)) continue;
+				if (!(*current_axis)[j].m_bounding_box->Overlaps(*(*current_axis)[i].m_bounding_box)) continue;
 
-				d_colliding_pairs.push_back(CollidingPair<BoundingBox>(current_axis[j].m_bounding_box,current_axis[i].m_bounding_box));
-				current_axis[j].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
-				current_axis[i].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
+				d_colliding_pairs.push_back(CollidingPair<BoundingBox>((*current_axis)[j].m_bounding_box,(*current_axis)[i].m_bounding_box));
+
+				(*current_axis)[j].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
+				(*current_axis)[i].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
 			}
 		}
 
@@ -186,18 +198,12 @@ namespace Physics
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			auto bounding_box = d_rigid_bodies[i]->Bounding_box();
+			glm::mat4 scale = glm::scale(glm::mat4(1),d_rigid_bodies[i]->Bounding_box()->m_scale_factor);
+			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetPosition() * scale);
+ 
 
-			shader.SetUniform("mvp",projection_view);
-
-			auto cube = new Cube(
-				bounding_box->m_min_coordinate + bounding_box->m_center,
-				bounding_box->m_max_coordinate+ bounding_box->m_center,
-				glm::vec4(bounding_box->Color(),1.0f)
-				);
-
-			cube->Draw();
-
-			delete cube;
+			d_bounding_cubes[i]->Set_Color(d_rigid_bodies[i]->Bounding_box()->Color());
+			d_bounding_cubes[i]->Draw(shader);
 		}
 	} 
 	void RigidBodyManager::Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view)
@@ -224,6 +230,19 @@ namespace Physics
 			d_rigid_bodies[i]->Apply_Impulse(glm::sphericalRand(1.0f) * glm::sphericalRand(30.0f),
 				glm::linearRand(d_rigid_bodies[i]->Bounding_box()->m_min_coordinate,d_rigid_bodies[i]->Bounding_box()->m_max_coordinate),
 				delta_time);
+		}
+	}
+
+	RigidBodyManager::~RigidBodyManager()
+	{
+		for (auto sphere : d_bounding_spheres)
+		{
+			delete sphere;
+		}
+		 
+		for (auto cube : d_bounding_cubes)
+		{
+			delete cube;
 		}
 	}
 

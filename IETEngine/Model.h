@@ -141,9 +141,13 @@ namespace Rendering
 		}
 
 
-		glm::vec3 GetPosition()
+		glm::vec3 GetPositionVec()
 		{
 			return decomposeT(d_position);
+		}	
+		glm::mat4 GetPosition()
+		{
+			return d_position;
 		}
 
 		glm::mat4 GetModelMatrix() const

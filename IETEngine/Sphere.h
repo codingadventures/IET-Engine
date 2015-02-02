@@ -17,11 +17,13 @@ namespace Rendering
 	private:
 		GLuint			d_VBO;
 		GLuint			d_VAO;
-		vector<Vertex>	d_vertices;
+		Vertex*			d_vertices;
 		glm::vec3		d_center;
 		glm::vec3		d_color;
+		size_t			d_num_vertices;
 	public:
 		Sphere(float radius, int resolution, glm::vec3 center);
+		~Sphere();
 		void Draw(Shader& shader);
 		void Set_Color(glm::vec3 color); 
 	private:
@@ -31,6 +33,8 @@ namespace Rendering
 
 	Sphere::Sphere(float radius, int resolution,glm::vec3 center )
 	{
+		d_num_vertices = resolution * resolution * 6;
+		d_vertices = new Vertex[d_num_vertices];
 		Init(radius, resolution,center);
 	}
 
@@ -38,6 +42,7 @@ namespace Rendering
 	{
 		float X1,Y1,X2,Y2,Z1,Z2;
 		float inc1,inc2,inc3,inc4,inc5,Radius1,Radius2;
+		int i = 0;
 
 		for(int w = 0; w < resolution; w++) {
 			for(int h = (-resolution/2); h < (resolution/2); h++){
@@ -67,15 +72,15 @@ namespace Rendering
 
 
 				// insert the triangle coordinates
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1) + center));
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)+ center));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center));
+				d_vertices[i++] = Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1) + center);
+				d_vertices[i++] = Vertex(glm::vec3(Radius1*X2,Z1,Radius1*Y2)+ center);
+				d_vertices[i++] = Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center);
 
 
 
-				d_vertices.push_back(Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)+ center ));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center ));
-				d_vertices.push_back(Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)+ center ));
+				d_vertices[i++] = Vertex(glm::vec3(Radius1*X1,Z1,Radius1*Y1)+ center );
+				d_vertices[i++] = Vertex(glm::vec3(Radius2*X2,Z2,Radius2*Y2)+ center );
+				d_vertices[i++] = Vertex(glm::vec3(Radius2*X1,Z2,Radius2*Y1)+ center );
 
 
 				//indexVBO(v, t, n, indices, indexed_vertices, indexed_uvs, indexed_normals);	 
@@ -87,7 +92,7 @@ namespace Rendering
 		glBindVertexArray(d_VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, d_VBO);
-		glBufferData(GL_ARRAY_BUFFER, d_vertices.size() * sizeof(Vertex), &d_vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, d_num_vertices * sizeof(Vertex), &d_vertices[0], GL_STATIC_DRAW);
 
 
 		glEnableVertexAttribArray(0);	
@@ -100,13 +105,18 @@ namespace Rendering
 		shader.SetUniform("sphere_color",d_color);
 		// Draw mesh
 		glBindVertexArray(this->d_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, this->d_vertices.size());
+		glDrawArrays(GL_TRIANGLES, 0, d_num_vertices);
 		glBindVertexArray(0);
 	}
 
 	void Sphere::Set_Color(glm::vec3 color)
 	{
 		d_color = color;
+	}
+
+	Sphere::~Sphere()
+	{
+		delete d_vertices;
 	}
 
 }

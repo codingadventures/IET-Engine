@@ -271,10 +271,10 @@ namespace Controller
 
 		d_model_vector.push_back(d_cube_model);
 
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 100; i++)
 		{
 			auto model = new Model(*d_cube_model);
-			model->Translate(glm::sphericalRand(20.0f));
+			model->Translate(glm::sphericalRand(80.0f));
 
 			auto rigid_body =  new RigidBody(*model);
 			d_model_vector.push_back(model);
@@ -385,7 +385,7 @@ namespace Controller
 			d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 
 
-		d_rigid_body_manager->Draw_Bounding_Box(*d_shader, projection_view);
+		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
 
 		//p.Draw();
 		d_shader_no_texture->Use();

@@ -73,11 +73,11 @@ inline glm::mat4 decomposeR( const glm::mat4& m ) {
 	scaling.z = glm::length(col3);
 
 	// Handle negative scaling
-	if (glm::determinant(m) < 0) {
-		scaling.x = -scaling.x;
-		scaling.y = -scaling.y;
-		scaling.z = -scaling.z;
-	}
+	/*if (glm::determinant(m) < 0) {
+	scaling.x = -scaling.x;
+	scaling.y = -scaling.y;
+	scaling.z = -scaling.z;
+	}*/
 
 	// Remove scaling from the matrix
 	if (scaling.x != 0) {

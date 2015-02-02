@@ -12,11 +12,11 @@ namespace Rendering
 		vector<Vertex>	d_vertices;
 		GLuint			d_VAO;
 		GLuint			d_VBO; 
-
+		glm::vec3		d_color;
 	public:
 		Cube(glm::vec3 min_vertex, glm::vec3 max_vertex, glm::vec4 color);
-
-		void Draw();
+		void Set_Color(glm::vec3 color); 
+		void Draw(Shader& shader);
 
 	private:
 		void Init();
@@ -76,15 +76,16 @@ namespace Rendering
 		Init();
 	}
 
-	void Cube::Draw()
+	void Cube::Draw(Shader& shader)
 	{ 
+		shader.SetUniform("sphere_color",d_color);
 		// Draw mesh
 		glBindVertexArray(this->d_VAO);
 		glDrawArrays(GL_LINES, 0, this->d_vertices.size());
 		glBindVertexArray(0);
 	}
 
-	void 	Cube::Init()
+	void Cube::Init()
 	{
 		glGenVertexArrays(1, &this->d_VAO);
 		glGenBuffers(1, &this->d_VBO);
@@ -93,7 +94,7 @@ namespace Rendering
 		// Load data into vertex buffers
 		glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, d_vertices.size() * sizeof(Vertex), &this->d_vertices[0], GL_STATIC_DRAW);  
+		glBufferData(GL_ARRAY_BUFFER, d_vertices.size() * sizeof(Vertex), &this->d_vertices[0], GL_STREAM_DRAW);  
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -104,6 +105,11 @@ namespace Rendering
 		glEnableVertexAttribArray(3);	
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
 	} 
+
+	void Cube::Set_Color(glm::vec3 color)
+	{
+		d_color = color;
+	}
 
 
 }

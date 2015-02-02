@@ -25,7 +25,7 @@ namespace Physics
 
 		bool BoundingSphere::Overlaps(const BoundingSphere *other) const
 		{
-			float distanceSquared = glm::length2(center - other->center);
+			float distanceSquared = glm::distance2(center,other->center);
 			return distanceSquared < (radius+other->radius)*(radius+other->radius);
 		}
 

@@ -152,9 +152,9 @@ namespace Controller
 
 
 
-			camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+			camera->SetTarget(model_dartmaul->GetPositionVec() + glm::vec3(0,5,0));
 
-			spline.addPoint(-1, model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+			spline.addPoint(-1, model_dartmaul->GetPositionVec() + glm::vec3(0,5,0));
 			spline.addPoint(0, glm::vec3(1759.0f,105.0f,1481.0f));  
 			spline.addPoint(3, glm::vec3(1352.0f,112.0f,-594.0f));  
 			spline.addPoint(6, glm::vec3(-637.0f,111.0f,-296.0f)); 
@@ -164,10 +164,10 @@ namespace Controller
 			spline.addPoint(12, glm::vec3(-52.0f,16.0f,-10.0f));
 			spline.addPoint(15, glm::vec3(-40.0f,14.0f,-10.0f));
 
-			spline.addPoint(18, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition());   
+			spline.addPoint(18, camera->Offset * camera->Rotation +  model_dartmaul->GetPositionVec());   
 
-			spline.addPoint(19, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
-			spline.addPoint(20, camera->Offset * camera->Rotation +  model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+			spline.addPoint(19, camera->Offset * camera->Rotation +  model_dartmaul->GetPositionVec() + glm::vec3(0,5,0));
+			spline.addPoint(20, camera->Offset * camera->Rotation +  model_dartmaul->GetPositionVec() + glm::vec3(0,5,0));
 
 			model_battlecruise = new Model(shader, BATTLECRUISE_MODEL); 
 			//model_floor->Scale(glm::vec3(50.0f, 50.0f, 50.0f));	
@@ -292,7 +292,7 @@ namespace Controller
 			{
 				model_dartmaul->m_Direction = glm::vec3(camera->Front.x,0,camera->Front.z);
 				model_dartmaul->Rotate(camera->ModelRotation*  glm::quat(glm::vec3(0.0f,glm::radians(235.0f),0.0f)));
-				dartMaulModelWorldPosition = model_dartmaul->GetPosition();
+				dartMaulModelWorldPosition = model_dartmaul->GetPositionVec();
 			}
 			shader->Use();
 
@@ -331,7 +331,7 @@ namespace Controller
 
 			lastSwordState = player->m_swordState->m_stateName;
 
-			camera->SetTarget(model_dartmaul->GetPosition() + glm::vec3(0,5,0));
+			camera->SetTarget(model_dartmaul->GetPositionVec() + glm::vec3(0,5,0));
 
 			d_view_matrix = camera->GetViewMatrix();
 
@@ -363,8 +363,8 @@ namespace Controller
 				for (int i = 0; i < droidsSize; i++)
 				{  
 					shaderBones->SetModel(droids[i]->model->GetModelMatrix());
-					float totalDist = glm::distance(droids[i]->model->GetPosition(),model_dartmaul->GetPosition());
-					auto vec = droids[i]->model->GetPosition() - model_dartmaul->GetPosition();
+					float totalDist = glm::distance(droids[i]->model->GetPositionVec(),model_dartmaul->GetPositionVec());
+					auto vec = droids[i]->model->GetPositionVec() - model_dartmaul->GetPositionVec();
 					if (!pause)
 					{
 						if (!droids[i]->IsDead() && isAttacking && totalDist < 3.0f)

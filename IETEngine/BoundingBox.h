@@ -14,10 +14,13 @@ namespace Physics
 		float		m_depth;
 		float		m_height;
 
+
 		glm::vec3	m_min_coordinate;
 		glm::vec3   m_max_coordinate;
 		glm::vec3	m_center;
 		glm::vec3	m_is_colliding;
+
+		glm::vec3	m_scale_factor;
 
 		BoundingBox(const BoundingBox& bounding_box);
 		BoundingBox(vector<Vertex> vertices);
@@ -32,18 +35,19 @@ namespace Physics
 
 		bool Is_Colliding() const;
 
-		void Recalculate_Bounding_Box(glm::mat4 model_matrix);
+		void Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation);
 
 		EndPoint Get_EndPoint_X();
 		EndPoint Get_EndPoint_Y();
 		EndPoint Get_EndPoint_Z();
 
 	private:
+		glm::vec3		d_initial_wdh;
 
 		vector<Vertex> d_vertices;
 
 		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
-		void calculate(glm::mat4 model_matrix = glm::mat4(1.0f));
+		void calculate(glm::vec3* translation ,glm::quat* rotation  );
 	};
 
 	BoundingBox::BoundingBox(vector<Vertex> vertices) 
@@ -53,23 +57,30 @@ namespace Physics
 		m_depth(0.0f),
 		m_height(0.0f)
 	{
-		calculate();
+		calculate(&glm::vec3(0.0f),&glm::quat());
+		d_initial_wdh.x = m_width;
+		d_initial_wdh.y = m_height;
+		d_initial_wdh.z = m_depth;
 	}
 
 	BoundingBox::BoundingBox(const BoundingBox& bounding_box)
 	{
 		this->d_vertices = bounding_box.d_vertices;
-		calculate();
+		calculate(&glm::vec3(0.0f),&glm::quat());
+		d_initial_wdh.x = m_width;
+		d_initial_wdh.y = m_height;
+		d_initial_wdh.z = m_depth;
 	}
 
-	void BoundingBox::calculate(glm::mat4 model_matrix)
+	void BoundingBox::calculate(glm::vec3* translation,glm::quat* rotation)
 	{
 		glm::vec3	min_coordinate;
 		glm::vec3   max_coordinate;
-
-		for (auto point : d_vertices)
+		size_t		vert_size = d_vertices.size();
+		//for (auto point : d_vertices)
+		for (int i = 0; i < vert_size; i++)
 		{
-			glm::vec3 newPos  = glm::vec3(decomposeR(model_matrix) * glm::vec4(point.Position,1.0f));
+			glm::vec3 newPos  = glm::vec3(*rotation * glm::vec4(d_vertices[i].Position,1.0f));
 
 			if(newPos.x < min_coordinate.x) min_coordinate.x = newPos.x;
 			if(newPos.x > max_coordinate.x) max_coordinate.x = newPos.x;
@@ -81,11 +92,20 @@ namespace Physics
 			if(newPos.z > max_coordinate.z) max_coordinate.z = newPos.z;
 		}								
 
-		m_depth = glm::distance( min_coordinate.z,max_coordinate.z);
-		m_width = glm::distance( min_coordinate.x,max_coordinate.x);
-		m_height = glm::distance( min_coordinate.y,max_coordinate.y);
 
-		m_center =  (min_coordinate + max_coordinate) * 0.5f + decomposeT(model_matrix);
+
+		float depth = glm::distance( min_coordinate.z,max_coordinate.z)
+			,width =    glm::distance( min_coordinate.x,max_coordinate.x)
+			,height =   glm::distance( min_coordinate.y,max_coordinate.y);
+
+
+		m_depth = depth;
+		m_width = width;
+		m_height = height;
+		m_scale_factor = glm::vec3(m_width,m_height,m_depth) / d_initial_wdh;
+
+		m_center =  (min_coordinate + max_coordinate) * 0.5f + *translation;
+
 
 		m_min_coordinate = min_coordinate;
 		m_max_coordinate = max_coordinate;
@@ -145,9 +165,9 @@ namespace Physics
 		return  is_colliding ? glm::vec3(1.0f,0.0f,0.0f) : glm::vec3(0.0f,1.0f,0.0f);
 	}
 
-	void BoundingBox::Recalculate_Bounding_Box(glm::mat4 model_matrix)
+	void BoundingBox::Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation)
 	{
-		calculate(model_matrix);
+		calculate(translation, rotation);
 	}
 
 
@@ -158,10 +178,9 @@ namespace Physics
 
 	bool BoundingBox::Overlaps(const BoundingBox& second)
 	{
-
-		if ( std::fabs(m_center[0] - second.m_center[0]) >  ( m_width * 0.5f + second.m_width * 0.5 ) ) return false;
-		if ( std::fabs(m_center[1] -  second.m_center[1]) > (m_height * 0.5 + second.m_height * 0.5 ) ) return false;
-		if ( std::fabs(m_center[2] -  second.m_center[2]) > (m_depth * 0.5f + second.m_depth * 0.5) ) return false;
+		if ( std::fabs(m_center[0] -  second.m_center[0]) > (m_width  * 0.5f + second.m_width  * 0.5 ) ) return false;
+		if ( std::fabs(m_center[1] -  second.m_center[1]) > (m_height * 0.5  + second.m_height * 0.5 ) ) return false;
+		if ( std::fabs(m_center[2] -  second.m_center[2]) > (m_depth  * 0.5f + second.m_depth  * 0.5) ) return false;
 
 		// We have an overlap
 		return true;

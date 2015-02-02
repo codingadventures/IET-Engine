@@ -103,7 +103,9 @@ namespace Physics
 	void RigidBody::Update(float delta_time, bool use_polyhedral)
 	{ 
 		glm::quat orientation =  m_model.Rotation();
+		glm::vec3 position	  = m_model.GetPositionVec();
 		glm::mat3 tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+		
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
 		d_angular_velocity =  d_angular_momentum * tensor;
@@ -124,7 +126,7 @@ namespace Physics
 		d_bounding_sphere->center += d_position;
 		d_bounding_box->m_center += d_position;
 		
-		d_bounding_box->Recalculate_Bounding_Box(m_model.GetModelMatrix());
+		d_bounding_box->Recalculate_Bounding_Box(&position,&orientation);
 
 		m_model.Rotate(orientation);
 		m_model.Translate(d_position);
