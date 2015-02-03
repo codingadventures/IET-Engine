@@ -85,14 +85,14 @@ namespace Controller
 	}
 	RenderingController::~RenderingController()
 	{
-		free(d_cube_model);
-		free(d_shader);
-		free(d_shader_gouraud);
-		free(d_shader_phong);
-		free(d_shader_toon);
-		free(d_shader_diffuse);
-		free(d_shader_ambient);
-		free(d_shader_no_texture);
+		delete d_cube_model;
+		delete d_shader;
+		delete d_shader_gouraud;
+		delete d_shader_phong;
+		delete d_shader_toon;
+		delete d_shader_diffuse;
+		delete d_shader_ambient;
+		delete d_shader_no_texture;
 	}
 
 
@@ -167,14 +167,28 @@ namespace Controller
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
 
-		 
+		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
+		vector<string> v_shader_ambient		= ArrayConversion<string>(2,string("ambient.vert"),string("common.vert"));
 
-		//d_shader = new Shader("vertex.vert","particle.frag"); 
-		//d_shader_toon = new Shader("toon.vert","toon.frag");
-		//d_shader_ambient = new Shader("ambient.vert","ambient.frag");
-		//d_shader_diffuse = new Shader("diffuse.vert","diffuse.frag");
-		//d_shader_no_texture = new Shader("vertex.vert","fragment_notexture.frag");
-		//d_shader_phong = new Shader("specular.vert","specular.frag");
+		vector<string> v_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.vert"),string("common.vert"));
+		vector<string> f_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.frag"),string("common.frag"));
+		
+
+		vector<string> v_shader_specular		= ArrayConversion<string>(2,string("specular.vert"),string("common.vert"));
+		vector<string> f_shader_specular		= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
+
+		vector<string> v_shader_toon		= ArrayConversion<string>(2,string("toon.vert"),string("common.vert"));
+
+		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
+		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag")); 
+
+		d_shader = new Shader(v_shader,"particle.frag"); 
+		d_shader_toon = new Shader(v_shader_toon,"toon.frag");
+
+		d_shader_ambient = new Shader(v_shader_ambient,"ambient.frag");
+		d_shader_diffuse = new Shader(v_shader_diffuse,f_shader_diffuse);
+		d_shader_no_texture = new Shader(v_shader,"fragment_notexture.frag");
+		d_shader_phong = new Shader(v_shader_specular,f_shader_specular);
 
 		d_cube_model = new Model("models\\cube.dae");
 		d_torus_model = new Model("models\\torus.dae");
@@ -270,17 +284,24 @@ namespace Controller
 
 		d_light_position.x =  15.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  15.5f * glm::sin((float) d_global_clock* .5);
-		 d_light_position.z =  15.5f * glm::cos((float)d_global_clock* .5) ;
+		d_light_position.z =  15.5f * glm::cos((float)d_global_clock* .5) ;
 		
 		//d_cube_model->Rotate(d_quaternion_rotation);
 
+		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
+		current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
+		current_shader->SetUniform("model_matrix",cube_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
-		current_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
 
 		d_cube_model->Draw(*current_shader);
 
-		current_shader->SetUniform("mvp",projection_view * d_torus_model->GetModelMatrix());
-		 
+		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+
+		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_torus_model->GetModelMatrix())));  
+		current_shader->SetUniform("model_matrix",torus_model_matrix);
+
 		d_torus_model->Draw(*current_shader);
 		//	text_to_screen();
 

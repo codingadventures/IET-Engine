@@ -1,48 +1,34 @@
 #version 330
-
-struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-    float shininess;
-}; 
-
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
  
-uniform Material material;
-uniform Light 	 light;
 
-  
+vec3 calculate_light_direction(vec3 vertex_world_space);
+vec3 calculate_diffuse_component_material(vec3 normal, vec3 light_direction);
+vec3 calculate_specular_component_material(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction);
+vec3 get_light_ambient_material();
+
+
+in  vec3 N; 
+in  vec3 vertex_world_space;
+
 uniform vec3 eye_position;
  
 
-in vec3 N;
-in vec3 Position;
 out vec4 color;
 
 void main()
 {
 	//Properties
-	vec3 light_direction 		= 	normalize(light.position - Position);
-	vec3 eye_direction 			=   normalize(eye_position - Position);
+	vec3 light_direction 		= 	calculate_light_direction(vertex_world_space);
+	vec3 eye_direction 			=   normalize(eye_position - vertex_world_space);
 	vec3 norm 					= 	normalize(N);
 	vec3 reflection_direction 	= 	reflect(-light_direction, norm);
+ 
 
-	//Diffuse Shading
-	float diffuse 	= max(dot(norm, light_direction), 0.0);
-
-	//Specular Shading
-	float specular 	= pow(max(dot(eye_direction, reflection_direction), 0.0), material.shininess);
 
 	 // Combine results
-    vec3 ambient_color 	= light.ambient 	* material.ambient;
-    vec3 diffuse_color 	= light.diffuse 	* diffuse  * material.diffuse;
-    vec3 specular_color = light.specular 	* specular * material.specular;
+    vec3 ambient_color 			= get_light_ambient_material();
+    vec3 diffuse_color 			= calculate_diffuse_component_material(N,light_direction);
+    vec3 specular_color 		= calculate_specular_component_material(norm,eye_direction,reflection_direction);
 
 	color = vec4(ambient_color + diffuse_color + specular_color, 1.0f);
 }

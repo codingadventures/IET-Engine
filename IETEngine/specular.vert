@@ -5,19 +5,21 @@ layout (location = 1) in vec3 normals;
 layout (location = 2) in vec2 texCoord; 
 layout (location = 3) in vec4 color; 
  
-uniform mat4 view;
-uniform mat4 projection;
-uniform mat4 model; 
+ 
+vec4 transform(vec4 position);
+vec3 normal_transform(mat4 model_transpose_inverse, vec3 normal);
 
-out vec3 N;
-out vec3 Position;
+uniform mat4 model_transpose_inverse;
+uniform mat4 model_matrix;
+
+out vec3 N; 
+out vec3 vertex_world_space;
 
 void main()
 {  
-	N = mat3(transpose(inverse(model))) * normals;
-
-	Position = vec3(model * vec4(position, 1.0f));
-
-	gl_Position = projection * view * vec4(Position, 1.0f);
+	vec4 position_vec4 =  vec4(position, 1.0f);
+	N  = normal_transform(model_transpose_inverse, normals);
+  	vertex_world_space = vec3(model_matrix * position_vec4);
+	gl_Position = transform(position_vec4);
 
 }

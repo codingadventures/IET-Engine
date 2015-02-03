@@ -106,6 +106,7 @@ namespace Controller
 		glutCreateWindow(d_window_name.c_str()); 
 		glutInitContextProfile(GLUT_CORE_PROFILE);
 
+		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION); 
 		this->d_camera = new Cam::Camera();
 
 
@@ -135,7 +136,7 @@ namespace Controller
 
 	AbstractController::~AbstractController()
 	{
-		free(d_camera);
+		delete d_camera;
 	}
 
 	static AbstractController* g_CurrentInstance;

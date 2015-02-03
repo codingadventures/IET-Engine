@@ -14,14 +14,14 @@ class Shader
 
 public:
 	// Our program ID
-	GLuint Program;
+	GLuint			m_program;
 
 private:
 	vector<string>	d_vertex_source_path;
 	vector<string>	d_fragment_source_path;
-	
+
 	GLchar**		d_vertex_code;
-	
+
 	GLchar**		d_fragment_code;
 
 	GLint*			d_vertex_string_count;
@@ -33,7 +33,7 @@ private:
 	GLint			d_mvp_uniform; 
 	GLint			d_vertex_shader;
 	GLint			d_fragment_shader;
-	 
+
 
 
 
@@ -43,11 +43,22 @@ public:
 	Shader(string vertexSourcePath, string fragmentSourcePath) 
 		: d_n_vertex(1),d_n_fragment(1) 
 	{
-		
+
 		d_vertex_source_path.push_back(vertexSourcePath);
 		d_fragment_source_path.push_back(fragmentSourcePath);
 		init();
 	}
+
+	Shader(vector<string> vertex_source_paths,string fragmentSourcePath)
+		: 
+		d_n_vertex(vertex_source_paths.size()),
+		d_vertex_source_path(vertex_source_paths), 
+		d_n_fragment(1)
+	{
+		d_fragment_source_path.push_back(fragmentSourcePath);
+		init();
+
+	} 
 
 	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths )
 		: 
@@ -62,7 +73,16 @@ public:
 	} 
 	~Shader()
 	{
-	 
+		for (int i = 0; i < d_n_vertex; i++)
+		{
+			delete[] d_vertex_code[i];
+		}
+
+		for (int i = 0; i < d_n_fragment; i++)
+		{
+			delete[] d_fragment_code[i];
+		}
+
 		delete[] d_vertex_code;
 		delete[] d_fragment_code;
 
@@ -72,22 +92,22 @@ public:
 	// Use our program
 	void Use()
 	{
-		glUseProgram(this->Program);
+		glUseProgram(this->m_program);
 	}
 
-	 
+
 	void SetUniform(string name, glm::vec3 value){
-		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
 		glUniform3fv(uniform, 1, glm::value_ptr(value));
 	}
 
 	void SetUniform(string name, glm::mat4 value){
-		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
 		glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(value)); 
 	}
 
 	void SetUniform(string name, float value){
-		GLint uniform =  glGetUniformLocation(Program, name.c_str());
+		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
 		glUniform1f(uniform, value);
 	}
 private:
@@ -141,9 +161,9 @@ private:
 		{
 			cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << source_path << endl;
 		}
-		 
-		count = return_code.length(); 
-		output = new GLchar[count];
+
+		count = return_code.length() ; 
+		output = new GLchar[count + 1];
 		std::size_t length = return_code.copy(output,count,0);
 		output[length]= '\0';
 	}
@@ -183,9 +203,9 @@ private:
 		} 
 #pragma endregion
 
-		this->Program = glCreateProgram();
-		glAttachShader(this->Program, d_vertex_shader);
-		glAttachShader(this->Program, d_fragment_shader); 
+		this->m_program = glCreateProgram();
+		glAttachShader(this->m_program, d_vertex_shader);
+		glAttachShader(this->m_program, d_fragment_shader); 
 	}
 
 	void link()
@@ -193,15 +213,15 @@ private:
 		GLint success;
 		GLchar infoLog[512];
 
-		glLinkProgram(this->Program);
+		glLinkProgram(this->m_program);
 
-		glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
+		glGetProgramiv(this->m_program, GL_LINK_STATUS, &success);
 
 		if(!success)
 		{
 			GLint maxLength = 0;
 
-			glGetShaderInfoLog(this->Program, 512, nullptr, infoLog);
+			glGetShaderInfoLog(this->m_program, 512, nullptr, infoLog);
 			cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog <<  endl;
 		}
 

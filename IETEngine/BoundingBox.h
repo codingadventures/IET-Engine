@@ -178,9 +178,9 @@ namespace Physics
 
 	bool BoundingBox::Overlaps(const BoundingBox& second)
 	{
-		if ( std::fabs(m_center[0] -  second.m_center[0]) > (m_width  * 0.5f + second.m_width  * 0.5 ) ) return false;
-		if ( std::fabs(m_center[1] -  second.m_center[1]) > (m_height * 0.5  + second.m_height * 0.5 ) ) return false;
-		if ( std::fabs(m_center[2] -  second.m_center[2]) > (m_depth  * 0.5f + second.m_depth  * 0.5) ) return false;
+		if ( std::fabs(m_center.x -  second.m_center.x) > (m_width  * 0.5f + second.m_width  * 0.5f ) ) return false;
+		if ( std::fabs(m_center.y -  second.m_center.y) > (m_height * 0.5f + second.m_height * 0.5f ) ) return false;
+		if ( std::fabs(m_center.z -  second.m_center.z) > (m_depth  * 0.5f + second.m_depth  * 0.5f ) ) return false;
 
 		// We have an overlap
 		return true;

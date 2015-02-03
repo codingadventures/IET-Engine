@@ -6,9 +6,7 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 3) in vec4 color; 
 
 vec4 transform(vec4 position); 
- 
-uniform mat4 mvp; 
-
+   
 out vec2 TexCoords;
 out vec4 outColor;
 

@@ -1,31 +1,27 @@
 #version 330
 
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
+  
+
+vec3 calculate_light_direction(vec3 vertex_world_space);
+float calculate_diffuse_component(vec3 normal, vec3 light_direction);
+float get_light_ambient();
+
+in  vec3 N; 
+in  vec3 vertex_world_space;
 
 uniform vec3 model_color; 
-uniform Light light;
 
-in  vec3 N;
-in  vec3 Position;
+
 out vec4 color;
 
 void main()
 {
-	vec3  light_direction = normalize(light.position - Position);
-	
+	vec3  light_direction = calculate_light_direction(vertex_world_space);
 	 
 
-	vec3  norm 			  = normalize(N);
-	float diffuse 		  = max(dot(norm, light_direction), 0.0);
+	float diffuseComponent  = calculate_diffuse_component(N, light_direction);
 
-	float diffuseComponent  = diffuse * light.diffuse;
-
-	vec3  result 		  = (light.ambient + diffuseComponent) * model_color ;
+	vec3  result 		  = (get_light_ambient() + diffuseComponent) * model_color ;
 
 	color 				  = vec4(result, 1.0f);
 }
