@@ -218,7 +218,7 @@ namespace Controller
 		Shader* current_shader;
 		glm::mat4 projection_view;
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);  
@@ -261,7 +261,6 @@ namespace Controller
 			break;
 		case TOON:
 			current_shader = d_shader_toon; 
-			current_shader->SetUniform("light_position", d_light_position); 
 
 			break;
 		case GOURAUD:
@@ -314,8 +313,8 @@ namespace Controller
 		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_torus_model->GetModelMatrix())));  
 		current_shader->SetUniform("model_matrix",torus_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
 		d_torus_model->Draw(*current_shader);
 		//	text_to_screen();

@@ -53,3 +53,5 @@ vec3 get_light_ambient_material()
 {
 	return light.ambient * material.ambient;
 }
+
+ 
