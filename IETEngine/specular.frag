@@ -27,7 +27,7 @@ void main()
 
 	 // Combine results
     vec3 ambient_color 			= get_light_ambient_material();
-    vec3 diffuse_color 			= calculate_diffuse_component_material(N,light_direction);
+    vec3 diffuse_color 			= calculate_diffuse_component_material(norm,light_direction);
     vec3 specular_color 		= calculate_specular_component_material(norm,eye_direction,reflection_direction);
 
 	color = vec4(ambient_color + diffuse_color + specular_color, 1.0f);

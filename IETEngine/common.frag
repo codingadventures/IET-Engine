@@ -36,13 +36,18 @@ vec3 calculate_diffuse_component_material(vec3 normal, vec3 light_direction)
 	return  light.diffuse * diffuse_factor * material.diffuse;;
 }
 
+vec3 specular_component_material(float specular)
+{
+		return	light.specular * specular * material.specular;
+}
+
 vec3 calculate_specular_component_material(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction)
 { 
 	//Specular Shading
 	float specular 				= pow(max(dot(eye_direction, reflection_direction), 0.0), material.shininess);
-	return						 light.specular 	* specular * material.specular;
- 
+	return 		specular_component_material(specular);
 }
+
 
 float get_light_ambient()
 {
