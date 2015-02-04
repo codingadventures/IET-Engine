@@ -22,7 +22,7 @@ vec3 calculate_light_direction(vec3 vertex_world_space)
 	return normalize(light.position - vertex_world_space);
 }
 
-float calculate_diffuse_component(vec3 normal, vec3 light_direction)
+vec3 calculate_diffuse_component(vec3 normal, vec3 light_direction)
 {
 	vec3 normalized_normal = normalize(normal);
 	float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
@@ -48,8 +48,7 @@ vec3 calculate_specular_component_material(vec3 normalized_normal, vec3 eye_dire
 	return 		specular_component_material(specular);
 }
 
-
-float get_light_ambient()
+vec3 get_light_ambient()
 {
 	return light.ambient;
 }

@@ -3,8 +3,8 @@
   
 
 vec3 calculate_light_direction(vec3 vertex_world_space);
-float calculate_diffuse_component(vec3 normal, vec3 light_direction);
-float get_light_ambient();
+vec3 calculate_diffuse_component(vec3 normal, vec3 light_direction);
+vec3 get_light_ambient();
 
 in  vec3 N; 
 in  vec3 vertex_world_space;
@@ -19,7 +19,7 @@ void main()
 	vec3  light_direction = calculate_light_direction(vertex_world_space);
 	 
 
-	float diffuseComponent  = calculate_diffuse_component(N, light_direction);
+	vec3 diffuseComponent  = calculate_diffuse_component(N, light_direction);
 
 	vec3  result 		  = (get_light_ambient() + diffuseComponent) * model_color ;
 
