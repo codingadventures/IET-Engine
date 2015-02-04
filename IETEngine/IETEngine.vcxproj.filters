@@ -349,5 +349,8 @@
     <None Include="common.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="cook_torrance.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

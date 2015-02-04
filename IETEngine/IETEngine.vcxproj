@@ -164,6 +164,7 @@
     <None Include="ambient.vert" />
     <None Include="common.frag" />
     <None Include="common.vert" />
+    <None Include="cook_torrance.frag" />
     <None Include="diffuse.frag" />
     <None Include="diffuse.vert" />
     <None Include="fragment.frag" />

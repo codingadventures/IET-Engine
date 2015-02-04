@@ -31,6 +31,8 @@ namespace Controller
 		Shader*			d_shader_ambient;
 		Shader*			d_shader_diffuse;
 		Shader*			d_shader_no_texture;
+		Shader*			d_shader_specular;
+		Shader*			d_shader_ct;
 
 		Model*			d_cube_model;
 		Model*			d_torus_model;
@@ -57,7 +59,7 @@ namespace Controller
 
 		float			d_shininess_component;
 
-		Shader* d_shader_specular;
+
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -86,13 +88,15 @@ namespace Controller
 	RenderingController::~RenderingController()
 	{
 		delete d_cube_model;
-		delete d_shader;
+
 		delete d_shader_gouraud;
 		delete d_shader_phong;
 		delete d_shader_toon;
-		delete d_shader_diffuse;
 		delete d_shader_ambient;
+		delete d_shader_diffuse;
 		delete d_shader_no_texture;
+		delete d_shader_specular;
+		delete	   d_shader_ct;
 	}
 
 
@@ -118,7 +122,7 @@ namespace Controller
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-		TwEnumVal lightEv[] = { { NONE, "None"}, {AMBIENT, "Ambient"},{DIFFUSE,"Diffuse"},  {GOURAUD, "Gouraud"}, {PHONG, "Phong"}, {TOON, "Toon"} };
+		TwEnumVal lightEv[] = { { NONE, "None"}, {AMBIENT, "Ambient"},{DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"}, {GOURAUD, "Gouraud"}, {PHONG, "Phong"}, {TOON, "Toon"} };
 		TwType lightType = TwDefineEnum("LightType", lightEv, 6);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
@@ -130,7 +134,7 @@ namespace Controller
 		//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Rotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" group='Model' label='Object rotation' opened=true help='Change the object orientation.' ");
-		 
+
 		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
@@ -157,9 +161,9 @@ namespace Controller
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-		
+
 		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
-		 
+
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
@@ -172,10 +176,13 @@ namespace Controller
 
 		vector<string> v_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.vert"),string("common.vert"));
 		vector<string> f_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.frag"),string("common.frag"));
-		
 
-		vector<string> v_shader_specular		= ArrayConversion<string>(2,string("specular.vert"),string("common.vert"));
-		vector<string> f_shader_specular		= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
+
+		vector<string> v_shader_specular	= ArrayConversion<string>(2,string("specular.vert"),string("common.vert"));
+		vector<string> f_shader_specular	= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
+
+		vector<string> v_shader_cookTorrance= ArrayConversion<string>(2,string("specular.vert"),string("common.vert"));
+		vector<string> f_shader_cookTorrance= ArrayConversion<string>(2,string("cook_torrance.frag"),string("common.frag"));
 
 		vector<string> v_shader_toon		= ArrayConversion<string>(2,string("toon.vert"),string("common.vert"));
 
@@ -189,6 +196,8 @@ namespace Controller
 		d_shader_diffuse = new Shader(v_shader_diffuse,f_shader_diffuse);
 		d_shader_no_texture = new Shader(v_shader,"fragment_notexture.frag");
 		d_shader_phong = new Shader(v_shader_specular,f_shader_specular);
+		d_shader_ct = new Shader(v_shader_cookTorrance,f_shader_cookTorrance);
+
 
 		d_cube_model = new Model("models\\cube.dae");
 		d_torus_model = new Model("models\\torus.dae");
@@ -198,7 +207,7 @@ namespace Controller
 
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
-		 
+
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -243,7 +252,13 @@ namespace Controller
 			light.SetShader(*current_shader);			
 			current_shader->SetUniform("eye_position", d_camera->Position);  
 			break;
+		case COOK_TORRANCE:
+			current_shader = d_shader_ct;
 
+			material.SetShader(*current_shader);
+			light.SetShader(*current_shader);			
+			current_shader->SetUniform("eye_position", d_camera->Position);  
+			break;
 		case TOON:
 			current_shader = d_shader_toon; 
 			current_shader->SetUniform("light_position", d_light_position); 
@@ -285,7 +300,7 @@ namespace Controller
 		d_light_position.x =  15.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  15.5f * glm::sin((float) d_global_clock* .5);
 		d_light_position.z =  15.5f * glm::cos((float)d_global_clock* .5) ;
-		
+
 		//d_cube_model->Rotate(d_quaternion_rotation);
 
 		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();

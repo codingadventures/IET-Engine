@@ -5,6 +5,7 @@ enum RenderingType{
 	NONE,
 	AMBIENT,
 	DIFFUSE,
+	COOK_TORRANCE,
 	SPECULAR,
 	PHONG,
 	TOON,
