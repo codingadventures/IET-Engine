@@ -1,12 +1,17 @@
 #version 330
  
-uniform sampler2D tex;
+ struct Material{
+ 	sampler2D texture_diffuse1;
+ };
+
+
+uniform Material material;
  
-in vec4 outColor;
+in vec2 TexCoords;
  
 out vec4 vFragColor;
  
 void main() 
 {
-	vFragColor = outColor;
+	vFragColor = texture(material.texture_diffuse1,TexCoords);
 }

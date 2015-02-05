@@ -14,6 +14,7 @@ uniform mat4 model_matrix;
 
 out vec3 N; 
 out vec3 vertex_world_space;
+out vec2 TexCoords;
 
 void main()
 {  
@@ -21,5 +22,5 @@ void main()
 	N  = normal_transform(model_transpose_inverse, normals);
   	vertex_world_space = vec3(model_matrix * position_vec4);
 	gl_Position = transform(position_vec4);
-
+	TexCoords = texCoord;
 }

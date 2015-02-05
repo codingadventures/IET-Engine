@@ -215,8 +215,7 @@ namespace Controller
 		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
-		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
-		d_rendering_type = DIFFUSE;
+		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -311,9 +310,9 @@ namespace Controller
 
 		d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
-		d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
+		/*d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
-		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;
+		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;*/
 
 		//d_cube_model->Rotate(d_quaternion_rotation);
 

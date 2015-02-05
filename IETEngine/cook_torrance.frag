@@ -5,9 +5,13 @@ vec3 calculate_light_direction(vec3 vertex_world_space);
 vec3 calculate_diffuse_component_material(vec3 normal, vec3 light_direction); 
 vec3 get_light_ambient_material(); 
 vec3 specular_component_material(float specular);
+vec3 calculate_diffuse_component_material_texture(vec3 normal, vec3 light_direction, vec2 tex_coord);
+vec3 calculate_ambient_component_material_texture(vec2 tex_coord);
+vec3 specular_component_material_texture(float specular,vec2 tex_coord);
 
 in  vec3 N; 
 in  vec3 vertex_world_space;
+in  vec2 TexCoords;
 
 uniform vec3 eye_position;
  
@@ -50,9 +54,9 @@ void main()
   
     float specular 				=   max(0.0,(fresnel * geo_attenuation * roughness) / (NdotV * NdotL * 4.0));
 
-    vec3 ambient_color 			= 	get_light_ambient_material();
-    vec3 diffuse_color 			= 	calculate_diffuse_component_material(norm,light_direction);
-    vec3 specular_color			=   specular_component_material(specular);
+    vec3 ambient_color 			= 	calculate_ambient_component_material_texture(TexCoords);
+    vec3 diffuse_color 			= 	calculate_diffuse_component_material_texture(norm,light_direction,TexCoords);
+    vec3 specular_color			=   specular_component_material_texture(specular,TexCoords);
 
 	color 						=   vec4(ambient_color + diffuse_color + specular_color, 1.0f);
 }

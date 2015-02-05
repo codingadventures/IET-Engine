@@ -55,6 +55,12 @@ vec3 specular_component_material(float specular)
 		return	light.specular * specular * material.specular;
 }
 
+vec3 specular_component_material_texture(float specular,vec2 tex_coord)
+{
+		return	light.specular * specular * vec3(texture(material.texture_specular1,tex_coord));
+}
+
+
 vec3 calculate_specular_component_material(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction)
 { 
 	//Specular Shading
