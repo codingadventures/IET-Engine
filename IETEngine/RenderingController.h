@@ -210,7 +210,9 @@ namespace Controller
 		d_cube_model	= new Model("models\\cube.dae");
 		d_torus_model	= new Model("models\\torus.dae");
 		d_nano_model	= new Model(DROID_NO_WEAPON_MODEL);
-		//d_torus_model->Translate(glm::vec3(-10,0,0));
+		d_torus_model->Translate(glm::vec3(-30,0,0));
+		d_cube_model->Translate(glm::vec3(-30,0,0));
+		d_torus_model->Scale(glm::vec3(10,10,10));
 		d_nano_model->Scale(glm::vec3(15,15,15));
 		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
@@ -296,18 +298,18 @@ namespace Controller
 
 		current_shader->Use();
 
-		glm::quat random_cube_rotation;
-		glm::quat random_torus_rotation;
+		static glm::quat random_cube_rotation;
+		static glm::quat random_torus_rotation;
 		glm::quat nano_rotation;
 
 
 
-		random_cube_rotation *= glm::angleAxis(glm::radians(20.0f), glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
-		random_torus_rotation *= glm::angleAxis(glm::radians(-15.0f), glm::vec3(0,1,0));
+		random_cube_rotation *= glm::angleAxis(glm::radians(2.0f), glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
+		random_torus_rotation *= glm::angleAxis(glm::radians(-1.0f), glm::vec3(0,1,0));
 		 
 
-//		d_cube_model->Rotate(random_cube_rotation);
-	//	d_torus_model->Rotate(random_torus_rotation); 
+ 		d_cube_model->Rotate(random_cube_rotation);
+		d_torus_model->Rotate(random_torus_rotation); 
 
 		d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
@@ -315,23 +317,25 @@ namespace Controller
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
 		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;*/
 
-		//d_cube_model->Rotate(d_quaternion_rotation);
+		d_cube_model->Rotate(d_quaternion_rotation);
 
-		//glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
-		//current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
-		//current_shader->SetUniform("model_matrix",cube_model_matrix);
-		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
+		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
+
+		current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
+		current_shader->SetUniform("model_matrix",cube_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
 
-		////d_cube_model->Draw(*current_shader);
+		 d_cube_model->Draw(*current_shader);
 
-		//glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+		 glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
-		//current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		//current_shader->SetUniform("model_matrix",torus_model_matrix);
-		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
+		 current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		 current_shader->SetUniform("model_matrix",torus_model_matrix);
+		 current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		//	d_torus_model->Draw(*current_shader); 
+		 d_torus_model->Draw(*current_shader); 
+
 		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp", projection_view * nano_model_matrix);
