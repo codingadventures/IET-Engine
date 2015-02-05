@@ -33,9 +33,11 @@ namespace Controller
 		Shader*			d_shader_no_texture;
 		Shader*			d_shader_specular;
 		Shader*			d_shader_ct;
+		Shader*			d_shader_texture;
 
 		Model*			d_cube_model;
 		Model*			d_torus_model;
+		Model*			d_nano_model;
 
 		RenderingType	d_rendering_type;
 
@@ -88,7 +90,8 @@ namespace Controller
 	RenderingController::~RenderingController()
 	{
 		delete d_cube_model;
-
+		delete d_torus_model;
+		delete d_nano_model;
 		delete d_shader_gouraud;
 		delete d_shader_phong;
 		delete d_shader_toon;
@@ -97,6 +100,7 @@ namespace Controller
 		delete d_shader_no_texture;
 		delete d_shader_specular;
 		delete	   d_shader_ct;
+		delete d_shader_texture;
 	}
 
 
@@ -177,6 +181,9 @@ namespace Controller
 		vector<string> v_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.vert"),string("common.vert"));
 		vector<string> f_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.frag"),string("common.frag"));
 
+		vector<string> v_shader_texture		= ArrayConversion<string>(2,string("diffuse.vert"),string("common.vert"));
+		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
+
 
 		vector<string> v_shader_specular	= ArrayConversion<string>(2,string("specular.vert"),string("common.vert"));
 		vector<string> f_shader_specular	= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
@@ -197,14 +204,15 @@ namespace Controller
 		d_shader_no_texture = new Shader(v_shader,"fragment_notexture.frag");
 		d_shader_phong = new Shader(v_shader_specular,f_shader_specular);
 		d_shader_ct = new Shader(v_shader_cookTorrance,f_shader_cookTorrance);
+		d_shader_texture =   new Shader(v_shader_texture,f_shader_texture);
 
-
-		d_cube_model = new Model("models\\cube.dae");
-		d_torus_model = new Model("models\\torus.dae");
+		d_cube_model	= new Model("models\\cube.dae");
+		d_torus_model	= new Model("models\\torus.dae");
+		d_nano_model	= new Model(DROID_MODEL);
 		//d_torus_model->Translate(glm::vec3(-10,0,0));
-		d_torus_model->Scale(glm::vec3(10,10,10));
+		d_nano_model->Scale(glm::vec3(3,3,3));
 		tweak_bar_setup();
-
+		d_nano_model->Rotate(glm::vec3(0,1,0),glm::radians(90.0f));
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
 
@@ -240,7 +248,7 @@ namespace Controller
 			current_shader->SetUniform("model_color",d_object_color); 
 			break;
 		case DIFFUSE:
-			current_shader = d_shader_diffuse ;
+			current_shader = d_shader_texture ;
 
 			light.SetShader(*current_shader);
 
@@ -308,7 +316,7 @@ namespace Controller
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
 
-		d_cube_model->Draw(*current_shader);
+		//d_cube_model->Draw(*current_shader);
 
 		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
@@ -316,7 +324,14 @@ namespace Controller
 		current_shader->SetUniform("model_matrix",torus_model_matrix);
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		d_torus_model->Draw(*current_shader);
+		//	d_torus_model->Draw(*current_shader); 
+		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
+
+		current_shader->SetUniform("mvp", projection_view * nano_model_matrix);
+		current_shader->SetUniform("model_matrix", nano_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  
+ 
+		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);

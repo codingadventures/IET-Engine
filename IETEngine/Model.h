@@ -125,7 +125,8 @@ namespace Rendering
 		}
 		void Rotate(glm::vec3 rotation_vector, float radians)
 		{
-			//this->d_rotation = glm::rotate(glm::mat4(),radians,rotation_vector);
+			glm::quat rot = glm::angleAxis(radians,rotation_vector);
+			this->d_rotation =  rot;
 		}
 
 		glm::quat Rotation() const { return d_rotation; } 
@@ -345,10 +346,10 @@ namespace Rendering
 				// Normal: texture_normalN
 
 				// 1. Diffuse maps
-				vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+				vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "material.texture_diffuse");
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 				// 2. Specular maps
-				vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+				vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "material.texture_specular");
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 			}
 #pragma endregion  

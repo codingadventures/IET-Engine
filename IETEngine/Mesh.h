@@ -81,9 +81,9 @@ namespace Rendering
 					stringstream ss;
 					string number;
 					string name = this->m_textures[i].type;
-					if(name == "texture_diffuse")
+					if(name == "material.texture_diffuse")
 						ss << diffuseNr++; // Transfer GLuint to stream
-					else if(name == "texture_specular")
+					else if(name == "material.texture_specular")
 						ss << specularNr++; // Transfer GLuint to stream
 					number = ss.str(); 
 					// Now set the sampler to the correct texture unit

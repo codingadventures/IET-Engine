@@ -33,8 +33,8 @@ namespace Rendering
 	void Light::SetShader(Shader& shader)
 	{
 		shader.SetUniform("light.position",d_position);
-		shader.SetUniform("light.ambient",d_ambient);
-		shader.SetUniform("light.diffuse",d_diffuse);
+		shader.SetUniform("light.ambient" ,d_ambient);
+		shader.SetUniform("light.diffuse" ,d_diffuse);
 		shader.SetUniform("light.specular",d_specular);
 	}
 
