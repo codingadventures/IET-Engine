@@ -126,8 +126,8 @@ namespace Controller
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-		TwEnumVal lightEv[] = { { NONE, "None"}, {AMBIENT, "Ambient"},{DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"}, {GOURAUD, "Gouraud"}, {PHONG, "Phong"}, {TOON, "Toon"} };
-		TwType lightType = TwDefineEnum("LightType", lightEv, 6);
+		TwEnumVal lightEv[] = { { NONE, "None"},  {DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"} };
+		TwType lightType = TwDefineEnum("LightType", lightEv, 5);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
@@ -269,6 +269,7 @@ namespace Controller
 			break;
 		case TOON:
 			current_shader = d_shader_toon; 
+			current_shader->SetUniform("light_position", d_light_position);  
 
 			break;
 		case GOURAUD:

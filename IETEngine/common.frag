@@ -61,6 +61,14 @@ vec3 specular_component_material_texture(float specular,vec2 tex_coord)
 }
 
 
+vec3 calculate_specular_component_material_texture(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction,vec2 tex_coord)
+{
+	//Specular Shading
+	float specular 				= pow(max(dot(eye_direction, reflection_direction), 0.0), material.shininess);
+	return 		specular_component_material_texture(specular,tex_coord);
+
+}
+
 vec3 calculate_specular_component_material(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction)
 { 
 	//Specular Shading
