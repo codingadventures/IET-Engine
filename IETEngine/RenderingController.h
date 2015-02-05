@@ -1,6 +1,6 @@
 #ifndef RenderingController_h__
 #define RenderingController_h__
-#define GLM_FORCE_RADIANS
+
 #include "AbstractController.h"
 #include "UI.h"
 #include "RenderingType.h"
@@ -165,6 +165,7 @@ namespace Controller
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
+		d_object_color = glm::vec3(1.0);
 
 		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
 
@@ -208,14 +209,14 @@ namespace Controller
 
 		d_cube_model	= new Model("models\\cube.dae");
 		d_torus_model	= new Model("models\\torus.dae");
-		d_nano_model	= new Model(DROID_MODEL);
+		d_nano_model	= new Model(DROID_NO_WEAPON_MODEL);
 		//d_torus_model->Translate(glm::vec3(-10,0,0));
-		d_nano_model->Scale(glm::vec3(3,3,3));
+		d_nano_model->Scale(glm::vec3(15,15,15));
+		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
-		d_nano_model->Rotate(glm::vec3(0,1,0),glm::radians(90.0f));
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f);
-
+		d_rendering_type = DIFFUSE;
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -285,7 +286,7 @@ namespace Controller
 
 		d_camera->MoveCamera();
 
-		d_view_matrix = d_camera->GetViewMatrix();
+		d_view_matrix = d_camera->GetViewMatrix(); 
 
 		projection_view = d_projection_matrix * d_view_matrix;
 		d_shader_no_texture->SetUniform("mvp",projection_view * glm::mat4(1));
@@ -295,34 +296,40 @@ namespace Controller
 
 		current_shader->Use();
 
-		static glm::quat random_cube_rotation;
-		static glm::quat random_torus_rotation;
+		glm::quat random_cube_rotation;
+		glm::quat random_torus_rotation;
+		glm::quat nano_rotation;
+
+
 
 		random_cube_rotation *= glm::angleAxis(glm::radians(20.0f), glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
 		random_torus_rotation *= glm::angleAxis(glm::radians(-15.0f), glm::vec3(0,1,0));
+		 
 
-		d_cube_model->Rotate(random_cube_rotation);
-		d_torus_model->Rotate(random_torus_rotation);
+//		d_cube_model->Rotate(random_cube_rotation);
+	//	d_torus_model->Rotate(random_torus_rotation); 
 
-		d_light_position.x =  15.5f * glm::cos((float)d_global_clock* .5);
-		d_light_position.y =  15.5f * glm::sin((float) d_global_clock* .5);
-		d_light_position.z =  15.5f * glm::cos((float)d_global_clock* .5) ;
+		d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
+
+		d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
+		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
+		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;
 
 		//d_cube_model->Rotate(d_quaternion_rotation);
 
-		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
-		current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
-		current_shader->SetUniform("model_matrix",cube_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
+		//glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
+		//current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
+		//current_shader->SetUniform("model_matrix",cube_model_matrix);
+		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
 
-		//d_cube_model->Draw(*current_shader);
+		////d_cube_model->Draw(*current_shader);
 
-		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+		//glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
-		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		current_shader->SetUniform("model_matrix",torus_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
+		//current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		//current_shader->SetUniform("model_matrix",torus_model_matrix);
+		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
 		//	d_torus_model->Draw(*current_shader); 
 		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
@@ -330,7 +337,7 @@ namespace Controller
 		current_shader->SetUniform("mvp", projection_view * nano_model_matrix);
 		current_shader->SetUniform("model_matrix", nano_model_matrix);
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  
- 
+
 		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 

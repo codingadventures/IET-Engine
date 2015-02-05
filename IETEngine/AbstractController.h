@@ -1,6 +1,7 @@
 #ifndef Controller_h__
 #define Controller_h__
 
+#define GLM_FORCE_RADIANS
 
 #include <glm/glm.hpp> 
 #include <glm/gtx/random.hpp>
@@ -10,7 +11,6 @@
 #include "Camera.h"
 #include "RigidBodyManager.h"
 
-#define GLM_FORCE_RADIANS
 
 
 namespace Controller

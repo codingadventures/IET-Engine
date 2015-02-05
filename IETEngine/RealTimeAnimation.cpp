@@ -1,6 +1,5 @@
 
-#include <math.h> 
-#include "PhysicsController.h"
+ 
 #include "RenderingController.h"
  
 using namespace Controller;

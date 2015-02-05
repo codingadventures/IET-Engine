@@ -125,8 +125,9 @@ namespace Rendering
 		}
 		void Rotate(glm::vec3 rotation_vector, float radians)
 		{
-			glm::quat rot = glm::angleAxis(radians,rotation_vector);
-			this->d_rotation =  rot;
+			 
+			this->d_rotation =  glm::rotate(d_rotation,radians,rotation_vector);
+;
 		}
 
 		glm::quat Rotation() const { return d_rotation; } 
