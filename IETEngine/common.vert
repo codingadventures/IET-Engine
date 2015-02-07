@@ -1,10 +1,23 @@
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+	sampler2D texture_diffuse1;
+    sampler2D texture_specular1;
+    vec3 specular;
+    float shininess;
+}; 
 
 struct Light {
-    vec3 position; 
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
 };
 
-uniform mat4 mvp;
+
 uniform Light light;
+uniform Material material;
+uniform mat4 mvp; 
 
 vec4 mvpTransform(vec4 position)
 {

@@ -38,6 +38,7 @@ namespace Controller
 		Model*			d_cube_model;
 		Model*			d_torus_model;
 		Model*			d_nano_model;
+		Model*			d_head_model;
 
 		RenderingType	d_rendering_type;
 
@@ -61,7 +62,6 @@ namespace Controller
 
 		float			d_shininess_component;
 
-
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -76,22 +76,14 @@ namespace Controller
 		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
-
-		d_material_ambient = glm::vec3(0.1745f,0.01175f,0.01175f); //Ruby reflection values
-		d_material_diffuse = glm::vec3(0.61424f,0.04136f,0.04136f);
-		d_material_specular = glm::vec3(0.727811f,0.626959f,0.626959f);
-
-		d_ambient_uniform_name = "ambient_component";
-		d_diffuse_uniform_name = "diffuse_component";
-		d_specular_uniform_name = "specular_component";
-
-		d_shininess_component = 0.6f;
+		 
 	}
 	RenderingController::~RenderingController()
 	{
 		delete d_cube_model;
 		delete d_torus_model;
 		delete d_nano_model;
+		delete d_head_model;
 		delete d_shader_gouraud;
 		delete d_shader_phong;
 		delete d_shader_toon;
@@ -142,17 +134,11 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Model Color", TW_TYPE_COLOR3F, &d_object_color, " group='Light' label='Object Color'");
-
+	 
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_light_ambient, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_light_specular, " group='Light' ");
-
-		TwAddVarRO(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_material_ambient, " group='Material' label='Material' ");
-		TwAddVarRO(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_material_diffuse, " group='Material' ");
-		TwAddVarRO(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_material_specular, " group='Material' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Shininess", TW_TYPE_FLOAT, &d_shininess_component, " group='Material' ");
-
+		 
 	}
 
 	void RenderingController::Init(int argc, char* argv[])
@@ -165,9 +151,7 @@ namespace Controller
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-		d_object_color = glm::vec3(1.0);
-
-		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
+ 		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
 
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
@@ -177,15 +161,15 @@ namespace Controller
 		TwGLUTModifiersFunc(glutGetModifiers);
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
-		 
+
 		vector<string> f_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.frag"),string("common.frag"));
-		 
+
 		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
-		 
+
 		vector<string> f_shader_specular	= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
-		 
+
 		vector<string> f_shader_cookTorrance= ArrayConversion<string>(2,string("cook_torrance.frag"),string("common.frag"));
-		  
+
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag")); 
 
@@ -200,6 +184,7 @@ namespace Controller
 		d_shader_texture =   new Shader(v_shader,f_shader_texture);
 
 		d_cube_model	= new Model("models\\cube.dae");
+		d_head_model    = new Model(HEAD_MODEL);
 		d_torus_model	= new Model("models\\torus.dae");
 		d_nano_model	= new Model(DROID_NO_WEAPON_MODEL);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
@@ -228,9 +213,8 @@ namespace Controller
 		Update_Timer(); 
 		Calculate_Fps( ); 
 
-		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular);
-		//Material material(d_material_ambient,d_material_diffuse,d_material_specular,d_shininess_component);
-
+		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
+ 
 		switch (d_rendering_type)
 		{
 		case NONE:
@@ -238,25 +222,20 @@ namespace Controller
 			break;
 		case AMBIENT:
 			current_shader = d_shader_ambient ; 
-			current_shader->SetUniform(d_ambient_uniform_name,d_light_ambient); 
-			current_shader->SetUniform("model_color",d_object_color); 
+			current_shader->SetUniform(d_ambient_uniform_name,d_light_ambient);  
 			break;
 		case DIFFUSE:
 			current_shader = d_shader_diffuse ;
 
 			light.SetShader(*current_shader);
-
-			current_shader->SetUniform("model_color",  d_object_color);  
+			 
 			break;
 		case PHONG:
-			current_shader = d_shader_phong ;
-			//material.SetShader(*current_shader);
+			current_shader = d_shader_phong ; 
 			light.SetShader(*current_shader);			 
 			break;
 		case COOK_TORRANCE:
 			current_shader = d_shader_ct;
-
-			//material.SetShader(*current_shader);
 			light.SetShader(*current_shader);			
 			break;
 		case TOON:
@@ -298,9 +277,9 @@ namespace Controller
 
 		random_cube_rotation *= glm::angleAxis(glm::radians(10.0f) * (float) d_delta_time_secs, glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
 		random_torus_rotation *= glm::angleAxis(glm::radians(-10.0f)* (float)d_delta_time_secs, glm::vec3(0,1,0));
-		 
 
- 		d_cube_model->Rotate(random_cube_rotation);
+
+		d_cube_model->Rotate(random_cube_rotation);
 		d_torus_model->Rotate(random_torus_rotation); 
 
 		d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
@@ -309,7 +288,7 @@ namespace Controller
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
 		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;*/
 
-		 
+
 		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
@@ -317,15 +296,15 @@ namespace Controller
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
 
-		 d_cube_model->Draw(*current_shader);
+		d_cube_model->Draw(*current_shader);
 
-		 glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
-		 current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		 current_shader->SetUniform("model_matrix",torus_model_matrix);
-		 current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
+		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		current_shader->SetUniform("model_matrix",torus_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		 d_torus_model->Draw(*current_shader); 
+		d_torus_model->Draw(*current_shader); 
 
 		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
@@ -333,7 +312,16 @@ namespace Controller
 		current_shader->SetUniform("model_matrix", nano_model_matrix);
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  
 
-	//	d_nano_model->Draw(*current_shader);
+		/*glm::mat4 head_model_matrix = d_head_model->GetModelMatrix();
+
+		current_shader->SetUniform("mvp", projection_view * head_model_matrix);
+		current_shader->SetUniform("model_matrix", head_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(head_model_matrix)));  
+
+
+		d_head_model->Draw(*current_shader);*/
+
+		//	d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);

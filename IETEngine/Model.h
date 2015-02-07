@@ -44,7 +44,7 @@ namespace Rendering
 
 	private:  
 		vector<Mesh>	d_meshes;
-	 
+
 		vector<Texture> d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
 		string			d_directory;
@@ -55,11 +55,11 @@ namespace Rendering
 		glm::mat4		d_model_matrix;
 		glm::mat4		d_scale;
 		glm::mat4		d_position;
-	
-		
+
+
 		glm::quat		d_rotation;
-		
-		
+
+
 
 	public:
 		/*  Functions   */
@@ -71,7 +71,7 @@ namespace Rendering
 
 			m_skeleton = new Skeleton(); 
 
-			 
+
 
 			this->loadModel(path); 
 
@@ -88,15 +88,16 @@ namespace Rendering
 
 		} 
 
-	 
+
 		glm::vec3		Position() const { return decomposeT(d_position); } 
 
+		bool			Has_Texture() {return d_textures_loaded.size()>0;}
 
 		~Model()
 		{
-			free(m_animation_matrix);
-			free(d_bone_location);
-			free(m_skeleton);
+			delete m_animation_matrix;
+			delete d_bone_location;
+			delete m_skeleton;
 
 		}
 		// Draws the model, and thus all its meshes
@@ -105,11 +106,12 @@ namespace Rendering
 			shader.Use();
 
 			this->d_model_matrix = GetModelMatrix();
-			
+
 
 			if (m_skeleton->getNumberOfBones()>0)
 				glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
+			shader.SetUniform("hasTexture",Has_Texture());
 
 			for(GLuint i = 0; i < this->d_meshes.size(); i++)
 				this->d_meshes[i].Draw(shader);
@@ -125,13 +127,13 @@ namespace Rendering
 		}
 		void Rotate(glm::vec3 rotation_vector, float radians)
 		{
-			 
+
 			this->d_rotation =  glm::rotate(d_rotation,radians,rotation_vector);
-;
+			;
 		}
 
 		glm::quat Rotation() const { return d_rotation; } 
-		
+
 		vector<Mesh>* Meshes() { 
 			return &d_meshes; 
 		}
@@ -244,9 +246,9 @@ namespace Rendering
 
 					memset(Name, 0, sizeof(Name));
 					sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-				//	GLint location = glGetUniformLocation(d_shader->Program, Name);
-//					if (location == INVALID_UNIFORM_LOCATION) {
-						//fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
+					//	GLint location = glGetUniformLocation(d_shader->Program, Name);
+					//					if (location == INVALID_UNIFORM_LOCATION) {
+					//fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
 					//}
 
 					//d_bone_location[i] = location;
@@ -344,7 +346,7 @@ namespace Rendering
 				aiColor4D ambient;
 				glm::vec4 glmAmbient;
 				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
-				
+
 				glmAmbient = aiColor4DToGlm(ambient);
 
 				aiColor4D diffuse;
@@ -361,7 +363,7 @@ namespace Rendering
 				aiGetMaterialFloat(aiMaterial, AI_MATKEY_SHININESS, &shininess);
 
 				material = Material(glmAmbient,glmDiffuse,glmSpecular,shininess);
-				 
+
 				// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
 				// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 				// Same applies to other texture as the following list summarizes:
@@ -457,7 +459,7 @@ namespace Rendering
 			return textures;
 		}
 
-		
+
 
 
 

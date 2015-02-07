@@ -115,6 +115,11 @@ public:
 		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
 		glUniform1f(uniform, value);
 	}
+
+	void SetUniform(string name, bool value){
+		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
+		glUniform1i(uniform, value);
+	}
 private:
 
 	void init()

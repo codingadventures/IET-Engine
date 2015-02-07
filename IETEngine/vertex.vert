@@ -21,6 +21,7 @@ out vec3 eye_direction;
 
 void main()
 {  
+
 	vec4 position_vec4 	=  vec4(position, 1.0f);
   	vec3 vertex_world_space 	
   						=  vec3(model_matrix * position_vec4);
@@ -36,5 +37,5 @@ void main()
 
 	gl_Position 		=  mvpTransform(position_vec4);
 
-	tex_coord 			= texCoord;
+	tex_coord 			=  texCoord;
 }
