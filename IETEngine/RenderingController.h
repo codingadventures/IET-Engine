@@ -188,12 +188,12 @@ namespace Controller
 		d_cube_model	= new Model("models\\cube.dae");
 		d_head_model    = new Model(HEAD_MODEL);
 		d_torus_model	= new Model("models\\torus.dae");
-		d_nano_model	= new Model(DROID_NO_WEAPON_MODEL);
+		d_nano_model	= new Model(CHURCH_MODEL);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		d_torus_model->Scale(glm::vec3(10,10,10));
-		d_nano_model->Scale(glm::vec3(15,15,15));
-		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
+		//d_nano_model->Scale(glm::vec3(15,15,15));
+		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
@@ -234,7 +234,7 @@ namespace Controller
 			break;
 		case COOK_TORRANCE:
 			current_shader = d_shader_ct;
-			current_shader->SetUniform("roughnessValue",0.3f);
+			current_shader->SetUniform("roughnessValue",0.8f);
 			current_shader->SetUniform("fresnelReflectance",0.8f);
 			break;
 		case TOON:
@@ -283,7 +283,7 @@ namespace Controller
 		d_cube_model->Rotate(random_cube_rotation);
 		d_torus_model->Rotate(random_torus_rotation); 
 
-		d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
+		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
 		/*d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
@@ -297,7 +297,7 @@ namespace Controller
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
 
 
-		d_cube_model->Draw(*current_shader);
+		//d_cube_model->Draw(*current_shader);
 
 		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
@@ -305,7 +305,7 @@ namespace Controller
 		current_shader->SetUniform("model_matrix",torus_model_matrix);
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		d_torus_model->Draw(*current_shader); 
+		//d_torus_model->Draw(*current_shader); 
 
 		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
@@ -322,7 +322,7 @@ namespace Controller
 
 		d_head_model->Draw(*current_shader);*/
 
-		//	d_nano_model->Draw(*current_shader);
+		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);

@@ -199,6 +199,8 @@ namespace Rendering
 		void calculate_area()
 		{	 
 			 size_t N = m_vertices.size();
+			 if (N % 3 != 0) return;
+
 			 for (int i = 0; i < N; i = i + 3)
 			 {
 				 glm::vec3 v1 = m_vertices[i].Position;
