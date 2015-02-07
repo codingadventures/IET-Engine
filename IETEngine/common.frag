@@ -19,10 +19,6 @@ uniform Light light;
 uniform Material material;
 
 
-vec3 calculate_light_direction(vec3 vertex_world_space)
-{
-	return normalize(light.position - vertex_world_space);
-}
 
 vec3 calculate_diffuse_component(vec3 normal, vec3 light_direction)
 {

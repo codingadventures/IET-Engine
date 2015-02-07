@@ -1,7 +1,7 @@
 #version 330
  
 
-vec3 calculate_light_direction(vec3 vertex_world_space);
+
 
 vec3 calculate_ambient_component_material_texture(vec2 tex_coord);
 vec3 calculate_diffuse_component_material_texture(vec3 normal, vec3 light_direction,vec2 tex_coord);
@@ -10,22 +10,16 @@ vec3 calculate_specular_component_material_texture(vec3 normalized_normal, vec3 
 vec3 get_light_ambient_material();
 
 
-in  vec3 N; 
-in  vec3 vertex_world_space;
-
-in  vec2 TexCoords;
-
-uniform vec3 eye_position;
+in  vec3 normalized_normal;  
+in  vec3 light_direction;
+in  vec2 tex_coord;
  
-
 out vec4 color;
 
 void main()
 {
 	//Properties
-	vec3 light_direction 		= 	calculate_light_direction(vertex_world_space);
-	vec3 eye_direction 			=   normalize(eye_position - vertex_world_space);
-	vec3 norm 					= 	normalize(N);
+	 
 	vec3 reflection_direction 	= 	reflect(-light_direction, norm);
  
 

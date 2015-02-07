@@ -161,23 +161,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ambient.frag" />
-    <None Include="ambient.vert" />
     <None Include="common.frag" />
     <None Include="common.vert" />
     <None Include="cook_torrance.frag" />
     <None Include="diffuse.frag" />
-    <None Include="diffuse.vert" />
     <None Include="fragment.frag" />
     <None Include="fragment_bone.frag" />
     <None Include="fragment_notexture.frag" />
     <None Include="particle.frag" />
-    <None Include="particle.vert" />
     <None Include="specular.frag" />
-    <None Include="specular.vert" />
+    <None Include="vertex.vert" />
     <None Include="boundings.frag" />
     <None Include="toon.frag" />
-    <None Include="toon.vert" />
-    <None Include="vertex.vert" />
     <None Include="vertex_bone.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

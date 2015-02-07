@@ -285,6 +285,7 @@ namespace Rendering
 			vector<GLuint> indices;
 			vector<Texture> textures;
 			vector<VertexWeight> boneWeights;
+			Material material;
 			glm::uint numBones = 0; 
 
 #pragma region [ Process Vertices ]
@@ -338,7 +339,29 @@ namespace Rendering
 			// Process materials
 			if(ai_mesh->mMaterialIndex >= 0)
 			{
-				aiMaterial* material = scene->mMaterials[ai_mesh->mMaterialIndex];
+				aiMaterial* aiMaterial = scene->mMaterials[ai_mesh->mMaterialIndex];
+
+				aiColor4D ambient;
+				glm::vec4 glmAmbient;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
+				
+				glmAmbient = aiColor4DToGlm(ambient);
+
+				aiColor4D diffuse;
+				glm::vec4 glmDiffuse;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
+				glmDiffuse = aiColor4DToGlm(diffuse);
+
+				aiColor4D specular;
+				glm::vec4 glmSpecular;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, &specular);
+				glmSpecular = aiColor4DToGlm(specular);
+
+				float shininess = 0.0f;
+				aiGetMaterialFloat(aiMaterial, AI_MATKEY_SHININESS, &shininess);
+
+				material = Material(glmAmbient,glmDiffuse,glmSpecular,shininess);
+				 
 				// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
 				// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 				// Same applies to other texture as the following list summarizes:
@@ -347,10 +370,10 @@ namespace Rendering
 				// Normal: texture_normalN
 
 				// 1. Diffuse maps
-				vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "material.texture_diffuse");
+				vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "material.texture_diffuse");
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 				// 2. Specular maps
-				vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "material.texture_specular");
+				vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "material.texture_specular");
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 			}
 #pragma endregion  
@@ -396,7 +419,7 @@ namespace Rendering
 #pragma endregion  
 
 			// Return a mesh object created from the extracted mesh data
-			return Mesh(vertices, indices, textures, boneWeights);
+			return Mesh(vertices, indices, textures, boneWeights,material);
 		}
 
 		// Checks all material textures of a given type and loads the textures if they're not loaded yet.

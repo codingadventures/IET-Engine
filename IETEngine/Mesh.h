@@ -17,6 +17,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "BoundingBox.h" 
 #include "BoundingSphere.h"
+#include "Material.h"
 
 namespace Rendering
 {
@@ -45,15 +46,18 @@ namespace Rendering
 		GLuint						d_EBO;
 		GLuint						d_bone_VBO;
 		std::map<std::string, Bone> d_bone_mapping;
-		float d_area;
+		Material					d_material;
+
+		float						d_area;
 	public:
 		/*  Functions  */
 		// Constructor
-		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights) 
+		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights,Material material) 
 			: 
 			d_area(0.0f),
 			d_bounding_sphere(BoundingSphere(vertices)),
-			d_bounding_box(BoundingBox(vertices))
+			d_bounding_box(BoundingBox(vertices)),
+			d_material(material)
 		{ 
 			this->m_vertices = vertices;
 			this->m_indices = indices;
@@ -93,6 +97,8 @@ namespace Rendering
 				}
 				glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 			}
+
+			d_material.SetShader(shader);
 	
 			// Draw mesh
 			glBindVertexArray(this->d_VAO);

@@ -295,9 +295,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertex.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
-    </None>
     <None Include="vertex_bone.vert">
       <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
@@ -310,32 +307,17 @@
     <None Include="fragment_notexture.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
-    <None Include="particle.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
-    </None>
     <None Include="particle.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
-    </None>
-    <None Include="toon.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
     <None Include="toon.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
-    <None Include="ambient.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
-    </None>
     <None Include="ambient.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
-    <None Include="diffuse.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
-    </None>
     <None Include="diffuse.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
-    </None>
-    <None Include="specular.vert">
-      <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
     <None Include="specular.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
@@ -351,6 +333,9 @@
     </None>
     <None Include="cook_torrance.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="vertex.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
   </ItemGroup>
 </Project>

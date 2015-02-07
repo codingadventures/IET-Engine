@@ -22,6 +22,12 @@ inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
 
 	return to;
 }
+ 
+inline glm::vec4 aiColor4DToGlm(const aiColor4D& from)
+{
+	return glm::vec4(from.r,from.g,from.b,from.a);
+}
+
 
 inline glm::vec3 aiVectorKeyToGlm(const aiVectorKey* from)
 {

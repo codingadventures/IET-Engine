@@ -7,11 +7,11 @@
 
 uniform Material material;
  
-in vec2 TexCoords;
+in vec2 tex_coord;
  
 out vec4 vFragColor;
  
 void main() 
 {
-	vFragColor = texture(material.texture_diffuse1,TexCoords);
+	vFragColor = texture(material.texture_diffuse1,tex_coord);
 }

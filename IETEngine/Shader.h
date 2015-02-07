@@ -101,6 +101,11 @@ public:
 		glUniform3fv(uniform, 1, glm::value_ptr(value));
 	}
 
+	void SetUniform(string name, glm::vec4 value){
+		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
+		glUniform3fv(uniform, 1, glm::value_ptr(value));
+	}
+
 	void SetUniform(string name, glm::mat4 value){
 		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
 		glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(value)); 
@@ -173,7 +178,8 @@ private:
 		const GLchar* vertex_code_char;
 		const GLchar* fragment_code_char;
 		GLint success;
-		GLchar infoLog[512];
+		GLint logSize = 0;
+		GLchar* infoLog;
 
 
 		d_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -186,20 +192,29 @@ private:
 
 		glGetShaderiv(d_vertex_shader, GL_COMPILE_STATUS, &success);
 		if(!success)
-		{
-			glGetShaderInfoLog(d_vertex_shader, 512, nullptr, infoLog);
+		{ 
+			glGetShaderiv(d_vertex_shader, GL_INFO_LOG_LENGTH, &logSize);
+			infoLog = new GLchar[logSize];
+
+			glGetShaderInfoLog(d_vertex_shader, logSize, nullptr, infoLog);
 			cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog <<  endl;
+			delete infoLog;
 		}
 #pragma endregion
 
 #pragma region [ Fragment Shader ]
 		glShaderSource(d_fragment_shader, d_n_fragment, d_fragment_code, d_fragment_string_count);
 		glCompileShader(d_fragment_shader);
-		glGetShaderiv(d_fragment_shader, GL_COMPILE_STATUS, &success);
+		glGetShaderiv(d_fragment_shader, GL_INFO_LOG_LENGTH, &success);
 		if(!success)
 		{
-			glGetShaderInfoLog(d_fragment_shader, 512, nullptr, infoLog);
+			glGetShaderiv(d_fragment_shader, GL_INFO_LOG_LENGTH, &logSize);
+
+			infoLog = new GLchar[logSize];
+
+			glGetShaderInfoLog(d_fragment_shader, logSize, nullptr, infoLog);
 			cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog <<  endl;
+			delete infoLog;
 		} 
 #pragma endregion
 
@@ -211,7 +226,7 @@ private:
 	void link()
 	{
 		GLint success;
-		GLchar infoLog[512];
+		GLchar* infoLog;
 
 		glLinkProgram(this->m_program);
 
@@ -219,10 +234,24 @@ private:
 
 		if(!success)
 		{
-			GLint maxLength = 0;
+			GLint logSize = 0;
+			glGetProgramiv(this->m_program, GL_INFO_LOG_LENGTH, &logSize);
+			infoLog = new GLchar[logSize];
+			glGetProgramInfoLog(this->m_program, logSize, nullptr, infoLog);
+			cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n";
+			cout << "File names: \n";
+			for (auto vertex : d_vertex_source_path)
+			{
+				cout << vertex + "\n";
+			}
 
-			glGetShaderInfoLog(this->m_program, 512, nullptr, infoLog);
-			cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog <<  endl;
+			for (auto fragment : d_fragment_source_path)
+			{
+				cout << fragment + "\n";
+			}
+
+			cout  << infoLog <<  endl;
+			delete infoLog;
 		}
 
 		glDeleteShader(d_vertex_shader);
