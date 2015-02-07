@@ -76,7 +76,7 @@ namespace Controller
 		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
-		 
+
 	}
 	RenderingController::~RenderingController()
 	{
@@ -134,11 +134,11 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
-	 
+
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_light_ambient, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_light_specular, " group='Light' ");
-		 
+
 	}
 
 	void RenderingController::Init(int argc, char* argv[])
@@ -151,7 +151,7 @@ namespace Controller
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
- 		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
+		UserKeyboardCallback = std::bind(&RenderingController::Read_Input,this); 
 
 		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
@@ -192,7 +192,7 @@ namespace Controller
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		d_torus_model->Scale(glm::vec3(10,10,10));
-		//d_nano_model->Scale(glm::vec3(15,15,15));
+		//d_nano_model->Scale(glm::vec3(10,10,10));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
@@ -216,7 +216,7 @@ namespace Controller
 		Calculate_Fps( ); 
 
 		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
- 
+
 		switch (d_rendering_type)
 		{
 		case NONE:
@@ -285,9 +285,9 @@ namespace Controller
 
 		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
-		/*d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
+		d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
-		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ;*/
+		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ; 
 
 
 		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
@@ -318,8 +318,6 @@ namespace Controller
 		current_shader->SetUniform("mvp", projection_view * head_model_matrix);
 		current_shader->SetUniform("model_matrix", head_model_matrix);
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(head_model_matrix)));  
-
-
 		d_head_model->Draw(*current_shader);*/
 
 		d_nano_model->Draw(*current_shader);
