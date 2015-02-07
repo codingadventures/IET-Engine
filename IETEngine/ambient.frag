@@ -1,11 +1,27 @@
 #version 330
   
-uniform vec3 ambient_component;
-uniform vec3 model_color;
 
+vec3 calculate_ambient_component_material();
+vec3 calculate_ambient_component_material_texture(vec2 tex_coord);
+
+in vec2 tex_coord;
 out vec4 color;
+
+uniform bool    hasTexture;
 
 void main()
 {
-	color = vec4(ambient_component * model_color, 1.0f);
+	vec3 Ia;
+
+	if (!hasTexture) 
+	{ 
+		Ia	= calculate_ambient_component_material();
+		 
+ 	}
+ 	else
+ 	{
+ 		Ia = calculate_ambient_component_material_texture(tex_coord);
+ 		 
+ 	}
+	color = vec4(Ia, 1.0f);
 }

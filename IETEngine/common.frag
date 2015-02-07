@@ -19,6 +19,39 @@ uniform Light light;
 uniform Material material;
 
 
+uniform float   roughnessValue; // 0 : smooth, 1: rough
+uniform float   fresnelReflectance;// fresnel reflectance at normal incidence
+
+float calculate_specular_cook_torrance_component(vec3 eye_direction,vec3 light_direction, vec3 normalized_normal)
+{
+	vec3 H						= 	normalize(eye_direction + light_direction);
+
+	float NdotL 				= 	dot(normalized_normal, light_direction);
+	
+	float NdotH 				= 	dot(normalized_normal, H); 
+    float NdotV 				= 	dot(normalized_normal, eye_direction); // note: this could also be NdotL, which is the same value
+    float VdotH 				= 	dot(eye_direction, H);
+ 	float mSquared 				= 	roughnessValue * roughnessValue;
+ 
+
+ 	float Gc 					=	2 * ( NdotH * NdotV ) / VdotH;
+	float Gb 					=	2 * ( NdotH * NdotL ) / VdotH;
+	float geo_attenuation 		= 	min(1.0,min(Gb,Gc));
+
+	// roughness (or: microfacet distribution function)
+    // beckmann distribution function
+    float r1 					= 	1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
+    float r2 					= 	(NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
+    float roughness 			= 	r1 * exp(r2);
+
+	// fresnel
+    // Schlick approximation
+    float fresnel 				= 	fresnelReflectance + (1.0 - fresnelReflectance) * pow(1.0 - VdotH, 5.0);
+  
+    float specular 				=   max(0.0,(fresnel * geo_attenuation * roughness) / (NdotV * NdotL * 4.0));
+
+    return specular;
+}
 
 vec3 calculate_diffuse_component(vec3 normal, vec3 light_direction)
 {

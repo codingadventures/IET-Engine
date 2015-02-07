@@ -162,6 +162,8 @@ namespace Controller
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
 
+		vector<string> f_shader_ambient		= ArrayConversion<string>(2,string("ambient.frag"),string("common.frag"));
+
 		vector<string> f_shader_diffuse		= ArrayConversion<string>(2,string("diffuse.frag"),string("common.frag"));
 
 		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
@@ -176,7 +178,7 @@ namespace Controller
 		d_shader = new Shader(v_shader,"particle.frag"); 
 		d_shader_toon = new Shader(v_shader,"toon.frag");
 
-		d_shader_ambient = new Shader(v_shader,"ambient.frag");
+		d_shader_ambient = new Shader(v_shader,f_shader_ambient);
 		d_shader_diffuse = new Shader(v_shader,f_shader_diffuse);
 		d_shader_no_texture = new Shader(v_shader,"fragment_notexture.frag");
 		d_shader_phong = new Shader(v_shader,f_shader_specular);
@@ -221,22 +223,19 @@ namespace Controller
 			current_shader = d_shader;
 			break;
 		case AMBIENT:
-			current_shader = d_shader_ambient ; 
-			current_shader->SetUniform(d_ambient_uniform_name,d_light_ambient);  
+			current_shader = d_shader_ambient ;   
 			break;
 		case DIFFUSE:
 			current_shader = d_shader_diffuse ;
 
-			light.SetShader(*current_shader);
-			 
 			break;
 		case PHONG:
-			current_shader = d_shader_phong ; 
-			light.SetShader(*current_shader);			 
+			current_shader = d_shader_phong ;  		 
 			break;
 		case COOK_TORRANCE:
 			current_shader = d_shader_ct;
-			light.SetShader(*current_shader);			
+			current_shader->SetUniform("roughnessValue",0.3f);
+			current_shader->SetUniform("fresnelReflectance",0.8f);
 			break;
 		case TOON:
 			current_shader = d_shader_toon; 
@@ -250,6 +249,8 @@ namespace Controller
 			current_shader = nullptr;
 			break;
 		}
+
+		light.SetShader(*current_shader);	
 
 		d_shader_no_texture->Use();
 
