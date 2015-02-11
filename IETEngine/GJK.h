@@ -23,7 +23,7 @@ namespace Physics
 	private:
 		glm::vec3	support(glm::vec3 direction, const vector<Vertex>& vertices);
 
-		bool		do_simplex(const vector<glm::vec3>& simplex, glm::vec3& D);
+		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& D);
 
 		bool		is_same_direction(glm::vec3 a, glm::vec3 b);
 	};
@@ -96,31 +96,123 @@ namespace Physics
 
 	}
 
-	bool GJK::do_simplex(const vector<glm::vec3>& simplex, glm::vec3& D)
+	bool GJK::do_simplex(vector<glm::vec3>& simplex, glm::vec3& D)
 	{
 		size_t s_size = simplex.size();
-		 
-		//switch (s_size)
-		//{
-		//case 2:					// 1-Edge
-		//	auto A = simplex[0];
-		//	auto B = simplex[1];
 
-		//	auto AO = -A;		//It is: O - A --> given the O is the origin thus 0,0,0. 
-		//	auto AB = B - A;
+		switch (s_size)
+		{
+		case 1:
 
-		//	if (is_same_direction(AO,AB))
-		//	{
-		//		auto direction = glm::cross(glm::cross(AO,AB),AB); // This is to find the perpendicular to AB
+			D = -simplex[0];
+			return false;
 
-		//	}
-		//	
-		//	break;
-		//case 3:					// 1-Triangle
-		//	break;
-		//case 4:
-		//	break;				// 1-Tetrahedron
-		//}
+			break;
+		case 2:					// 1-Edge
+			auto A = simplex[1]; //A is the last inserted point. which is the direction we are looking at
+			auto B = simplex[0]; 
+
+			auto AO = -A;		//It is: O - A --> given the O is the origin thus 0,0,0. 
+			auto AB = B - A;    //AB is the edge
+
+			if (is_same_direction(AO,AB))
+			{
+				D = glm::cross(glm::cross(AO,AB),AB); // This is to find the perpendicular to AB
+			}
+
+			D = AO;
+
+			simplex.clear();
+			simplex.push_back(A); // A is the closest to the origin.
+
+			return false;		  // it's a edge so we return false as there is no intersection
+			break;
+		case 3:				      // 1-Triangle
+			auto A = simplex[simplex.size() - 1]; //A is still the last inserted point. which is the direction we are looking at
+			auto B = simplex[simplex.size() - 2];
+			auto C = simplex[simplex.size() - 3];
+
+			auto AO = -A;
+			auto AB = B-A;
+			auto AC = C-A;
+
+			auto AC_perp = glm::cross(glm::cross(AB,AC),AC);
+
+			//Let's begin our tests
+			if (is_same_direction(AC_perp,AO))
+			{
+				if (is_same_direction(AC,AO))
+				{
+
+					simplex.clear();
+					simplex.push_back(C);
+					simplex.push_back(A);
+					D = glm::cross(glm::cross(AC,AO),AC);
+				}
+				else
+				{
+					if (is_same_direction(AB,AO))
+					{
+						simplex.clear();
+						simplex.push_back(B);
+						simplex.push_back(A);
+						D = glm::cross(glm::cross(AB,AO),AB);
+					}
+					else
+					{
+						simplex.clear();
+						simplex.push_back(A);
+						D = AO;
+					}
+				}
+			}
+			else
+			{
+				auto AB_perp = glm::cross(glm::cross(AB,AC),AB);
+				if (is_same_direction(AB_perp,AO))
+				{
+					//this is the same block as above
+					if (is_same_direction(AB,AO))
+					{
+						simplex.clear();
+						simplex.push_back(B);
+						simplex.push_back(A);
+						D = glm::cross(glm::cross(AB,AO),AB);
+					}
+					else
+					{
+						simplex.clear();
+						simplex.push_back(A);
+						D = AO;
+					}
+				}
+				else
+				{
+					auto ABC = glm::cross(AB,AC);
+					simplex.clear();
+					if (is_same_direction(ABC,AO))
+					{
+						simplex.push_back(C);
+						simplex.push_back(B);
+						simplex.push_back(A);
+						D = ABC;
+					}
+					else
+					{
+						simplex.push_back(B);
+						simplex.push_back(C);
+						simplex.push_back(A);
+						D = -ABC;
+					}
+				}
+			}
+
+			return false;					//Still we don't have a tetrahedron
+			break;
+		case 4:
+
+			break;				// 1-Tetrahedron
+		}
 
 		//// we only need to handle to 1-simplex and 2-simplex
 		//if(simplex.size() == 2) // 1-simplex
