@@ -95,6 +95,7 @@ namespace Physics
 		d_bounding_sphere->center += model.Position();
 		d_bounding_box->m_center += model.Position();
 	}
+
 	RigidBody::~RigidBody()
 	{
 		free(d_bounding_sphere);

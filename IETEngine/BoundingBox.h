@@ -5,8 +5,7 @@
 #include "EndPoint.h"
 
 namespace Physics
-{
-
+{ 
 
 	struct BoundingBox
 	{
@@ -22,13 +21,25 @@ namespace Physics
 
 		glm::vec3	m_scale_factor;
 
+		vector<Vertex> m_vertices;
+		vector<Vertex> m_model_space_vertices;
+
 		BoundingBox(const BoundingBox& bounding_box);
 		BoundingBox(vector<Vertex> vertices);
 
+		//BoundingBox& operator=(const BoundingBox& source){
+		//	if (this==&source) // self check
+		//		return *this;
+
+		//	m_vertices = source.m_vertices;
+
+		//	return *this;
+
+		//}
+
 		void operator+=(BoundingBox& const other_bbox){
 			*this = Calculate(*this,  other_bbox);
-		}
-
+		} 
 		glm::vec3 Color() const;
 
 		bool Overlaps(const BoundingBox& second);
@@ -41,22 +52,23 @@ namespace Physics
 		EndPoint Get_EndPoint_Y();
 		EndPoint Get_EndPoint_Z();
 
-	private:
+		//private:
 		glm::vec3		d_initial_wdh;
 
-		vector<Vertex> d_vertices;
 
 		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
 		void calculate(glm::vec3* translation ,glm::quat* rotation  );
 	};
 
 	BoundingBox::BoundingBox(vector<Vertex> vertices) 
-		: d_vertices(vertices),
+		: m_vertices(vertices),
+		m_model_space_vertices(vertices),
 		m_is_colliding(glm::vec3(false,false,false)),
 		m_width(0.0f),
 		m_depth(0.0f),
 		m_height(0.0f)
 	{
+
 		calculate(&glm::vec3(0.0f),&glm::quat());
 		d_initial_wdh.x = m_width;
 		d_initial_wdh.y = m_height;
@@ -64,8 +76,11 @@ namespace Physics
 	}
 
 	BoundingBox::BoundingBox(const BoundingBox& bounding_box)
+		: 
+		m_vertices(bounding_box.m_vertices),
+		m_model_space_vertices(bounding_box.m_model_space_vertices)
+
 	{
-		this->d_vertices = bounding_box.d_vertices;
 		calculate(&glm::vec3(0.0f),&glm::quat());
 		d_initial_wdh.x = m_width;
 		d_initial_wdh.y = m_height;
@@ -76,11 +91,11 @@ namespace Physics
 	{
 		glm::vec3	min_coordinate;
 		glm::vec3   max_coordinate;
-		size_t		vert_size = d_vertices.size();
+		size_t		vert_size = m_vertices.size();
 		//for (auto point : d_vertices)
 		for (int i = 0; i < vert_size; i++)
 		{
-			glm::vec3 newPos  = glm::vec3(*rotation * glm::vec4(d_vertices[i].Position,1.0f));
+			glm::vec3 newPos  = glm::vec3(*rotation * glm::vec4(m_vertices[i].Position,1.0f));
 
 			if(newPos.x < min_coordinate.x) min_coordinate.x = newPos.x;
 			if(newPos.x > max_coordinate.x) max_coordinate.x = newPos.x;
@@ -90,6 +105,8 @@ namespace Physics
 
 			if(newPos.z < min_coordinate.z) min_coordinate.z = newPos.z;
 			if(newPos.z > max_coordinate.z) max_coordinate.z = newPos.z;
+
+			m_model_space_vertices[i].Position = *translation +  glm::vec3(*rotation * glm::vec4(m_model_space_vertices[i].Position,1.0f));
 		}								
 
 
@@ -113,7 +130,7 @@ namespace Physics
 
 	Physics::BoundingBox BoundingBox::Calculate(BoundingBox& b1, BoundingBox& b2)
 	{
-		BoundingBox temp(b1.d_vertices);
+		BoundingBox temp(b1.m_vertices);
 		temp.m_min_coordinate.x = glm::min(b1.m_min_coordinate.x,b2.m_min_coordinate.x);
 		temp.m_max_coordinate.x = glm::max(b1.m_max_coordinate.x,b2.m_max_coordinate.x);
 

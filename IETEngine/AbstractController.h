@@ -136,7 +136,7 @@ namespace Controller
 
 	AbstractController::~AbstractController()
 	{
-		delete d_camera;
+		//delete d_camera;
 	}
 
 	static AbstractController* g_CurrentInstance;

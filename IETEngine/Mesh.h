@@ -212,7 +212,8 @@ namespace Rendering
 	
 		void calculate_bounding_box()
 		{
-			d_bounding_box = BoundingBox(m_vertices);
+		 	d_bounding_box = BoundingBox(m_vertices);
+			 
 		}
 		
 		 

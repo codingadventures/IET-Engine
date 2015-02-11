@@ -17,6 +17,7 @@
 #include "UI.h"
 #include "Sphere.h" 
 #include "Helper.h"
+#include "GJK.h"
 
 namespace Controller
 {
@@ -255,13 +256,13 @@ namespace Controller
 
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
-		vector<string> f_shader				= ArrayConversion<string>(1,string("particle.frag"));
+		 
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 
 		d_rigid_body_manager = new RigidBodyManager(false);
 
-		d_shader = new Shader(v_shader,f_shader); 
+		d_shader = new Shader(v_shader,f_shader_no_texture); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
 		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 
@@ -271,10 +272,10 @@ namespace Controller
 
 		d_model_vector.push_back(d_cube_model);
 
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			auto model = new Model(*d_cube_model);
-			model->Translate(glm::sphericalRand(80.0f));
+			model->Translate(glm::sphericalRand(1.0f));
 
 			auto rigid_body =  new RigidBody(*model);
 			d_model_vector.push_back(model);
@@ -335,6 +336,8 @@ namespace Controller
 		for (auto model: d_model_vector)
 		{
 			d_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
+
+			d_shader->SetUniform("model_matrix",model->GetModelMatrix());
 			model->Draw(*d_shader);
 		}
 		/*
@@ -342,7 +345,7 @@ namespace Controller
 		d_another_cube->Draw(*d_shader);*/
 
 
-	 
+
 		Vertex v1,v2;
 		v1.Position = d_force_impulse_application_point;
 		v1.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
@@ -387,7 +390,24 @@ namespace Controller
 
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
 
+		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
+		if (colliding_pairs->size())
+		{
+			for (auto pair : *colliding_pairs)
+			{
+
+
+				GJK *gjk = new GJK(pair.m_left_element->m_model_space_vertices,pair.m_right_element->m_model_space_vertices,pair.m_left_element->m_center,pair.m_right_element->m_center);  
+
+				gjk->Intersect();
+
+				delete gjk;
+			}
+		}
+
+
 		//p.Draw();
+
 		d_shader_no_texture->Use();
 
 		//text_to_screen();

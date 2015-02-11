@@ -104,6 +104,7 @@
     <ClInclude Include="EndPoint.h" />
     <ClInclude Include="EulerUpdater.h" />
     <ClInclude Include="Friction.h" />
+    <ClInclude Include="GJK.h" />
     <ClInclude Include="GLParticleRenderer.h" />
     <ClInclude Include="Inertia.h" />
     <ClInclude Include="IParticleRenderer.h" />
