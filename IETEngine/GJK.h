@@ -23,7 +23,7 @@ namespace Physics
 	private:
 		glm::vec3	support(glm::vec3 direction, const vector<Vertex>& vertices);
 
-		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& D);
+		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction);
 
 		bool		is_same_direction(glm::vec3 a, glm::vec3 b);
 	};
@@ -96,18 +96,22 @@ namespace Physics
 
 	}
 
-	bool GJK::do_simplex(vector<glm::vec3>& simplex, glm::vec3& D)
+	bool GJK::do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction)
 	{
 		size_t s_size = simplex.size();
 
 		switch (s_size)
 		{
+#pragma region 1-Simplex
+
 		case 1:
 
-			D = -simplex[0];
+			direction = -simplex[0];
 			return false;
 
 			break;
+#pragma endregion 
+#pragma region 2-Simplex 
 		case 2:					// 1-Edge
 			auto A = simplex[1]; //A is the last inserted point. which is the direction we are looking at
 			auto B = simplex[0]; 
@@ -117,16 +121,18 @@ namespace Physics
 
 			if (is_same_direction(AO,AB))
 			{
-				D = glm::cross(glm::cross(AO,AB),AB); // This is to find the perpendicular to AB
+				direction = glm::cross(glm::cross(AO,AB),AB); // This is to find the perpendicular to AB
 			}
 
-			D = AO;
+			direction = AO;
 
 			simplex.clear();
 			simplex.push_back(A); // A is the closest to the origin.
 
 			return false;		  // it's a edge so we return false as there is no intersection
 			break;
+#pragma endregion 
+#pragma region 3-Simplex
 		case 3:				      // 1-Triangle
 			auto A = simplex[simplex.size() - 1]; //A is still the last inserted point. which is the direction we are looking at
 			auto B = simplex[simplex.size() - 2];
@@ -147,7 +153,7 @@ namespace Physics
 					simplex.clear();
 					simplex.push_back(C);
 					simplex.push_back(A);
-					D = glm::cross(glm::cross(AC,AO),AC);
+					direction = glm::cross(glm::cross(AC,AO),AC);
 				}
 				else
 				{
@@ -156,13 +162,13 @@ namespace Physics
 						simplex.clear();
 						simplex.push_back(B);
 						simplex.push_back(A);
-						D = glm::cross(glm::cross(AB,AO),AB);
+						direction = glm::cross(glm::cross(AB,AO),AB);
 					}
 					else
 					{
 						simplex.clear();
 						simplex.push_back(A);
-						D = AO;
+						direction = AO;
 					}
 				}
 			}
@@ -177,13 +183,13 @@ namespace Physics
 						simplex.clear();
 						simplex.push_back(B);
 						simplex.push_back(A);
-						D = glm::cross(glm::cross(AB,AO),AB);
+						direction = glm::cross(glm::cross(AB,AO),AB);
 					}
 					else
 					{
 						simplex.clear();
 						simplex.push_back(A);
-						D = AO;
+						direction = AO;
 					}
 				}
 				else
@@ -195,74 +201,34 @@ namespace Physics
 						simplex.push_back(C);
 						simplex.push_back(B);
 						simplex.push_back(A);
-						D = ABC;
+						direction = ABC;
 					}
 					else
 					{
 						simplex.push_back(B);
 						simplex.push_back(C);
 						simplex.push_back(A);
-						D = -ABC;
+						direction = -ABC;
 					}
 				}
 			}
 
 			return false;					//Still we don't have a tetrahedron
 			break;
+#pragma endregion  
 		case 4:
+			//Check the vertex first. Given we have arrived to the last point added is A it is the only one I check...hoping my assumption is correct
+			auto A = simplex.at(simplex.size() - 1);
+			auto B = simplex.at(simplex.size() - 2);
+			auto C = simplex.at(simplex.size() - 3);
+			auto D = simplex.at(simplex.size() - 4);
+
+			auto AO = -A;
 
 			break;				// 1-Tetrahedron
 		}
 
-		//// we only need to handle to 1-simplex and 2-simplex
-		//if(simplex.size() == 2) // 1-simplex
-		//	// AO is in the same direction as AB
-		//		if(is_same_direction(-simplex[0], simplex[1] - simplex[0]))
-		//		{	
-		//			// get the glm::vec3 perpendicular to AB
-		//			direction = (simplex.b - simplex.a).perpendicular
-		//				// set direction to face O
-		//				// if AO is not in the same direction as AB, the dot product will be negative
-		//				// the scaling will therefore flip the direction to the opposite (correct) direction
-		//				direction.scale(-simplex.a.dot(direction))
-		//				// A and B remain in the simplex
-		//				simplex = [simplex.a, simplex.b]
-		//		}
-		//		else
-		//			direction = -simplex.a
-		//			// only A remains in the simplex
-		//			simplex = [simplex.a]
-		//else // 2-simplex
-		//	glm::vec3 AB = simplex.b - simplex.a
-		//	glm::vec3 AC = simplex.c - simplex.a
-		//	glm::vec3 AO = - simplex.a
-		//	// the glm::vec3 perpendicular to AB facing away from C
-		//	glm::vec3 ACB = AB.perpendicular
-		//	ACB = ACB.scale(ACB.dot(-AC))
-		//	// the glm::vec3 perpendicular to AC facing away from B
-		//	glm::vec3 ABC = AC.perpendicular
-		//	ABC= ABC.scale(ABC.dot(-AB))
-		//	if(ACB.isSameDirection(AO))
-		//		if(AB.isSameDirection(AO)) // region 4
-		//			direction = ACB
-		//			simplex = [simplex.a, simplex.b]
-		//		return false
-		//		else // region 5
-		//		direction = AO
-		//		simplex = [simplex.a]
-		//		return false
-		//	else if(ABC.isSameDirection(AO))
-		//	if(AC.isSameDirection(AO)) // region 6
-		//		direction = ABC
-		//		simplex = [simplex.a, simplex.c]
-		//	return false
-		//	else // region 5 (again)
-		//	direction = AO
-		//	simplex = [simplex.a]
-		//	return false
-		//	else // region 5
-		//else // region 7
-		//return true
+
 	}
 
 	bool GJK::is_same_direction(glm::vec3 a, glm::vec3 b)
