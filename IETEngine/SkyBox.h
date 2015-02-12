@@ -97,6 +97,10 @@ namespace Rendering
 		glBindVertexArray(d_VAO);
 		
 		glActiveTexture(GL_TEXTURE0);
+
+		shader.SetUniform("draw_sky_box",true);
+
+
 		glUniform1i(glGetUniformLocation(shader.m_program, "skybox"), 0);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, d_cubemapTexture);

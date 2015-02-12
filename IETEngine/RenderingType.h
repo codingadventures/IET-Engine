@@ -3,6 +3,8 @@
 
 enum RenderingType{
 	NONE,
+	SKYBOX,
+	SKYBOX_REFR,
 	AMBIENT,
 	DIFFUSE,
 	COOK_TORRANCE,
