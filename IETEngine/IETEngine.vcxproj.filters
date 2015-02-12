@@ -296,6 +296,9 @@
     <ClInclude Include="GJK.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="SkyBox.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex_bone.vert">
@@ -339,6 +342,9 @@
     </None>
     <None Include="vertex.vert">
       <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="skybox.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
   </ItemGroup>
 </Project>

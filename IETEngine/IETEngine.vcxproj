@@ -122,6 +122,7 @@
     <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="RigidBodyManager.h" />
+    <ClInclude Include="SkyBox.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SwordBlock.h" />
@@ -170,6 +171,7 @@
     <None Include="fragment_bone.frag" />
     <None Include="fragment_notexture.frag" />
     <None Include="particle.frag" />
+    <None Include="skybox.frag" />
     <None Include="specular.frag" />
     <None Include="vertex.vert" />
     <None Include="boundings.frag" />

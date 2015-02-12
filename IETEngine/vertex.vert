@@ -18,6 +18,7 @@ out vec3 normalized_normal;
 out vec2 tex_coord;
 out vec3 light_direction;
 out vec3 eye_direction;
+out vec3 tex_coord_skybox;
 
 void main()
 {  
@@ -38,4 +39,6 @@ void main()
 	gl_Position 		=  mvpTransform(position_vec4);
 
 	tex_coord 			=  texCoord;
+
+	tex_coord_skybox	=  position;
 }

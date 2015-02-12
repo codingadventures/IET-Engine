@@ -6,6 +6,7 @@
 #include "RenderingType.h"
 #include "Light.h"
 #include "Material.h"
+#include "SkyBox.h"
 
 namespace Controller
 { 
@@ -34,11 +35,15 @@ namespace Controller
 		Shader*			d_shader_specular;
 		Shader*			d_shader_ct;
 		Shader*			d_shader_texture;
+		Shader*			d_shader_skybox;
 
 		Model*			d_cube_model;
 		Model*			d_torus_model;
 		Model*			d_nano_model;
+ 
 		Model*			d_head_model;
+
+		SkyBox*			d_sky_box;
 
 		RenderingType	d_rendering_type;
 
@@ -61,7 +66,6 @@ namespace Controller
 		string			d_specular_uniform_name;
 
 		float			d_shininess_component;
-
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -93,6 +97,8 @@ namespace Controller
 		delete d_shader_specular;
 		delete d_shader_ct;
 		delete d_shader_texture;
+		delete d_sky_box;
+		delete d_shader_skybox;
 	}
 
 
@@ -161,6 +167,8 @@ namespace Controller
 		TwGLUTModifiersFunc(glutGetModifiers);
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
+		
+		vector<string> f_shader_skybox		= ArrayConversion<string>(1,string("skybox.frag")); 
 
 		vector<string> f_shader_ambient		= ArrayConversion<string>(2,string("ambient.frag"),string("common.frag"));
 
@@ -175,6 +183,13 @@ namespace Controller
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag")); 
 
+		vector<const char*> skybox_faces;
+		skybox_faces.push_back("models/skybox/right.jpg");
+		skybox_faces.push_back("models/skybox/left.jpg");
+		skybox_faces.push_back("models/skybox/top.jpg");
+		skybox_faces.push_back("models/skybox/bottom.jpg");
+		skybox_faces.push_back("models/skybox/back.jpg");
+		skybox_faces.push_back("models/skybox/front.jpg");
 		d_shader = new Shader(v_shader,"particle.frag"); 
 		d_shader_toon = new Shader(v_shader,"toon.frag");
 
@@ -184,11 +199,15 @@ namespace Controller
 		d_shader_phong = new Shader(v_shader,f_shader_specular);
 		d_shader_ct = new Shader(v_shader,f_shader_cookTorrance);
 		d_shader_texture =   new Shader(v_shader,f_shader_texture);
+		d_shader_skybox =   new Shader(v_shader,f_shader_skybox);
 
 		d_cube_model	= new Model("models\\cube.dae");
-		d_head_model    = new Model(HEAD_MODEL);
+		//d_head_model    = new Model(HEAD_MODEL);
 		d_torus_model	= new Model("models\\torus.dae");
-		d_nano_model	= new Model(CHURCH_MODEL);
+
+		d_sky_box = new SkyBox(skybox_faces);
+
+		//d_nano_model	= new Model(CHURCH_MODEL);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		d_torus_model->Scale(glm::vec3(10,10,10));
@@ -251,6 +270,9 @@ namespace Controller
 		}
 
 		light.SetShader(*current_shader);	
+		light.SetShader(*d_shader_skybox);	
+
+
 
 		d_shader_no_texture->Use();
 
@@ -261,7 +283,16 @@ namespace Controller
 		d_view_matrix = d_camera->GetViewMatrix(); 
 
 		projection_view = d_projection_matrix * d_view_matrix;
+
+
 		d_shader_no_texture->SetUniform("mvp",projection_view * glm::mat4(1));
+
+		d_shader_skybox->Use();
+		d_shader_skybox->SetUniform("mvp", d_projection_matrix * glm::mat4(glm::mat3(d_view_matrix)));
+		d_shader_skybox->SetUniform("model_matrix", glm::mat4(1));
+		
+		d_sky_box->Draw(*d_shader_skybox);
+
 
 		Point p(d_light_position,glm::vec4(1.0f,0.0f,0.0f,1.0f));
 		p.Draw();
@@ -307,11 +338,11 @@ namespace Controller
 
 		//d_torus_model->Draw(*current_shader); 
 
-		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
+	/*	glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp", projection_view * nano_model_matrix);
 		current_shader->SetUniform("model_matrix", nano_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  */
 
 		/*glm::mat4 head_model_matrix = d_head_model->GetModelMatrix();
 
@@ -320,7 +351,7 @@ namespace Controller
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(head_model_matrix)));  
 		d_head_model->Draw(*current_shader);*/
 
-		d_nano_model->Draw(*current_shader);
+//		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);
