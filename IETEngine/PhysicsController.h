@@ -80,6 +80,8 @@ namespace Controller
 		SpringGenerator* d_spring_generator;
 		bool d_draw_spheres;
 		bool d_is_narrow_phase_collision;
+		glm::vec3 d_collision_color ;
+
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -130,14 +132,18 @@ namespace Controller
 		//string integration_message = "4 - Integration Method - STATUS: " + integration_status;
 		//screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
 
-		char com[100];
+		/*char com[100];
 		sprintf_s(com,"Center of Mass: %f,%f,%f",d_rigid_body->Center_of_mass().x,d_rigid_body->Center_of_mass().y,d_rigid_body->Center_of_mass().z);
 		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,com);
 
 		char Up[100];
 		sprintf_s(Up,"Camera Up: %f,%f,%f",d_camera->Up.x,d_camera->Up.y,d_camera->Up.z);
-		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,Up);
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,Up);*/
 
+		string collision_status = d_is_narrow_phase_collision ? "YES" : "NO";
+		char collision[100];
+		sprintf_s(collision,"Collision: %s",collision_status.c_str());
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,collision);
 
 
 		/*	*/
@@ -310,8 +316,7 @@ namespace Controller
 		Calculate_Fps( );
 
 
-
-		d_shader->Use();
+		//d_shader->Use();
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 
@@ -335,12 +340,25 @@ namespace Controller
 
 		//d_cube_model->Draw(*d_shader);
 
+		d_shader_boundings->Use();
+		d_shader_boundings->SetUniform("shape_color",d_collision_color);
+
 		for (auto model: d_model_vector)
 		{
-			d_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
+			Shader* curr_shader;
 
-			d_shader->SetUniform("model_matrix",model->GetModelMatrix());
-			model->Draw(*d_shader);
+
+			if (d_is_narrow_phase_collision)
+				curr_shader = d_shader_boundings;
+			else
+				curr_shader = d_shader;
+
+			curr_shader->Use();
+			curr_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
+
+			curr_shader->SetUniform("model_matrix",model->GetModelMatrix());
+
+			model->Draw(*curr_shader);
 		}
 		/*
 
@@ -406,19 +424,24 @@ namespace Controller
 
 				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings);
 
-
+				if (d_is_narrow_phase_collision)
+				{
+					d_collision_color = glm::vec3(1.0f,0.0f,0.0f);
+				}
 				//	narrow_phase.push_back(pair);
 
 				delete gjk;
 			}
 		}
+		else
+			d_is_narrow_phase_collision = false;
 
 
 		//p.Draw();
 
 		d_shader_no_texture->Use();
 
-		//text_to_screen();
+		 text_to_screen();
 
 		//	glDisable(GL_BLEND);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

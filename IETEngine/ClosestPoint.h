@@ -30,7 +30,7 @@ namespace Physics
 				if (sqDist < bestSqDist) 
 				{
 					bestSqDist = sqDist, closestPt = q;
-					point_to_plane.plane = Plane(a,b,c);
+					point_to_plane.plane = Plane::Plane(a,b,c);
 					point_to_plane.distance = bestSqDist;
 					point_to_plane.point = closestPt;
 				}
@@ -42,7 +42,7 @@ namespace Physics
 				if (sqDist < bestSqDist) 
 				{
 					bestSqDist = sqDist, closestPt = q;
-					point_to_plane.plane = Plane(a,c,d);
+					point_to_plane.plane =  Plane::Plane(a,c,d);
 					point_to_plane.distance = bestSqDist;
 					point_to_plane.point = closestPt;
 				}
@@ -55,7 +55,7 @@ namespace Physics
 				if (sqDist < bestSqDist) 
 				{
 					bestSqDist = sqDist, closestPt = q;
-					point_to_plane.plane = Plane(a,d,b);
+					point_to_plane.plane =  Plane::Plane(a,d,b);
 					point_to_plane.distance = bestSqDist;
 					point_to_plane.point = closestPt;
 				}
@@ -67,7 +67,7 @@ namespace Physics
 				if (sqDist < bestSqDist) 
 				{
 					bestSqDist = sqDist, closestPt = q;
-					point_to_plane.plane = Plane(b,d,c);
+					point_to_plane.plane =  Plane::Plane(b,d,c);
 					point_to_plane.distance = bestSqDist;
 					point_to_plane.point = closestPt;
 				}
@@ -120,12 +120,14 @@ namespace Physics
 		}
 
 
+
+
 		static	int PointOutsideOfPlane(glm::vec3 p, glm::vec3 a, glm::vec3 b, glm::vec3 c)
 		{
 			return glm::dot(p - a, glm::cross(b - a, c - a)) >= 0.0f; // [AP AB AC] >= 0
 		}
 
-		static	glm::vec3 ClosestPtPointPlane(glm::vec3 q, Plane p)
+		static	glm::vec3 Plane(glm::vec3 q, Plane p)
 		{
 			float t = glm::dot(p.n_normal, q) - p.d;
 			return q - t * p.n_normal;

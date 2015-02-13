@@ -30,6 +30,10 @@ namespace Physics
 		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction);
 
 		bool		is_same_direction(glm::vec3 a, glm::vec3 b);
+
+		bool		check_tetrahedron(glm::vec3 AO,glm::vec3 AB,glm::vec3 AC,glm::vec3 ABC, glm::vec3 direction, vector<glm::vec3>& simplex);
+
+		bool		check_triangle(vector<glm::vec3>& simplex, glm::vec3 &direction);
 	};
 
 
@@ -37,16 +41,17 @@ namespace Physics
 	glm::vec3 GJK::support(glm::vec3 direction, const vector<Vertex>& vertices)
 	{
 		size_t length = vertices.size();
-		float max_dot_product = FLT_MIN;
-		int   index_max_d_product= 0;
+		float max_dot_product = glm::dot(vertices[0].Position,direction);
+
+		int   index_max_d_product = 0;
 		float local_dot_product;
-		for (int i = 0; i < length; i++)
+		for (int i = 1; i < length; i++)
 		{
 			local_dot_product = glm::dot(direction,vertices[i].Position);
-			if (local_dot_product <= max_dot_product) continue;
-
-			max_dot_product = local_dot_product;
-			index_max_d_product = i;
+			if (local_dot_product > max_dot_product){
+				max_dot_product = local_dot_product;
+				index_max_d_product = i;
+			}
 		}
 
 		return vertices[index_max_d_product].Position;
@@ -85,25 +90,27 @@ namespace Physics
 		auto D = direction;
 
 		shader.Use();
-		 
-		{
+
+		/*{
 
 
-			Point p(point3,glm::vec4(1.0f,0.0f,0.0f,1.0f));
-			shader.SetUniform("shape_color",glm::vec3(1.0f,0.0f,0.0f));
-			p.Draw();
+		Point p(point3,glm::vec4(1.0f,0.0f,0.0f,1.0f));
+		shader.SetUniform("shape_color",glm::vec3(1.0f,0.0f,0.0f));
+		p.Draw();
 
-			Point p1(point1,glm::vec4(1.0f,0.0f,0.0f,1.0f));
-			Point p2(point2,glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
-			Point p3(glm::vec3(0.0f),glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
+		Point p1(point1,glm::vec4(1.0f,0.0f,0.0f,1.0f));
+		Point p2(point2,glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
+		Point p3(glm::vec3(0.0f),glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
 
 
-			p1.Draw();
-			p2.Draw();
-			p3.Draw();
-		}
+		p1.Draw();
+		p2.Draw();
+		p3.Draw();
+		}*/
 		for (int counter = 0; counter < MAX_COUNT; counter++ )
 		{
+
+
 			if (do_simplex(simplex,D))
 			{
 				intersect = true;
@@ -124,14 +131,14 @@ namespace Physics
 
 			simplex.push_back(A);
 
-			
+
 		}
 
-		for (int i = 0; i < simplex.size()-1; i++)
+		/*	for (int i = 0; i < simplex.size()-1; i++)
 		{
-			Line l(simplex[i],simplex[i+1]);
-			l.Draw();
-		}
+		Line l(simplex[i],simplex[i+1]);
+		l.Draw();
+		}*/
 
 		return intersect;
 	}
@@ -162,7 +169,7 @@ namespace Physics
 
 				if (is_same_direction(AO,AB))
 				{
-					direction = glm::cross(glm::cross(AO,AB),AB); // This is to find the perpendicular to AB
+					direction = glm::cross(glm::cross(AB,AO),AB); // This is to find the perpendicular to AB
 					simplex.clear();
 					simplex.push_back(B);
 					simplex.push_back(A);
@@ -181,87 +188,9 @@ namespace Physics
 #pragma endregion 
 #pragma region 3-Simplex
 		case 3:				      // 1-Triangle
-			{
-				auto A = simplex[simplex.size() - 1]; //A is still the last inserted point. which is the direction we are looking at
-				auto B = simplex[simplex.size() - 2];
-				auto C = simplex[simplex.size() - 3];
+			//Still we don't have a tetrahedron --> It's probably false
+			return check_triangle(simplex,direction);
 
-				auto AO = -A;
-				auto AB = B - A;
-				auto AC = C-A;
-
-				auto AC_perp = glm::cross(glm::cross(AB,AC),AC);
-
-				//Let's begin our tests
-				if (is_same_direction(AC_perp,AO))
-				{
-					if (is_same_direction(AC,AO))
-					{
-
-						simplex.clear();
-						simplex.push_back(C);
-						simplex.push_back(A);
-						direction = glm::cross(glm::cross(AC,AO),AC);
-					}
-					else
-					{
-						if (is_same_direction(AB,AO))
-						{
-							simplex.clear();
-							simplex.push_back(B);
-							simplex.push_back(A);
-							direction = glm::cross(glm::cross(AB,AO),AB);
-						}
-						else
-						{
-							simplex.clear();
-							simplex.push_back(A);
-							direction = AO;
-						}
-					}
-				}
-				else
-				{
-					auto AB_perp = glm::cross(glm::cross(AB,AC),AB);
-					if (is_same_direction(AB_perp,AO))
-					{
-						//this is the same block as above
-						if (is_same_direction(AB,AO))
-						{
-							simplex.clear();
-							simplex.push_back(B);
-							simplex.push_back(A);
-							direction = glm::cross(glm::cross(AB,AO),AB);
-						}
-						else
-						{
-							simplex.clear();
-							simplex.push_back(A);
-							direction = AO;
-						}
-					}
-					else
-					{
-						auto ABC = glm::cross(AB,AC);
-						simplex.clear();
-						if (is_same_direction(ABC,AO))
-						{
-							simplex.push_back(C);
-							simplex.push_back(B);
-							simplex.push_back(A);
-							direction = ABC;
-						}
-						else
-						{
-							simplex.push_back(B);
-							simplex.push_back(C);
-							simplex.push_back(A);
-							direction = -ABC;
-						}
-					}
-				}
-			}
-			return false;					//Still we don't have a tetrahedron
 			break;
 #pragma endregion  
 #pragma region 4-Simplex
@@ -274,23 +203,63 @@ namespace Physics
 				auto D = simplex[simplex.size() - 4];
 
 				auto AO = -A;
+				auto AB = B - A;
+				auto AC = C - A;
+				auto AD = D - A;
 
-				auto p = ClosestPoint::Tetrahedron(glm::vec3(0.0f),A,B,C,D);
 
-				if (p.point == glm::vec3(0.0f)) //The origin is inside the tetrahedron
-					return true;
+				auto ABC = glm::cross(AB,AC);
+				auto ACD = glm::cross(AC,AD);
+				auto ADB = glm::cross(AD,AB);
 
-				simplex.clear();
+				if (glm::dot(ABC,AO) >  0.0f) //I should say is_same_direction
+				{
+					//simplex.erase(simplex.begin());
+					simplex.clear();
+					simplex.push_back(C);
+					simplex.push_back(B);
+					simplex.push_back(A);
+					return	check_triangle(simplex,direction);
+					//check_tetrahedron(AO,AB,AC,ABC,direction,simplex);
+				}
 
-				simplex.push_back(p.plane.c);
-				simplex.push_back(p.plane.b);
-				simplex.push_back(p.plane.a);
+				if (glm::dot(ADB,AO) >  0.0f)
+				{
+					simplex.clear(); 
 
-				D = p.plane.d;
+					simplex.push_back(B);
+					simplex.push_back(D);
+					simplex.push_back(A);
 
-				return false;
+					/*simplex.erase(simplex.begin() + 1);
+					simplex[0] = B;
+					simplex[1] = D;*/
+					return check_triangle(simplex,direction);
+				} 
+
+				if (glm::dot(ACD,AO) >  0.0f)
+				{
+					simplex.clear(); 
+
+					simplex.push_back(D);
+					simplex.push_back(C);
+					simplex.push_back(A);
+
+
+					//simplex.erase(simplex.begin() + 2);
+					
+					return check_triangle(simplex,direction);
+				}
+				 
+				auto p = ClosestPoint::Tetrahedron(glm::vec3(0.0f),A, B, C, D);
+
+				Point p1(p.point);
+				p1.Draw();
+
+				return true;
+
 			}
-			break;				// 1-Tetrahedron
+			break;				 
 #pragma endregion  
 		}
 
@@ -303,7 +272,129 @@ namespace Physics
 		return dot > 0.0f;
 	}
 
+	bool GJK::check_tetrahedron(glm::vec3 AO,glm::vec3 AB,glm::vec3 AC,glm::vec3 ABC, glm::vec3 direction, vector<glm::vec3>& simplex)
+	{
+		auto A = simplex[simplex.size() - 1];
+		auto B = simplex[simplex.size() - 2];
+		auto C = simplex[simplex.size() - 3];
+		auto D = simplex[simplex.size() - 4];
+
+		auto AB_ABC = glm::cross(AB,ABC);
 
 
+		//Check edges
+		if (glm::dot(AB_ABC,AO) >  0.0f )
+		{
+			direction = glm::cross(glm::cross(AB, AO), AB);
+			simplex.clear();
+			simplex.push_back(B);
+			simplex.push_back(A);
+			return false;
+		}
+
+
+		auto AC_ABC = glm::cross(ABC,AC);
+		if (glm::dot(AC_ABC,AO) > 0.0f )
+		{
+			direction = glm::cross(glm::cross(AC,AO),AC);
+			simplex.clear();
+			simplex.push_back(C);
+			simplex.push_back(A);
+			return false;
+		}
+
+		direction = ABC;
+		simplex.clear();
+		simplex.push_back(C);
+		simplex.push_back(B);
+		simplex.push_back(A);
+
+		return false;
+	}
+
+
+	bool GJK::check_triangle(vector<glm::vec3>& simplex, glm::vec3 &direction)
+	{
+		auto A = simplex[simplex.size() - 1]; //A is still the last inserted point. which is the direction we are looking at
+		auto B = simplex[simplex.size() - 2];
+		auto C = simplex[simplex.size() - 3];
+
+		auto AO = -A;
+		auto AB = B - A;
+		auto AC = C - A;
+
+		auto ABC = glm::cross(AB,AC);
+
+		auto AC_perp = glm::cross(ABC,AC);
+
+		//Let's begin our tests
+		if (is_same_direction(AC_perp,AO))
+		{
+			if (is_same_direction(AC,AO))
+			{
+
+				simplex.clear();
+				simplex.push_back(C);
+				simplex.push_back(A);
+				direction = glm::cross(glm::cross(AC,AO),AC);
+			}
+			else
+			{
+				if (is_same_direction(AB,AO))
+				{
+					simplex.clear();
+					simplex.push_back(B);
+					simplex.push_back(A);
+					direction = glm::cross(glm::cross(AB,AO),AB);
+				}
+				else
+				{
+					simplex.clear();
+					simplex.push_back(A);
+					direction = AO;
+				}
+			}
+		}
+		else
+		{
+			auto AB_perp = glm::cross(AB,ABC);
+			if (is_same_direction(AB_perp,AO))
+			{
+				//this is the same block as above
+				if (is_same_direction(AB,AO))
+				{
+					simplex.clear();
+					simplex.push_back(B);
+					simplex.push_back(A);
+					direction = glm::cross(glm::cross(AB,AO),AB);
+				}
+				else
+				{
+					simplex.clear();
+					simplex.push_back(A);
+					direction = AO;
+				}
+			}
+			else
+			{ 
+				simplex.clear();
+				if (is_same_direction(ABC,AO))
+				{
+					simplex.push_back(C);
+					simplex.push_back(B);
+					simplex.push_back(A);
+					direction = ABC;
+				}
+				else
+				{
+					simplex.push_back(B);
+					simplex.push_back(C);
+					simplex.push_back(A);
+					direction = -ABC;
+				}
+			}
+		}
+		return false;
+	}
 }
 #endif // GJK_h__
