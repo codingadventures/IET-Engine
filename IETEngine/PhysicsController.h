@@ -54,7 +54,7 @@ namespace Controller
 		Model*		d_cube_model;
 
 		vector<Model*>		
-			d_model_vector;
+					d_model_vector;
 
 		GLint		d_textureId;
 

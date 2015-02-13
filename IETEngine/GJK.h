@@ -114,6 +114,14 @@ namespace Physics
 			if (do_simplex(simplex,D))
 			{
 				intersect = true;
+				
+				//EPA kicks in at this stage
+
+				for (int i = 0; i < simplex.size(); i++)
+				{
+
+				}
+				
 				break;
 			}
 
@@ -250,12 +258,7 @@ namespace Physics
 					
 					return check_triangle(simplex,direction);
 				}
-				 
-				auto p = ClosestPoint::Tetrahedron(glm::vec3(0.0f),A, B, C, D);
-
-				Point p1(p.point);
-				p1.Draw();
-
+				  
 				return true;
 
 			}
