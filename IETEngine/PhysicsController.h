@@ -18,6 +18,7 @@
 #include "Sphere.h" 
 #include "Helper.h"
 #include "GJK.h"
+#include "CollidingPair.h"
 
 namespace Controller
 {
@@ -78,6 +79,7 @@ namespace Controller
 		bool d_use_polyhedral_tensor;
 		SpringGenerator* d_spring_generator;
 		bool d_draw_spheres;
+		bool d_is_narrow_phase_collision;
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -87,10 +89,10 @@ namespace Controller
 #pragma region Constructor/Destructor
 	PhysicsController::~PhysicsController()
 	{
-		free(d_camera);
-		free(d_shader);
-		free(d_particle_renderer);
-		free(d_particle_system); 
+		delete d_camera;
+		delete d_shader;
+		delete d_particle_renderer;
+		delete d_particle_system; 
 	}
 
 	PhysicsController::PhysicsController() 	
@@ -180,6 +182,7 @@ namespace Controller
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
 
+		TwAddVarRO(Helper::g_tweak_bar, "Collision", TW_TYPE_BOOLCPP, &d_is_narrow_phase_collision, NULL);
 
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
@@ -254,9 +257,8 @@ namespace Controller
 		TwGLUTModifiersFunc(glutGetModifiers);
 
 
-
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
-		 
+
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 
@@ -275,7 +277,7 @@ namespace Controller
 		for (int i = 0; i < 1; i++)
 		{
 			auto model = new Model(*d_cube_model);
-			model->Translate(glm::sphericalRand(1.0f));
+			model->Translate(glm::sphericalRand(10.0f));
 
 			auto rigid_body =  new RigidBody(*model);
 			d_model_vector.push_back(model);
@@ -285,7 +287,7 @@ namespace Controller
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 
 		tweak_bar_setup();
-
+		d_is_narrow_phase_collision = false;
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 
 	}
@@ -346,12 +348,12 @@ namespace Controller
 
 
 
-		Vertex v1,v2;
+		/*Vertex v1,v2;
 		v1.Position = d_force_impulse_application_point;
 		v1.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
 		v2.Color = glm::vec4(1.0f,1.0f,0.0f,1.0f);
 		v2.Position = d_force_impulse_application_point + d_force_impulse_direction * d_force_impulse_magnitude;
-		Line l(v1,v2);
+		Line l(v1,v2);*/
 		//l.Draw();
 
 		/*float theta = glm::radians(30.0f);
@@ -359,13 +361,13 @@ namespace Controller
 		glm::vec3 a = b * glm::tan(theta);
 		v1.Position =   b * glm::cos(theta) + a * sin(theta);
 		*/
-
+		/*
 		v2.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
-		Point p2(v2);
+		Point p2(v2);*/
 		//p2.Draw();
 
 
-		d_rigid_body_manager->ApplyImpulseToAll(d_delta_time_secs);
+		//d_rigid_body_manager->ApplyImpulseToAll(d_delta_time_secs);
 
 
 
@@ -389,17 +391,23 @@ namespace Controller
 
 
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
-
+		 
 		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
 		if (colliding_pairs->size())
 		{
+			d_shader_boundings->Use();
+			d_shader_boundings->SetUniform("mvp",projection_view * glm::mat4());
+
+			d_shader_boundings->SetUniform("model_matrix",glm::mat4());
+			vector<CollidingPair<BoundingBox>> narrow_phase;
 			for (auto pair : *colliding_pairs)
 			{
-
-
 				GJK *gjk = new GJK(pair.m_left_element->m_model_space_vertices,pair.m_right_element->m_model_space_vertices,pair.m_left_element->m_center,pair.m_right_element->m_center);  
 
-				gjk->Intersect();
+				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings);
+
+
+				//	narrow_phase.push_back(pair);
 
 				delete gjk;
 			}

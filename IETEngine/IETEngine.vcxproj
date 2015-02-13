@@ -99,6 +99,7 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoxGenerator.h" />
+    <ClInclude Include="ClosestPoint.h" />
     <ClInclude Include="CollidingPair.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="EndPoint.h" />
@@ -118,6 +119,7 @@
     <ClInclude Include="ParticleSystem2.h" />
     <ClInclude Include="ParticleUpdater.h" />
     <ClInclude Include="PhysicsController.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="RenderingController.h" />
     <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />

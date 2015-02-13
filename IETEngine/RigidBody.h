@@ -61,7 +61,7 @@ namespace Physics
 		float					Polyhedral_Mass() const;
 		BoundingSphere*			Bounding_sphere();
 		BoundingBox*			Bounding_box() ;
-	
+
 	private:
 		glm::mat3				set_as_cross_product_matrix(glm::vec3 v);
 
@@ -72,12 +72,12 @@ namespace Physics
 
 #pragma region [ Getters ]
 
-		float					RigidBody::Mass()			 const   { return d_mass; } 
-		float					RigidBody::Area()			 const	 { return d_area; }
-		float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
-		glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
-		BoundingSphere*			RigidBody::Bounding_sphere()		 { return d_bounding_sphere; } 
-		BoundingBox*			RigidBody::Bounding_box()			 { return d_bounding_box ; } 
+	float					RigidBody::Mass()			 const   { return d_mass; } 
+	float					RigidBody::Area()			 const	 { return d_area; }
+	float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
+	glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
+	BoundingSphere*			RigidBody::Bounding_sphere()		 { return d_bounding_sphere; } 
+	BoundingBox*			RigidBody::Bounding_box()			 { return d_bounding_box ; } 
 
 #pragma endregion 
 
@@ -89,7 +89,7 @@ namespace Physics
 		d_mass(1.0f),
 		d_polyhedral_mass(0.0f)
 	{
-		
+
 		calculate_mesh_stats();
 		d_center_of_mass += model.Position();
 		d_bounding_sphere->center += model.Position();
@@ -98,7 +98,7 @@ namespace Physics
 
 	RigidBody::~RigidBody()
 	{
-		free(d_bounding_sphere);
+		delete d_bounding_sphere;
 	}
 
 	void RigidBody::Update(float delta_time, bool use_polyhedral)
@@ -106,7 +106,7 @@ namespace Physics
 		glm::quat orientation =  m_model.Rotation();
 		glm::vec3 position	  = m_model.GetPositionVec();
 		glm::mat3 tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
-		
+
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
 		d_angular_velocity =  d_angular_momentum * tensor;
@@ -126,9 +126,9 @@ namespace Physics
 
 		d_bounding_sphere->center += d_position;
 		d_bounding_box->m_center += d_position;
-		
-		d_bounding_box->Recalculate_Bounding_Box(&position,&orientation);
 
+		d_bounding_box->Recalculate_Bounding_Box(&position,&orientation);
+		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
 		m_model.Rotate(orientation);
 		m_model.Translate(d_position);
 
@@ -191,9 +191,11 @@ namespace Physics
 
 		d_inverse_inertial_tensor	= glm::inverse(d_inertial_tensor);
 		d_inverse_polyhedral_tensor = glm::inverse(d_polyhedral_tensor);
+
+		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
 	} 
 
-	
+
 
 }
 #endif // RigidBody_h__

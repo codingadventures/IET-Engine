@@ -199,6 +199,9 @@ namespace Rendering
 			m_skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 		}
 
+		void get_furthest_point(glm::vec3 direction){
+		
+		}
 
 
 		void ClearJointsLimit(){

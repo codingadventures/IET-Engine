@@ -78,7 +78,7 @@ namespace Rendering
 
 	void Cube::Draw(Shader& shader)
 	{ 
-		shader.SetUniform("sphere_color",d_color);
+		shader.SetUniform("shape_color",d_color);
 		// Draw mesh
 		glBindVertexArray(this->d_VAO);
 		glDrawArrays(GL_LINES, 0, this->d_vertices.size());

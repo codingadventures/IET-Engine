@@ -102,7 +102,7 @@ namespace Rendering
 
 	void Sphere::Draw(Shader& shader)
 	{
-		shader.SetUniform("sphere_color",d_color);
+		shader.SetUniform("shape_color",d_color);
 		// Draw mesh
 		glBindVertexArray(this->d_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, d_num_vertices);

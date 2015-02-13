@@ -24,7 +24,8 @@ out vec3 tex_coord_skybox;
 
 void main()
 {  
-
+ 
+    gl_PointSize = 5.0;
 	vec4 position_vec4 	=  vec4(position, 1.0f);
   	vec3 vertex_world_space 	
   						=  vec3(model_matrix * position_vec4);
