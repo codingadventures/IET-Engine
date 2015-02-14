@@ -3,18 +3,24 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <unordered_set>
 #include "Vertex.h"
 #include "ClosestPoint.h"
+#include "EPA.h"
 
-#define MAX_COUNT 30
+#define MAX_GJK_COUNT 30
 
 
 using namespace std;
 
 namespace Physics
 {
+	
+
 	class GJK
 	{
+	public: 
+		glm::vec3 m_intersection_point;
 	private:
 		vector<Vertex>&	d_vertices_shape_1;
 		vector<Vertex>&	d_vertices_shape_2; 
@@ -24,9 +30,7 @@ namespace Physics
 
 		bool Intersect(Shader& shader);
 	protected:
-	private:
-		glm::vec3	support(glm::vec3 direction, const vector<Vertex>& vertices);
-
+	private:  
 		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction);
 
 		bool		is_same_direction(glm::vec3 a, glm::vec3 b);
@@ -35,28 +39,7 @@ namespace Physics
 
 		bool		check_triangle(vector<glm::vec3>& simplex, glm::vec3 &direction);
 	};
-
-
-
-	glm::vec3 GJK::support(glm::vec3 direction, const vector<Vertex>& vertices)
-	{
-		size_t length = vertices.size();
-		float max_dot_product = glm::dot(vertices[0].Position,direction);
-
-		int   index_max_d_product = 0;
-		float local_dot_product;
-		for (int i = 1; i < length; i++)
-		{
-			local_dot_product = glm::dot(direction,vertices[i].Position);
-			if (local_dot_product > max_dot_product){
-				max_dot_product = local_dot_product;
-				index_max_d_product = i;
-			}
-		}
-
-		return vertices[index_max_d_product].Position;
-
-	}
+	 
 
 	GJK::GJK(vector<Vertex>& vertices_shape_1,vector<Vertex>& vertices_shape_2,glm::vec3 centroid_shape1,glm::vec3 centroid_shape2)
 		: 
@@ -75,13 +58,14 @@ namespace Physics
 	bool GJK::Intersect(Shader& shader)
 	{
 		vector<glm::vec3> simplex;
+
 		bool intersect = false;
 		d_initial_direction = glm::vec3(1.0f,0.0f,0.f);
 		auto direction = glm::normalize(d_initial_direction);
 
 		// Minkowski difference --> called support
-		auto point1 = support(direction, d_vertices_shape_1);
-		auto point2 = support(-direction, d_vertices_shape_2);
+		auto point1 = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1);
+		auto point2 = SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
 
 		auto point3 = point1 - point2;
 
@@ -107,7 +91,7 @@ namespace Physics
 		p2.Draw();
 		p3.Draw();
 		}*/
-		for (int counter = 0; counter < MAX_COUNT; counter++ )
+		for (int counter = 0; counter < MAX_GJK_COUNT; counter++ )
 		{
 
 
@@ -116,19 +100,21 @@ namespace Physics
 				intersect = true;
 				
 				//EPA kicks in at this stage
-
-				for (int i = 0; i < simplex.size(); i++)
+				if (simplex.size() == 4)
 				{
-
-				}
+ 					EPA epa = EPA(simplex,d_vertices_shape_1,d_vertices_shape_2);
+					auto intersection_point = epa.Run();
+					m_intersection_point = intersection_point.point;
 				
+				}
+
 				break;
 			}
 
 			auto newD = glm::normalize(D);
 			auto dotD = glm::dot(newD,-D);
 
-			auto A = support(newD, d_vertices_shape_1) - support(-newD, d_vertices_shape_2);
+			auto A = SupportMapping::Get_Farthest_Point(newD, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-newD, d_vertices_shape_2);
 			auto AnewD= glm::dot(A,newD);
 
 
@@ -255,10 +241,10 @@ namespace Physics
 
 
 					//simplex.erase(simplex.begin() + 2);
-					
+
 					return check_triangle(simplex,direction);
 				}
-				  
+
 				return true;
 
 			}

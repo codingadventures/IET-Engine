@@ -427,6 +427,13 @@ namespace Controller
 				if (d_is_narrow_phase_collision)
 				{
 					d_collision_color = glm::vec3(1.0f,0.0f,0.0f);
+					auto p1 =  gjk->m_intersection_point;
+					//auto p2 = glm::vec3(d_model_vector[0]->GetModelMatrix() * glm::vec4(p1,1.0f));
+					//auto p3 = glm::vec3(d_model_vector[1]->GetModelMatrix() * glm::vec4(p1,1.0f));
+					Point p(p1);
+					 
+					p.Draw();
+					//pd.Draw();
 				}
 				//	narrow_phase.push_back(pair);
 

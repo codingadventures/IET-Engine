@@ -79,6 +79,9 @@
     <Filter Include="Header Files\Physics\Drag">
       <UniqueIdentifier>{a2d04bf1-0ee9-43a9-a38a-acf7592b0771}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\NarrowPhase">
+      <UniqueIdentifier>{508cff0f-a7db-4ab2-86dc-1d2a81f1160d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -304,6 +307,12 @@
     </ClInclude>
     <ClInclude Include="Plane.h">
       <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="EPA.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="SupportMapping.h">
+      <Filter>Header Files\Physics\NarrowPhase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
