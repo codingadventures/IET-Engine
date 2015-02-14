@@ -6,6 +6,7 @@
 #include "Plane.h"
 #include "ClosestPoint.h"
 #include <unordered_set>
+#include <set>
 #include "SupportMapping.h"
 
 namespace Physics
@@ -74,11 +75,9 @@ namespace Physics
 		size_t triangle_list_size;
 		glm::vec3 origin = glm::vec3(0.0f);
 		PointToPlane previous_point_to_plane; 
-		
-		vector<Plane> local_planes;
 
-		unordered_set<int> edge_indices_to_remove; 
-		local_planes = triangle_list;
+
+		set<int> edge_indices_to_remove;  
 
 		for (int epa_counter = 0; epa_counter < MAX_EPA_COUNT; epa_counter++)
 		{
@@ -88,7 +87,7 @@ namespace Physics
 			auto direction = new_closest_point.plane.n_normal;
 
 			auto new_point = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
-			 
+
 			//If the closest face is no closer (by a certain threshold) to the origin than the previously picked one
 			if (new_closest_point.distance  >= previous_point_to_plane.distance)
 			{
@@ -98,18 +97,18 @@ namespace Physics
 			previous_point_to_plane = new_closest_point;
 
 			triangle_list_size = triangle_list.size();
-			for (int i = 0; i < triangle_list_size; i++)
+			for (int i = triangle_list_size - 1; i >= 0 ; i--)
 			{
 				Plane& triangle = triangle_list[i];
 				bool is_point_outside_triangle = ClosestPoint::PointOutsideOfPlane(new_point,triangle.a,triangle.b,triangle.c);
 				if (is_point_outside_triangle) // Remove the triangle and all the edges
 				{ 
-					local_planes.erase(local_planes.begin() + i);
+					triangle_list.erase(triangle_list.begin() + i);
 					edge_list.push_back(Edge(triangle.a,triangle.b));
 					edge_list.push_back(Edge(triangle.b,triangle.c));
 					edge_list.push_back(Edge(triangle.c,triangle.a));
 				}
-			 
+
 			}
 
 			//Calculate duplicate edges in case there are adjacent triangles to be removed. 
@@ -130,22 +129,26 @@ namespace Physics
 
 #pragma region Removing Duplicate Edges
 			auto edge_iterator = edge_list.begin();
-			for (auto edge_index : edge_indices_to_remove)
-			{
-				edge_list.erase(edge_iterator + edge_index);
+
+			std::set<int>::reverse_iterator rit =  edge_indices_to_remove.rbegin();
+
+			for (; rit != edge_indices_to_remove.rend();++rit)
+			{ 
+				if (rit == edge_indices_to_remove.rbegin()) // hack I don't know why I need to do this
+					rit++;
+				edge_list.erase(edge_iterator + *rit);
 			}
 #pragma endregion 
 
 			//Add new triangles
 			for (auto edge : edge_list)
 			{
-				local_planes.push_back(Plane(new_point,edge.p1,edge.p2));
+				triangle_list.push_back(Plane(new_point,edge.p1,edge.p2));
 			}
 
 			edge_list.clear(); 
 			edge_indices_to_remove.clear();
-			d_vertex_list.push_back(new_point);
-			triangle_list = local_planes;
+			d_vertex_list.push_back(new_point); 
 		}
 
 		return previous_point_to_plane;
