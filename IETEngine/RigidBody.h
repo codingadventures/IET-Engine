@@ -6,7 +6,7 @@
 #include <glm/gtx/orthonormalize.hpp>
 
 #define DUMPING_FACTOR 0.6f
-
+#define EPSILON		0.2f
 namespace Physics
 {
 	using namespace Drag;
@@ -55,13 +55,18 @@ namespace Physics
 		void					Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
 
 		glm::vec3				Center_of_mass() const;
+		glm::vec3				Velocity() const;
+		glm::vec3				Angular_Velocity() const;
 
 		float					Mass() const;
 		float					Area() const;
 		float					Polyhedral_Mass() const;
 		BoundingSphere*			Bounding_sphere();
 		BoundingBox*			Bounding_box() ;
+		float Calculate_Collision_Response(const RigidBody& other, glm::vec3 contact_point_a, 
+			glm::vec3 contact_point_b, glm::vec3 normal, bool use_polyhedral);
 
+		glm::mat3				Inertial_Tensor(bool use_polyhedral) const;
 	private:
 		glm::mat3				set_as_cross_product_matrix(glm::vec3 v);
 
@@ -105,7 +110,7 @@ namespace Physics
 	{ 
 		glm::quat orientation =  m_model.Rotation();
 		glm::vec3 position	  = m_model.GetPositionVec();
-		glm::mat3 tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+		glm::mat3 tensor = Inertial_Tensor(use_polyhedral);
 
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
@@ -114,6 +119,8 @@ namespace Physics
 		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) ;
 
 		calculate_torque();
+
+		d_velocity = d_linear_momentum / mass; 
 
 		float damping = glm::pow(DUMPING_FACTOR, delta_time);
 
@@ -142,6 +149,8 @@ namespace Physics
 		calculate_torque();
 		d_angular_momentum +=	d_torque * delta_time;
 		d_linear_momentum +=	d_force  * delta_time;
+		d_velocity = d_linear_momentum / d_mass; 
+
 
 	}
 
@@ -161,7 +170,7 @@ namespace Physics
 
 	void RigidBody::calculate_torque()
 	{
-		glm::vec3 point_world_space =  d_force_application_point + d_center_of_mass ;
+		glm::vec3 point_world_space =  d_force_application_point;
 
 		glm::vec3 point_com_distance =  point_world_space -  d_center_of_mass ;
 
@@ -194,6 +203,58 @@ namespace Physics
 
 		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
 	} 
+
+	float RigidBody::Calculate_Collision_Response(const RigidBody& other, glm::vec3 contact_point_a, glm::vec3 contact_point_b, glm::vec3 normal, bool use_polyhedral)
+	{
+		auto ra		=  contact_point_a - d_center_of_mass;
+		auto rb		=  contact_point_b - other.Center_of_mass();
+
+		auto ra_n	= glm::cross(ra,normal);
+		auto rb_n	= glm::cross(rb,normal);
+
+		auto inertia_term_a 
+			= glm::cross(Inertial_Tensor(use_polyhedral) * ra_n,ra);
+
+		auto inertia_term_b 
+			= glm::cross(other.Inertial_Tensor(use_polyhedral) * rb_n,rb);
+
+
+		auto t1 = 1.0f/d_mass;
+		auto t2 = 1.0f/other.Mass();
+		auto t3 = glm::dot(normal, inertia_term_a);
+		auto t4 = glm::dot(normal, inertia_term_b);
+
+		auto denominator = t1+t2+t3+t4;
+
+		auto pa = d_velocity + glm::cross(d_angular_velocity, ra);
+		auto pb = other.Velocity() + glm::cross(other.Angular_Velocity(), rb);
+
+		auto v_rel = glm::dot(normal, pa-pb);
+		if (v_rel < 0.0)
+		{	
+			auto numerator = -(1 + EPSILON) * v_rel;
+
+			auto J = numerator / denominator;
+
+			return glm::max(0.0f,J);
+		}
+		return 0.0f;
+	}
+
+	glm::mat3 RigidBody::Inertial_Tensor(bool use_polyhedral) const
+	{
+		return use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+	}
+
+	glm::vec3 RigidBody::Velocity() const
+	{
+		return d_velocity;
+	}
+
+	glm::vec3 RigidBody::Angular_Velocity() const
+	{
+		return d_angular_velocity;
+	}
 
 
 

@@ -13,12 +13,13 @@
 #include <Magick++.h>
 #include "Model.h"
 #include "RigidBody.h"
-
+#include<conio.h>
 #include "UI.h"
 #include "Sphere.h" 
 #include "Helper.h"
 #include "GJK.h"
 #include "CollidingPair.h"
+#include "Light.h"
 
 namespace Controller
 {
@@ -52,9 +53,15 @@ namespace Controller
 		RigidBody*	d_rigid_body2;
 
 		Model*		d_cube_model;
+		glm::vec3		d_light_ambient;
+		glm::vec3		d_light_diffuse;
+		glm::vec3		d_light_specular;
+		glm::vec3		d_light_position;
+
+
 
 		vector<Model*>		
-					d_model_vector;
+			d_model_vector;
 
 		GLint		d_textureId;
 
@@ -80,7 +87,7 @@ namespace Controller
 		SpringGenerator* d_spring_generator;
 		bool d_draw_spheres;
 		bool d_is_narrow_phase_collision;
-		glm::vec3 d_collision_color ;
+		glm::vec4 d_collision_color ;
 
 	};
 
@@ -263,6 +270,7 @@ namespace Controller
 		TwGLUTModifiersFunc(glutGetModifiers);
 
 
+		vector<string> f_shader_specular	= ArrayConversion<string>(2,string("specular.frag"),string("common.frag"));
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert"));
 
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
@@ -280,6 +288,11 @@ namespace Controller
 
 		d_model_vector.push_back(d_cube_model);
 
+		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
+
 		for (int i = 0; i < 1; i++)
 		{
 			auto model = new Model(*d_cube_model);
@@ -291,10 +304,11 @@ namespace Controller
 		}
 
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
-
 		tweak_bar_setup();
 		d_is_narrow_phase_collision = false;
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
 
 	}
 
@@ -306,14 +320,17 @@ namespace Controller
 
 	void PhysicsController::Draw()
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+
 		Update_Timer(); 
 		Calculate_Fps( );
+		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 
 
 		//d_shader->Use();
@@ -328,7 +345,6 @@ namespace Controller
 
 		//d_shader->SetUniform("mvp",projection_view * d_cube_model->GetModelMatrix());
 
-		d_rigid_body_manager->Update(d_delta_time_secs);
 
 		if (d_draw_spheres)
 			d_rigid_body_manager->Check_Sphere_Collisions();
@@ -338,10 +354,14 @@ namespace Controller
 		/*
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
 
+		d_rigid_body_manager->Update(d_delta_time_secs);
+
+
 		//d_cube_model->Draw(*d_shader);
 
 		d_shader_boundings->Use();
 		d_shader_boundings->SetUniform("shape_color",d_collision_color);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		for (auto model: d_model_vector)
 		{
@@ -360,6 +380,8 @@ namespace Controller
 
 			model->Draw(*curr_shader);
 		}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 		/*
 
 		d_another_cube->Draw(*d_shader);*/
@@ -400,16 +422,14 @@ namespace Controller
 		Point p(vertices);
 		*/
 		/**/
-		/*glEnable(GL_BLEND);
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
-
-		if (d_draw_spheres)
-			d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 
 
+		/*	if (d_draw_spheres)
+		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
+
+		*/
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
-		 
+
 		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
 		if (colliding_pairs->size())
 		{
@@ -420,19 +440,48 @@ namespace Controller
 			vector<CollidingPair<BoundingBox>> narrow_phase;
 			for (auto pair : *colliding_pairs)
 			{
-				GJK *gjk = new GJK(pair.m_left_element->m_model_space_vertices,pair.m_right_element->m_model_space_vertices,pair.m_left_element->m_center,pair.m_right_element->m_center);  
+				GJK *gjk = new GJK(
+					pair.m_left_element->Bounding_box()->m_model_space_vertices,
+					pair.m_right_element->Bounding_box()->m_model_space_vertices,
+					pair.m_left_element->Bounding_box()->m_center,
+					pair.m_right_element->Bounding_box()->m_center);  
 
 				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings);
 
 				if (d_is_narrow_phase_collision)
 				{
-					d_collision_color = glm::vec3(1.0f,0.0f,0.0f);
-					auto p1 =  gjk->m_intersection_point;
-					//auto p2 = glm::vec3(d_model_vector[0]->GetModelMatrix() * glm::vec4(p1,1.0f));
-					//auto p3 = glm::vec3(d_model_vector[1]->GetModelMatrix() * glm::vec4(p1,1.0f));
+					d_collision_color = glm::vec4(1.0f,0.0f,0.0f,0.3f);
+					auto p1 =  gjk->m_intersection_point_a;
+					auto p2 =  gjk->m_intersection_point_b;
+
 					Point p(p1);
-					 
+					Point origin(glm::vec3(0.0f));
+					Point p4(p2);
+					Line l(p1,p2);
+					d_shader_boundings->SetUniform("shape_color",glm::vec4(0.0f,1.0f,1.0f,1.0f));
+
 					p.Draw();
+					p4.Draw();
+					origin.Draw();
+
+					d_shader_boundings->SetUniform("shape_color",glm::vec4(0.0f,1.0f,0.0f,1.0f));
+
+					l.Draw();
+
+					auto force = pair.m_left_element->Calculate_Collision_Response(*pair.m_right_element,p1,p2,gjk->m_normal,false);
+
+					auto force_dir = force * gjk->m_normal;
+
+					linearMomentum = linearMomentum + J;
+					angularMomentum = angularMomentum + cross(rA, J);
+
+					body->SetLinearMomentum(body->GetLinearMomentum() - J);
+					body->SetAngularMomentum(body->GetAngularMomentum() - cross(rB, J));
+
+					/*pair.m_left_element->Apply_Impulse(force,p1,d_delta_time_secs);
+					pair.m_right_element->Apply_Impulse(-force,p2,d_delta_time_secs);
+					d_rigid_body_manager->Update(d_delta_time_secs);*/
+
 					//pd.Draw();
 				}
 				//	narrow_phase.push_back(pair);
@@ -441,14 +490,19 @@ namespace Controller
 			}
 		}
 		else
+		{
+			d_collision_color = glm::vec4(.0f,.0f,.0f,1.0f);
+
 			d_is_narrow_phase_collision = false;
+		}
+
 
 
 		//p.Draw();
 
 		d_shader_no_texture->Use();
 
-		 text_to_screen();
+		text_to_screen();
 
 		//	glDisable(GL_BLEND);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -457,6 +511,8 @@ namespace Controller
 
 
 		glutSwapBuffers();
+
+
 	}
 
 }

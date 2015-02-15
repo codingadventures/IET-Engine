@@ -103,7 +103,7 @@ public:
 
 	void SetUniform(string name, glm::vec4 value){
 		GLint uniform =  glGetUniformLocation(m_program, name.c_str());
-		glUniform3fv(uniform, 1, glm::value_ptr(value));
+		glUniform4fv(uniform, 1, glm::value_ptr(value));
 	}
 
 	void SetUniform(string name, glm::mat4 value){

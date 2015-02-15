@@ -20,7 +20,7 @@ namespace Physics
 		bool								d_use_polyhedral;
 		glm::vec3							d_colliding_color;
 		glm::vec3							d_non_colliding_color;
-		vector<CollidingPair<BoundingBox>>  d_colliding_pairs;
+		vector<CollidingPair<RigidBody>>    d_colliding_pairs;
 		vector<Sphere*>						d_bounding_spheres;
 		vector<Cube*>						d_bounding_cubes;
 		size_t								d_sort_axis;
@@ -36,9 +36,9 @@ namespace Physics
 		void		Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Boundings(Shader& shader, glm::mat4 projection_view);
-		void		ApplyImpulseToAll( float delta_time);
+		void		Apply_Impulse_To_All( float delta_time);
 			
-		vector<CollidingPair<BoundingBox>>* 
+		vector<CollidingPair<RigidBody>>* 
 			Colliding_Pairs();
 
 
@@ -166,7 +166,7 @@ namespace Physics
 
 				if (!(*current_axis)[j].m_bounding_box->Overlaps(*(*current_axis)[i].m_bounding_box)) continue;
 
-				d_colliding_pairs.push_back(CollidingPair<BoundingBox>((*current_axis)[j].m_bounding_box,(*current_axis)[i].m_bounding_box));
+				d_colliding_pairs.push_back(CollidingPair<RigidBody>(d_rigid_bodies[j] ,d_rigid_bodies[i]));
 
 				(*current_axis)[j].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
 				(*current_axis)[i].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
@@ -218,12 +218,12 @@ namespace Physics
 		}
 	}
 
-	vector<CollidingPair<BoundingBox>>* RigidBodyManager::Colliding_Pairs()
+	vector<CollidingPair<RigidBody>>* RigidBodyManager::Colliding_Pairs()
 	{
 		return &d_colliding_pairs;   
 	}
 
-	void RigidBodyManager::ApplyImpulseToAll( float delta_time)
+	void RigidBodyManager::Apply_Impulse_To_All( float delta_time)
 	{
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 

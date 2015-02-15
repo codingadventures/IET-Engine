@@ -158,6 +158,7 @@
     <ClInclude Include="SwingSword.h" />
     <ClInclude Include="SwordIdle.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexWeight.h" />

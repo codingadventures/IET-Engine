@@ -7,20 +7,24 @@
 #include "Vertex.h"
 #include "ClosestPoint.h"
 #include "EPA.h"
+#include "Triangle.h"
 
 #define MAX_GJK_COUNT 30
 
 
-using namespace std;
 
 namespace Physics
 {
-	
 
+	using namespace std;
+	using namespace Rendering;
 	class GJK
 	{
 	public: 
-		glm::vec3 m_intersection_point;
+		glm::vec3		m_intersection_point_a;
+		glm::vec3		m_intersection_point_b;
+		glm::vec3		m_normal;
+
 	private:
 		vector<Vertex>&	d_vertices_shape_1;
 		vector<Vertex>&	d_vertices_shape_2; 
@@ -39,7 +43,7 @@ namespace Physics
 
 		bool check_triangle(vector<SupportPoint>& simplex, glm::vec3 &direction);
 	};
-	 
+
 
 	GJK::GJK(vector<Vertex>& vertices_shape_1,vector<Vertex>& vertices_shape_2,glm::vec3 centroid_shape1,glm::vec3 centroid_shape2)
 		: 
@@ -75,22 +79,7 @@ namespace Physics
 
 		shader.Use();
 
-		/*{
 
-
-		Point p(point3,glm::vec4(1.0f,0.0f,0.0f,1.0f));
-		shader.SetUniform("shape_color",glm::vec3(1.0f,0.0f,0.0f));
-		p.Draw();
-
-		Point p1(point1,glm::vec4(1.0f,0.0f,0.0f,1.0f));
-		Point p2(point2,glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
-		Point p3(glm::vec3(0.0f),glm::vec4(1.0f,0.0f,0.0f,1.0f)); 
-
-
-		p1.Draw();
-		p2.Draw();
-		p3.Draw();
-		}*/
 		for (int counter = 0; counter < MAX_GJK_COUNT; counter++ )
 		{
 
@@ -98,15 +87,40 @@ namespace Physics
 			if (do_simplex(simplex,D))
 			{
 				intersect = true;
-				
+
+				//assert(simplex.size(),4);
 				//EPA kicks in at this stage
 				if (simplex.size() == 4)
 				{
- 					EPA epa = EPA(simplex,d_vertices_shape_1,d_vertices_shape_2);
+					EPA epa = EPA(simplex,d_vertices_shape_1,d_vertices_shape_2);
+					//for (auto triangle : epa.m_triangle_list)
+					//{
+					//	//Triangle t(triangle.a.minkowski_point,triangle.b.minkowski_point,triangle.c.minkowski_point);
+					//	Triangle t(triangle.a.support_a,triangle.b.support_a,triangle.c.support_a);
+					//	
+					//	t.Draw();
+					//}
 					auto intersection_point = epa.Run();
-					m_intersection_point = intersection_point.point;
-				
+					m_intersection_point_a = intersection_point.point_a;
+					m_intersection_point_b = intersection_point.point_b;
+					m_normal = intersection_point.plane.n_normal;
+					shader.SetUniform("shape_color",glm::vec4(.0f,1.0f,0.0f,1.0f));
+					Triangle t(
+						intersection_point.plane.a.support_a,
+						intersection_point.plane.b.support_a,
+						intersection_point.plane.c.support_a);
+
+					Triangle t2(
+						intersection_point.plane.a.support_b,
+						intersection_point.plane.b.support_b,
+						intersection_point.plane.c.support_b);
+
+					t.Draw();
+					t2.Draw();
+
 				}
+
+
 
 				break;
 			}

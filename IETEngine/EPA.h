@@ -14,7 +14,7 @@ namespace Physics
 	using namespace std;
 	using namespace NarrowPhase;
 
-#define MAX_EPA_COUNT 30
+#define MAX_EPA_COUNT 100
 
 
 	class EPA
@@ -39,13 +39,15 @@ namespace Physics
 		EPA(vector<SupportPoint> vertex_list, const  vector<Vertex>& vertices_shape_1, const  vector<Vertex>& vertices_shape_2);
 
 		PointToPlane Run();
+
+		vector<Plane> m_triangle_list;
+
 	protected:
 	private:
 		vector<SupportPoint> d_vertex_list;
 		const vector<Vertex>& d_vertices_shape_1;
 		const vector<Vertex>& d_vertices_shape_2;
 
-		vector<Plane> triangle_list;
 		vector<Edge> edge_list;
 	};
 
@@ -63,10 +65,10 @@ namespace Physics
 		auto D = d_vertex_list[0]; 
 
 
-		triangle_list.push_back(Plane(A,B,C));
-		triangle_list.push_back(Plane(A,C,D));
-		triangle_list.push_back(Plane(A,D,B));
-		triangle_list.push_back(Plane(B,D,C)); //CCW
+		m_triangle_list.push_back(Plane(A,B,C));
+		m_triangle_list.push_back(Plane(A,C,D));
+		m_triangle_list.push_back(Plane(A,D,B));
+		m_triangle_list.push_back(Plane(B,D,C)); //CCW
 
 	}
 
@@ -81,38 +83,55 @@ namespace Physics
 
 		for (int epa_counter = 0; epa_counter < MAX_EPA_COUNT; epa_counter++)
 		{
-			auto previous_point = d_vertex_list.back();
-			auto new_closest_point = ClosestPoint::ToPolytope(origin,triangle_list);
 
-			auto direction = new_closest_point.plane.n_normal;
+			auto closest_triangle = ClosestPoint::ToPolytope(origin,m_triangle_list);
 
-			auto new_point = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
+			auto direction = closest_triangle.plane.n_normal;
+
+			auto new_support_point = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
 
 			//If the closest face is no closer (by a certain threshold) to the origin than the previously picked one
-			if (glm::dot(new_closest_point.plane.n_normal,new_point.minkowski_point) - new_closest_point.distance < 0.0001f)
+
+			auto distance = glm::dot(closest_triangle.plane.n_normal,new_support_point.minkowski_point - closest_triangle.plane.a.minkowski_point);
+
+			if (distance - closest_triangle.distance < 0.0001f)
 			{
-				auto& plane = new_closest_point.plane;
+				auto& plane = closest_triangle.plane;
 				PointToPlane to_return;
 				auto barycentric =	ClosestPoint::ToTriangle(glm::vec3(0.0f),plane.a.minkowski_point,plane.b.minkowski_point,plane.c.minkowski_point);
-				to_return.distance = new_closest_point.distance;
+				to_return.distance = closest_triangle.distance;
 				to_return.plane = plane;
-				to_return.point = barycentric.x * plane.a.support_a + barycentric.y * plane.b.support_a  + barycentric.z * plane.c.support_a;
-				
+				to_return.barycentric = barycentric;
+				to_return.point_a = barycentric.x * plane.a.support_a + barycentric.y * plane.b.support_a  + barycentric.z * plane.c.support_a;
+				to_return.point_b = barycentric.x * plane.a.support_b + barycentric.y * plane.b.support_b  + barycentric.z * plane.c.support_b;
+				//auto a =barycentric.x * plane.a.support_a;
+
 				return to_return;
 			}
-			previous_point_to_plane = new_closest_point;
 
-			triangle_list_size = triangle_list.size();
+			triangle_list_size = m_triangle_list.size();
+
+
+			if (triangle_list_size >0)
+			{	//Remove the closest face
+				m_triangle_list.erase(m_triangle_list.begin() + closest_triangle.best_index);
+				triangle_list_size--;
+			}
+
+
+
 			for (int i = triangle_list_size - 1; i >= 0 ; i--)
 			{
-				Plane& triangle = triangle_list[i];
-				bool is_point_outside_triangle = ClosestPoint::PointOutsideOfPlane(new_point.minkowski_point,triangle.a.minkowski_point,triangle.b.minkowski_point,triangle.c.minkowski_point);
+				Plane& triangle = m_triangle_list[i];
+				bool is_point_outside_triangle = ClosestPoint::PointOutsideOfPlane(new_support_point.minkowski_point,triangle.a.minkowski_point,triangle.b.minkowski_point,triangle.c.minkowski_point);
 				if (is_point_outside_triangle) // Remove the triangle and all the edges
 				{ 
-					triangle_list.erase(triangle_list.begin() + i);
 					edge_list.push_back(Edge(triangle.a,triangle.b));
 					edge_list.push_back(Edge(triangle.b,triangle.c));
 					edge_list.push_back(Edge(triangle.c,triangle.a));
+
+					m_triangle_list.erase(m_triangle_list.begin() + i);
+
 				}
 
 			}
@@ -134,27 +153,31 @@ namespace Physics
 #pragma endregion 
 
 #pragma region Removing Duplicate Edges
-			auto edge_iterator = edge_list.begin();
 
-			std::set<int>::reverse_iterator rit =  edge_indices_to_remove.rbegin();
 
-			for (; rit != edge_indices_to_remove.rend();++rit)
-			{ 
-				if (rit == edge_indices_to_remove.rbegin()) // hack I don't know why I need to do this
-					rit++;
-				edge_list.erase(edge_iterator + *rit);
+			auto rit =  edge_indices_to_remove.rbegin();
+			auto rend = edge_indices_to_remove.rend();
+
+			for (; rit != rend; rit++)
+			{  
+				auto value = *rit;
+				//cout << "Value being deleted.. " << value << endl;
+				//if (value > 0)
+				edge_list.erase(edge_list.begin() + value);
+				//else
+				//	edge_list.erase(edge_list.begin());
 			}
 #pragma endregion 
 
 			//Add new triangles
 			for (auto edge : edge_list)
 			{
-				triangle_list.push_back(Plane(new_point,edge.p1,edge.p2));
+				m_triangle_list.push_back(Plane(new_support_point,edge.p1,edge.p2));
 			}
 
 			edge_list.clear(); 
 			edge_indices_to_remove.clear();
-			d_vertex_list.push_back(new_point); 
+			d_vertex_list.push_back(new_support_point); 
 		}
 
 		return previous_point_to_plane;

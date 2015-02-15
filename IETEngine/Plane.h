@@ -31,8 +31,13 @@ namespace Physics
 			auto B = b.minkowski_point;
 			auto C = c.minkowski_point;
 
-			normal = glm::cross(B - A,C - A);
+			normal = glm::cross(B - A,C - A); 
+
 			n_normal = glm::normalize(normal);
+
+			if (n_normal != n_normal)
+				n_normal = glm::vec3(0.0f);
+
 			d = glm::dot(n_normal,A);
 
 		}

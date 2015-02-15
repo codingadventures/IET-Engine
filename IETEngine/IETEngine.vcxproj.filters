@@ -317,6 +317,9 @@
     <ClInclude Include="SupportPoint.h">
       <Filter>Header Files\Physics\NarrowPhase</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex_bone.vert">
