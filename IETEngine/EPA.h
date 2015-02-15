@@ -21,27 +21,27 @@ namespace Physics
 	{
 	private:
 		struct Edge{
-			glm::vec3 p1,p2;
+			SupportPoint p1,p2;
 
-			Edge(glm::vec3 p1,glm::vec3 p2)
+			Edge(SupportPoint p1,SupportPoint p2)
 				: p1(p1),p2(p2)
 			{
 
 			}
 
-			bool operator== (const Edge& edge)
+			bool operator== (const Edge& edge) const
 			{
-				return edge.p1 == p1 && edge.p2 == p2;
+				return (edge.p1 == p1 && edge.p2 == p2) || (edge.p1 == p2 && edge.p2 == p1);
 			}
 		};
 
 	public:
-		EPA(vector<glm::vec3> vertex_list, const  vector<Vertex>& vertices_shape_1, const  vector<Vertex>& vertices_shape_2);
+		EPA(vector<SupportPoint> vertex_list, const  vector<Vertex>& vertices_shape_1, const  vector<Vertex>& vertices_shape_2);
 
 		PointToPlane Run();
 	protected:
 	private:
-		vector<glm::vec3> d_vertex_list;
+		vector<SupportPoint> d_vertex_list;
 		const vector<Vertex>& d_vertices_shape_1;
 		const vector<Vertex>& d_vertices_shape_2;
 
@@ -49,7 +49,7 @@ namespace Physics
 		vector<Edge> edge_list;
 	};
 
-	EPA::EPA(vector<glm::vec3>  vertex_list, 
+	EPA::EPA(vector<SupportPoint>  vertex_list, 
 		const vector<Vertex>& vertices_shape_1, 
 		const vector<Vertex>& vertices_shape_2) :
 
@@ -89,18 +89,24 @@ namespace Physics
 			auto new_point = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
 
 			//If the closest face is no closer (by a certain threshold) to the origin than the previously picked one
-			if (new_closest_point.distance  >= previous_point_to_plane.distance)
+			if (glm::dot(new_closest_point.plane.n_normal,new_point.minkowski_point) - new_closest_point.distance < 0.0001f)
 			{
-				return previous_point_to_plane;
+				auto& plane = new_closest_point.plane;
+				PointToPlane to_return;
+				auto barycentric =	ClosestPoint::ToTriangle(glm::vec3(0.0f),plane.a.minkowski_point,plane.b.minkowski_point,plane.c.minkowski_point);
+				to_return.distance = new_closest_point.distance;
+				to_return.plane = plane;
+				to_return.point = barycentric.x * plane.a.support_a + barycentric.y * plane.b.support_a  + barycentric.z * plane.c.support_a;
+				
+				return to_return;
 			}
-
 			previous_point_to_plane = new_closest_point;
 
 			triangle_list_size = triangle_list.size();
 			for (int i = triangle_list_size - 1; i >= 0 ; i--)
 			{
 				Plane& triangle = triangle_list[i];
-				bool is_point_outside_triangle = ClosestPoint::PointOutsideOfPlane(new_point,triangle.a,triangle.b,triangle.c);
+				bool is_point_outside_triangle = ClosestPoint::PointOutsideOfPlane(new_point.minkowski_point,triangle.a.minkowski_point,triangle.b.minkowski_point,triangle.c.minkowski_point);
 				if (is_point_outside_triangle) // Remove the triangle and all the edges
 				{ 
 					triangle_list.erase(triangle_list.begin() + i);

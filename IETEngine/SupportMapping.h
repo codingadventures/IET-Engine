@@ -5,6 +5,7 @@
 #include "Vertex.h"
 #include <vector>
 #include "glm\detail\type_vec3.hpp"
+#include "SupportPoint.h"
 
 namespace Physics
 {
@@ -15,12 +16,12 @@ namespace Physics
 		static class SupportMapping
 		{
 		public:
-			static glm::vec3 Get_Farthest_Point(glm::vec3 direction, const vector<Vertex>& shape_vertices);
+			static SupportPoint Get_Farthest_Point(glm::vec3 direction, const vector<Vertex>& shape_vertices);
 		protected:
 		private:
 		};
 
-		glm::vec3 SupportMapping::Get_Farthest_Point(glm::vec3 direction, const vector<Vertex>& shape_vertices)
+		SupportPoint SupportMapping::Get_Farthest_Point(glm::vec3 direction, const vector<Vertex>& shape_vertices)
 		{
 			size_t length = shape_vertices.size();
 			float max_dot_product = glm::dot(shape_vertices[0].Position,direction);
@@ -36,7 +37,10 @@ namespace Physics
 				}
 			}
 
-			return shape_vertices[index_max_d_product].Position;
+			SupportPoint p;
+
+			p.support_a = shape_vertices[index_max_d_product].Position;
+			return p;
 		}
 
 	}

@@ -129,6 +129,7 @@
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SupportMapping.h" />
+    <ClInclude Include="SupportPoint.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />

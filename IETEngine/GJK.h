@@ -31,13 +31,13 @@ namespace Physics
 		bool Intersect(Shader& shader);
 	protected:
 	private:  
-		bool		do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction);
+		bool		do_simplex(vector<SupportPoint>& simplex, glm::vec3& direction);
 
 		bool		is_same_direction(glm::vec3 a, glm::vec3 b);
 
 		bool		check_tetrahedron(glm::vec3 AO,glm::vec3 AB,glm::vec3 AC,glm::vec3 ABC, glm::vec3 direction, vector<glm::vec3>& simplex);
 
-		bool		check_triangle(vector<glm::vec3>& simplex, glm::vec3 &direction);
+		bool check_triangle(vector<SupportPoint>& simplex, glm::vec3 &direction);
 	};
 	 
 
@@ -57,7 +57,7 @@ namespace Physics
 	*/
 	bool GJK::Intersect(Shader& shader)
 	{
-		vector<glm::vec3> simplex;
+		vector<SupportPoint> simplex;
 
 		bool intersect = false;
 		d_initial_direction = glm::vec3(1.0f,0.0f,0.f);
@@ -115,7 +115,7 @@ namespace Physics
 			auto dotD = glm::dot(newD,-D);
 
 			auto A = SupportMapping::Get_Farthest_Point(newD, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-newD, d_vertices_shape_2);
-			auto AnewD= glm::dot(A,newD);
+			auto AnewD= glm::dot(A.minkowski_point,newD);
 
 
 			if(AnewD <= dotD + 0.05f){
@@ -137,7 +137,7 @@ namespace Physics
 		return intersect;
 	}
 
-	bool GJK::do_simplex(vector<glm::vec3>& simplex, glm::vec3& direction)
+	bool GJK::do_simplex(vector<SupportPoint>& simplex, glm::vec3& direction)
 	{
 		size_t s_size = simplex.size();
 
@@ -147,7 +147,7 @@ namespace Physics
 
 		case 1:
 
-			direction = -simplex[0];
+			direction = -simplex[0].minkowski_point;
 			return false;
 
 			break;
@@ -155,8 +155,11 @@ namespace Physics
 #pragma region 2-Simplex 
 		case 2:					// 1-Edge
 			{
-				auto A = simplex[1]; //A is the last inserted point. which is the direction we are looking at
-				auto B = simplex[0]; 
+				auto A = simplex[1].minkowski_point; //A is the last inserted point. which is the direction we are looking at
+				auto B = simplex[0].minkowski_point;
+
+				auto A_support = simplex[1];
+				auto B_support = simplex[0];
 
 				auto AO = -A;		//It is: O - A --> given the O is the origin thus 0,0,0. 
 				auto AB = B - A;    //AB is the edge
@@ -165,15 +168,15 @@ namespace Physics
 				{
 					direction = glm::cross(glm::cross(AB,AO),AB); // This is to find the perpendicular to AB
 					simplex.clear();
-					simplex.push_back(B);
-					simplex.push_back(A);
+					simplex.push_back(B_support);
+					simplex.push_back(A_support);
 
 				}
 				else
 				{
 					direction = AO;
 					simplex.clear();
-					simplex.push_back(A); // A is the closest to the origin.
+					simplex.push_back(A_support); // A is the closest to the origin.
 				}
 
 			}
@@ -191,10 +194,16 @@ namespace Physics
 		case 4:
 			{
 				//Check the vertex first. Given we have arrived to the last point added is A it is the only one I check...hoping my assumption is correct
-				auto A = simplex[simplex.size() - 1];
-				auto B = simplex[simplex.size() - 2];
-				auto C = simplex[simplex.size() - 3];
-				auto D = simplex[simplex.size() - 4];
+				auto A = simplex[simplex.size() - 1].minkowski_point;
+				auto B = simplex[simplex.size() - 2].minkowski_point;
+				auto C = simplex[simplex.size() - 3].minkowski_point;
+				auto D = simplex[simplex.size() - 4].minkowski_point;
+
+				auto A_support = simplex[simplex.size() - 1];
+				auto B_support = simplex[simplex.size() - 2];
+				auto C_support = simplex[simplex.size() - 3];
+				auto D_support = simplex[simplex.size() - 4];
+
 
 				auto AO = -A;
 				auto AB = B - A;
@@ -210,9 +219,9 @@ namespace Physics
 				{
 					//simplex.erase(simplex.begin());
 					simplex.clear();
-					simplex.push_back(C);
-					simplex.push_back(B);
-					simplex.push_back(A);
+					simplex.push_back(C_support);
+					simplex.push_back(B_support);
+					simplex.push_back(A_support);
 					return	check_triangle(simplex,direction);
 					//check_tetrahedron(AO,AB,AC,ABC,direction,simplex);
 				}
@@ -221,9 +230,9 @@ namespace Physics
 				{
 					simplex.clear(); 
 
-					simplex.push_back(B);
-					simplex.push_back(D);
-					simplex.push_back(A);
+					simplex.push_back(B_support);
+					simplex.push_back(D_support);
+					simplex.push_back(A_support);
 
 					/*simplex.erase(simplex.begin() + 1);
 					simplex[0] = B;
@@ -235,9 +244,9 @@ namespace Physics
 				{
 					simplex.clear(); 
 
-					simplex.push_back(D);
-					simplex.push_back(C);
-					simplex.push_back(A);
+					simplex.push_back(D_support);
+					simplex.push_back(C_support);
+					simplex.push_back(A_support);
 
 
 					//simplex.erase(simplex.begin() + 2);
@@ -302,11 +311,15 @@ namespace Physics
 	}
 
 
-	bool GJK::check_triangle(vector<glm::vec3>& simplex, glm::vec3 &direction)
+	bool GJK::check_triangle(vector<SupportPoint>& simplex, glm::vec3 &direction)
 	{
-		auto A = simplex[simplex.size() - 1]; //A is still the last inserted point. which is the direction we are looking at
-		auto B = simplex[simplex.size() - 2];
-		auto C = simplex[simplex.size() - 3];
+		auto A = simplex[simplex.size() - 1].minkowski_point; //A is still the last inserted point. which is the direction we are looking at
+		auto B = simplex[simplex.size() - 2].minkowski_point;
+		auto C = simplex[simplex.size() - 3].minkowski_point;
+
+		auto A_support = simplex[simplex.size() - 1];
+		auto B_support = simplex[simplex.size() - 2];
+		auto C_support = simplex[simplex.size() - 3];
 
 		auto AO = -A;
 		auto AB = B - A;
@@ -323,8 +336,8 @@ namespace Physics
 			{
 
 				simplex.clear();
-				simplex.push_back(C);
-				simplex.push_back(A);
+				simplex.push_back(C_support);
+				simplex.push_back(A_support);
 				direction = glm::cross(glm::cross(AC,AO),AC);
 			}
 			else
@@ -332,14 +345,14 @@ namespace Physics
 				if (is_same_direction(AB,AO))
 				{
 					simplex.clear();
-					simplex.push_back(B);
-					simplex.push_back(A);
+					simplex.push_back(B_support);
+					simplex.push_back(A_support);
 					direction = glm::cross(glm::cross(AB,AO),AB);
 				}
 				else
 				{
 					simplex.clear();
-					simplex.push_back(A);
+					simplex.push_back(A_support);
 					direction = AO;
 				}
 			}
@@ -353,14 +366,14 @@ namespace Physics
 				if (is_same_direction(AB,AO))
 				{
 					simplex.clear();
-					simplex.push_back(B);
-					simplex.push_back(A);
+					simplex.push_back(B_support);
+					simplex.push_back(A_support);
 					direction = glm::cross(glm::cross(AB,AO),AB);
 				}
 				else
 				{
 					simplex.clear();
-					simplex.push_back(A);
+					simplex.push_back(A_support);
 					direction = AO;
 				}
 			}
@@ -369,16 +382,16 @@ namespace Physics
 				simplex.clear();
 				if (is_same_direction(ABC,AO))
 				{
-					simplex.push_back(C);
-					simplex.push_back(B);
-					simplex.push_back(A);
+					simplex.push_back(C_support);
+					simplex.push_back(B_support);
+					simplex.push_back(A_support);
 					direction = ABC;
 				}
 				else
 				{
-					simplex.push_back(B);
-					simplex.push_back(C);
-					simplex.push_back(A);
+					simplex.push_back(B_support);
+					simplex.push_back(C_support);
+					simplex.push_back(A_support);
 					direction = -ABC;
 				}
 			}
