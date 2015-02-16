@@ -88,7 +88,7 @@ namespace Controller
 		bool d_draw_spheres;
 		bool d_is_narrow_phase_collision;
 		glm::vec4 d_collision_color ;
-
+		Model* d_floor_model;
 	};
 
 	void PhysicsController::setup_current_instance(){
@@ -283,10 +283,24 @@ namespace Controller
 		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 
 		d_cube_model = new Model("models\\cubetri.obj");
+		d_floor_model = new Model("models\\plane.dae");
 		d_rigid_body = new RigidBody(*d_cube_model);
+
+		auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
+		d_floor_model->Rotate(floor_rotation);
+
+		d_floor_model->Scale(glm::vec3(100.0f,100.0f,100.0f));
+		d_floor_model->Translate(glm::vec3(0,-10.0f,0.0f));
 		d_rigid_body_manager->Add(d_rigid_body);
 
+		auto floor_rigid_body = new RigidBody(*d_floor_model);
+
+		floor_rigid_body->Mass(FLT_MAX);
+
+		//	d_rigid_body_manager->Add(floor_rigid_body);
+
 		d_model_vector.push_back(d_cube_model);
+		//d_model_vector.push_back(d_floor_model);
 
 		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
@@ -303,13 +317,14 @@ namespace Controller
 			d_rigid_body_manager->Add(rigid_body);
 		}
 
+		//
+
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 		tweak_bar_setup();
 		d_is_narrow_phase_collision = false;
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-
 	}
 
 	void PhysicsController::Run(){
@@ -354,14 +369,13 @@ namespace Controller
 		/*
 		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
 
-		d_rigid_body_manager->Update(d_delta_time_secs);
 
 
 		//d_cube_model->Draw(*d_shader);
 
 		d_shader_boundings->Use();
 		d_shader_boundings->SetUniform("shape_color",d_collision_color);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		for (auto model: d_model_vector)
 		{
@@ -380,7 +394,7 @@ namespace Controller
 
 			model->Draw(*curr_shader);
 		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		/*
 
@@ -407,9 +421,9 @@ namespace Controller
 		//p2.Draw();
 
 
-		//d_rigid_body_manager->ApplyImpulseToAll(d_delta_time_secs);
 
 
+		d_rigid_body_manager->Update(d_delta_time_secs);
 
 		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
@@ -428,7 +442,7 @@ namespace Controller
 		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 
 		*/
-		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
+	//	d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
 
 		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
 		if (colliding_pairs->size())
@@ -436,8 +450,7 @@ namespace Controller
 			d_shader_boundings->Use();
 			d_shader_boundings->SetUniform("mvp",projection_view * glm::mat4());
 
-			d_shader_boundings->SetUniform("model_matrix",glm::mat4());
-			vector<CollidingPair<BoundingBox>> narrow_phase;
+			d_shader_boundings->SetUniform("model_matrix",glm::mat4()); 
 			for (auto pair : *colliding_pairs)
 			{
 				GJK *gjk = new GJK(
@@ -446,11 +459,10 @@ namespace Controller
 					pair.m_left_element->Bounding_box()->m_center,
 					pair.m_right_element->Bounding_box()->m_center);  
 
-				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings);
-
-				if (d_is_narrow_phase_collision)
+				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings); 
+				if (d_is_narrow_phase_collision )
 				{
-					d_collision_color = glm::vec4(1.0f,0.0f,0.0f,0.3f);
+					 d_collision_color = glm::vec4(1.0f,0.0f,0.0f,0.3f);
 					auto p1 =  gjk->m_intersection_point_a;
 					auto p2 =  gjk->m_intersection_point_b;
 
@@ -472,19 +484,15 @@ namespace Controller
 
 					auto force_dir = force * gjk->m_normal;
 
-					linearMomentum = linearMomentum + J;
-					angularMomentum = angularMomentum + cross(rA, J);
+					pair.m_left_element->m_linear_momentum += force_dir;
+ 
+					pair.m_left_element->m_angular_momentum += glm::cross(p1 - pair.m_left_element->Center_of_mass() , force_dir);
 
-					body->SetLinearMomentum(body->GetLinearMomentum() - J);
-					body->SetAngularMomentum(body->GetAngularMomentum() - cross(rB, J));
+					pair.m_right_element->m_linear_momentum -= force_dir;
+					pair.m_right_element->m_angular_momentum -= glm::cross(p2 - pair.m_right_element->Center_of_mass(), force_dir);
 
-					/*pair.m_left_element->Apply_Impulse(force,p1,d_delta_time_secs);
-					pair.m_right_element->Apply_Impulse(-force,p2,d_delta_time_secs);
-					d_rigid_body_manager->Update(d_delta_time_secs);*/
 
-					//pd.Draw();
-				}
-				//	narrow_phase.push_back(pair);
+				} 
 
 				delete gjk;
 			}
@@ -492,11 +500,10 @@ namespace Controller
 		else
 		{
 			d_collision_color = glm::vec4(.0f,.0f,.0f,1.0f);
-
-			d_is_narrow_phase_collision = false;
+			d_is_narrow_phase_collision = false; 
 		}
 
-
+		//d_rigid_body_manager->Apply_Impulse_To_All(d_delta_time_secs);
 
 		//p.Draw();
 

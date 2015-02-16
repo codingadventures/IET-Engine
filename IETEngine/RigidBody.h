@@ -6,7 +6,7 @@
 #include <glm/gtx/orthonormalize.hpp>
 
 #define DUMPING_FACTOR 0.6f
-#define EPSILON		0.2f
+#define REST_FACTOR		1.0f
 namespace Physics
 {
 	using namespace Drag;
@@ -14,8 +14,11 @@ namespace Physics
 	class RigidBody
 	{
 	public:
-		Model& m_model;
+		Model&					m_model;
 
+		glm::vec3				m_linear_momentum; 
+
+		glm::vec3				m_angular_momentum;
 
 		RigidBody(Model&);
 		~RigidBody();
@@ -33,9 +36,6 @@ namespace Physics
 		glm::vec3				d_force;
 		glm::vec3				d_velocity;
 		glm::vec3				d_acceleration;
-		glm::vec3				d_linear_momentum; 
-
-		glm::vec3				d_angular_momentum;
 		glm::vec3				d_torque;
 		glm::vec3				d_angular_velocity;
 		glm::vec3				d_force_application_point;
@@ -59,6 +59,8 @@ namespace Physics
 		glm::vec3				Angular_Velocity() const;
 
 		float					Mass() const;
+		void					Mass(float val) { d_mass = val; }
+		
 		float					Area() const;
 		float					Polyhedral_Mass() const;
 		BoundingSphere*			Bounding_sphere();
@@ -92,7 +94,11 @@ namespace Physics
 		d_area(0.0f),
 		d_calculated_area(0.0f),
 		d_mass(1.0f),
-		d_polyhedral_mass(0.0f)
+		d_polyhedral_mass(0.0f),
+		d_angular_velocity(0.0f),
+		d_acceleration(0.0f),
+		m_linear_momentum(0.0f),
+		m_angular_momentum(0.0f)
 	{
 
 		calculate_mesh_stats();
@@ -108,27 +114,34 @@ namespace Physics
 
 	void RigidBody::Update(float delta_time, bool use_polyhedral)
 	{ 
-		glm::quat orientation =  m_model.Rotation();
-		glm::vec3 position	  = m_model.GetPositionVec();
-		glm::mat3 tensor = Inertial_Tensor(use_polyhedral);
+		glm::quat orientation	=	m_model.Rotation();
+		glm::vec3 position		=	m_model.GetPositionVec();
+		glm::mat3 tensor		=	Inertial_Tensor(use_polyhedral);
+
+		assert(tensor == tensor);
+		
+		//if (d_mass == FLT_MAX) return;
 
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
-		d_angular_velocity =  d_angular_momentum * tensor;
+		d_angular_velocity =  m_angular_momentum * tensor;
+		assert(d_angular_velocity == d_angular_velocity);
 
 		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) ;
+		assert(orientation == orientation);
 
 		calculate_torque();
 
-		d_velocity = d_linear_momentum / mass; 
+		d_velocity = m_linear_momentum / mass; 
+		assert(d_velocity == d_velocity);
 
 		float damping = glm::pow(DUMPING_FACTOR, delta_time);
 
-		d_linear_momentum  *= damping ;
-		d_angular_momentum *= damping ;
+		/*m_linear_momentum  *= damping ;
+		m_angular_momentum *= damping ;*/
 
 		orientation = glm::normalize(orientation);
-		d_position =  d_linear_momentum * delta_time / mass;
+		d_position =  m_linear_momentum * delta_time / mass;
 		d_center_of_mass += d_position ;
 
 		d_bounding_sphere->center += d_position;
@@ -147,9 +160,13 @@ namespace Physics
 		//d_acceleration = force / d_mass;
 		d_force_application_point = application_point ;
 		calculate_torque();
-		d_angular_momentum +=	d_torque * delta_time;
-		d_linear_momentum +=	d_force  * delta_time;
-		d_velocity = d_linear_momentum / d_mass; 
+		m_angular_momentum +=	d_torque * delta_time;
+		assert(m_angular_momentum == m_angular_momentum);
+
+		m_linear_momentum +=	d_force  * delta_time;
+		assert(m_linear_momentum == m_linear_momentum);
+
+		d_velocity = m_linear_momentum / d_mass; 
 
 
 	}
@@ -215,30 +232,42 @@ namespace Physics
 		auto inertia_term_a 
 			= glm::cross(Inertial_Tensor(use_polyhedral) * ra_n,ra);
 
+		assert(inertia_term_a==inertia_term_a);
+
+
 		auto inertia_term_b 
 			= glm::cross(other.Inertial_Tensor(use_polyhedral) * rb_n,rb);
+		assert(inertia_term_b==inertia_term_b);
 
 
 		auto t1 = 1.0f/d_mass;
 		auto t2 = 1.0f/other.Mass();
 		auto t3 = glm::dot(normal, inertia_term_a);
 		auto t4 = glm::dot(normal, inertia_term_b);
+		assert(t3==t3);
+		assert(t4==t4);
 
 		auto denominator = t1+t2+t3+t4;
 
 		auto pa = d_velocity + glm::cross(d_angular_velocity, ra);
+		assert(pa==pa);
+
 		auto pb = other.Velocity() + glm::cross(other.Angular_Velocity(), rb);
+		assert(pb==pb);
 
 		auto v_rel = glm::dot(normal, pa-pb);
-		if (v_rel < 0.0)
-		{	
-			auto numerator = -(1 + EPSILON) * v_rel;
+		/*if (v_rel < 0.0)
+		{	*/
+		auto numerator = -(1 + REST_FACTOR) * v_rel;
 
-			auto J = numerator / denominator;
+		assert(denominator!=0);
 
-			return glm::max(0.0f,J);
-		}
-		return 0.0f;
+		auto J = numerator / denominator;
+
+
+		return J;
+		/*}
+		*/return 0.0f;
 	}
 
 	glm::mat3 RigidBody::Inertial_Tensor(bool use_polyhedral) const

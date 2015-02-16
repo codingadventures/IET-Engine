@@ -32,7 +32,7 @@ namespace Physics
 	public:
 		GJK(vector<Vertex>&	vertices_shape_1,vector<Vertex>& vertices_shape_2,glm::vec3 centroid_shape1,glm::vec3 centroid_shape2);
 
-		bool Intersect(Shader& shader);
+		bool		Intersect(Shader& shader);
 	protected:
 	private:  
 		bool		do_simplex(vector<SupportPoint>& simplex, glm::vec3& direction);
@@ -41,7 +41,7 @@ namespace Physics
 
 		bool		check_tetrahedron(glm::vec3 AO,glm::vec3 AB,glm::vec3 AC,glm::vec3 ABC, glm::vec3 direction, vector<glm::vec3>& simplex);
 
-		bool check_triangle(vector<SupportPoint>& simplex, glm::vec3 &direction);
+		bool		check_triangle(vector<SupportPoint>& simplex, glm::vec3 &direction);
 	};
 
 
@@ -92,6 +92,28 @@ namespace Physics
 				//EPA kicks in at this stage
 				if (simplex.size() == 4)
 				{
+
+					//NASTY HACK
+					//gotta figure out why
+					int exit_index = 0;
+					for (int i = 0; i < 4; i++)
+					{
+						for (int j = i+1; j < 4; j++)
+						{
+							if (simplex[i].minkowski_point == simplex[j].minkowski_point)
+							{
+								exit_index++;
+							}
+						}
+
+					}
+					if (exit_index > 2)
+					{
+						intersect = false;
+						return false;
+					}
+					/**/
+
 					EPA epa = EPA(simplex,d_vertices_shape_1,d_vertices_shape_2);
 					//for (auto triangle : epa.m_triangle_list)
 					//{
@@ -101,6 +123,7 @@ namespace Physics
 					//	t.Draw();
 					//}
 					auto intersection_point = epa.Run();
+
 					m_intersection_point_a = intersection_point.point_a;
 					m_intersection_point_b = intersection_point.point_b;
 					m_normal = intersection_point.plane.n_normal;

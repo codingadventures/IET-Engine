@@ -9,6 +9,7 @@
 #include <set>
 #include "Cube.h"
 #include "CollidingPair.h"
+#include "Plane.h"
 
 namespace Physics
 {
@@ -17,12 +18,16 @@ namespace Physics
 
 	private:
 		vector<RigidBody*>					d_rigid_bodies;
-		bool								d_use_polyhedral;
-		glm::vec3							d_colliding_color;
-		glm::vec3							d_non_colliding_color;
+		vector<Plane*>						d_planes;
+
 		vector<CollidingPair<RigidBody>>    d_colliding_pairs;
 		vector<Sphere*>						d_bounding_spheres;
 		vector<Cube*>						d_bounding_cubes;
+
+		bool								d_use_polyhedral;
+		glm::vec3							d_colliding_color;
+		glm::vec3							d_non_colliding_color;
+
 		size_t								d_sort_axis;
 
 	public:
@@ -30,6 +35,7 @@ namespace Physics
 		~RigidBodyManager();
 
 		void		Add(RigidBody* rigid_body);
+		void		Add_Collision_Plane(Plane& plane);
 		void		Update(double delta_time); 
 		void		Check_Sphere_Collisions();
 		void		Check_AABB_Collisions();
@@ -37,7 +43,7 @@ namespace Physics
 		void		Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Boundings(Shader& shader, glm::mat4 projection_view);
 		void		Apply_Impulse_To_All( float delta_time);
-			
+
 		vector<CollidingPair<RigidBody>>* 
 			Colliding_Pairs();
 
@@ -128,7 +134,7 @@ namespace Physics
 		std::sort(x_axis.begin(),x_axis.end());
 		std::sort(y_axis.begin(),y_axis.end());
 		std::sort(z_axis.begin(),z_axis.end());
-		 
+
 
 		//I determine which pairs collide
 		//O(n)
@@ -200,7 +206,7 @@ namespace Physics
 			auto bounding_box = d_rigid_bodies[i]->Bounding_box();
 			glm::mat4 scale = glm::scale(glm::mat4(1),d_rigid_bodies[i]->Bounding_box()->m_scale_factor);
 			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetPosition() * scale);
- 
+
 
 			d_bounding_cubes[i]->Set_Color(d_rigid_bodies[i]->Bounding_box()->Color());
 			d_bounding_cubes[i]->Draw(shader);
@@ -228,7 +234,7 @@ namespace Physics
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			d_rigid_bodies[i]->Apply_Impulse(glm::sphericalRand(1.0f) * glm::sphericalRand(30.0f),
-				glm::linearRand(d_rigid_bodies[i]->Bounding_box()->m_min_coordinate,d_rigid_bodies[i]->Bounding_box()->m_max_coordinate),
+				glm::linearRand(  d_rigid_bodies[i]->Bounding_box()->m_center, d_rigid_bodies[i]->Bounding_box()->m_center),
 				delta_time);
 		}
 	}
@@ -239,11 +245,16 @@ namespace Physics
 		{
 			delete sphere;
 		}
-		 
+
 		for (auto cube : d_bounding_cubes)
 		{
 			delete cube;
 		}
+	}
+
+	void RigidBodyManager::Add_Collision_Plane(Plane& plane)
+	{
+		d_planes.push_back(&plane);
 	}
 
 

@@ -83,16 +83,18 @@ namespace Physics
 
 		for (int epa_counter = 0; epa_counter < MAX_EPA_COUNT; epa_counter++)
 		{
-
 			auto closest_triangle = ClosestPoint::ToPolytope(origin,m_triangle_list);
 
 			auto direction = closest_triangle.plane.n_normal;
+
+			if (glm::dot(direction,closest_triangle.plane.a.minkowski_point) <= 0.0f)
+				direction = -direction;
 
 			auto new_support_point = SupportMapping::Get_Farthest_Point(direction, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-direction, d_vertices_shape_2);
 
 			//If the closest face is no closer (by a certain threshold) to the origin than the previously picked one
 
-			auto distance = glm::dot(closest_triangle.plane.n_normal,new_support_point.minkowski_point - closest_triangle.plane.a.minkowski_point);
+			auto distance = glm::dot(closest_triangle.plane.n_normal,new_support_point.minkowski_point);
 
 			if (distance - closest_triangle.distance < 0.0001f)
 			{
@@ -102,6 +104,10 @@ namespace Physics
 				to_return.distance = closest_triangle.distance;
 				to_return.plane = plane;
 				to_return.barycentric = barycentric;
+				assert(barycentric==barycentric);
+				assert(plane.a.support_a==plane.a.support_a);
+				assert(plane.a.support_b==plane.a.support_b);
+
 				to_return.point_a = barycentric.x * plane.a.support_a + barycentric.y * plane.b.support_a  + barycentric.z * plane.c.support_a;
 				to_return.point_b = barycentric.x * plane.a.support_b + barycentric.y * plane.b.support_b  + barycentric.z * plane.c.support_b;
 				//auto a =barycentric.x * plane.a.support_a;
@@ -110,16 +116,7 @@ namespace Physics
 			}
 
 			triangle_list_size = m_triangle_list.size();
-
-
-			if (triangle_list_size >0)
-			{	//Remove the closest face
-				m_triangle_list.erase(m_triangle_list.begin() + closest_triangle.best_index);
-				triangle_list_size--;
-			}
-
-
-
+			  
 			for (int i = triangle_list_size - 1; i >= 0 ; i--)
 			{
 				Plane& triangle = m_triangle_list[i];
@@ -172,6 +169,8 @@ namespace Physics
 			//Add new triangles
 			for (auto edge : edge_list)
 			{
+				assert(new_support_point.minkowski_point != edge.p1.minkowski_point);
+				assert(new_support_point.minkowski_point != edge.p2.minkowski_point);
 				m_triangle_list.push_back(Plane(new_support_point,edge.p1,edge.p2));
 			}
 
