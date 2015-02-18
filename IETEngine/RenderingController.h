@@ -40,7 +40,7 @@ namespace Controller
 		Model*			d_cube_model;
 		Model*			d_torus_model;
 		Model*			d_nano_model;
- 
+
 		Model*			d_head_model;
 
 		SkyBox*			d_sky_box;
@@ -67,6 +67,7 @@ namespace Controller
 
 		float			d_shininess_component;
 		float			d_refractive_index;
+		bool			d_use_bump_mapping;
 	};
 	void RenderingController::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -82,7 +83,7 @@ namespace Controller
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_refractive_index =1.0f;
-
+		d_use_bump_mapping = false;
 	}
 	RenderingController::~RenderingController()
 	{
@@ -126,7 +127,7 @@ namespace Controller
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-		TwEnumVal lightEv[] = { { NONE, "None"},{SKYBOX,"SkyBox"},{SKYBOX_REFR,"SkyBox Refr."}, {AMBIENT,"Ambient"}, {DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"} };
+		TwEnumVal lightEv[] = { { NONE, "None"},{SKYBOX,"SkyBox"},{SKYBOX_REFR,"SkyBox Refr."}, {AMBIENT,"Ambient"}, {TextureType_DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"} };
 		TwType lightType = TwDefineEnum("LightType", lightEv, 6);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
@@ -140,6 +141,7 @@ namespace Controller
 			" group='Model' label='Object rotation' opened=true help='Change the object orientation.' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Bump Mupping", TW_TYPE_BOOLCPP, &d_use_bump_mapping," group='Light' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
 
@@ -147,7 +149,7 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_light_specular, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Refr. Index", TW_TYPE_FLOAT, &d_refractive_index, " group='Light' ");
-		
+
 	}
 
 	void RenderingController::Init(int argc, char* argv[])
@@ -170,7 +172,7 @@ namespace Controller
 		TwGLUTModifiersFunc(glutGetModifiers);
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
-		
+
 		vector<string> f_shader_skybox		= ArrayConversion<string>(1,string("skybox.frag")); 
 
 		vector<string> f_shader_ambient		= ArrayConversion<string>(2,string("ambient.frag"),string("common.frag"));
@@ -204,17 +206,17 @@ namespace Controller
 		d_shader_texture =   new Shader(v_shader,f_shader_texture);
 		d_shader_skybox =   new Shader(v_shader,f_shader_skybox);
 
-		d_cube_model	= new Model("models\\cubetri.obj");
+		//d_cube_model	= new Model("models\\cubetri.obj");
 		//d_head_model    = new Model(HEAD_MODEL);
-		d_torus_model	= new Model("models\\torus.dae");
+		//	d_torus_model	= new Model("models\\torus.dae");
 
 		d_sky_box = new SkyBox(skybox_faces);
 
-		//d_nano_model	= new Model(CHURCH_MODEL);
+		d_nano_model	= new Model(DROID_BUMP);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
-		d_torus_model->Scale(glm::vec3(10,10,10));
-		//d_nano_model->Scale(glm::vec3(10,10,10));
+		//	d_torus_model->Scale(glm::vec3(10,10,10));
+		//	 d_nano_model->Scale(glm::vec3(10,10,10));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
@@ -256,7 +258,7 @@ namespace Controller
 		case AMBIENT:
 			current_shader = d_shader_ambient ;   
 			break;
-		case DIFFUSE:
+		case  DIFFUSE:
 			current_shader = d_shader_diffuse ;
 
 			break;
@@ -283,7 +285,7 @@ namespace Controller
 
 		light.SetShader(*current_shader);	
 		light.SetShader(*d_shader_skybox);	
-		 
+
 		d_shader_no_texture->Use();
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
@@ -300,7 +302,7 @@ namespace Controller
 		d_shader_skybox->Use();
 		d_shader_skybox->SetUniform("mvp", d_projection_matrix * glm::mat4(glm::mat3(d_view_matrix)));
 		d_shader_skybox->SetUniform("model_matrix", glm::mat4(1));
-		
+
 		d_sky_box->Draw(*d_shader_skybox);
 
 
@@ -321,39 +323,41 @@ namespace Controller
 		random_cube_rotation *= glm::angleAxis(glm::radians(10.0f) * (float) d_delta_time_secs, glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
 		random_torus_rotation *= glm::angleAxis(glm::radians(-10.0f)* (float)d_delta_time_secs, glm::vec3(0,1,0));
 
+		
+		current_shader->SetUniform("use_bump_mapping",d_use_bump_mapping);
 
 		//d_cube_model->Rotate(random_cube_rotation);
-		d_torus_model->Rotate(random_torus_rotation); 
-		d_cube_model->Rotate(d_quaternion_rotation);
+		//d_torus_model->Rotate(random_torus_rotation); 
+		d_nano_model->Rotate(d_quaternion_rotation);
 		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
-		d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
+	/*	d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
-		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ; 
+		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ; */
 
 
-		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
+		/*glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp",projection_view * cube_model_matrix);
 		current_shader->SetUniform("model_matrix",cube_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  */
 
 
-		d_cube_model->Draw(*current_shader);
+		//d_cube_model->Draw(*current_shader);
 
-		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+		//glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
-		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		current_shader->SetUniform("model_matrix",torus_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
+		//current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		//current_shader->SetUniform("model_matrix",torus_model_matrix);
+		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		d_torus_model->Draw(*current_shader); 
+		//d_torus_model->Draw(*current_shader); 
 
-	/*	glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
+		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
 		current_shader->SetUniform("mvp", projection_view * nano_model_matrix);
 		current_shader->SetUniform("model_matrix", nano_model_matrix);
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  */
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(nano_model_matrix)));  /**/
 
 		/*glm::mat4 head_model_matrix = d_head_model->GetModelMatrix();
 
@@ -362,7 +366,7 @@ namespace Controller
 		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(head_model_matrix)));  
 		d_head_model->Draw(*current_shader);*/
 
-//		d_nano_model->Draw(*current_shader);
+		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);

@@ -4,6 +4,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normals;
 layout (location = 2) in vec2 texCoord; 
 layout (location = 3) in vec4 color; 
+layout (location = 4) in vec3 tangent; 
  
 vec4 mvpTransform(vec4 position);
 vec3 normal_transform(mat4 model_transpose_inverse, vec3 normal);
@@ -21,13 +22,15 @@ out vec2 tex_coord;
 out vec3 light_direction;
 out vec3 eye_direction;
 out vec3 tex_coord_skybox; 
+out vec3 tangent_dir;
+out vec3 vertex_world_space;
 
 void main()
 {  
  
     gl_PointSize = 5.0;
 	vec4 position_vec4 	=  vec4(position, 1.0f);
-  	vec3 vertex_world_space 	
+  	vertex_world_space 	
   						=  vec3(model_matrix * position_vec4);
  
 	vec3 normal  		=  normal_transform(model_transpose_inverse, normals); 
@@ -44,6 +47,7 @@ void main()
 	gl_Position 		=  mvpTransform(position_vec4);
 
 	tex_coord 			=  texCoord;
+    tangent_dir 		=  vec3(model_matrix * vec4(tangent,1.0f));
 
 	if (draw_sky_box)
 		tex_coord_skybox	=  position;

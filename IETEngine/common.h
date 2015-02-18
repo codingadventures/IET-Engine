@@ -50,8 +50,9 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define NANO_MODEL "models\\Nanosuit2\\nanosuit.dae"
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define CHURCH_MODEL "models\\sibenik\\sibenik.dae"
-
+#define DROID_BUMP "models\\nanosuit\\nanosuit.obj"
 #define DROID_NO_WEAPON_MODEL "models\\Droids\\droid_no_weapon.dae"
+ 
 #pragma endregion [ MODELS ]
 
 #pragma region [ ANIMATIONS ]

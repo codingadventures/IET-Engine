@@ -84,14 +84,15 @@ namespace Rendering
 					// Retrieve texture number (the N in diffuse_textureN)
 					stringstream ss;
 					string number;
-					string name = this->m_textures[i].type;
-					if(name == "material.texture_diffuse")
-						ss << diffuseNr++; // Transfer GLuint to stream
-					else if(name == "material.texture_specular")
-						ss << specularNr++; // Transfer GLuint to stream
-					number = ss.str(); 
+					auto uniform_name = m_textures[i].Get_Uniform_Name("1");   
+					//if(name == "material.texture_diffuse")
+					//	ss << diffuseNr++; // Transfer GLuint to stream
+					//else if(name == "material.texture_specular")
+					//	ss << specularNr++; // Transfer GLuint to stream
+					//number = ss.str(); 
 					// Now set the sampler to the correct texture unit
-					glUniform1i(glGetUniformLocation(shader.m_program, (name + number).c_str()), i);
+					 
+					glUniform1i(glGetUniformLocation(shader.m_program,  uniform_name.c_str()), i);
 					// And finally bind the texture
 					glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
 				}
@@ -150,6 +151,14 @@ namespace Rendering
 			glEnableVertexAttribArray(2);	
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 	
+			 
+			/*glEnableVertexAttribArray(3);	
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));*/
+
+			//
+			glEnableVertexAttribArray(4);	
+			glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
+
 			if (hasBones())
 			{
 				glGenBuffers(1, &this->d_bone_VBO);
@@ -158,12 +167,15 @@ namespace Rendering
 				glBindBuffer(GL_ARRAY_BUFFER, d_bone_VBO);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(m_boneWeights[0]) * m_boneWeights.size(), &m_boneWeights[0], GL_STATIC_DRAW);
 	
-				glEnableVertexAttribArray(3);
-				glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
+				glEnableVertexAttribArray(5);
+				glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
 	
-				glEnableVertexAttribArray(4);    
-				glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
+				glEnableVertexAttribArray(6);    
+				glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
 			}
+
+		
+
 			glBindVertexArray(0);
 		}
 	

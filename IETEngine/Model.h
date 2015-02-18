@@ -14,7 +14,6 @@
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <Magick++.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -30,10 +29,7 @@ namespace Rendering
 
 	using namespace std;
 	using namespace Physics::Tensor;
-
-
-	GLint TextureFromFile(const char* path, string directory);
-
+	 
 	class Model 
 	{
 	public:
@@ -215,7 +211,7 @@ namespace Rendering
 		{
 			// Read file via ASSIMP
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs);
+			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 			// Check for errors
 			if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 			{
@@ -321,6 +317,16 @@ namespace Rendering
 				}
 				else
 					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+
+				if (ai_mesh->HasTangentsAndBitangents())
+				{
+					glm::vec3 tangent;
+					tangent.x = ai_mesh->mTangents[i].x;
+					tangent.y = ai_mesh->mTangents[i].y;
+					tangent.z = ai_mesh->mTangents[i].z;
+
+					vertex.Tangent = tangent;
+				}
 				vertices.push_back(vertex);
 			}
 #pragma endregion
@@ -372,11 +378,19 @@ namespace Rendering
 				// Normal: texture_normalN
 
 				// 1. Diffuse maps
-				vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "material.texture_diffuse");
+				vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, TextureType_DIFFUSE);
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 				// 2. Specular maps
-				vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "material.texture_specular");
+				vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, TextureType_SPECULAR);
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+				// 3. Normal maps
+				vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, TextureType_NORMAL);
+				textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+				// 4. Ref maps
+				vector<Texture> reflMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);
+				textures.insert(textures.end(), reflMaps.begin(), reflMaps.end());
 			}
 #pragma endregion  
 
@@ -426,19 +440,20 @@ namespace Rendering
 
 		// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 		// The required info is returned as a Texture struct.
-		vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
+		vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName)
 		{
-			vector<Texture> textures;
+			vector<Texture> textures; 
 			for(GLuint i = 0; i < mat->GetTextureCount(type); i++)
 			{
 
 				aiString str;
 				mat->GetTexture(type, i, &str);
+				string file_name(str.C_Str());
 				// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 				GLboolean skip = false;
 				for(GLuint j = 0; j < d_textures_loaded.size(); j++)
 				{
-					if(d_textures_loaded[j].path == str)
+					if(d_textures_loaded[j].m_file_name == file_name)
 					{
 						textures.push_back(d_textures_loaded[j]);
 						skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -448,66 +463,19 @@ namespace Rendering
 
 				if(!skip)
 				{   // If texture hasn't been loaded already, load it
-					Texture texture;
-					texture.id = TextureFromFile(str.C_Str(), this->d_directory);
-					texture.type = typeName;
-					texture.path = str;
-					textures.push_back(texture);
-					this->d_textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+					Texture texture(file_name, typeName);
+					if (texture.Load(this->d_directory));
+					{
+						textures.push_back(texture);
+						this->d_textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+					}
+					//texture.path = str;
 				}
 			}
 			return textures;
 		}
 
-
-
-
-
-
-
 	};
-
-
-	GLint TextureFromFile(const char* fileName, string directory)
-	{
-		Magick::Blob m_blob;
-		Magick::Image* m_pImage; 
-		string stringFileName(fileName);
-		string fullPath = directory + "\\" + stringFileName;
-		try {
-			m_pImage = new Magick::Image(fullPath.c_str());
-			m_pImage->write(&m_blob, "RGB");
-		}
-		catch (Magick::Error& Error) {
-			std::cout << "Error loading texture '" << fullPath << "': " << Error.what() << std::endl;
-			return false;
-		}
-
-		//Generate texture ID and load texture data 
-		//
-		//filename = directory + '/' + filename;
-		GLuint textureID;
-
-
-		//SOIL_load_OGL_texture(filename.c_str(),SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);;
-		glGenTextures(1, &textureID);
-		//int width,height,channels;
-		//unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, nullptr, 0);
-		// Assign texture to ID
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D,  0, GL_RGB, m_pImage->columns(), m_pImage->rows(), 0, GL_RGB, GL_UNSIGNED_BYTE, m_blob.data());
-
-		// Parameters
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-		glGenerateMipmap(GL_TEXTURE_2D);	
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		//	SOIL_free_image_data(image);
-		return textureID;
-	}
+	 
 }
 #endif // Model_h__
