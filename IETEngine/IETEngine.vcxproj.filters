@@ -367,5 +367,8 @@
     <None Include="skybox.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="fresnel.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

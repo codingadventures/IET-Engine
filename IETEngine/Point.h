@@ -34,6 +34,7 @@ namespace Rendering
 		{ 
 			// Draw mesh
 			glBindVertexArray(this->VAO);
+
 			glDrawArrays(GL_POINTS, 0, this->vertices.size());
 			glBindVertexArray(0);
 		}

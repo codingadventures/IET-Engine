@@ -26,7 +26,7 @@ namespace Controller
 	private:
 
 		Shader*			d_shader;
-		Shader*			d_shader_gouraud;
+		Shader*			d_shader_fresnel;
 		Shader*			d_shader_phong;
 		Shader*			d_shader_toon;
 		Shader*			d_shader_ambient;
@@ -91,7 +91,7 @@ namespace Controller
 		delete d_torus_model;
 		delete d_nano_model;
 		delete d_head_model;
-		delete d_shader_gouraud;
+		delete d_shader_fresnel;
 		delete d_shader_phong;
 		delete d_shader_toon;
 		delete d_shader_ambient;
@@ -127,8 +127,8 @@ namespace Controller
 		TwInit(TW_OPENGL_CORE, NULL);
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-		TwEnumVal lightEv[] = { { NONE, "None"},{SKYBOX,"SkyBox"},{SKYBOX_REFR,"SkyBox Refr."}, {AMBIENT,"Ambient"}, {TextureType_DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"} };
-		TwType lightType = TwDefineEnum("LightType", lightEv, 8);
+		TwEnumVal lightEv[] = { { NONE, "None"},{SKYBOX,"SkyBox"},{SKYBOX_REFR,"SkyBox Refr."}, {AMBIENT,"Ambient"}, {TextureType_DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"},{FRESNEL,"Fresnel"} };
+		TwType lightType = TwDefineEnum("LightType", lightEv, 9);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
@@ -188,6 +188,8 @@ namespace Controller
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag")); 
 
+		auto		   f_shader_fresnel     = ArrayConversion<string>(2,string("fresnel"),string("common.frag"));
+
 		vector<const char*> skybox_faces;
 		skybox_faces.push_back("models/skybox/right.jpg");
 		skybox_faces.push_back("models/skybox/left.jpg");
@@ -205,19 +207,20 @@ namespace Controller
 		d_shader_ct = new Shader(v_shader,f_shader_cookTorrance);
 		d_shader_texture =   new Shader(v_shader,f_shader_texture);
 		d_shader_skybox =   new Shader(v_shader,f_shader_skybox);
-
+	//	d_shader_fresnel = new Shader(v_shader,f_shader_fresnel);
 		//d_cube_model	= new Model("models\\cubetri.obj");
 		//d_head_model    = new Model(HEAD_MODEL);
 		//	d_torus_model	= new Model("models\\torus.dae");
 
 		d_sky_box = new SkyBox(skybox_faces);
 
-		d_nano_model	= new Model(DROID_BUMP);
+		d_nano_model	= new Model(DROID_BUMP_2);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		//	d_torus_model->Scale(glm::vec3(10,10,10));
 		//d_nano_model->Scale(glm::vec3(20.0f,20.0f,20.0f));
 		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
+		d_quaternion_rotation = d_nano_model->Rotation();
 		tweak_bar_setup();
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
@@ -275,8 +278,8 @@ namespace Controller
 			current_shader->SetUniform("light_position", d_light_position);  
 
 			break;
-		case GOURAUD:
-			current_shader = d_shader_gouraud;
+		case FRESNEL:
+			current_shader = d_shader_fresnel;
 			break;
 		default:
 			current_shader = nullptr;
@@ -328,7 +331,7 @@ namespace Controller
 
 		//d_cube_model->Rotate(random_cube_rotation);
 		//d_torus_model->Rotate(random_torus_rotation); 
-		d_nano_model->Rotate(d_quaternion_rotation);
+		//d_nano_model->Rotate(d_quaternion_rotation);
 		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
 		/*	d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);

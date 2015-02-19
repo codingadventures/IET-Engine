@@ -19,6 +19,8 @@ in vec3 tangent_dir;
 in vec2 tex_coord;
 in vec3 light_direction;
 in vec3 eye_direction;
+
+in vec3 not_normalized_normal;
 in vec3 vertex_world_space;
 uniform bool    hasTexture;
 uniform bool    use_bump_mapping;
@@ -36,7 +38,7 @@ void main()
     {    
         mat3 tbn = calculate_bumped_matrix(normalized_normal,tangent_dir);  
                                                          
-        normal = normalize(calculate_bumped_normal(tbn,tex_coord));
+        normal = normalize( not_normalized_normal + calculate_bumped_normal(tbn,tex_coord));
 
        // H = tbn * normalize(eye_direction + light_direction);
         //light_dir = tbn * light_direction ;

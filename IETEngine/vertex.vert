@@ -24,7 +24,7 @@ out vec3 eye_direction;
 out vec3 tex_coord_skybox; 
 out vec3 tangent_dir;
 out vec3 vertex_world_space;
-
+out vec3 not_normalized_normal;
 void main()
 {  
  
@@ -37,6 +37,9 @@ void main()
  
 	vec3 normal  		=  normal_transform(model_transpose_inverse, normals); 
 	eye_direction 		=  normalize(eye_position - vertex_world_space);
+
+
+	not_normalized_normal = normal;
 
 	normalized_normal 	=  normalize(normal);
 

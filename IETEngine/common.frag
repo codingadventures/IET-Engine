@@ -112,8 +112,10 @@ vec3 calculate_bumped_normal(mat3 TBN,vec2 tex_coord)
 
     vec3 BumpMapNormal = texture(material.texture_normal1, tex_coord).xyz;                                
     BumpMapNormal = 2.0 * BumpMapNormal - vec3(1.0, 1.0, 1.0);                              
-    return  TBN * BumpMapNormal ;    
+    return   BumpMapNormal ;    
 }
+
+
    
 mat3 calculate_bumped_matrix(vec3 normal,vec3 tangent)                                                                 
 {                                                                                                                                              
@@ -122,5 +124,4 @@ mat3 calculate_bumped_matrix(vec3 normal,vec3 tangent)
     mat3 TBN = mat3(tangent, Bitangent, normal);                                            
     return TBN;                                                    
 }     
-
  

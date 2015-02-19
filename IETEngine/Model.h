@@ -385,7 +385,7 @@ namespace Rendering
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
 				// 3. Normal maps
-				vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, TextureType_NORMAL);
+				vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_NORMALS, TextureType_NORMAL);
 				 textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
 				// 4. Ref maps

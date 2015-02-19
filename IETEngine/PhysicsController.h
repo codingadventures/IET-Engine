@@ -44,15 +44,15 @@ namespace Controller
 		GLint	TextureFromFile(const char* fileName, string directory);
 		void TW_CALL apply_impulse_callback(void *clientData);
 	private: 
-		Shader*		d_shader;
-		Shader*		d_shader_no_texture;
+		Shader*			d_shader;
+		Shader*			d_shader_no_texture;
 
-		Shader*		d_shader_boundings;
+		Shader*			d_shader_boundings;
 
-		RigidBody*	d_rigid_body;
-		RigidBody*	d_rigid_body2;
+		RigidBody*		d_rigid_body;
+		RigidBody*		d_rigid_body2;
 
-		Model*		d_cube_model;
+		Model*			d_cube_model;
 		glm::vec3		d_light_ambient;
 		glm::vec3		d_light_diffuse;
 		glm::vec3		d_light_specular;
@@ -317,6 +317,10 @@ namespace Controller
 			d_rigid_body_manager->Add(rigid_body);
 		}
 
+		/*auto container_cube = new Model(*d_cube_model);
+		container_cube->Scale(glm::vec3(50.0f,50.0f,50.0f));	
+		d_rigid_body_manager->Add( new RigidBody(*container_cube));*/
+
 		//
 
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
@@ -375,7 +379,7 @@ namespace Controller
 
 		d_shader_boundings->Use();
 		d_shader_boundings->SetUniform("shape_color",d_collision_color);
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		for (auto model: d_model_vector)
 		{
@@ -394,7 +398,7 @@ namespace Controller
 
 			model->Draw(*curr_shader);
 		}
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		/*
 
@@ -442,7 +446,7 @@ namespace Controller
 		d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 
 		*/
-	//	d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
+		//	d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
 
 		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
 		if (colliding_pairs->size())
@@ -462,7 +466,7 @@ namespace Controller
 				d_is_narrow_phase_collision = gjk->Intersect(*d_shader_boundings); 
 				if (d_is_narrow_phase_collision )
 				{
-					 d_collision_color = glm::vec4(1.0f,0.0f,0.0f,0.3f);
+					d_collision_color = glm::vec4(1.0f,0.0f,0.0f,0.3f);
 					auto p1 =  gjk->m_intersection_point_a;
 					auto p2 =  gjk->m_intersection_point_b;
 
@@ -485,7 +489,7 @@ namespace Controller
 					auto force_dir = force * gjk->m_normal;
 
 					pair.m_left_element->m_linear_momentum += force_dir;
- 
+
 					pair.m_left_element->m_angular_momentum += glm::cross(p1 - pair.m_left_element->Center_of_mass() , force_dir);
 
 					pair.m_right_element->m_linear_momentum -= force_dir;

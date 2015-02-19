@@ -176,6 +176,7 @@
     <None Include="fragment.frag" />
     <None Include="fragment_bone.frag" />
     <None Include="fragment_notexture.frag" />
+    <None Include="fresnel.frag" />
     <None Include="particle.frag" />
     <None Include="skybox.frag" />
     <None Include="specular.frag" />

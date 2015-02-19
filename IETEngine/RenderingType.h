@@ -11,7 +11,7 @@ enum RenderingType{
 	SPECULAR,
 	PHONG,
 	TOON,
-	GOURAUD
+	FRESNEL
 
 };
 

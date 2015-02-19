@@ -18,7 +18,7 @@ in vec3 normalized_normal;
 in vec2 tex_coord;
 in vec3 light_direction;
 in vec3 eye_direction;
-  
+in vec3 not_normalized_normal;
 in vec3 tangent_dir;
 
 uniform bool hasTexture;
@@ -36,7 +36,7 @@ void main()
     {    
         mat3 tbn = calculate_bumped_matrix(normalized_normal,tangent_dir);  
                                                          
-        normal = normalize(calculate_bumped_normal(tbn,tex_coord));
+        normal = normalize( not_normalized_normal + calculate_bumped_normal(tbn,tex_coord));
 		reflection_direction 	= 	reflect(-light_direction, normal);
 		//reflection_direction = tbn * reflection_direction;
 		//light_dir = tbn * light_direction;
