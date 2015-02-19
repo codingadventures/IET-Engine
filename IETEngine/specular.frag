@@ -39,7 +39,7 @@ void main()
         normal = normalize(calculate_bumped_normal(tbn,tex_coord));
 		reflection_direction 	= 	reflect(-light_direction, normal);
 		//reflection_direction = tbn * reflection_direction;
-		light_dir = tbn * light_direction;
+		//light_dir = tbn * light_direction;
 		//eye_dir = tbn * eye_direction;
 
     }

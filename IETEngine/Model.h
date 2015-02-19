@@ -368,7 +368,7 @@ namespace Rendering
 				float shininess = 0.0f;
 				aiGetMaterialFloat(aiMaterial, AI_MATKEY_SHININESS, &shininess);
 
-				material = Material(glmAmbient,glmDiffuse,glmSpecular,shininess);
+				material = Material(glmAmbient,glmDiffuse,glmSpecular,32.0f);
 
 				// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
 				// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
@@ -386,7 +386,7 @@ namespace Rendering
 
 				// 3. Normal maps
 				vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, TextureType_NORMAL);
-				textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+				 textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
 				// 4. Ref maps
 				vector<Texture> reflMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);

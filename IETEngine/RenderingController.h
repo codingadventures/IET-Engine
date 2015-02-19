@@ -156,9 +156,9 @@ namespace Controller
 	{
 		AbstractController::Init(argc,argv);  
 
-		this->d_camera->Position = glm::vec3(0.0f,0.0f,20.0f);
+		this->d_camera->Position = glm::vec3(0.0f,0.0f,0.0f);
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 2.0f;
+		d_camera->MovementSpeed = 0.1f;
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
@@ -212,12 +212,12 @@ namespace Controller
 
 		d_sky_box = new SkyBox(skybox_faces);
 
-		d_nano_model	= new Model(FLOOR_BUMP);
+		d_nano_model	= new Model(DROID_BUMP);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		//	d_torus_model->Scale(glm::vec3(10,10,10));
 		//d_nano_model->Scale(glm::vec3(20.0f,20.0f,20.0f));
-		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
+		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
@@ -303,7 +303,7 @@ namespace Controller
 		d_shader_skybox->SetUniform("mvp", d_projection_matrix * glm::mat4(glm::mat3(d_view_matrix)));
 		d_shader_skybox->SetUniform("model_matrix", glm::mat4(1));
 
-	//	d_sky_box->Draw(*d_shader_skybox);
+		d_sky_box->Draw(*d_shader_skybox);
 
 
 		Point p(d_light_position,glm::vec4(1.0f,0.0f,0.0f,1.0f));

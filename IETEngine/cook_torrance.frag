@@ -28,7 +28,7 @@ out vec4 color;
 void main()
 { 
     vec3 Ia,Id,Is;
-    vec3 normal;
+    vec3 normal = normalized_normal;;
     vec3 H; 
     vec3 light_dir = light_direction;
     vec3 eye_dir = eye_direction;
@@ -38,15 +38,13 @@ void main()
                                                          
         normal = normalize(calculate_bumped_normal(tbn,tex_coord));
 
-        H = tbn * normalize(eye_direction + light_direction);
-        light_dir = tbn * light_direction ;
+       // H = tbn * normalize(eye_direction + light_direction);
+        //light_dir = tbn * light_direction ;
         //eye_dir = tbn * eye_direction;
     }
-    else
-    {
-        normal = normalized_normal;
+     
         H = normalize(eye_dir + light_dir);
-	} 
+	 
     float specular 	=   calculate_specular_cook_torrance_component(eye_dir,light_dir,normal,H);
 
     if (!hasTexture)
