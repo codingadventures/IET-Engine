@@ -51,6 +51,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define CHURCH_MODEL "models\\sibenik\\sibenik.dae"
 #define DROID_BUMP "models\\nanosuit\\nanosuit.obj"
+#define FLOOR_BUMP "models\\plane_bump.obj"
 #define DROID_NO_WEAPON_MODEL "models\\Droids\\droid_no_weapon.dae"
  
 #pragma endregion [ MODELS ]

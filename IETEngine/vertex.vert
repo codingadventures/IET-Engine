@@ -32,6 +32,8 @@ void main()
 	vec4 position_vec4 	=  vec4(position, 1.0f);
   	vertex_world_space 	
   						=  vec3(model_matrix * position_vec4);
+    tangent_dir 		=  vec3(model_matrix * vec4(tangent,1.0f));
+  	
  
 	vec3 normal  		=  normal_transform(model_transpose_inverse, normals); 
 	eye_direction 		=  normalize(eye_position - vertex_world_space);
@@ -47,7 +49,6 @@ void main()
 	gl_Position 		=  mvpTransform(position_vec4);
 
 	tex_coord 			=  texCoord;
-    tangent_dir 		=  vec3(model_matrix * vec4(tangent,1.0f));
 
 	if (draw_sky_box)
 		tex_coord_skybox	=  position;

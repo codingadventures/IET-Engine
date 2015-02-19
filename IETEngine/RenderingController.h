@@ -128,7 +128,7 @@ namespace Controller
 		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
 		TwEnumVal lightEv[] = { { NONE, "None"},{SKYBOX,"SkyBox"},{SKYBOX_REFR,"SkyBox Refr."}, {AMBIENT,"Ambient"}, {TextureType_DIFFUSE,"Diffuse"}, {COOK_TORRANCE,"Cook-Torrance"},   {PHONG, "Phong"}, {TOON, "Toon"} };
-		TwType lightType = TwDefineEnum("LightType", lightEv, 6);
+		TwType lightType = TwDefineEnum("LightType", lightEv, 8);
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
@@ -212,11 +212,11 @@ namespace Controller
 
 		d_sky_box = new SkyBox(skybox_faces);
 
-		d_nano_model	= new Model(DROID_BUMP);
+		d_nano_model	= new Model(FLOOR_BUMP);
 		/*d_torus_model->Translate(glm::vec3(-30,0,0));
 		d_cube_model->Translate(glm::vec3(-30,0,0));*/
 		//	d_torus_model->Scale(glm::vec3(10,10,10));
-		//	 d_nano_model->Scale(glm::vec3(10,10,10));
+		//d_nano_model->Scale(glm::vec3(20.0f,20.0f,20.0f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		tweak_bar_setup();
 
@@ -303,7 +303,7 @@ namespace Controller
 		d_shader_skybox->SetUniform("mvp", d_projection_matrix * glm::mat4(glm::mat3(d_view_matrix)));
 		d_shader_skybox->SetUniform("model_matrix", glm::mat4(1));
 
-		d_sky_box->Draw(*d_shader_skybox);
+	//	d_sky_box->Draw(*d_shader_skybox);
 
 
 		Point p(d_light_position,glm::vec4(1.0f,0.0f,0.0f,1.0f));
@@ -323,7 +323,7 @@ namespace Controller
 		random_cube_rotation *= glm::angleAxis(glm::radians(10.0f) * (float) d_delta_time_secs, glm::linearRand(glm::vec3(0.1f,0.1f,0.1f),glm::vec3(1.0f,1.0f,1.0f)));
 		random_torus_rotation *= glm::angleAxis(glm::radians(-10.0f)* (float)d_delta_time_secs, glm::vec3(0,1,0));
 
-		
+
 		current_shader->SetUniform("use_bump_mapping",d_use_bump_mapping);
 
 		//d_cube_model->Rotate(random_cube_rotation);
@@ -331,7 +331,7 @@ namespace Controller
 		d_nano_model->Rotate(d_quaternion_rotation);
 		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
-	/*	d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
+		/*	d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);
 		d_light_position.y =  35.5f * glm::sin((float) d_global_clock* .5);
 		d_light_position.z =  35.5f * glm::cos((float)d_global_clock* .5) ; */
 

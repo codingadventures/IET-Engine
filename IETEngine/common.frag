@@ -23,10 +23,8 @@ uniform Material material;
 uniform float   roughnessValue; // 0 : smooth, 1: rough
 uniform float   fresnelReflectance;// fresnel reflectance at normal incidence
 
-float calculate_specular_cook_torrance_component(vec3 eye_direction,vec3 light_direction, vec3 normalized_normal)
-{
-	vec3 H						= 	normalize(eye_direction + light_direction);
-
+float calculate_specular_cook_torrance_component(vec3 eye_direction,vec3 light_direction, vec3 normalized_normal, vec3 H)
+{ 
 	float NdotL 				= 	dot(normalized_normal, light_direction);
 	
 	float NdotH 				= 	dot(normalized_normal, H); 
@@ -109,16 +107,20 @@ vec3 get_light_ambient()
 	return light.ambient;
 }
 
-vec3 calculate_bumped_normal(vec3 normal,vec3 tangent,vec2 tex_coord)                                                                     
-{                                                                                                                                              
-    tangent = normalize(tangent - dot(tangent, normal) * normal);                           
-    vec3 Bitangent = cross(tangent, normal);                                                
+vec3 calculate_bumped_normal(mat3 TBN,vec2 tex_coord)
+{
+
     vec3 BumpMapNormal = texture(material.texture_normal1, tex_coord).xyz;                                
     BumpMapNormal = 2.0 * BumpMapNormal - vec3(1.0, 1.0, 1.0);                              
-    vec3 NewNormal;                                                                         
+    return  TBN * BumpMapNormal ;    
+}
+   
+mat3 calculate_bumped_matrix(vec3 normal,vec3 tangent)                                                                 
+{                                                                                                                                              
+    tangent = normalize(tangent - dot(tangent, normal) * normal);                           
+    vec3 Bitangent = cross(tangent, normal);                                                                                                                    
     mat3 TBN = mat3(tangent, Bitangent, normal);                                            
-    NewNormal = TBN * BumpMapNormal;                                                        
-    NewNormal = normalize(NewNormal);                                                       
-    return NewNormal;                                                                       
+    return TBN;                                                    
 }     
+
  
