@@ -107,7 +107,7 @@ namespace Rendering
 			if (m_skeleton->getNumberOfBones()>0)
 				glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
-			shader.SetUniform("hasTexture",Has_Texture());
+			shader.SetUniform("hasTexture",false);
 
 			for(GLuint i = 0; i < this->d_meshes.size(); i++)
 				this->d_meshes[i].Draw(shader);
@@ -350,18 +350,18 @@ namespace Rendering
 				aiMaterial* aiMaterial = scene->mMaterials[ai_mesh->mMaterialIndex];
 
 				aiColor4D ambient;
-				glm::vec4 glmAmbient;
+				glm::vec3 glmAmbient;
 				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
 
-				glmAmbient = aiColor4DToGlm(ambient);
+				glmAmbient = glm::vec3(0.5f) ;// aiColor4DToGlm(ambient);
 
 				aiColor4D diffuse;
-				glm::vec4 glmDiffuse;
+				glm::vec3 glmDiffuse;
 				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 				glmDiffuse = aiColor4DToGlm(diffuse);
 
 				aiColor4D specular;
-				glm::vec4 glmSpecular;
+				glm::vec3 glmSpecular;
 				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, &specular);
 				glmSpecular = aiColor4DToGlm(specular);
 

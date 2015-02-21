@@ -76,6 +76,7 @@ namespace Rendering
 			// Bind appropriate textures
 			GLuint diffuseNr = 1;
 			GLuint specularNr = 1;
+			shader.Use();
 			if ( this->m_textures.size()>0)
 			{
 				for(GLuint i = 0; i < this->m_textures.size(); i++)

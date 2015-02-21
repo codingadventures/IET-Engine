@@ -17,33 +17,24 @@ namespace Rendering
 
 	private:
 
-		glm::vec4	d_ambient;
-		glm::vec4	d_diffuse;
-		glm::vec4	d_specular;
+		glm::vec3	d_ambient;
+		glm::vec3	d_diffuse;
+		glm::vec3	d_specular;
 
 		float		d_shininess;
 	};
 
 	Material::Material(glm::vec3 ambient, glm::vec3 diffuse,glm::vec3 specular,float shininess)
 		:	
-		d_ambient(glm::vec4(ambient,1.0f)),
-		d_diffuse(glm::vec4(diffuse,1.0f)),
-		d_specular(glm::vec4(specular,1.0f)),
+		d_ambient (ambient) ,
+		d_diffuse (diffuse) ,
+		d_specular (specular),
 		d_shininess( shininess)
 
 	{
 
 	}
 
-	Material::Material(glm::vec4 ambient, glm::vec4  diffuse,glm::vec4  specular,float shininess)
-		:
-		d_ambient(ambient),
-		d_diffuse(diffuse),
-		d_specular(specular),
-		d_shininess(shininess)
-	{
-
-	}
 
 	void Material::SetShader(Shader& shader)
 	{

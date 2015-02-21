@@ -121,6 +121,12 @@ namespace Controller
 		d_force_impulse_application_point(0.0f)
 	{
 		setup_current_instance();
+
+		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
+
 	}
 #pragma endregion
 
@@ -270,10 +276,10 @@ namespace Controller
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 		vector<string> f_shader_particles	= ArrayConversion<string>(1,string("particle.frag"));
-
+		 
 		//d_rigid_body_manager = new RigidBodyManager(false);
 
-		d_shader = new Shader(v_shader,f_shader_no_texture); 
+		d_shader = new Shader(v_shader,f_shader_specular); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
 		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 		d_shader_particle = new Shader(v_shader,f_shader_particles);
@@ -296,12 +302,7 @@ namespace Controller
 		////	d_rigid_body_manager->Add(floor_rigid_body);
 
 		//d_model_vector.push_back(d_cube_model);
-		////d_model_vector.push_back(d_floor_model);
-
-		//d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
-		//d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
-		//d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
-		//d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
+		////d_model_vector.push_back(d_floor_model); 
 
 		//for (int i = 0; i < 1; i++)
 		//{
@@ -356,26 +357,32 @@ namespace Controller
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		/*glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);*/
 
 		Update_Timer(); 
 		Calculate_Fps( );
-		//Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 
 
 		d_shader->Use();
+		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
+		light.SetShader(*d_shader);	
 
 		d_camera->MoveCamera();
 
 		d_view_matrix = d_camera->GetViewMatrix();
+		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
 
-		glm::mat4 projection_view = d_projection_matrix * d_view_matrix  * d_cube_model->GetModelMatrix();
-		d_shader->SetUniform("mvp",projection_view);
-
+		glm::mat4 projection_view = d_projection_matrix * d_view_matrix;
+		d_shader->SetUniform("mvp",projection_view * cube_model_matrix);
+		d_shader->SetUniform("eye_position", d_camera->Position);  
+		d_shader->SetUniform("use_bump_mapping", false);  
+		d_shader->SetUniform("draw_sky_box", false);  
+		d_shader->SetUniform("model_matrix", cube_model_matrix);
+		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  /**/
 
 
 #ifdef PARTICLE
@@ -538,12 +545,12 @@ namespace Controller
 
 		//p.Draw();
 		//d_vertices.clear();
-		d_shader_no_texture->Use();
+		//d_shader_no_texture->Use();
 
-		text_to_screen();
+		//text_to_screen();
 
 		//	glDisable(GL_BLEND);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		TwDraw();
 

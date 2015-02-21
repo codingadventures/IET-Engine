@@ -210,7 +210,7 @@ namespace Controller
 	//	d_shader_fresnel = new Shader(v_shader,f_shader_fresnel);
 		//d_cube_model	= new Model("models\\cubetri.obj");
 		//d_head_model    = new Model(HEAD_MODEL);
-		//	d_torus_model	= new Model("models\\torus.dae");
+			d_torus_model	= new Model("models\\torus.dae");
 
 		d_sky_box = new SkyBox(skybox_faces);
 
@@ -308,9 +308,7 @@ namespace Controller
 
 		d_sky_box->Draw(*d_shader_skybox);
 
-
-		Point p(d_light_position,glm::vec4(1.0f,0.0f,0.0f,1.0f));
-		p.Draw();
+ 
 
 		current_shader->Use();
 		current_shader->SetUniform("draw_sky_box",false);
@@ -348,13 +346,13 @@ namespace Controller
 
 		//d_cube_model->Draw(*current_shader);
 
-		//glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
+		glm::mat4 torus_model_matrix = d_torus_model->GetModelMatrix();
 
-		//current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
-		//current_shader->SetUniform("model_matrix",torus_model_matrix);
-		//current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
+		current_shader->SetUniform("mvp",projection_view * torus_model_matrix);
+		current_shader->SetUniform("model_matrix",torus_model_matrix);
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(torus_model_matrix)));  
 
-		//d_torus_model->Draw(*current_shader); 
+		d_torus_model->Draw(*current_shader); 
 
 		glm::mat4 nano_model_matrix = d_nano_model->GetModelMatrix();
 
