@@ -215,8 +215,15 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_use_polyhedral_tensor, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Show Sphere Bound.", TW_TYPE_BOOLCPP, &d_draw_spheres, "");*/
-		TwAddVarRW(Helper::g_tweak_bar, "Wind Direction", TW_TYPE_DIR3F,  &d_particle_system2->m_wind_direction,  " group='Particles' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Wind Speed", TW_TYPE_FLOAT,  &d_particle_system2->m_wind_speed,  " group='Particles' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Wind Direction", TW_TYPE_DIR3F,  &d_particle_system2->m_wind_direction,  " group='Wind' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Wind Speed", TW_TYPE_FLOAT,  &d_particle_system2->m_wind_speed,  " group='Wind' ");
+
+		TwAddVarRW(Helper::g_tweak_bar, "Source Direction", TW_TYPE_DIR3F,  &d_particle_system2->m_source_direction,  " group='Speed' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Source Speed", TW_TYPE_FLOAT,  &d_particle_system2->m_initial_speed,  " group='Speed' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Source Spread", TW_TYPE_FLOAT,  &d_particle_system2->m_spread,  " group='Speed' ");
+	
+		TwAddVarRW(Helper::g_tweak_bar, "Elasticity", TW_TYPE_FLOAT,  &d_particle_system2->m_elasticity,  " group='Speed' ");
+
 
 		//TwAddVarRW(Helper::g_tweak_bar, "Wind", TW_TYPE_BOOLCPP, &d_particle_system2->m_wind_enabled,  " group='Particles' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Spinning", TW_TYPE_BOOLCPP, &d_particle_system2->m_spinning_enabled,  " group='Particles' ");
@@ -352,7 +359,8 @@ namespace Controller
 		 auto rotated_normal2 = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
 		 d_particle_system2->Add_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::normalize(rotated_normal));
 		 d_particle_system2->Add_Plane(glm::vec3(0.0f,0.0f,0.0f),glm::normalize(rotated_normal2));
-		// d_particle_system2->Add_Plane(glm::vec3(5.0f,0.0f,0.0f),glm::normalize(-rotated_normal));
+
+
 		 d_particle_system2->Add_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
 
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);

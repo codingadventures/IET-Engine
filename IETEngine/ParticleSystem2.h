@@ -8,14 +8,12 @@ using namespace Physics::Particles;
 using namespace std;
 
 #define  GLOBAL_ACCELERATION	glm::vec3(0.0f,-9.8f,0.0f)
-#define	 PARTICLE_LIFE			6.0f
-#define  EPSILON				0.01f
-#define	 ELASTICITY				0.2f
-#define	 EMIT_PERCENTAGE		0.45f
+#define	 PARTICLE_LIFE			5.0f
+#define  EPSILON				0.01f 
+#define	 EMIT_PERCENTAGE		0.20f
 
 #define  AIR_DENSITY			1.225f
 #define  DRAG_COEFFICIENT		0.47f		//For Spheres
-#define  WIND_LIFE				8.0f 
 #define  AIR_DRAG_ENABLED		false
 
 class ParticleSystem2
@@ -28,7 +26,11 @@ public:
 	bool m_euler_enabled;
 	float m_wind_speed;
 	glm::vec3 m_wind_direction;
+	glm::vec3 m_source_direction;
 
+	float m_initial_speed;
+	float m_spread;
+	float m_elasticity;
 private: 
 	size_t d_max_count;
 	size_t d_count_alive;
@@ -42,7 +44,11 @@ public:
 		m_spinning_enabled(false), 
 		m_euler_enabled(true),
 		m_wind_direction(glm::vec3(1.0f,0.0f,0.0f)),
-		m_wind_speed(0.0f)
+		m_wind_speed(0.0f),
+		m_source_direction(0.0f,1.0f,0.0f),
+		m_spread(2.5f),
+		m_initial_speed(10.f),
+		m_elasticity(0.2f)
 	{
 		d_max_count = max_count; 
 
@@ -168,8 +174,8 @@ private:
 		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
-		float spread = 2.5f;
-		glm::vec3 maindir = m_waterfall_enabled? glm::vec3(10.0f, 0.0f, 0.0f): glm::vec3(0.0f, 10.0f, 0.0f); 
+		 
+		glm::vec3 maindir = m_waterfall_enabled? glm::vec3(10.0f, 0.0f, 0.0f): m_source_direction; 
 
 		glm::vec3 randomdir = glm::vec3(
 			(rand()%5000 - 1000.0f)/1000.0f,
@@ -178,7 +184,7 @@ private:
 			);
 		//m_particles[index].velocity = glm::linearRand(glm::vec3(-5.5f, 0.22f, -5.5f),glm::vec3(5.5f, 25.55f, 5.5f));
 		m_particles[index].life = PARTICLE_LIFE;
-		m_particles[index].velocity = maindir + randomdir * spread;
+		m_particles[index].velocity = maindir * m_initial_speed + randomdir * m_spread;
 		m_particles[index].acceleration = glm::vec3();
 		m_particles[index].m = 1.0f;
 	} 
@@ -216,7 +222,7 @@ private:
 
 			float velFactor = glm::dot(p.velocity, plane.n_normal);
 
-			p.velocity -= plane.n_normal * (1.0f + ELASTICITY) * velFactor;
+			p.velocity -= plane.n_normal * (1.0f + m_elasticity) * velFactor;
 
 			p.acceleration = force;
 		} 
