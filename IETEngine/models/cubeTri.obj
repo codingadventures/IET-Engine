@@ -4,6 +4,7 @@
 #
 # object Box001
 #
+mtllib cubeTri.mtl
 
 v  -2.8185 -2.8185 -2.8185
 v  -2.8185 2.8185 -2.8185
@@ -30,3 +31,4 @@ f 2 1 5
 f 5 8 2 
 # 12 faces
 
+usemtl Material

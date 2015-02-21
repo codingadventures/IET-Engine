@@ -11,8 +11,7 @@ namespace Rendering
 	{
 	public:
 		Material(){}
-		Material(glm::vec3  ambient, glm::vec3  diffuse,glm::vec3  specular,float shininess);
-		Material(glm::vec4  ambient, glm::vec4  diffuse,glm::vec4  specular,float shininess);
+		Material(glm::vec3  ambient, glm::vec3  diffuse,glm::vec3  specular,float shininess); 
 		void SetShader(Shader& shader); 
 
 	private:
