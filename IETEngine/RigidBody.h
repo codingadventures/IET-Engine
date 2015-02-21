@@ -5,7 +5,6 @@
 #include "Friction.h"
 #include <glm/gtx/orthonormalize.hpp>
 
-#define DUMPING_FACTOR 0.6f
 #define REST_FACTOR		1.0f
 namespace Physics
 {
@@ -19,6 +18,9 @@ namespace Physics
 		glm::vec3				m_linear_momentum; 
 
 		glm::vec3				m_angular_momentum;
+
+		float					m_damping_factor;
+		bool					m_use_damping;
 
 		RigidBody(Model&);
 		~RigidBody();
@@ -60,7 +62,7 @@ namespace Physics
 
 		float					Mass() const;
 		void					Mass(float val) { d_mass = val; }
-		
+
 		float					Area() const;
 		float					Polyhedral_Mass() const;
 		BoundingSphere*			Bounding_sphere();
@@ -79,7 +81,7 @@ namespace Physics
 
 #pragma region [ Getters ]
 
-	float					RigidBody::Mass()			 const   { return d_mass; } 
+	float					RigidBody::Mass()			 const   {	return d_mass; } 
 	float					RigidBody::Area()			 const	 { return d_area; }
 	float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
 	glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
@@ -98,7 +100,8 @@ namespace Physics
 		d_angular_velocity(0.0f),
 		d_acceleration(0.0f),
 		m_linear_momentum(0.0f),
-		m_angular_momentum(0.0f)
+		m_angular_momentum(0.0f),
+		m_damping_factor(0.2f)
 	{
 
 		calculate_mesh_stats();
@@ -119,8 +122,7 @@ namespace Physics
 		glm::mat3 tensor		=	Inertial_Tensor(use_polyhedral);
 
 		assert(tensor == tensor);
-		
-		//if (d_mass == FLT_MAX) return;
+
 
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
@@ -135,11 +137,12 @@ namespace Physics
 		d_velocity = m_linear_momentum / mass; 
 		assert(d_velocity == d_velocity);
 
-		float damping = glm::pow(DUMPING_FACTOR, delta_time);
-
-		/*m_linear_momentum  *= damping ;
-		m_angular_momentum *= damping ;*/
-
+		if (m_use_damping)
+		{
+			float damping = glm::pow(m_damping_factor, delta_time);
+			m_linear_momentum  *= damping ;
+			m_angular_momentum *= damping ;
+		}
 		orientation = glm::normalize(orientation);
 		d_position =  m_linear_momentum * delta_time / mass;
 		d_center_of_mass += d_position ;

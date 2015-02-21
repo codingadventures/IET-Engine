@@ -84,8 +84,8 @@ public:
 			m_particles[i].is_alive = true;
 			if (m_spinning_enabled)
 			{
-				m_particles[i].vertex.Position.x = 4.5f*sin((float)time*2.5f);
-				m_particles[i].vertex.Position.z = 4.5f*cos((float)time*2.5f); 
+				m_particles[i].vertex.Position.x = 2.5f*sin((float)time*2.5f);
+				m_particles[i].vertex.Position.z = 2.5f*cos((float)time*2.5f); 
 			}
 
 			std::swap(m_particles[i],m_particles[d_count_alive]);
@@ -171,7 +171,7 @@ private:
 	{
 		m_particles[index].is_alive = false;
 		m_particles[index].vertex.Position = m_waterfall_enabled ? glm::vec3(-20.0f,20.0f,-0.0f):glm::vec3(0.0f,0.0f,0.0f); 
-		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.7, 0.7, 0.7, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
+		m_particles[index].min_start_color = glm::linearRand( glm::vec4( 0.4, 0.4, 0.4, 1.0 ), glm::vec4( 1.0, 1.0, 1.0, 1.0 ));
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
 		 

@@ -2,7 +2,8 @@
 #define PhysicsController_h__
 
 #define GLM_FORCE_RADIANS
-
+//#define PARTICLE
+#define RIGID_BODY
 #include <glm/gtx/rotate_vector.hpp>
 #include "AbstractController.h"
 #include "Point.h" 
@@ -71,8 +72,6 @@ namespace Controller
 
 		float   	d_force_impulse_magnitude; 
 
-		GLParticleRenderer* d_particle_renderer;
-		ParticleSystem* d_particle_system; 
 		ParticleSystem2* d_particle_system2; 
 
 		std::shared_ptr<BoxGenerator> d_box_generator;
@@ -105,9 +104,8 @@ namespace Controller
 	PhysicsController::~PhysicsController()
 	{
 		delete d_camera;
-		delete d_shader;
-		delete d_particle_renderer;
-		delete d_particle_system; 
+		delete d_shader; 
+		delete d_particle_system2; 
 		delete d_point;
 	}
 
@@ -141,11 +139,11 @@ namespace Controller
 		//string wind_status = wind_on ? "ON" : "OFF";
 		//string wind_message = "3 - Enable/Disable Wind - STATUS: " + wind_status;
 		//screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
-
-		//string integration_status = euler_on ? "Euler" : "Runge-Kutta 4";
-		//string integration_message = "4 - Integration Method - STATUS: " + integration_status;
-		//screen_output(10, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
-
+#ifdef PARTICLE
+		string integration_status = d_particle_system2->m_euler_enabled ? "Euler" : "Runge-Kutta 4";
+		string integration_message = "4 - Integration Method - STATUS: " + integration_status;
+		screen_output(600, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
+#endif
 		/*char com[100];
 		sprintf_s(com,"Center of Mass: %f,%f,%f",d_rigid_body->Center_of_mass().x,d_rigid_body->Center_of_mass().y,d_rigid_body->Center_of_mass().z);
 		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 50 ,com);
@@ -154,10 +152,10 @@ namespace Controller
 		sprintf_s(Up,"Camera Up: %f,%f,%f",d_camera->Up.x,d_camera->Up.y,d_camera->Up.z);
 		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,Up);*/
 
-		string collision_status = d_is_narrow_phase_collision ? "YES" : "NO";
+		/*string collision_status = d_is_narrow_phase_collision ? "YES" : "NO";
 		char collision[100];
 		sprintf_s(collision,"Collision: %s",collision_status.c_str());
-		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,collision);
+		screen_output(VIEWPORT_WIDTH-500, VIEWPORT_HEIGHT - 70 ,collision);*/
 
 
 		/*	*/
@@ -206,22 +204,29 @@ namespace Controller
 
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, NULL);
-		/*	TwAddVarCB(Helper::g_tweak_bar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_cube_model, ""); 
-		TwAddVarCB(Helper::g_tweak_bar, "cube.Polyhedral Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetCalculatedMassCallback, d_cube_model, ""); 
-		TwAddVarCB(Helper::g_tweak_bar, "cube.Area ", TW_TYPE_FLOAT, NULL, Helper::UI::GetAreaCallback, d_cube_model, ""); */
+#ifdef RIGID_BODY 
+		TwAddVarCB(Helper::g_tweak_bar, "cube.Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetMassCallback, d_rigid_body, ""); 
+		TwAddVarCB(Helper::g_tweak_bar, "cube.Polyhedral Mass", TW_TYPE_FLOAT, NULL, Helper::UI::GetCalculatedMassCallback, d_rigid_body, ""); 
+		TwAddVarCB(Helper::g_tweak_bar, "cube.Area ", TW_TYPE_FLOAT, NULL, Helper::UI::GetAreaCallback, d_rigid_body, "");  
 
-		/*TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
+
 		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_use_polyhedral_tensor, "");
-		TwAddVarRW(Helper::g_tweak_bar, "Show Sphere Bound.", TW_TYPE_BOOLCPP, &d_draw_spheres, "");*/
+		TwAddVarRW(Helper::g_tweak_bar, "Use Damping", TW_TYPE_BOOLCPP, &d_rigid_body->m_use_damping,  "");
+		TwAddVarRW(Helper::g_tweak_bar, "Damping Fact.", TW_TYPE_FLOAT, &d_rigid_body->m_damping_factor,  "");
+
+#endif
+		/*TwAddVarRW(Helper::g_tweak_bar, "Show Sphere Bound.", TW_TYPE_BOOLCPP, &d_draw_spheres, "");*/
+#ifdef PARTICLE
 		TwAddVarRW(Helper::g_tweak_bar, "Wind Direction", TW_TYPE_DIR3F,  &d_particle_system2->m_wind_direction,  " group='Wind' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Wind Speed", TW_TYPE_FLOAT,  &d_particle_system2->m_wind_speed,  " group='Wind' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Source Direction", TW_TYPE_DIR3F,  &d_particle_system2->m_source_direction,  " group='Speed' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Source Speed", TW_TYPE_FLOAT,  &d_particle_system2->m_initial_speed,  " group='Speed' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Source Spread", TW_TYPE_FLOAT,  &d_particle_system2->m_spread,  " group='Speed' ");
-	
+
 		TwAddVarRW(Helper::g_tweak_bar, "Elasticity", TW_TYPE_FLOAT,  &d_particle_system2->m_elasticity,  " group='Speed' ");
 
 
@@ -229,7 +234,7 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Spinning", TW_TYPE_BOOLCPP, &d_particle_system2->m_spinning_enabled,  " group='Particles' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Euler/Runge-Kutta", TW_TYPE_BOOLCPP, &d_particle_system2->m_euler_enabled,  " group='Particles' "); 
 		TwAddVarRW(Helper::g_tweak_bar, "Waterfall", TW_TYPE_BOOLCPP, &d_particle_system2->m_waterfall_enabled,  " group='Particles' "); 
-
+#endif
 
 		// 		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", apply_impulse_callback, NULL, " label='Apply Impulse' ");
 		//TwAddVarRW(myBar, "NameOfMyVariable", TW_TYPE_xxxx, &myVar, "");
@@ -237,40 +242,6 @@ namespace Controller
 
 
 #pragma endregion  
-
-	GLint PhysicsController::TextureFromFile(const char* fileName, string directory)
-	{
-		Magick::Blob m_blob;
-		Magick::Image* m_pImage; 
-		string stringFileName(fileName);
-		string fullPath = directory + "\\" + stringFileName;
-		try {
-			m_pImage = new Magick::Image(fullPath.c_str());
-			m_pImage->write(&m_blob, "RGB");
-		}
-		catch (Magick::Error& Error) {
-			std::cout << "Error loading texture '" << fullPath << "': " << Error.what() << std::endl;
-			return false;
-		}
-
-		//Generate texture ID and load texture data 
-		//
-		//filename = directory + '/' + filename;
-		GLuint textureID;
-
-
-		//SOIL_load_OGL_texture(filename.c_str(),SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);;
-		glGenTextures(1, &textureID);
-		//int width,height,channels;
-		//unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, nullptr, 0);
-		// Assign texture to ID
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D,  0, GL_RGB, m_pImage->columns(), m_pImage->rows(), 0, GL_RGB, GL_UNSIGNED_BYTE, m_blob.data());
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		//	SOIL_free_image_data(image);
-		return textureID;
-	}
 
 	void PhysicsController::Init(int argc, char* argv[])
 	{
@@ -307,9 +278,9 @@ namespace Controller
 		d_shader_boundings = new Shader(v_shader,f_shader_boundings);
 		d_shader_particle = new Shader(v_shader,f_shader_particles);
 
-		/*	d_cube_model = new Model("models\\cubetri.obj");
-		d_floor_model = new Model("models\\plane.dae");
-		d_rigid_body = new RigidBody(*d_cube_model);*/
+		d_cube_model = new Model("models\\cubetri.obj");
+		/*d_floor_model = new Model("models\\plane.dae");*/
+		d_rigid_body = new RigidBody(*d_cube_model);
 
 		/*auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
 		d_floor_model->Rotate(floor_rotation);
@@ -347,21 +318,23 @@ namespace Controller
 		d_rigid_body_manager->Add( new RigidBody(*container_cube));*/
 
 		//
-		const int num_particles = 300000;
-		d_particle_system2 = new ParticleSystem2(num_particles);
-		 
-		d_vertices.resize(num_particles);
-	 	d_vertices.reserve(num_particles); 
- 
-		 d_point = new Point(d_vertices);
+#ifdef PARTICLE
+		{
+			const int num_particles = 300000;
+			d_particle_system2 = new ParticleSystem2(num_particles);
 
-		 auto rotated_normal = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
-		 auto rotated_normal2 = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
-		 d_particle_system2->Add_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::normalize(rotated_normal));
-		 d_particle_system2->Add_Plane(glm::vec3(0.0f,0.0f,0.0f),glm::normalize(rotated_normal2));
+			d_vertices.resize(num_particles);
+			d_vertices.reserve(num_particles); 
 
+			d_point = new Point(d_vertices);
 
-		 d_particle_system2->Add_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
+			auto rotated_normal = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
+			auto rotated_normal2 = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
+			d_particle_system2->Add_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::normalize(rotated_normal));
+			d_particle_system2->Add_Plane(glm::vec3(0.0f,0.0f,0.0f),glm::normalize(rotated_normal2));
+			d_particle_system2->Add_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
+		}
+#endif
 
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 		tweak_bar_setup();
@@ -383,7 +356,7 @@ namespace Controller
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 
@@ -392,7 +365,7 @@ namespace Controller
 		//Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 
 
-		//d_shader->Use();
+		d_shader->Use();
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
 
@@ -400,14 +373,23 @@ namespace Controller
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
-		glm::mat4 projection_view = d_projection_matrix * d_view_matrix;// * d_cube_model->GetModelMatrix();
+		glm::mat4 projection_view = d_projection_matrix * d_view_matrix  * d_cube_model->GetModelMatrix();
+		d_shader->SetUniform("mvp",projection_view);
 
+
+
+#ifdef PARTICLE
 		d_shader_particle->Use();
 		d_shader_particle->SetUniform("mvp",projection_view);
 
 
 		d_shader_particle->SetUniform("eye_position", d_camera->Position);  
+		d_particle_system2->Update(d_delta_time_secs);
+		d_particle_system2->GetVertices(d_vertices);
 
+		d_point->Update();
+		d_point->Draw();
+#endif
 		/*	if (d_draw_spheres)
 		d_rigid_body_manager->Check_Sphere_Collisions();
 
@@ -418,8 +400,8 @@ namespace Controller
 
 
 
-		//d_cube_model->Draw(*d_shader);
-
+		d_cube_model->Draw(*d_shader);
+		d_rigid_body->Update(d_delta_time_secs,d_use_polyhedral_tensor);
 		//d_shader_boundings->Use();
 		//	d_shader_boundings->SetUniform("shape_color",d_collision_color);
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -475,11 +457,7 @@ namespace Controller
 		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
 		//d_rigid_body->Apply_Impulse(spring_force,d_force_impulse_application_point + d_rigid_body->Center_of_mass(),d_delta_time_secs);
-		d_particle_system2->Update(d_delta_time_secs);
-	 	d_particle_system2->GetVertices(d_vertices);
-	 
-		d_point->Update();
-		d_point->Draw();
+
 
 		//delete &p;
 		/*
