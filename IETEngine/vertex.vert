@@ -25,10 +25,12 @@ out vec3 tex_coord_skybox;
 out vec3 tangent_dir;
 out vec3 vertex_world_space;
 out vec3 not_normalized_normal;
+out vec4 out_color;
+
 void main()
 {  
  
-    gl_PointSize = 5.0;
+    
 	vec4 position_vec4 	=  vec4(position, 1.0f);
   	vertex_world_space 	
   						=  vec3(model_matrix * position_vec4);
@@ -52,7 +54,8 @@ void main()
 	gl_Position 		=  mvpTransform(position_vec4);
 
 	tex_coord 			=  texCoord;
-
+	out_color			=  color;
+	
 	if (draw_sky_box)
 		tex_coord_skybox	=  position;
 	else
@@ -62,4 +65,8 @@ void main()
 		else
 			tex_coord_skybox = cube_map_refraction;
 	}
+
+  	float dist = length(eye_position.xyz);
+    float att = inversesqrt(0.1f*dist);
+    gl_PointSize = 2.0f * att;
 }

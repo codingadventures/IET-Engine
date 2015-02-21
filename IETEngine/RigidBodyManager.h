@@ -188,7 +188,7 @@ namespace Physics
 
 	void RigidBodyManager::draw_center_of_mass(RigidBody& rigid_body)
 	{
-		Vertex v;
+		Vertex v ;//= new Vertex();
 
 		v.Position = glm::vec3(0.0f);
 		v.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
