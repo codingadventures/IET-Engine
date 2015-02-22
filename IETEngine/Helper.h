@@ -247,7 +247,28 @@ vector<T> ArrayConversion(int n_args,...)
 	return t;
 }
 
+inline void DrawGrid(int size){
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(.3,.3,.3); 
+	glBegin(GL_QUADS);
+	glVertex3f( -size/2,-0.001, -size/2);
+	glVertex3f( -size/2,-0.001,size/2);
+	glVertex3f(size/2,-0.001,size/2);
+	glVertex3f(size/2,-0.001, -size/2);
+	glEnd();
 
+	glBegin(GL_LINES);
+	for(int i=-size/2;i<=size/2;i++) {
+		if (i==0) { glColor3f(.6,.3,.3); } else { glColor3f(.25,.25,.25); };
+		glVertex3f(i,0,-size/2);
+		glVertex3f(i,0,size/2);
+		if (i==0) { glColor3f(.3,.3,.6); } else { glColor3f(.25,.25,.25); };
+		glVertex3f(-size/2,0,i);
+		glVertex3f(size/2,0,i);
+	};
+	glEnd();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
 
 #pragma endregion
 

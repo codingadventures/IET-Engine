@@ -83,6 +83,7 @@ namespace Physics
 
 	float					RigidBody::Mass()			 const   {	return d_mass; } 
 	float					RigidBody::Area()			 const	 { return d_area; }
+	//void					Velocity(float speed)		 const   {}
 	float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
 	glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
 	BoundingSphere*			RigidBody::Bounding_sphere()		 { return d_bounding_sphere; } 
@@ -190,9 +191,8 @@ namespace Physics
 
 	void RigidBody::calculate_torque()
 	{
-		glm::vec3 point_world_space =  d_force_application_point;
-
-		glm::vec3 point_com_distance =  point_world_space -  d_center_of_mass ;
+	 
+		glm::vec3 point_com_distance =  d_force_application_point;
 
 		d_torque = glm::cross(point_com_distance, d_force);
 

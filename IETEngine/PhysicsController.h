@@ -277,7 +277,7 @@ namespace Controller
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 		vector<string> f_shader_particles	= ArrayConversion<string>(1,string("particle.frag"));
 		 
-		//d_rigid_body_manager = new RigidBodyManager(false);
+		 d_rigid_body_manager = new RigidBodyManager(false);
 
 		d_shader = new Shader(v_shader,f_shader_specular); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
@@ -287,13 +287,16 @@ namespace Controller
 		d_cube_model = new Model("models\\cubetri.obj");
 		/*d_floor_model = new Model("models\\plane.dae");*/
 		d_rigid_body = new RigidBody(*d_cube_model);
-
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(00.0f,0.0f,10.0f),glm::vec3(0.0f,0.0f,-1.0f));
 		/*auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
 		d_floor_model->Rotate(floor_rotation);
 
 		d_floor_model->Scale(glm::vec3(100.0f,100.0f,100.0f));
-		d_floor_model->Translate(glm::vec3(0,-10.0f,0.0f));
-		d_rigid_body_manager->Add(d_rigid_body);*/
+		d_floor_model->Translate(glm::vec3(0,-10.0f,0.0f));*/
+		 d_rigid_body_manager->Add(d_rigid_body);
 
 		//auto floor_rigid_body = new RigidBody(*d_floor_model);
 
@@ -407,8 +410,9 @@ namespace Controller
 
 
 
-		d_cube_model->Draw(*d_shader);
-		d_rigid_body->Update(d_delta_time_secs,d_use_polyhedral_tensor);
+		 d_cube_model->Draw(*d_shader);
+
+		//d_rigid_body->Update(d_delta_time_secs,d_use_polyhedral_tensor);
 		//d_shader_boundings->Use();
 		//	d_shader_boundings->SetUniform("shape_color",d_collision_color);
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -459,7 +463,7 @@ namespace Controller
 
 
 
-		//d_rigid_body_manager->Update(d_delta_time_secs);
+		 d_rigid_body_manager->Update(d_delta_time_secs);
 
 		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
@@ -545,12 +549,15 @@ namespace Controller
 
 		//p.Draw();
 		//d_vertices.clear();
-		//d_shader_no_texture->Use();
+		// d_shader_no_texture->Use();
+		 d_shader->SetUniform("mvp",projection_view);
+
+		 DrawGrid(100);
+		
 
 		//text_to_screen();
 
 		//	glDisable(GL_BLEND);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		TwDraw();
 

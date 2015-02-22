@@ -18,7 +18,7 @@ namespace Physics
 
 	private:
 		vector<RigidBody*>					d_rigid_bodies;
-		vector<Plane*>						d_planes;
+		vector<Plane>						d_planes;
 
 		vector<CollidingPair<RigidBody>>    d_colliding_pairs;
 		vector<Sphere*>						d_bounding_spheres;
@@ -35,7 +35,7 @@ namespace Physics
 		~RigidBodyManager();
 
 		void		Add(RigidBody* rigid_body);
-		void		Add_Collision_Plane(Plane& plane);
+		void		Add_Collision_Plane(glm::vec3 center, glm::vec3 normal);
 		void		Update(double delta_time); 
 		void		Check_Sphere_Collisions();
 		void		Check_AABB_Collisions();
@@ -52,6 +52,7 @@ namespace Physics
 	private:
 		void		draw_bounding_sphere(RigidBody& rigid_body);
 		void		draw_center_of_mass(RigidBody& rigid_body);
+		void		Check_Plane_Collision(RigidBody& rigid_body);
 	};
 
 
@@ -88,7 +89,7 @@ namespace Physics
 			rigid_body->Bounding_sphere()->Change_Color(d_non_colliding_color);
 			rigid_body->Bounding_box()->m_is_colliding = glm::vec3(0.0f);
 			rigid_body->Update(delta_time,d_use_polyhedral);
-
+			Check_Plane_Collision(*rigid_body);
 		}
 	}
 
@@ -252,13 +253,23 @@ namespace Physics
 		}
 	}
 
-	void RigidBodyManager::Add_Collision_Plane(Plane& plane)
+	void RigidBodyManager::Add_Collision_Plane(glm::vec3 center, glm::vec3 normal)
 	{
-		d_planes.push_back(&plane);
+		Plane plane(center,normal);
+		d_planes.push_back( plane);
 	}
 
 
+	void RigidBodyManager::Check_Plane_Collision(RigidBody& rigid_body)
+	{
+		for (auto plane : d_planes)
+		{
+			auto dot = glm::dot(rigid_body.Center_of_mass() - plane.x, plane.n_normal);
+			if  ( dot  > 0) continue;
 
+			rigid_body.m_linear_momentum =	glm::reflect(rigid_body.m_linear_momentum,plane.n_normal); 
+		}
+	}
 
 
 
