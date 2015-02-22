@@ -64,5 +64,5 @@ void main()
 	}
 	 // Combine results
    		 		
-	color = vec4(Ia + Id + Is, 1.0f);
+	color = vec4(Ia + Id + Is, 0.3f);
 }

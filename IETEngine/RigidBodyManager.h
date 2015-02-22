@@ -15,6 +15,8 @@ namespace Physics
 {
 	class RigidBodyManager
 	{ 
+	public:
+		bool								m_use_polyhedral;
 
 	private:
 		vector<RigidBody*>					d_rigid_bodies;
@@ -24,14 +26,13 @@ namespace Physics
 		vector<Sphere*>						d_bounding_spheres;
 		vector<Cube*>						d_bounding_cubes;
 
-		bool								d_use_polyhedral;
 		glm::vec3							d_colliding_color;
 		glm::vec3							d_non_colliding_color;
 
 		size_t								d_sort_axis;
 
 	public:
-		RigidBodyManager(bool use_polyedral);
+		RigidBodyManager();
 		~RigidBodyManager();
 
 		void		Add(RigidBody* rigid_body);
@@ -52,12 +53,12 @@ namespace Physics
 	private:
 		void		draw_bounding_sphere(RigidBody& rigid_body);
 		void		draw_center_of_mass(RigidBody& rigid_body);
-		void Check_Plane_Collision(RigidBody& rigid_body, float delta_time);
+		void		Check_Plane_Collision(RigidBody& rigid_body, float delta_time);
 	};
 
 
-	RigidBodyManager::RigidBodyManager(bool use_polyhedral)
-		: d_use_polyhedral(use_polyhedral),
+	RigidBodyManager::RigidBodyManager()
+		: m_use_polyhedral(false),
 		d_non_colliding_color(glm::vec3(0.0f,0.0f,1.0f)),
 		d_colliding_color(glm::vec3(1.0f,0.0f,0.0f)),
 		d_sort_axis(0)
@@ -88,7 +89,7 @@ namespace Physics
 		{
 			rigid_body->Bounding_sphere()->Change_Color(d_non_colliding_color);
 			rigid_body->Bounding_box()->m_is_colliding = glm::vec3(0.0f);
-			rigid_body->Update(delta_time,d_use_polyhedral);
+			rigid_body->Update(delta_time,m_use_polyhedral);
 			Check_Plane_Collision(*rigid_body, delta_time);
 		}
 	}
@@ -272,8 +273,16 @@ namespace Physics
 
 			if  ( min_collision  > 0 ) continue;
 
-			rigid_body.m_linear_momentum =	glm::reflect(rigid_body.m_linear_momentum,plane.n_normal); 
-			rigid_body.m_position += 2.0f* (plane.x - ws_min_coord) * plane.n_normal;
+			auto restitution_acc = glm::dot(rigid_body.m_linear_momentum,plane.n_normal);
+
+			if (restitution_acc < 0.0f)
+				rigid_body.m_linear_momentum -= restitution_acc  * (1.0f+0.2f) * plane.n_normal;
+
+			auto restitution_vel = glm::dot(rigid_body.m_angular_momentum,plane.n_normal);
+			if (restitution_vel < 0.0f)
+				rigid_body.m_angular_momentum -= restitution_vel * (1.0f+0.2f) *  plane.n_normal;
+
+
 		}
 	}
 

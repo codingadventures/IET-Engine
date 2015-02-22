@@ -6,8 +6,7 @@
 
 using namespace Physics::Particles;
 using namespace std;
-
-#define  GLOBAL_ACCELERATION	glm::vec3(0.0f,-9.8f,0.0f)
+ 
 #define	 PARTICLE_LIFE			5.0f
 #define  EPSILON				0.01f 
 #define	 EMIT_PERCENTAGE		0.20f
@@ -27,6 +26,7 @@ public:
 	float m_wind_speed;
 	glm::vec3 m_wind_direction;
 	glm::vec3 m_source_direction;
+	glm::vec3 m_gravity;
 
 	float m_initial_speed;
 	float m_spread;
@@ -48,7 +48,8 @@ public:
 		m_source_direction(0.0f,1.0f,0.0f),
 		m_spread(2.5f),
 		m_initial_speed(10.f),
-		m_elasticity(0.2f)
+		m_elasticity(0.2f),
+		m_gravity(glm::vec3(0.0f,-9.8f,0.0f))
 	{
 		d_max_count = max_count; 
 
@@ -141,30 +142,31 @@ private:
 	void Euler_Integration(Particle& p, float delta_time)
 	{ 
 		p.vertex.Position += p.velocity * delta_time; 
-		p.velocity += (p.acceleration * delta_time + m_wind_direction*m_wind_speed * delta_time) ; 
-		p.acceleration  = GLOBAL_ACCELERATION ;//+ CalculateDrags(p.velocity);
+		p.velocity += (p.acceleration * delta_time) ; 
+		p.acceleration  = m_gravity + calculate_wind_speed();
 	}
 
 	void Runge_Kutta_4(Particle& p, float delta_time) {
 
+		auto wind_speed = calculate_wind_speed();
 		glm::vec3 x1 = p.vertex.Position;
 		glm::vec3 v1 = p.velocity;
 
 		glm::vec3 x2 = p.vertex.Position + 0.5f * v1 * delta_time;
 		glm::vec3 v2 = v1 + 0.5f * p.acceleration * delta_time; // there is 0.5
-		glm::vec3 a2 = GLOBAL_ACCELERATION ;//+ CalculateDrags(v2);   
+		glm::vec3 a2 = m_gravity  + wind_speed; 
 
 		glm::vec3 x3 = x1 + 0.5f * v2 * delta_time;
-		glm::vec3 v3 = v1 + 0.5f * a2 * delta_time;
-		glm::vec3 a3 = GLOBAL_ACCELERATION ;//+ CalculateDrags(v3);   
+		glm::vec3 v3 = v1 + 0.5f * a2 * delta_time + wind_speed;
+		glm::vec3 a3 = m_gravity  + wind_speed; 
 
 		glm::vec3 x4 = x1 + v3 * delta_time;
-		glm::vec3 v4 = v1 + a3 * delta_time;
-		glm::vec3 a4 = GLOBAL_ACCELERATION ;//+ CalculateDrags(v4);   
+		glm::vec3 v4 = v1 + a3 * delta_time + wind_speed;
+		glm::vec3 a4 = m_gravity  + wind_speed;  
 
 		p.vertex.Position +=  (delta_time / 6) * (v1 + 2.0f * v2 + 2.0f * v3 + v4);
 		p.velocity		  +=  (delta_time / 6) * (p.acceleration + (2.0f * a2) + (2.0f * a3) + a4);
-		p.acceleration	  = GLOBAL_ACCELERATION;// + CalculateDrags(p.velocity); 
+		p.acceleration	  = m_gravity + wind_speed; 
 	}
 
 	inline void Reset(size_t index)
@@ -206,6 +208,10 @@ private:
 		return -0.5f * AIR_DENSITY * pi/*this should have more*/ * DRAG_COEFFICIENT * (wind_drag_magnitude * wind_drag);
 	}  
 
+	inline glm::vec3 calculate_wind_speed()
+	{
+		return m_wind_direction*m_wind_speed;
+	}
 
 	void CollisionDetection(Particle& p)
 	{

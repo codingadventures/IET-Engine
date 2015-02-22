@@ -36,6 +36,8 @@ public:
 		*/
 
 		static bool just_warped = false;
+		static bool mouse_released = false;
+		static int saved_xpos,saved_ypos;
 		if(just_warped) {
 			just_warped = false;
 			return;
@@ -44,13 +46,23 @@ public:
 		TwEventMouseMotionGLUT(xpos, ypos);
 
 		if (g_cursor == Pointer)
-			 return;
-		/*if(firstMouse)
 		{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-		}*/
+			if (!mouse_released)
+			{
+				//Save mouse position
+				saved_xpos = xpos;
+				saved_ypos = ypos;
+				mouse_released = true;
+			}
+			return;
+		}
+
+		if(mouse_released)
+		{
+			xpos = saved_xpos;
+			ypos = saved_ypos;
+			mouse_released = false;
+		} 
 
 		GLfloat xoffset = xpos - VIEWPORT_WIDTH/2;
 		GLfloat yoffset =  VIEWPORT_HEIGHT/2 - ypos;  // Reversed since y-coordinates go from bottom to left

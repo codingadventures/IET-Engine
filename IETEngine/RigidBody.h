@@ -18,7 +18,15 @@ namespace Physics
 		glm::vec3				m_linear_momentum; 
 
 		glm::vec3				m_angular_momentum;
+
 		glm::vec3				m_position;
+		glm::vec3				m_force;
+		glm::vec3				m_velocity;
+		glm::vec3				m_acceleration;
+		glm::vec3				d_torque;
+		glm::vec3				m_angular_velocity;
+		glm::vec3				m_force_application_point;
+
 
 		float					m_damping_factor;
 		bool					m_use_damping;
@@ -36,12 +44,7 @@ namespace Physics
 		glm::vec3				d_center_of_mass;
 		glm::vec3				d_polyhedral_center_of_mass;
 
-		glm::vec3				d_force;
-		glm::vec3				d_velocity;
-		glm::vec3				d_acceleration;
-		glm::vec3				d_torque;
-		glm::vec3				d_angular_velocity;
-		glm::vec3				d_force_application_point;
+		
 
 		glm::mat3				d_inertial_tensor;
 		glm::mat3				d_inverse_inertial_tensor;
@@ -98,8 +101,8 @@ namespace Physics
 		d_calculated_area(0.0f),
 		d_mass(1.0f),
 		d_polyhedral_mass(0.0f),
-		d_angular_velocity(0.0f),
-		d_acceleration(0.0f),
+		m_angular_velocity(0.0f),
+		m_acceleration(0.0f),
 		m_linear_momentum(0.0f),
 		m_angular_momentum(0.0f),
 		m_damping_factor(0.2f)
@@ -127,16 +130,16 @@ namespace Physics
 
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
-		d_angular_velocity =  m_angular_momentum * tensor;
-		assert(d_angular_velocity == d_angular_velocity);
+		m_angular_velocity =  m_angular_momentum * tensor;
+		assert(m_angular_velocity == m_angular_velocity);
 
-		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(d_angular_velocity)) ;
+		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(m_angular_velocity)) ;
 		assert(orientation == orientation);
 
 		calculate_torque();
 
-		d_velocity = m_linear_momentum / mass; 
-		assert(d_velocity == d_velocity);
+		m_velocity = m_linear_momentum / mass; 
+		assert(m_velocity == m_velocity);
 
 		if (m_use_damping)
 		{
@@ -160,17 +163,17 @@ namespace Physics
 
 	void RigidBody::Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time)
 	{
-		d_force = force;
+		m_force = force;
 		//d_acceleration = force / d_mass;
-		d_force_application_point = application_point ;
+		m_force_application_point = application_point ;
 		calculate_torque();
 		m_angular_momentum +=	d_torque * delta_time;
 		assert(m_angular_momentum == m_angular_momentum);
 
-		m_linear_momentum +=	d_force  * delta_time;
+		m_linear_momentum +=	m_force  * delta_time;
 		assert(m_linear_momentum == m_linear_momentum);
 
-		d_velocity = m_linear_momentum / d_mass; 
+		m_velocity = m_linear_momentum / d_mass; 
 
 
 	}
@@ -191,10 +194,10 @@ namespace Physics
 
 	void RigidBody::calculate_torque()
 	{
-	 
-		glm::vec3 point_com_distance =  d_force_application_point;
 
-		d_torque = glm::cross(point_com_distance, d_force);
+		glm::vec3 point_com_distance =  m_force_application_point;
+
+		d_torque = glm::cross(point_com_distance, m_force);
 
 	} 
 
@@ -252,7 +255,7 @@ namespace Physics
 
 		auto denominator = t1+t2+t3+t4;
 
-		auto pa = d_velocity + glm::cross(d_angular_velocity, ra);
+		auto pa = m_velocity + glm::cross(m_angular_velocity, ra);
 		assert(pa==pa);
 
 		auto pb = other.Velocity() + glm::cross(other.Angular_Velocity(), rb);
@@ -280,12 +283,12 @@ namespace Physics
 
 	glm::vec3 RigidBody::Velocity() const
 	{
-		return d_velocity;
+		return m_velocity;
 	}
 
 	glm::vec3 RigidBody::Angular_Velocity() const
 	{
-		return d_angular_velocity;
+		return m_angular_velocity;
 	}
 
 

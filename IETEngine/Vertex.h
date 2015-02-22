@@ -19,10 +19,7 @@ struct Vertex {
 	//Tangent
 	glm::vec3 Tangent;
 
-	Vertex(){}
-	/*Vertex(const Vertex& vertex){
-
-	}*/
+	Vertex(){} 
 	Vertex(glm::vec3 position, glm::vec4 color = glm::vec4(1,1,1,1),glm::vec3 normal=glm::vec3(0.0f),glm::vec3 tangent=glm::vec3(0.0f))
 		: Position(position),Color(color),Normal(normal),Tangent(tangent)
 	{

@@ -17,33 +17,26 @@ namespace Rendering
 			//vertices.push_back(position); 
 			Init();
 		}
-		Point(glm::vec3 position, glm::vec4 color) :vertices(vector<Vertex>()) { 
+		Point(glm::vec3 position, glm::vec4 color) :vertices(vector<Vertex>()) 
+		{ 
 			Vertex  v;
 			v.Color = color;
 			v.Position = position;
-			//vertices.push_back(v); 
+			vertices.push_back(v); 
 			Init();
 		}
 		Point(vector<Vertex> &positions)
 			: vertices(positions) { 
-				/*if(positions.size()==0) return;
-				vertices = positions;*/
 				Init();
 		}
 
 		~Point()
-		{
-		/*	for (int i = 0; i < vertices_size; i++)
-			{
-				delete vertices[i];
-			}*/
-
-			
+		{  
 			glDeleteBuffers(1,&VBO);
 			glDeleteBuffers(1,&VAO);
 		}
 
-		 
+
 
 		void Draw()
 		{ 
@@ -52,7 +45,7 @@ namespace Rendering
 
 			glDrawArrays(GL_POINTS, 0, this->vertices.size());
 			glBindVertexArray(0);
-			 
+
 		}
 
 		void Init()
@@ -79,13 +72,25 @@ namespace Rendering
 
 		void Update()
 		{
-			/*const size_t count =  this->vertices.size();
-			if (count > 0)
-			{*/
-				glBindBuffer(GL_ARRAY_BUFFER, this->VBO); 
-				glBufferSubData(GL_ARRAY_BUFFER, 0,  vertices_size * sizeof(Vertex),  &this->vertices[0]);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-			//}
+			glBindBuffer(GL_ARRAY_BUFFER, this->VBO); 
+			glBufferSubData(GL_ARRAY_BUFFER, 0,  vertices_size * sizeof(Vertex),  &this->vertices[0]);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		}
+		void UpdateAndDraw(glm::vec3 position,glm::vec4 color)
+		{
+			 
+			auto v = Vertex(position,color);
+			 
+
+			glBindBuffer(GL_ARRAY_BUFFER, this->VBO); 
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex),  &v);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glBindVertexArray(this->VAO);
+
+			glDrawArrays(GL_POINTS, 0, 1);
+			glBindVertexArray(0);
 		}
 
 	private:

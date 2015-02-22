@@ -171,9 +171,7 @@ namespace Camera
 				break;
 			}
 	
-	
-			// Camera controls
-	
+	 
 		}
 	
 		void SetTarget(glm::vec3 target)

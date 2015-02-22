@@ -2,8 +2,8 @@
 #define PhysicsController_h__
 
 #define GLM_FORCE_RADIANS
-//#define PARTICLE
-#define RIGID_BODY
+#define PARTICLE
+//#define RIGID_BODY
 #include <glm/gtx/rotate_vector.hpp>
 #include "AbstractController.h"
 #include "Point.h" 
@@ -62,33 +62,23 @@ namespace Controller
 		glm::vec3		d_light_specular;
 		glm::vec3		d_light_position;
 
-		vector<Vertex> d_vertices;
+		vector<Vertex>	d_vertices;
 
 
 		vector<Model*>		
-			d_model_vector;
+			d_model_vector; 
 
-		GLint		d_textureId;
-
-		float   	d_force_impulse_magnitude; 
+		float   		d_force_impulse_magnitude; 
 
 		ParticleSystem2* d_particle_system2; 
-
-		std::shared_ptr<BoxGenerator> d_box_generator;
-		std::shared_ptr<ParticleEmitter> d_particle_emitter;
-		std::shared_ptr<EulerUpdater> d_particle_updater;
 
 		glm::vec3 d_force_impulse_direction;
 		glm::vec3 d_force_impulse_application_point;
 
 		Point*		d_point;
-		bool d_waterfall_on;
-		bool  d_spinning_on;
-		bool  d_wind_on;
-		bool  d_euler_on;
+		Point*		d_application_force_point;
 		/*bool d_is_spring_enabled;*/
-		bool d_use_polyhedral_tensor;
-		SpringGenerator* d_spring_generator;
+		bool d_use_polyhedral_tensor; 
 		bool d_draw_spheres;
 		bool d_is_narrow_phase_collision;
 		glm::vec4 d_collision_color ;
@@ -107,15 +97,13 @@ namespace Controller
 		delete d_shader; 
 		delete d_particle_system2; 
 		delete d_point;
+		delete d_application_force_point;
 	}
 
 	PhysicsController::PhysicsController() 	
 		: 
 		AbstractController("Physics Simulations"),
-		d_shader(nullptr),
-		/*	spinning_on(false),
-		waterfall_on(false),
-		wind_on(false),*/
+		d_shader(nullptr), 
 		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
 		d_force_impulse_magnitude(10.0f),
 		d_force_impulse_application_point(0.0f)
@@ -147,7 +135,7 @@ namespace Controller
 		//screen_output(10, VIEWPORT_HEIGHT - 90, (char*) wind_message.c_str());
 #ifdef PARTICLE
 		string integration_status = d_particle_system2->m_euler_enabled ? "Euler" : "Runge-Kutta 4";
-		string integration_message = "4 - Integration Method - STATUS: " + integration_status;
+		string integration_message = "Integration Method: " + integration_status;
 		screen_output(600, VIEWPORT_HEIGHT - 110, (char*) integration_message.c_str());
 #endif
 		/*char com[100];
@@ -219,7 +207,7 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
 
-		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_use_polyhedral_tensor, "");
+		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_rigid_body_manager->m_use_polyhedral, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Use Damping", TW_TYPE_BOOLCPP, &d_rigid_body->m_use_damping,  "");
 		TwAddVarRW(Helper::g_tweak_bar, "Damping Fact.", TW_TYPE_FLOAT, &d_rigid_body->m_damping_factor,  "");
 
@@ -234,9 +222,9 @@ namespace Controller
 		TwAddVarRW(Helper::g_tweak_bar, "Source Spread", TW_TYPE_FLOAT,  &d_particle_system2->m_spread,  " group='Speed' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Elasticity", TW_TYPE_FLOAT,  &d_particle_system2->m_elasticity,  " group='Speed' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Gravity", TW_TYPE_DIR3F,  &d_particle_system2->m_gravity,  " group='Speed' ");
 
-
-		//TwAddVarRW(Helper::g_tweak_bar, "Wind", TW_TYPE_BOOLCPP, &d_particle_system2->m_wind_enabled,  " group='Particles' ");
+		 
 		TwAddVarRW(Helper::g_tweak_bar, "Spinning", TW_TYPE_BOOLCPP, &d_particle_system2->m_spinning_enabled,  " group='Particles' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Euler/Runge-Kutta", TW_TYPE_BOOLCPP, &d_particle_system2->m_euler_enabled,  " group='Particles' "); 
 		TwAddVarRW(Helper::g_tweak_bar, "Waterfall", TW_TYPE_BOOLCPP, &d_particle_system2->m_waterfall_enabled,  " group='Particles' "); 
@@ -276,8 +264,8 @@ namespace Controller
 		vector<string> f_shader_no_texture	= ArrayConversion<string>(1,string("fragment_notexture.frag"));
 		vector<string> f_shader_boundings	= ArrayConversion<string>(1,string("boundings.frag"));
 		vector<string> f_shader_particles	= ArrayConversion<string>(1,string("particle.frag"));
-		 
-		 d_rigid_body_manager = new RigidBodyManager(false);
+
+		d_rigid_body_manager = new RigidBodyManager();
 
 		d_shader = new Shader(v_shader,f_shader_specular); 
 		d_shader_no_texture = new Shader(v_shader,f_shader_no_texture);
@@ -287,10 +275,10 @@ namespace Controller
 		d_cube_model = new Model("models\\cubetri.obj");
 		/*d_floor_model = new Model("models\\plane.dae");*/
 		d_rigid_body = new RigidBody(*d_cube_model);
-		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
-		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));
-		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));
-		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(00.0f,0.0f,10.0f),glm::vec3(0.0f,0.0f,-1.0f));
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));/*
+																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));
+																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));
+																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(00.0f,0.0f,10.0f),glm::vec3(0.0f,0.0f,-1.0f));*/
 
 		d_cube_model->Translate(glm::vec3(0.0f,5.0f,0.0f));
 		/*auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
@@ -298,7 +286,7 @@ namespace Controller
 
 		d_floor_model->Scale(glm::vec3(100.0f,100.0f,100.0f));
 		d_floor_model->Translate(glm::vec3(0,-10.0f,0.0f));*/
-		 d_rigid_body_manager->Add(d_rigid_body);
+		d_rigid_body_manager->Add(d_rigid_body);
 
 		//auto floor_rigid_body = new RigidBody(*d_floor_model);
 
@@ -309,16 +297,16 @@ namespace Controller
 		//d_model_vector.push_back(d_cube_model);
 		////d_model_vector.push_back(d_floor_model); 
 
-		//for (int i = 0; i < 1; i++)
-		//{
-		//	auto model = new Model(*d_cube_model);
-		//	model->Translate(glm::sphericalRand(10.0f));
+		/*for (int i = 0; i < 1; i++)
+		{
+		auto model = new Model(*d_cube_model);
+		model->Translate(glm::sphericalRand(10.0f));
 
-		//	auto rigid_body =  new RigidBody(*model);
-		//	d_model_vector.push_back(model);
-		//	d_rigid_body_manager->Add(rigid_body);
-		//}
-
+		auto rigid_body =  new RigidBody(*model);
+		d_model_vector.push_back(model);
+		d_rigid_body_manager->Add(rigid_body);
+		}
+		*/
 		/*auto container_cube = new Model(*d_cube_model);
 		container_cube->Scale(glm::vec3(50.0f,50.0f,50.0f));	
 		d_rigid_body_manager->Add( new RigidBody(*container_cube));*/
@@ -326,7 +314,7 @@ namespace Controller
 		//
 #ifdef PARTICLE
 		{
-			const int num_particles = 300000;
+			const int num_particles = 20000;
 			d_particle_system2 = new ParticleSystem2(num_particles);
 
 			d_vertices.resize(num_particles);
@@ -337,17 +325,21 @@ namespace Controller
 			auto rotated_normal = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
 			auto rotated_normal2 = glm::rotate(glm::vec3(0.0f,1.0f,0.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f)); //I rotate the normal 0,1,0 around x
 			d_particle_system2->Add_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::normalize(rotated_normal));
-			d_particle_system2->Add_Plane(glm::vec3(0.0f,0.0f,0.0f),glm::normalize(rotated_normal2));
+			d_particle_system2->Add_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::normalize(rotated_normal2));
 			d_particle_system2->Add_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
 		}
 #endif
-
+#ifdef RIGID_BODY
+		d_application_force_point = new Point(d_force_impulse_application_point + d_rigid_body->Center_of_mass(),glm::vec4(1.0f,0.0f,0.0f,0.5f));
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST)
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+#endif
 		//d_spring_generator = new SpringGenerator(glm::vec3(0.0f,10.0f,0.0f),0.6f);
 		tweak_bar_setup();
 		d_is_narrow_phase_collision = false;
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
-		//glDisable(GL_CULL_FACE);
-		//glDisable(GL_DEPTH_TEST);
 	}
 
 	void PhysicsController::Run(){
@@ -363,8 +355,7 @@ namespace Controller
 
 		glEnable(GL_PROGRAM_POINT_SIZE); 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		/*glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);*/
+ 
 
 		Update_Timer(); 
 		Calculate_Fps( );
@@ -379,16 +370,27 @@ namespace Controller
 		d_camera->MoveCamera();
 
 		d_view_matrix = d_camera->GetViewMatrix();
-		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
 
 		glm::mat4 projection_view = d_projection_matrix * d_view_matrix;
+
+#ifdef RIGID_BODY
+		glm::mat4 cube_model_matrix = d_cube_model->GetModelMatrix();
+
 		d_shader->SetUniform("mvp",projection_view * cube_model_matrix);
 		d_shader->SetUniform("eye_position", d_camera->Position);  
 		d_shader->SetUniform("use_bump_mapping", false);  
 		d_shader->SetUniform("draw_sky_box", false);  
 		d_shader->SetUniform("model_matrix", cube_model_matrix);
-		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix)));  /**/
+		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(cube_model_matrix))); 
+		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,d_rigid_body->Bounding_box()->m_min_coordinate,d_rigid_body->Bounding_box()->m_max_coordinate);
+		d_cube_model->Draw(*d_shader);
+		d_rigid_body_manager->Update(d_delta_time_secs);
 
+		d_shader_particle->Use();
+		d_shader_particle->SetUniform("mvp",projection_view * cube_model_matrix); 
+		d_application_force_point->UpdateAndDraw(d_force_impulse_application_point, glm::vec4(1.0f,0.0f,0.0f,0.8f));
+
+#endif
 
 #ifdef PARTICLE
 		d_shader_particle->Use();
@@ -407,36 +409,32 @@ namespace Controller
 
 		d_rigid_body_manager->Check_AABB_Collisions();*/
 
-		/*
-		d_force_impulse_application_point =	glm::clamp(d_force_impulse_application_point,bounding_box.min_coordinate,bounding_box.max_coordinate);*/
 
 
-
-		 d_cube_model->Draw(*d_shader);
 
 		//d_rigid_body->Update(d_delta_time_secs,d_use_polyhedral_tensor);
 		//d_shader_boundings->Use();
 		//	d_shader_boundings->SetUniform("shape_color",d_collision_color);
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		/*for (auto model: d_model_vector)
-		{
-		Shader* curr_shader;
+		//for (auto model: d_model_vector)
+		//{
+		//	Shader* curr_shader = d_shader;
 
 
-		if (d_is_narrow_phase_collision)
-		curr_shader = d_shader_boundings;
-		else
-		curr_shader = d_shader;
+		//	/*if (d_is_narrow_phase_collision)
+		//	curr_shader = d_shader_boundings;
+		//	else
+		//	curr_shader = d_shader;*/
 
-		curr_shader->Use();
-		curr_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
+		//	curr_shader->Use();
+		//	curr_shader->SetUniform("mvp",projection_view * model->GetModelMatrix());
 
-		curr_shader->SetUniform("model_matrix",model->GetModelMatrix());
+		//	curr_shader->SetUniform("model_matrix",model->GetModelMatrix());
 
-		model->Draw(*curr_shader);
-		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
+		//	model->Draw(*curr_shader);
+		//}
+		/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
 
 		/*
 
@@ -452,20 +450,11 @@ namespace Controller
 		Line l(v1,v2);*/
 		//l.Draw();
 
-		/*float theta = glm::radians(30.0f);
-		glm::vec3 b = (v2.Position - 0.1f*v2.Position);
-		glm::vec3 a = b * glm::tan(theta);
-		v1.Position =   b * glm::cos(theta) + a * sin(theta);
-		*/
-		/*
-		v2.Color = glm::vec4(1.0f,0.0f,0.0f,0.0f);
-		Point p2(v2);*/
-		//p2.Draw();
 
 
 
 
-		 d_rigid_body_manager->Update(d_delta_time_secs);
+
 
 		//glm::vec3 spring_force = d_spring_generator->GenerateForce(d_rigid_body->Center_of_mass());
 
@@ -552,14 +541,19 @@ namespace Controller
 		//p.Draw();
 		//d_vertices.clear();
 		// d_shader_no_texture->Use();
-		 d_shader->SetUniform("mvp",projection_view);
+		d_shader->Use();
+		d_shader->SetUniform("mvp",projection_view);
 
-		 DrawGrid(100);
-		
+		DrawGrid(50);
 
-		//text_to_screen();
+		/*glm::mat4 model_rot = glm::translate(glm::mat4(),glm::vec3(-10.0f,0.0f,0.0f)) * glm::rotate(glm::mat4(1.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f));
+		d_shader->SetUniform("mvp",projection_view * model_rot);
 
-		//	glDisable(GL_BLEND);
+		DrawGrid(50);
+*/
+		d_shader_no_texture->Use();
+		text_to_screen();
+		 
 
 		TwDraw();
 
