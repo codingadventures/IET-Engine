@@ -45,6 +45,8 @@ namespace Physics
  
 		glm::vec3		d_initial_wdh;
 
+		glm::vec3 Get_Min_Coordinate_World_Space();
+		glm::vec3 Get_Max_Coordinate_World_Space();
 
 		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
 		void calculate(glm::vec3* translation ,glm::quat* rotation  );
@@ -199,6 +201,15 @@ namespace Physics
 
 		// We have an overlap
 		return true;
+	}
+
+	glm::vec3 BoundingBox::Get_Min_Coordinate_World_Space()
+	{
+		return this->m_min_coordinate + m_center;
+	}
+	glm::vec3 BoundingBox::Get_Max_Coordinate_World_Space()
+	{
+		return this->m_max_coordinate + m_center;
 	}
 
 }

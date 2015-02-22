@@ -18,6 +18,7 @@ namespace Physics
 		glm::vec3				m_linear_momentum; 
 
 		glm::vec3				m_angular_momentum;
+		glm::vec3				m_position;
 
 		float					m_damping_factor;
 		bool					m_use_damping;
@@ -51,7 +52,6 @@ namespace Physics
 		BoundingBox*			d_bounding_box;
 		BoundingSphere*			d_bounding_sphere;
 
-		glm::vec3				d_position;
 	public:
 		void					Update(float delta_time, bool use_polyhedral);
 		void					Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
@@ -145,16 +145,16 @@ namespace Physics
 			m_angular_momentum *= damping ;
 		}
 		orientation = glm::normalize(orientation);
-		d_position =  m_linear_momentum * delta_time / mass;
-		d_center_of_mass += d_position ;
+		m_position =  m_linear_momentum * delta_time / mass;
+		d_center_of_mass += m_position ;
 
-		d_bounding_sphere->center += d_position;
-		d_bounding_box->m_center += d_position;
+		d_bounding_sphere->center += m_position;
+		d_bounding_box->m_center += m_position;
 
 		d_bounding_box->Recalculate_Bounding_Box(&position,&orientation);
 		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
 		m_model.Rotate(orientation);
-		m_model.Translate(d_position);
+		m_model.Translate(m_position);
 
 	}
 

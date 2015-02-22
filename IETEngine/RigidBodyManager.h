@@ -52,7 +52,7 @@ namespace Physics
 	private:
 		void		draw_bounding_sphere(RigidBody& rigid_body);
 		void		draw_center_of_mass(RigidBody& rigid_body);
-		void		Check_Plane_Collision(RigidBody& rigid_body);
+		void Check_Plane_Collision(RigidBody& rigid_body, float delta_time);
 	};
 
 
@@ -89,7 +89,7 @@ namespace Physics
 			rigid_body->Bounding_sphere()->Change_Color(d_non_colliding_color);
 			rigid_body->Bounding_box()->m_is_colliding = glm::vec3(0.0f);
 			rigid_body->Update(delta_time,d_use_polyhedral);
-			Check_Plane_Collision(*rigid_body);
+			Check_Plane_Collision(*rigid_body, delta_time);
 		}
 	}
 
@@ -260,14 +260,20 @@ namespace Physics
 	}
 
 
-	void RigidBodyManager::Check_Plane_Collision(RigidBody& rigid_body)
+	void RigidBodyManager::Check_Plane_Collision(RigidBody& rigid_body, float delta_time)
 	{
 		for (auto plane : d_planes)
 		{
-			auto dot = glm::dot(rigid_body.Center_of_mass() - plane.x, plane.n_normal);
-			if  ( dot  > 0) continue;
+			auto ws_min_coord = rigid_body.Bounding_box()->Get_Min_Coordinate_World_Space();
+			auto ws_max_coord = rigid_body.Bounding_box()->Get_Max_Coordinate_World_Space();
+
+			auto min_collision = glm::dot(ws_min_coord - plane.x, plane.n_normal);
+			auto max_collision = glm::dot(ws_max_coord - plane.x, plane.n_normal);
+
+			if  ( min_collision  > 0 ) continue;
 
 			rigid_body.m_linear_momentum =	glm::reflect(rigid_body.m_linear_momentum,plane.n_normal); 
+			rigid_body.m_position += 2.0f* (plane.x - ws_min_coord) * plane.n_normal;
 		}
 	}
 

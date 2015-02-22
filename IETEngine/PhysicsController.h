@@ -291,6 +291,8 @@ namespace Controller
 		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));
 		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));
 		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(00.0f,0.0f,10.0f),glm::vec3(0.0f,0.0f,-1.0f));
+
+		d_cube_model->Translate(glm::vec3(0.0f,5.0f,0.0f));
 		/*auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
 		d_floor_model->Rotate(floor_rotation);
 
