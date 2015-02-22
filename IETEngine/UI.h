@@ -27,7 +27,17 @@ namespace Helper
 			*static_cast<float *>(value) = static_cast<const RigidBody *>(clientData)->Area();
 		}
 	 
+		static void TW_CALL GetPosition(void *value, void *clientData)
+		{
+			*static_cast<glm::vec3 *>(value) = static_cast<const Model*>(clientData)->Position();
+		}
+		static void TW_CALL SetPosition(const void *value, void *clientData)
+		{ 
+			auto translation = *(const glm::vec3 *)value;  // for instance
+			auto model = static_cast<Model*>(clientData);
 
+			model->TranslateFromOrigin(translation);
+		}
 	};
 
 }

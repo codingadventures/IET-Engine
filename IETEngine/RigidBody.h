@@ -125,6 +125,9 @@ namespace Physics
 		glm::vec3 position		=	m_model.GetPositionVec();
 		glm::mat3 tensor		=	Inertial_Tensor(use_polyhedral);
 
+		d_center_of_mass  = position;
+
+
 		assert(tensor == tensor);
 
 
@@ -149,7 +152,6 @@ namespace Physics
 		}
 		orientation = glm::normalize(orientation);
 		m_position =  m_linear_momentum * delta_time / mass;
-		d_center_of_mass += m_position ;
 
 		d_bounding_sphere->center += m_position;
 		d_bounding_box->m_center += m_position;
@@ -158,6 +160,9 @@ namespace Physics
 		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
 		m_model.Rotate(orientation);
 		m_model.Translate(m_position);
+
+		d_center_of_mass  = m_model.GetPositionVec();
+		d_bounding_sphere->center = d_center_of_mass;
 
 	}
 

@@ -106,7 +106,7 @@ public:
 			m_particles[i].life -= delta_time;
 			m_particles[i].vertex.Color = glm::mix(m_particles[i].min_start_color,m_particles[i].max_start_color, 1.0f - m_particles[i].life / PARTICLE_LIFE);
 
-			CollisionDetection(m_particles[i]);
+			CollisionDetection(m_particles[i],delta_time);
 
 			if (m_particles[i].life < 0)
 			{
@@ -166,7 +166,7 @@ private:
 
 		p.vertex.Position +=  (delta_time / 6) * (v1 + 2.0f * v2 + 2.0f * v3 + v4);
 		p.velocity		  +=  (delta_time / 6) * (p.acceleration + (2.0f * a2) + (2.0f * a3) + a4);
-		p.acceleration	  = m_gravity + wind_speed; 
+		p.acceleration	  = m_gravity; 
 	}
 
 	inline void Reset(size_t index)
@@ -177,7 +177,7 @@ private:
 		m_particles[index].max_start_color = glm::linearRand(glm::vec4( 0.5, 0.0, 0.6, 0.0 ), glm::vec4(0.7, 0.5, 1.0, 0.0 ));
 
 		 
-		glm::vec3 maindir = m_waterfall_enabled? glm::vec3(10.0f, 0.0f, 0.0f): m_source_direction; 
+		glm::vec3 maindir = m_waterfall_enabled? glm::vec3(1.0f, 0.0f, 0.0f): m_source_direction; 
 
 		glm::vec3 randomdir = glm::vec3(
 			(rand()%5000 - 1000.0f)/1000.0f,
@@ -213,7 +213,7 @@ private:
 		return m_wind_direction*m_wind_speed;
 	}
 
-	void CollisionDetection(Particle& p)
+	void CollisionDetection(Particle& p,float delta_time)
 	{
 
 		for (auto plane : d_planes)
@@ -231,6 +231,8 @@ private:
 			p.velocity -= plane.n_normal * (1.0f + m_elasticity) * velFactor;
 
 			p.acceleration = force;
+
+			p.vertex.Position +=  p.velocity * delta_time ;
 		} 
 
 		//if(p.vertex.Position.y < EPSILON)

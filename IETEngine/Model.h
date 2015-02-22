@@ -121,6 +121,13 @@ namespace Rendering
 		{
 			this->d_position = glm::translate(this->d_position,translation_vector);
 		}
+
+		void TranslateFromOrigin(glm::vec3 translation_vector)
+		{
+			this->d_position = glm::translate(glm::mat4(),translation_vector);
+
+
+		}
 		void Rotate(glm::vec3 rotation_vector, float radians)
 		{
 

@@ -26,8 +26,8 @@ namespace Physics
 		vector<Sphere*>						d_bounding_spheres;
 		vector<Cube*>						d_bounding_cubes;
 
-		glm::vec3							d_colliding_color;
-		glm::vec3							d_non_colliding_color;
+		glm::vec4							d_colliding_color;
+		glm::vec4							d_non_colliding_color;
 
 		size_t								d_sort_axis;
 
@@ -35,7 +35,7 @@ namespace Physics
 		RigidBodyManager();
 		~RigidBodyManager();
 
-		void		Add(RigidBody* rigid_body);
+		void		Add(Model* rigid_body);
 		void		Add_Collision_Plane(glm::vec3 center, glm::vec3 normal);
 		void		Update(double delta_time); 
 		void		Check_Sphere_Collisions();
@@ -59,16 +59,17 @@ namespace Physics
 
 	RigidBodyManager::RigidBodyManager()
 		: m_use_polyhedral(false),
-		d_non_colliding_color(glm::vec3(0.0f,0.0f,1.0f)),
-		d_colliding_color(glm::vec3(1.0f,0.0f,0.0f)),
+		d_non_colliding_color(glm::vec4(0.0f,0.0f,1.0f,1.0f)),
+		d_colliding_color(glm::vec4(1.0f,0.0f,0.0f,0.3f)),
 		d_sort_axis(0)
 	{
 
 	}
 
 
-	void RigidBodyManager::Add(RigidBody* rigid_body)
+	void RigidBodyManager::Add(Model* model)
 	{
+		auto rigid_body = new RigidBody(*model);
 		this->d_rigid_bodies.push_back(rigid_body);
 
 		auto sphere = new Sphere(rigid_body->Bounding_sphere()->radius,50,glm::vec3(0.0f));
@@ -202,7 +203,7 @@ namespace Physics
 	void RigidBodyManager::Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view)
 	{
 		shader.Use();
-
+		
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			auto bounding_box = d_rigid_bodies[i]->Bounding_box();
@@ -221,7 +222,9 @@ namespace Physics
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetModelMatrix());
-			d_bounding_spheres[i]->Set_Color(d_rigid_bodies[i]->Bounding_sphere()->color);
+			 
+			shader.SetUniform("shape_color",d_rigid_bodies[i]->Bounding_sphere()->color);
+
 			d_bounding_spheres[i]->Draw(shader);
 		}
 	}
@@ -251,6 +254,11 @@ namespace Physics
 		for (auto cube : d_bounding_cubes)
 		{
 			delete cube;
+		}
+
+		for (auto rigid_body : d_rigid_bodies)
+		{
+			delete rigid_body;
 		}
 	}
 

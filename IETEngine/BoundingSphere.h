@@ -13,7 +13,7 @@ namespace Physics
 	{
 		 
 		glm::vec3	center;
-		glm::vec3	color;
+		glm::vec4	color;
 		float		radius;
 
 		BoundingSphere(const vector<Vertex>& vertices)
@@ -29,7 +29,7 @@ namespace Physics
 			return distanceSquared < (radius+other->radius)*(radius+other->radius);
 		}
 
-		inline void Change_Color(glm::vec3 color);
+		inline void Change_Color(glm::vec4 color);
 
 	private:
 		void calculate(const vector<Vertex>& vertices) 
@@ -57,9 +57,9 @@ namespace Physics
 		}
 	};
 
-	void BoundingSphere::Change_Color(glm::vec3 color)
+	void BoundingSphere::Change_Color(glm::vec4 color)
 	{
-		this->color= color;
+		this->color = color;
 	}
 
 }
