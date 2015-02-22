@@ -33,6 +33,7 @@ namespace Controller
 	using namespace Physics::Particles;
 	using namespace Physics;
 
+
 	class PhysicsController : public AbstractController {
 	public:
 		void Init(int argc, char* argv[]);
@@ -47,7 +48,8 @@ namespace Controller
 		void setup_current_instance();
 
 		GLint	TextureFromFile(const char* fileName, string directory);
-		void TW_CALL apply_impulse_callback(void *clientData);
+
+		//void TW_CALL generate_force(void *  clientData);
 	private: 
 		Shader*			d_shader;
 		Shader*			d_shader_no_texture;
@@ -69,6 +71,7 @@ namespace Controller
 			d_model_vector; 
 
 		float   		d_force_impulse_magnitude; 
+		float			d_plane_size;
 
 		ParticleSystem2* d_particle_system2; 
 
@@ -90,6 +93,7 @@ namespace Controller
 		Controller::g_CurrentInstance = this; 
 	}
 
+	
 #pragma region Constructor/Destructor
 	PhysicsController::~PhysicsController()
 	{
@@ -106,7 +110,8 @@ namespace Controller
 		d_shader(nullptr), 
 		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
 		d_force_impulse_magnitude(10.0f),
-		d_force_impulse_application_point(0.0f)
+		d_force_impulse_application_point(0.0f),
+		d_plane_size(40.f)
 	{
 		setup_current_instance();
 
@@ -172,16 +177,14 @@ namespace Controller
 		if (g_keyMappings[KEY_4])
 		euler_on = !euler_on;*/
 
-#ifdef RIGID_BODY
+#if defined(RIGID_BODY) || defined(COLLISION_DETECTION)
 		if (g_keyMappings[KEY_SPACE])
-			d_rigid_body->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point , d_delta_time_secs);
+			d_rigid_body_manager->Rigid_bodies()[0]->Apply_Impulse(d_force_impulse_direction * d_force_impulse_magnitude,d_force_impulse_application_point);
 
 #endif // RIGID_BODY
 
 
 	}
-
-
 
 	void PhysicsController::tweak_bar_setup()
 	{
@@ -202,10 +205,16 @@ namespace Controller
 
 #endif
 
-#ifdef COLLISION_DETECTION || RIGID_BODY
+#if  defined(RIGID_BODY) || defined(COLLISION_DETECTION)
 		TwAddVarRW(Helper::g_tweak_bar, "Force Direction", TW_TYPE_DIR3F, &d_force_impulse_direction, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force Magnitude", TW_TYPE_FLOAT, &d_force_impulse_magnitude, "");
 		TwAddVarRW(Helper::g_tweak_bar, "Force App. Point", TW_TYPE_DIR3F, &d_force_impulse_application_point, "");
+
+		TwAddVarRW(Helper::g_tweak_bar, "Use Polyhedral Tensor", TW_TYPE_BOOLCPP, &d_rigid_body_manager->m_use_polyhedral, "");
+		TwAddVarCB(Helper::g_tweak_bar, "Use Damping", TW_TYPE_BOOLCPP, Helper::UI::Set_Is_Damping_Enabled, Helper::UI::Get_Is_Damping_Enabled, d_rigid_body_manager,  "");
+		TwAddVarCB(Helper::g_tweak_bar, "Damping Fact.", TW_TYPE_FLOAT, Helper::UI::Set_Damping, Helper::UI::Get_Damping, d_rigid_body_manager,  "");
+		TwAddVarCB(Helper::g_tweak_bar, "Cube Position", TW_TYPE_DIR3F, Helper::UI::SetPosition ,Helper::UI::GetPosition,d_cube_model , "");
+
 #endif   
 
 #ifdef COLLISION_DETECTION
@@ -214,6 +223,7 @@ namespace Controller
 
 		TwAddVarCB(Helper::g_tweak_bar, "Cube Position", TW_TYPE_DIR3F, Helper::UI::SetPosition ,Helper::UI::GetPosition,d_cube_model , "");
 		//TwAddVarRO(Helper::g_tweak_bar, "Collision", TW_TYPE_BOOLCPP, &d_is_narrow_phase_collision, NULL);
+		TwAddButton(Helper::g_tweak_bar, "Apply Impulse", Helper::UI::Generate_Force, d_rigid_body_manager, " label='Force Generator' ");
 
 #endif
 #ifdef PARTICLE
@@ -276,37 +286,28 @@ namespace Controller
 
 		d_cube_model = new Model("models\\cubetri.obj"); 
 		d_rigid_body_manager->Add(d_cube_model);
-		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));/*
-																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-10.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));
-																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(10.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));
-																							 d_rigid_body_manager->Add_Collision_Plane(glm::vec3(00.0f,0.0f,10.0f),glm::vec3(0.0f,0.0f,-1.0f));*/
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));				// BOTTOM
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(-d_plane_size,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f));	// LEFT
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(d_plane_size,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f));	// RIGHT
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f,d_plane_size,0.0f),glm::vec3(0.0f,-1.0f,0.0f));   // TOP
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f,0.0f,d_plane_size),glm::vec3(0.0f,0.0f,-1.0f));   // FRONT
+		d_rigid_body_manager->Add_Collision_Plane(glm::vec3(0.0f,0.0f,-d_plane_size),glm::vec3(0.0f,0.0f,1.0f));   // BACK
 
 		d_cube_model->Translate(glm::vec3(0.0f,5.0f,0.0f));
-		/*auto floor_rotation = glm::angleAxis(glm::radians(-90.0f),glm::vec3(1.0f,0.0f,0.0f));
-		d_floor_model->Rotate(floor_rotation);
-
-		d_floor_model->Scale(glm::vec3(100.0f,100.0f,100.0f));
-		d_floor_model->Translate(glm::vec3(0,-10.0f,0.0f));*/
 
 
-
-
-		//d_model_vector.push_back(d_cube_model);
-		////d_model_vector.push_back(d_floor_model); 
-
-		for (int i = 0; i < 10; i++)
+#ifdef COLLISION_DETECTION
+		for (int i = 0; i < 1; i++)
 		{
 			auto model = new Model(*d_cube_model);
-			model->Translate(glm::sphericalRand(20.0f));
+			model->Translate(glm::linearRand(glm::vec3(0.0f),glm::vec3(d_plane_size)));
 			d_model_vector.push_back(model);
 			d_rigid_body_manager->Add(model);
 		}
 
-		/*auto container_cube = new Model(*d_cube_model);
-		container_cube->Scale(glm::vec3(50.0f,50.0f,50.0f));	
-		d_rigid_body_manager->Add( new RigidBody(*container_cube));*/
 
-		//
+#endif
+
 #ifdef PARTICLE
 		{
 			const int num_particles = 200000;
@@ -459,7 +460,7 @@ namespace Controller
 
 
 		//	d_shader_boundings->SetUniform("shape_color",d_collision_color);
-	 
+
 		/*auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
 		if (colliding_pairs->size())
 		{
@@ -527,6 +528,8 @@ namespace Controller
 		d_shader->Use();
 		d_shader->SetUniform("mvp",projection_view);
 
+		d_shader->SetUniform("model_transpose_inverse",  glm::mat4()); 
+		d_shader->SetUniform("model_matrix",  glm::mat4()); 
 		DrawGrid(50);
 
 		/*glm::mat4 model_rot = glm::translate(glm::mat4(),glm::vec3(-10.0f,0.0f,0.0f)) * glm::rotate(glm::mat4(1.0f),glm::radians(-45.0f),glm::vec3(0.0f,0.0f,1.0f));

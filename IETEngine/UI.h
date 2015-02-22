@@ -38,6 +38,40 @@ namespace Helper
 
 			model->TranslateFromOrigin(translation);
 		}
+
+		static void TW_CALL Get_Damping(void *value, void *clientData)
+		{
+			auto rb_manager = static_cast<const RigidBodyManager*>(clientData);
+
+			*static_cast<float *>(value) = rb_manager->m_damping_factor;
+		}
+		static void TW_CALL Set_Damping(const void *value, void *clientData)
+		{ 
+			auto damping_factor = *(const float *)value;  // for instance
+			 auto rb_manager   = static_cast<RigidBodyManager*>(clientData);
+
+			rb_manager->Set_Damping_Factor(damping_factor);
+		}
+
+		static void TW_CALL Get_Is_Damping_Enabled(void *value, void *clientData)
+		{
+			*static_cast<bool *>(value) = static_cast<const RigidBodyManager*>(clientData)->m_use_damping;
+		}
+		static void TW_CALL Set_Is_Damping_Enabled(const void *value, void *clientData)
+		{ 
+			auto enable = *(const bool *)value;  // for instance
+			auto rb_manager = static_cast<RigidBodyManager*>(clientData);
+
+			rb_manager->Damping(enable);
+		}
+	
+		static void TW_CALL Generate_Force(void * clientData)
+		{ 
+			auto rb_manager   = static_cast<RigidBodyManager*>(clientData);
+
+			rb_manager->Apply_Impulse_To_All();
+		}
+
 	};
 
 }

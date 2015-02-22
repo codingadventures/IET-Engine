@@ -17,6 +17,9 @@ namespace Physics
 	{ 
 	public:
 		bool								m_use_polyhedral;
+		float								m_damping_factor;
+		bool								m_use_damping;
+
 
 	private:
 		vector<RigidBody*>					d_rigid_bodies;
@@ -34,6 +37,8 @@ namespace Physics
 	public:
 		RigidBodyManager();
 		~RigidBodyManager();
+		vector<RigidBody*> 
+			Rigid_bodies() const { return d_rigid_bodies; } 
 
 		void		Add(Model* rigid_body);
 		void		Add_Collision_Plane(glm::vec3 center, glm::vec3 normal);
@@ -43,7 +48,9 @@ namespace Physics
 		void		Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Boundings(Shader& shader, glm::mat4 projection_view);
-		void		Apply_Impulse_To_All( float delta_time);
+		void Apply_Impulse_To_All();
+		void		Set_Damping_Factor(float damping);
+		void		Damping(bool enable);
 
 		vector<CollidingPair<RigidBody>>* 
 			Colliding_Pairs();
@@ -61,7 +68,9 @@ namespace Physics
 		: m_use_polyhedral(false),
 		d_non_colliding_color(glm::vec4(0.0f,0.0f,1.0f,1.0f)),
 		d_colliding_color(glm::vec4(1.0f,0.0f,0.0f,0.3f)),
-		d_sort_axis(0)
+		d_sort_axis(0),
+		m_damping_factor(0.2f),
+		m_use_damping(true)
 	{
 
 	}
@@ -77,7 +86,7 @@ namespace Physics
 		auto cube = new Cube(
 			rigid_body->Bounding_box()->m_min_coordinate ,
 			rigid_body->Bounding_box()->m_max_coordinate  ,
-			glm::vec4(rigid_body->Bounding_box()->Color(),1.0f)
+			 rigid_body->Bounding_box()->Color() 
 			);
 
 		d_bounding_spheres.push_back(sphere);
@@ -203,15 +212,15 @@ namespace Physics
 	void RigidBodyManager::Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view)
 	{
 		shader.Use();
-		
+
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			auto bounding_box = d_rigid_bodies[i]->Bounding_box();
 			glm::mat4 scale = glm::scale(glm::mat4(1),d_rigid_bodies[i]->Bounding_box()->m_scale_factor);
 			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetPosition() * scale);
 
-
-			d_bounding_cubes[i]->Set_Color(d_rigid_bodies[i]->Bounding_box()->Color());
+			shader.SetUniform("shape_color",d_rigid_bodies[i]->Bounding_box()->Color());
+			 
 			d_bounding_cubes[i]->Draw(shader);
 		}
 	} 
@@ -222,7 +231,7 @@ namespace Physics
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetModelMatrix());
-			 
+
 			shader.SetUniform("shape_color",d_rigid_bodies[i]->Bounding_sphere()->color);
 
 			d_bounding_spheres[i]->Draw(shader);
@@ -234,13 +243,12 @@ namespace Physics
 		return &d_colliding_pairs;   
 	}
 
-	void RigidBodyManager::Apply_Impulse_To_All( float delta_time)
-	{
+	void RigidBodyManager::Apply_Impulse_To_All()
+{
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
-			d_rigid_bodies[i]->Apply_Impulse(glm::sphericalRand(1.0f) * glm::sphericalRand(30.0f),
-				glm::linearRand(  d_rigid_bodies[i]->Bounding_box()->m_center, d_rigid_bodies[i]->Bounding_box()->m_center),
-				delta_time);
+			d_rigid_bodies[i]->Apply_Impulse(glm::linearRand(glm::vec3(-1.0f),glm::vec3(1.0f)) * glm::linearRand(1.0f,100.0f) ,
+				glm::linearRand(  d_rigid_bodies[i]->Bounding_box()->m_min_coordinate, d_rigid_bodies[i]->Bounding_box()->m_max_coordinate));
 		}
 	}
 
@@ -291,6 +299,24 @@ namespace Physics
 				rigid_body.m_angular_momentum -= restitution_vel * (1.0f+0.2f) *  plane.n_normal;
 
 
+		}
+	}
+
+	void RigidBodyManager::Set_Damping_Factor(float damping)
+	{
+		m_damping_factor = damping;
+		for (auto rigid_body : d_rigid_bodies)
+		{
+			rigid_body->m_damping_factor = damping;
+		}
+	}
+
+	void RigidBodyManager::Damping(bool enable)
+	{
+		m_use_damping = enable;
+		for (auto rigid_body : d_rigid_bodies)
+		{
+			rigid_body->m_use_damping = enable;
 		}
 	}
 

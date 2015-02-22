@@ -57,7 +57,7 @@ namespace Physics
 
 	public:
 		void					Update(float delta_time, bool use_polyhedral);
-		void					Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time);
+		void Apply_Impulse(glm::vec3 force, glm::vec3 application_point);
 
 		glm::vec3				Center_of_mass() const;
 		glm::vec3				Velocity() const;
@@ -105,7 +105,8 @@ namespace Physics
 		m_acceleration(0.0f),
 		m_linear_momentum(0.0f),
 		m_angular_momentum(0.0f),
-		m_damping_factor(0.2f)
+		m_damping_factor(0.2f),
+		m_use_damping(true)
 	{
 
 		calculate_mesh_stats();
@@ -127,9 +128,17 @@ namespace Physics
 
 		d_center_of_mass  = position;
 
+		calculate_torque();
 
 		assert(tensor == tensor);
 
+		m_angular_momentum +=	d_torque * delta_time;
+		assert(m_angular_momentum == m_angular_momentum);
+
+		m_linear_momentum +=	m_force  * delta_time;
+		assert(m_linear_momentum == m_linear_momentum);
+
+		m_velocity = m_linear_momentum / d_mass; 
 
 		float mass = use_polyhedral ? d_polyhedral_mass: d_mass;
 
@@ -139,7 +148,6 @@ namespace Physics
 		orientation += delta_time *  orientation * glm::quat(set_as_cross_product_matrix(m_angular_velocity)) ;
 		assert(orientation == orientation);
 
-		calculate_torque();
 
 		m_velocity = m_linear_momentum / mass; 
 		assert(m_velocity == m_velocity);
@@ -163,24 +171,13 @@ namespace Physics
 
 		d_center_of_mass  = m_model.GetPositionVec();
 		d_bounding_sphere->center = d_center_of_mass;
-
+		m_force = glm::vec3(0.0f);
 	}
 
-	void RigidBody::Apply_Impulse(glm::vec3 force, glm::vec3 application_point, float delta_time)
+	void RigidBody::Apply_Impulse(glm::vec3 force, glm::vec3 application_point)
 	{
-		m_force = force;
-		//d_acceleration = force / d_mass;
-		m_force_application_point = application_point ;
-		calculate_torque();
-		m_angular_momentum +=	d_torque * delta_time;
-		assert(m_angular_momentum == m_angular_momentum);
-
-		m_linear_momentum +=	m_force  * delta_time;
-		assert(m_linear_momentum == m_linear_momentum);
-
-		m_velocity = m_linear_momentum / d_mass; 
-
-
+		m_force = force; 
+		m_force_application_point = application_point;
 	}
 
 	glm::mat3 RigidBody::set_as_cross_product_matrix(glm::vec3 v )

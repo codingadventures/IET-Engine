@@ -29,7 +29,7 @@ namespace Physics
 		void operator+=(BoundingBox& const other_bbox){
 			*this = Calculate(*this,  other_bbox);
 		} 
-		glm::vec3 Color() const;
+		glm::vec4 Color() const;
 
 		bool Overlaps(const BoundingBox& second);
 
@@ -167,10 +167,10 @@ namespace Physics
 		return ep;
 	}
 
-	glm::vec3 BoundingBox::Color()  const
+	glm::vec4 BoundingBox::Color()  const
 	{
 		bool is_colliding = Is_Colliding();
-		return  is_colliding ? glm::vec3(1.0f,0.0f,0.0f) : glm::vec3(0.0f,1.0f,0.0f);
+		return  is_colliding ? glm::vec4(1.0f,0.0f,0.0f,0.3f) : glm::vec4(0.0f,1.0f,0.0f,1.0f);
 	}
 
 	void BoundingBox::Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation)
