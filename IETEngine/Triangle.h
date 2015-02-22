@@ -20,10 +20,17 @@ namespace Rendering
 			d_vertices.push_back(Vertex(a));
 			d_vertices.push_back(Vertex(b));
 			d_vertices.push_back(Vertex(c));
-			 
+
 			Init();
 		}
+		~Triangle()
+		{
+			glDeleteBuffers(1,&d_VBO);
+			glDeleteVertexArrays(1,&d_VAO);
+			d_VBO = 0;
+			d_VAO = 0;
 
+		}
 		void Draw()
 		{ 
 			// Draw mesh

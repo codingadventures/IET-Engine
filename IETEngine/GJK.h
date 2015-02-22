@@ -75,14 +75,24 @@ namespace Physics
 
 		simplex.push_back(point3);
 
-		auto D = direction;
+		auto D = -point3.minkowski_point;
 
 		shader.Use();
 
 
 		for (int counter = 0; counter < MAX_GJK_COUNT; counter++ )
 		{
+			//auto newD = glm::normalize(D); 
 
+			auto A = SupportMapping::Get_Farthest_Point(D, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-D, d_vertices_shape_2);
+			auto AnewD= glm::dot(A.minkowski_point,D);
+
+			if(AnewD < 0.0f){
+				intersect = false;
+				break;
+			}
+
+			simplex.push_back(A);
 
 			if (do_simplex(simplex,D))
 			{
@@ -95,51 +105,44 @@ namespace Physics
 
 					//NASTY HACK
 					//gotta figure out why
-					int exit_index = 0;
+					/*int exit_index = 0;
 					for (int i = 0; i < 4; i++)
 					{
-						for (int j = i+1; j < 4; j++)
-						{
-							if (simplex[i].minkowski_point == simplex[j].minkowski_point)
-							{
-								exit_index++;
-							}
-						}
+					for (int j = i+1; j < 4; j++)
+					{
+					if (simplex[i].minkowski_point == simplex[j].minkowski_point)
+					{
+					exit_index++;
+					}
+					}
 
 					}
 					if (exit_index > 2)
 					{
-						intersect = false;
-						return false;
-					}
-					/**/
+					intersect = false;
+					return false;
+					} */
 
 					EPA epa = EPA(simplex,d_vertices_shape_1,d_vertices_shape_2);
-					//for (auto triangle : epa.m_triangle_list)
-					//{
-					//	//Triangle t(triangle.a.minkowski_point,triangle.b.minkowski_point,triangle.c.minkowski_point);
-					//	Triangle t(triangle.a.support_a,triangle.b.support_a,triangle.c.support_a);
-					//	
-					//	t.Draw();
-					//}
+				 
 					auto intersection_point = epa.Run();
 
 					m_intersection_point_a = intersection_point.point_a;
 					m_intersection_point_b = intersection_point.point_b;
 					m_normal = intersection_point.plane.n_normal;
-					shader.SetUniform("shape_color",glm::vec4(.0f,1.0f,0.0f,1.0f));
+					/*shader.SetUniform("shape_color",glm::vec4(.0f,1.0f,0.0f,1.0f));
 					Triangle t(
-						intersection_point.plane.a.support_a,
-						intersection_point.plane.b.support_a,
-						intersection_point.plane.c.support_a);
+					intersection_point.plane.a.support_a,
+					intersection_point.plane.b.support_a,
+					intersection_point.plane.c.support_a);
 
 					Triangle t2(
-						intersection_point.plane.a.support_b,
-						intersection_point.plane.b.support_b,
-						intersection_point.plane.c.support_b);
+					intersection_point.plane.a.support_b,
+					intersection_point.plane.b.support_b,
+					intersection_point.plane.c.support_b);
 
 					t.Draw();
-					t2.Draw();
+					t2.Draw();*/
 
 				}
 
@@ -148,19 +151,7 @@ namespace Physics
 				break;
 			}
 
-			auto newD = glm::normalize(D);
-			auto dotD = glm::dot(newD,-D);
-
-			auto A = SupportMapping::Get_Farthest_Point(newD, d_vertices_shape_1) - SupportMapping::Get_Farthest_Point(-newD, d_vertices_shape_2);
-			auto AnewD= glm::dot(A.minkowski_point,newD);
-
-
-			if(AnewD <= dotD + 0.05f){
-				intersect = false;
-				break;
-			}
-
-			simplex.push_back(A);
+			
 
 
 		}

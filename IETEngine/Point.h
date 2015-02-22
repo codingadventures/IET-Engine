@@ -33,7 +33,9 @@ namespace Rendering
 		~Point()
 		{  
 			glDeleteBuffers(1,&VBO);
-			glDeleteBuffers(1,&VAO);
+			glDeleteVertexArrays(1,&VAO);
+			VBO = 0;
+			VAO = 0;
 		}
 
 

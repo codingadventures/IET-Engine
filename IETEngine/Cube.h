@@ -15,6 +15,7 @@ namespace Rendering
 		glm::vec3		d_color;
 	public:
 		Cube(glm::vec3 min_vertex, glm::vec3 max_vertex, glm::vec4 color);
+		~Cube();
 		void Set_Color(glm::vec3 color); 
 		void Draw(Shader& shader);
 
@@ -76,6 +77,14 @@ namespace Rendering
 		Init();
 	}
 
+	Cube::~Cube()
+	{
+		glDeleteBuffers(1,&d_VBO);
+		glDeleteVertexArrays(1,&d_VAO);
+		d_VBO = 0;
+		d_VAO = 0;
+	}
+
 	void Cube::Draw(Shader& shader)
 	{ 
 		shader.SetUniform("shape_color",d_color);
@@ -110,6 +119,8 @@ namespace Rendering
 	{
 		d_color = color;
 	}
+
+	
 
 
 }

@@ -19,6 +19,15 @@ public:
 		Init();
 	}
 
+	~Line()
+	{
+		glDeleteBuffers(1,&d_VBO);
+		glDeleteVertexArrays(1,&d_VAO);
+		d_VBO = 0;
+		d_VAO = 0;
+
+	}
+
 	void Draw()
 	{ 
 		// Draw mesh

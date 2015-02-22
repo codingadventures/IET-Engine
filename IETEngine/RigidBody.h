@@ -44,7 +44,7 @@ namespace Physics
 		glm::vec3				d_center_of_mass;
 		glm::vec3				d_polyhedral_center_of_mass;
 
-		
+
 
 		glm::mat3				d_inertial_tensor;
 		glm::mat3				d_inverse_inertial_tensor;
@@ -264,23 +264,26 @@ namespace Physics
 		assert(pb==pb);
 
 		auto v_rel = glm::dot(normal, pa-pb);
-		/*if (v_rel < 0.0)
-		{	*/
-		auto numerator = -(1 + REST_FACTOR) * v_rel;
+		if (v_rel < 0.0)
+		{	 
+			auto numerator = -(1 + REST_FACTOR) * v_rel;
 
-		assert(denominator!=0);
+			assert(denominator!=0);
 
-		auto J = numerator / denominator;
+			auto J = numerator / denominator;
 
 
-		return J;
-		/*}
-		*/return 0.0f;
+			return std::max(0.0f,J);
+		}
+		return 0.0f;
 	}
 
 	glm::mat3 RigidBody::Inertial_Tensor(bool use_polyhedral) const
 	{
-		return use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+		auto inverse_tensor = use_polyhedral ? d_inverse_polyhedral_tensor : d_inverse_inertial_tensor;
+		glm::quat orientation	=	m_model.Rotation();
+
+		return glm::toMat3(orientation) * inverse_tensor * glm::transpose(glm::toMat3(orientation));
 	}
 
 	glm::vec3 RigidBody::Velocity() const
