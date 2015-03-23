@@ -57,7 +57,7 @@ namespace Physics
 
 	public:
 		void					Update(float delta_time, bool use_polyhedral);
-		void Apply_Impulse(glm::vec3 force, glm::vec3 application_point);
+		void					Apply_Impulse(glm::vec3 force, glm::vec3 application_point);
 
 		glm::vec3				Center_of_mass() const;
 		glm::vec3				Velocity() const;

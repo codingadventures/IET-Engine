@@ -11,7 +11,8 @@ enum RenderingType{
 	SPECULAR,
 	PHONG,
 	TOON,
-	FRESNEL
+	FRESNEL,
+	HATCHING
 
 };
 

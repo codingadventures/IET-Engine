@@ -36,6 +36,14 @@
 GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define ANIMATION_SPEED 0.5
 
+#define HATCH01 "hatch_0.jpg"
+#define HATCH02 "hatch_1.jpg"
+#define HATCH03 "hatch_2.jpg"
+#define HATCH04 "hatch_3.jpg"
+#define HATCH05 "hatch_4.jpg"
+#define HATCH06 "hatch_5.jpg"
+
+
 #pragma region [ MODELS ]
 #define CONES_MODEL "models\\Cones3.dae"
 #define MAX_MODEL "models\\max.dae"

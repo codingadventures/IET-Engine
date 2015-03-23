@@ -141,6 +141,13 @@ namespace Rendering
 			return &d_meshes; 
 		}
 
+		void addTextures(Texture texture)
+		{
+			for (auto& mesh : d_meshes)
+			{
+				mesh.m_textures.push_back(texture);
+			} 
+		}
 
 		void Rotate(glm::quat rotation)
 		{

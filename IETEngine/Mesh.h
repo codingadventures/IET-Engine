@@ -1,4 +1,4 @@
- #ifndef Mesh_h__
+#ifndef Mesh_h__
 #define Mesh_h__
 
 
@@ -21,7 +21,7 @@
 
 namespace Rendering
 {
-	
+
 	using namespace std;
 	using namespace Physics;
 
@@ -32,14 +32,14 @@ namespace Rendering
 		vector<GLuint>				m_indices;
 		vector<Texture>				m_textures; 
 		vector<VertexWeight>		m_boneWeights;
-		 							
+
 		glm::vec3					m_center_of_mass; 
 		glm::vec3					m_polyhedral_center_of_mass;
-									
+
 	private:						
 		BoundingBox					d_bounding_box;
 		BoundingSphere				d_bounding_sphere;
-									
+
 		/*  Render data  */			
 		GLuint						d_VAO;
 		GLuint						d_VBO;
@@ -69,7 +69,7 @@ namespace Rendering
 			this->setupMesh();
 		}   
 
-		 
+
 		// Render the mesh
 		void Draw(Shader& shader ) 
 		{
@@ -92,8 +92,8 @@ namespace Rendering
 					//	ss << specularNr++; // Transfer GLuint to stream
 					//number = ss.str(); 
 					// Now set the sampler to the correct texture unit
-					 
-					glUniform1i(glGetUniformLocation(shader.m_program,  uniform_name.c_str()), i);
+					GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
+					glUniform1i(shader_location, i);
 					// And finally bind the texture
 					glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
 				}
@@ -101,13 +101,13 @@ namespace Rendering
 			}
 
 			d_material.SetShader(shader);
-	
+
 			// Draw mesh
 			glBindVertexArray(this->d_VAO);
 			glDrawElements(GL_TRIANGLES, this->m_indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
-		
+
 		float Area() const { return d_area; } 
 
 		Physics::BoundingBox Bounding_box() const { 
@@ -129,7 +129,7 @@ namespace Rendering
 			glGenVertexArrays(1, &this->d_VAO);
 			glGenBuffers(1, &this->d_VBO);
 			glGenBuffers(1, &this->d_EBO);
-	
+
 			glBindVertexArray(this->d_VAO);
 			// Load data into vertex buffers
 			glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO);
@@ -137,10 +137,10 @@ namespace Rendering
 			// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
 			// again translates to 3/2 floats which translates to a byte array.
 			glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex), &this->m_vertices[0], GL_STATIC_DRAW);  
-	
+
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_indices.size() * sizeof(GLuint), &this->m_indices[0], GL_STATIC_DRAW);
-	
+
 			// Set the vertex attribute pointers
 			// Vertex Positions
 			glEnableVertexAttribArray(0);	
@@ -151,8 +151,8 @@ namespace Rendering
 			// Vertex Texture Coordinates
 			glEnableVertexAttribArray(2);	
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
-	
-			 
+
+
 			/*glEnableVertexAttribArray(3);	
 			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));*/
 
@@ -163,29 +163,29 @@ namespace Rendering
 			if (hasBones())
 			{
 				glGenBuffers(1, &this->d_bone_VBO);
-	
-	
+
+
 				glBindBuffer(GL_ARRAY_BUFFER, d_bone_VBO);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(m_boneWeights[0]) * m_boneWeights.size(), &m_boneWeights[0], GL_STATIC_DRAW);
-	
+
 				glEnableVertexAttribArray(5);
 				glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
-	
+
 				glEnableVertexAttribArray(6);    
 				glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
 			}
 
-		
+
 
 			glBindVertexArray(0);
 		}
-	
+
 		// Calculation of the center of mass based on paul bourke's website
 		// http://paulbourke.net/geometry/polygonmesh/
 		void calculate_center_of_mass()
 		{
 			size_t N = m_vertices.size();
-			
+
 			float* area  = new float[N];
 			glm::vec3* R	 = new glm::vec3[N];
 			glm::vec3 numerator;
@@ -201,35 +201,35 @@ namespace Rendering
 				denominator +=area[i];
 			}
 			m_center_of_mass = numerator/denominator;
-	
+
 			if (m_center_of_mass != m_center_of_mass)
 				m_center_of_mass = glm::vec3(0.0f,0.0f,0.0f);
-	
+
 			delete[] area;
 			delete[] R;
 		}
-	
+
 		void calculate_area()
 		{	 
-			 size_t N = m_vertices.size();
-			 if (N % 3 != 0) return;
+			size_t N = m_vertices.size();
+			if (N % 3 != 0) return;
 
-			 for (int i = 0; i < N; i = i + 3)
-			 {
-				 glm::vec3 v1 = m_vertices[i].Position;
-				 glm::vec3 v2 = m_vertices[i+1].Position;
-				 glm::vec3 v3 = m_vertices[i+2].Position;
-				 d_area += glm::length(glm::cross(v2 - v1,v3 - v1)) * 0.5f;
-			 }
+			for (int i = 0; i < N; i = i + 3)
+			{
+				glm::vec3 v1 = m_vertices[i].Position;
+				glm::vec3 v2 = m_vertices[i+1].Position;
+				glm::vec3 v3 = m_vertices[i+2].Position;
+				d_area += glm::length(glm::cross(v2 - v1,v3 - v1)) * 0.5f;
+			}
 		}
-	
+
 		void calculate_bounding_box()
 		{
-		 	d_bounding_box = BoundingBox(m_vertices);
-			 
+			d_bounding_box = BoundingBox(m_vertices);
+
 		}
-		
-		 
+
+
 	};
 }
 

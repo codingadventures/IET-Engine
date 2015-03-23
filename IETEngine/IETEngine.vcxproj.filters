@@ -320,6 +320,9 @@
     <ClInclude Include="Triangle.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="RenderingControllerDemo.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex_bone.vert">
@@ -368,6 +371,9 @@
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
     <None Include="fresnel.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="hatching.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
   </ItemGroup>

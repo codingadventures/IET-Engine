@@ -303,7 +303,7 @@ namespace Controller
 		for (int i = 0; i < 1; i++)
 		{
 			auto model = new Model(*d_cube_model);
-			model->Translate(glm::linearRand(glm::vec3(0.0f),glm::vec3(15.0f)));
+			model->Translate(glm::linearRand(glm::vec3(0.0f),glm::vec3(10.0f)));
 			d_model_vector.push_back(model);
 			d_rigid_body_manager->Add(model);
 		}

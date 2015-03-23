@@ -106,15 +106,10 @@ namespace Controller
 
 
 	void RenderingController::text_to_screen()
-	{ 
-
-
-
+	{  
 		string controls = "Player/Camera W,A,S,D";
 		screen_output(10, 20, (char*) controls.c_str());
-
-
-
+		 
 	}
 
 	void RenderingController::Read_Input()
@@ -329,7 +324,7 @@ namespace Controller
 
 		//d_cube_model->Rotate(random_cube_rotation);
 		//d_torus_model->Rotate(random_torus_rotation); 
-		//d_nano_model->Rotate(d_quaternion_rotation);
+		//
 		//d_nano_model->Rotate(glm::vec3(0,0,1),glm::radians(5 * d_delta_time_secs)); 
 
 		/*	d_light_position.x =  35.5f * glm::cos((float)d_global_clock* .5);

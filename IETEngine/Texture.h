@@ -17,19 +17,21 @@ struct Texture {
 	GLuint id;
 	TextureType m_texture_type;
 	string m_file_name;
-
-	Texture(string file_name, TextureType type);
+	string m_uniform_name;
+	Texture(string file_name, TextureType type, string uniform_name = "");
 	bool Load(string directory);
 	string Get_Uniform_Name(string index);
 };
 
-Texture::Texture(string file_name, TextureType type) : m_texture_type(type),m_file_name(file_name)
+Texture::Texture(string file_name, TextureType type, string uniform_name ) : m_texture_type(type),m_file_name(file_name), m_uniform_name(uniform_name)
 {
 	assert(file_name!= "");
 }
 
 std::string Texture::Get_Uniform_Name(string index)
 {
+	if (!m_uniform_name.empty()) return "hatching." + m_uniform_name;
+
 	switch (m_texture_type)
 	{
 	case TextureType_REFLECTION:
@@ -78,14 +80,14 @@ bool Texture::Load(string directory)
 	glTexImage2D(GL_TEXTURE_2D,  0, GL_RGBA, image->columns(), image->rows(), 0, GL_RGBA, GL_UNSIGNED_BYTE, blob.data());
 
 	// Parameters
-	/*glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glGenerateMipmap(GL_TEXTURE_2D);	*/
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	//glGenerateMipmap(GL_TEXTURE_2D);	/**/
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);/* */
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
