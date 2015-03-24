@@ -133,12 +133,12 @@ namespace Controller
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
 
-		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
+		vector<string> v_shader				= ArrayConversion<string>(2,string("hatching.vert"),string("common.vert")); 
 
 		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching.frag"),string("common.frag")); 
 
 
-		d_shader = new Shader(v_shader,f_shader); 
+		d_shader = new Shader(v_shader,f_shader,"hatching.geom"); 
 
 		d_nano_model = new Model("models\\torus.dae");
 
@@ -149,13 +149,12 @@ namespace Controller
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
 
 		//Load all the hatches
-
-		auto hatch1 = Texture(HATCH01, TextureType_DIFFUSE, "hatch1");
-		auto hatch2 = Texture(HATCH02, TextureType_DIFFUSE, "hatch2");
-		auto hatch3 = Texture(HATCH03, TextureType_DIFFUSE, "hatch3");
-		auto hatch4 = Texture(HATCH04, TextureType_DIFFUSE, "hatch4");
-		auto hatch5 = Texture(HATCH05, TextureType_DIFFUSE, "hatch5");
-		auto hatch6 = Texture(HATCH06, TextureType_DIFFUSE, "hatch6");
+		/*auto hatch1  = Texture(HATCH01,TextureType_DIFFUSE,"hatching.hatch1");
+		auto hatch2  = Texture(HATCH02,TextureType_DIFFUSE,"hatching.hatch2"); 
+		auto hatch3  = Texture(HATCH03,TextureType_DIFFUSE,"hatching.hatch3"); 
+		auto hatch4  = Texture(HATCH04,TextureType_DIFFUSE,"hatching.hatch4"); 
+		auto hatch5  = Texture(HATCH05,TextureType_DIFFUSE,"hatching.hatch5"); 
+		auto hatch6  = Texture(HATCH06,TextureType_DIFFUSE,"hatching.hatch6"); 
 
 		hatch1.Load("textures");
 		hatch2.Load("textures");
@@ -169,7 +168,23 @@ namespace Controller
 		d_nano_model->addTextures(hatch3);
 		d_nano_model->addTextures(hatch4);
 		d_nano_model->addTextures(hatch5);
-		d_nano_model->addTextures(hatch6);
+		d_nano_model->addTextures(hatch6);*/
+
+
+
+		auto hatch = Texture("textures", "hatch3d");
+		vector<string> texturesToLoad;
+
+		texturesToLoad.push_back(HATCH01);
+		texturesToLoad.push_back(HATCH02);
+		texturesToLoad.push_back(HATCH03);
+		texturesToLoad.push_back(HATCH04);
+		texturesToLoad.push_back(HATCH05);
+		texturesToLoad.push_back(HATCH06);
+
+		hatch.Load3D(texturesToLoad);
+
+		d_nano_model->addTextures(hatch); 
 
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
@@ -201,7 +216,7 @@ namespace Controller
 		d_view_matrix = d_camera->GetViewMatrix(); 
 
 		projection_view = d_projection_matrix * d_view_matrix;  
-	
+
 		d_nano_model->Rotate(d_quaternion_rotation);
 
 		current_shader->Use(); 

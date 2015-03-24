@@ -19,20 +19,26 @@ public:
 private:
 	vector<string>	d_vertex_source_path;
 	vector<string>	d_fragment_source_path;
+	vector<string>	d_geometry_source_path;
 
 	GLchar**		d_vertex_code;
 
 	GLchar**		d_fragment_code;
 
+	GLchar**		d_geometry_code;
+
 	GLint*			d_vertex_string_count;
 	GLint*			d_fragment_string_count;
+	GLint*			d_geometry_string_count;
 
 	const size_t	d_n_vertex;
 	const size_t	d_n_fragment;
+	const size_t	d_n_geometry;
 
 	GLint			d_mvp_uniform; 
 	GLint			d_vertex_shader;
 	GLint			d_fragment_shader;
+	GLint			d_geometry_shader;
 
 
 
@@ -40,33 +46,47 @@ private:
 
 public:
 	// Constructor reads and builds our shader
-	Shader(string vertexSourcePath, string fragmentSourcePath) 
-		: d_n_vertex(1),d_n_fragment(1) 
+	Shader(string vertexSourcePath, string fragmentSourcePath, string geometrySourcePath = "") 
+		: d_n_vertex(1),d_n_fragment(1), d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
 	{
 
 		d_vertex_source_path.push_back(vertexSourcePath);
 		d_fragment_source_path.push_back(fragmentSourcePath);
+
+		if (!geometrySourcePath.empty()) 
+			d_geometry_source_path.push_back(geometrySourcePath);
+
 		init();
 	}
 
-	Shader(vector<string> vertex_source_paths,string fragmentSourcePath)
+	Shader(vector<string> vertex_source_paths,string fragmentSourcePath,string geometrySourcePath = "")
 		: 
 		d_n_vertex(vertex_source_paths.size()),
 		d_vertex_source_path(vertex_source_paths), 
-		d_n_fragment(1)
+		d_n_fragment(1),
+		d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
 	{
 		d_fragment_source_path.push_back(fragmentSourcePath);
+
+		if (!geometrySourcePath.empty()) 
+			d_geometry_source_path.push_back(geometrySourcePath);
+
+
 		init();
 
 	} 
 
-	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths )
+	Shader(vector<string> vertex_source_paths,vector<string> fragment_source_paths ,string geometrySourcePath = "")
 		: 
 		d_n_vertex(vertex_source_paths.size()),
 		d_n_fragment(fragment_source_paths.size()),
+
 		d_vertex_source_path(vertex_source_paths),
-		d_fragment_source_path(fragment_source_paths) 
+		d_fragment_source_path(fragment_source_paths) ,
+		d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
 	{
+		if (!geometrySourcePath.empty()) 
+			d_geometry_source_path.push_back(geometrySourcePath);
 
 		init();
 
@@ -77,17 +97,29 @@ public:
 		{
 			delete[] d_vertex_code[i];
 		}
+		delete[] d_vertex_code;
+		delete d_vertex_string_count;
 
-		for (int i = 0; i < d_n_fragment; i++)
+		if (d_n_geometry != 0)
 		{
-			delete[] d_fragment_code[i];
+			for (int i = 0; i < d_n_fragment; i++)
+			{
+				delete[] d_fragment_code[i];
+			}
+			delete[] d_geometry_code;
+			delete d_geometry_string_count;
 		}
 
-		delete[] d_vertex_code;
-		delete[] d_fragment_code;
 
-		delete d_vertex_string_count;
+		for (int i = 0; i < d_n_geometry; i++)
+		{
+			delete[] d_geometry_code[i];
+		}
+
+
+		delete[] d_fragment_code;
 		delete d_fragment_string_count;
+
 	}
 	// Use our program
 	void Use()
@@ -126,6 +158,10 @@ private:
 	{
 		init_pointers();
 		load_vertex();
+
+		if (d_n_geometry != 0)
+			load_geometry();
+
 		load_fragment();
 		compile();
 		link();  
@@ -146,6 +182,14 @@ private:
 			Load(d_fragment_source_path[i], d_fragment_code[i],d_fragment_string_count[i]);
 		} 
 
+	}
+
+	void load_geometry()
+	{
+		for (size_t i = 0; i < d_n_geometry; i++)
+		{
+			Load(d_geometry_source_path[i], d_geometry_code[i], d_geometry_string_count[i]);
+		} 
 	}
 
 	static void Load(string source_path,  GLchar*& output,GLint& count )
@@ -190,13 +234,12 @@ private:
 		d_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 		d_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
-
 #pragma region [ Vertex Shader ]
 		glShaderSource(d_vertex_shader, d_n_vertex, d_vertex_code , d_vertex_string_count);
 		glCompileShader(d_vertex_shader);
 
 		glGetShaderiv(d_vertex_shader, GL_COMPILE_STATUS, &success);
-		if(!success)
+		if(success != 1)
 		{ 
 			glGetShaderiv(d_vertex_shader, GL_INFO_LOG_LENGTH, &logSize);
 			infoLog = new GLchar[logSize];
@@ -207,11 +250,32 @@ private:
 		}
 #pragma endregion
 
+#pragma region [ Geometry Shader ]
+		if (d_n_geometry != 0)
+		{
+			d_geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+
+			glShaderSource(d_geometry_shader, d_n_geometry, d_geometry_code, d_geometry_string_count);
+			glCompileShader(d_geometry_shader);
+			glGetShaderiv(d_geometry_shader, GL_INFO_LOG_LENGTH, &success);
+			if(success != 1)
+			{
+				glGetShaderiv(d_geometry_shader, GL_INFO_LOG_LENGTH, &logSize);
+
+				infoLog = new GLchar[logSize];
+
+				glGetShaderInfoLog(d_geometry_shader, logSize, nullptr, infoLog);
+				cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog <<  endl;
+				delete infoLog;
+			} 
+		}
+#pragma endregion
+
 #pragma region [ Fragment Shader ]
 		glShaderSource(d_fragment_shader, d_n_fragment, d_fragment_code, d_fragment_string_count);
 		glCompileShader(d_fragment_shader);
 		glGetShaderiv(d_fragment_shader, GL_INFO_LOG_LENGTH, &success);
-		if(!success)
+		if(success != 1)
 		{
 			glGetShaderiv(d_fragment_shader, GL_INFO_LOG_LENGTH, &logSize);
 
@@ -223,8 +287,13 @@ private:
 		} 
 #pragma endregion
 
+
 		this->m_program = glCreateProgram();
 		glAttachShader(this->m_program, d_vertex_shader);
+
+		if (d_n_geometry != 0)
+			glAttachShader(this->m_program, d_geometry_shader);
+
 		glAttachShader(this->m_program, d_fragment_shader); 
 	}
 
@@ -261,6 +330,8 @@ private:
 
 		glDeleteShader(d_vertex_shader);
 		glDeleteShader(d_fragment_shader);  
+		if (d_n_geometry!=0)
+			glDeleteShader(d_geometry_shader);  
 
 	}
 
@@ -271,7 +342,13 @@ private:
 
 		d_fragment_code = new    GLchar*[d_n_fragment];
 		d_fragment_string_count = new GLint[d_n_fragment];
+
+		d_geometry_code = new    GLchar*[d_n_geometry];
+		d_geometry_string_count = new GLint[d_n_geometry];
 	}
+
+
+
 
 
 };

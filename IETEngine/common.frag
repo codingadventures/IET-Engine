@@ -25,6 +25,8 @@ struct Hatching{
   sampler2D hatch6;  
 };
 
+uniform sampler3D hatch3d;
+
 uniform float rimWeight;  
 uniform int invertRim;  
 
@@ -104,7 +106,7 @@ vec3 calculate_ambient_component_material_texture(vec2 tex_coord)
 float calculate_specular_component(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction)
 {
 	//Specular Shading
-	float specular 	= pow(max(dot(eye_direction, reflection_direction), 0.0), material.shininess);
+	float specular 	= pow(max(dot(eye_direction, reflection_direction), 0.0), 32);
 	return 	specular;
 }
 
@@ -159,11 +161,12 @@ vec4 calculate_hatching(
     //if( invertRim == 1 ) rim = 1. - rim;
 
 
-    Ia =  calculate_ambient_component_material();
-    Id =  calculate_diffuse_component_material(normalized_normal,light_dir);
-    Is =  calculate_specular_component_material(specular);
+    // Ia =  calculate_ambient_component_material();
+    // Id =  calculate_diffuse_component_material(normalized_normal,light_dir);
+    // Is =  calculate_specular_component_material(specular);
  
-    float shading = Ia + Id /*+ rimWeight * rim */+ Is;
+    // float shading = Ia + Id /*+ rimWeight * rim */+ Is;
+    float shading = 0.5 * ambient + 0.6 * diffuse + 0.4 * specular;
 
     float step = 1. / 6.;
     if( shading <= step ){   
@@ -188,4 +191,27 @@ vec4 calculate_hatching(
     vec4 src = mix( mix( ink_color, vec4( 1. ), c.r ), c, .5 );
     
     return src;
+}
+
+vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec2 tex_coord)
+{
+    ivec3 sizeOfTex = textureSize(hatch3d, 0);
+    vec3 Ia,Id,Is;
+   
+   // vec3 texCoordXYZ =   tex_coord.xyz / sizeOfTex.x; 
+      vec2 texCoordXY  = tex_coord.xy/sizeOfTex.x;
+
+    // sample depth of the texture by light intensity
+     
+    float specular = calculate_specular_component(normalized_normal,  eye_direction,  reflection_direction);
+
+    Ia =  calculate_ambient_component_material();
+    Id =  calculate_diffuse_component_material(normalized_normal, light_dir);
+    Is =  calculate_specular_component_material(specular);
+
+    float shading =  clamp(Ia + Id + Is,0.0, 1.0);
+
+    vec3 hatching = texture(hatch3d, vec3(tex_coord, shading)).rgb;
+
+    return hatching * (1.0 + shading * 2)/3;;
 }

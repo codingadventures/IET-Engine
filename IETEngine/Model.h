@@ -225,13 +225,29 @@ namespace Rendering
 		{
 			// Read file via ASSIMP
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate |  aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 			// Check for errors
 			if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 			{
 				cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 				return;
 			}
+			/*const auto materialCount = scene->mNumMaterials;
+
+			for (auto i = 0; i < materialCount; ++i)
+			{
+				int mapping = aiTextureMapping_PLANE;
+				scene->mMaterials[i]->Get(AI_MATKEY_MAPPING_DIFFUSE(0), mapping);
+				scene->mMaterials[i]->AddProperty(&mapping, 1, AI_MATKEY_MAPPING_DIFFUSE(0));
+			}
+			scene = importer.ApplyPostProcessing(aiProcess_CalcTangentSpace              |  \
+				aiProcess_GenNormals                    |  \
+				aiProcess_JoinIdenticalVertices |  \
+				aiProcess_GenSmoothNormals | \
+				aiProcess_Triangulate                   |  \
+				aiProcess_GenUVCoords           |  \
+				aiProcess_TransformUVCoords | \
+				aiProcess_SortByPType     );*/
 
 			// Retrieve the directory path of the filepath
 			this->d_directory = path.substr(0, path.find_last_of('\\'));

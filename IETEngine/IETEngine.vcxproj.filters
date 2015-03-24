@@ -82,6 +82,9 @@
     <Filter Include="Header Files\Physics\NarrowPhase">
       <UniqueIdentifier>{508cff0f-a7db-4ab2-86dc-1d2a81f1160d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Shaders\Geometry">
+      <UniqueIdentifier>{56547525-b6ad-4218-8b2d-beaa07f0eb84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -375,6 +378,12 @@
     </None>
     <None Include="hatching.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="hatching.geom">
+      <Filter>Header Files\Shaders\Geometry</Filter>
+    </None>
+    <None Include="hatching.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
   </ItemGroup>
 </Project>

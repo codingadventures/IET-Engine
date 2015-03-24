@@ -20,16 +20,16 @@ void main()
 { 
 	vec3 Ia,Id;
 
-	if (!hasTexture) 
-	{ 
-		Ia	= calculate_ambient_component_material();
-		Id = calculate_diffuse_component_material(normalized_normal, light_direction);
- 	}
- 	else
- 	{
+	// if (!hasTexture) 
+	// { 
+	// 	Ia	= calculate_ambient_component_material();
+	// 	Id = calculate_diffuse_component_material(normalized_normal, light_direction);
+ // 	}
+ // 	else
+ // 	{
  		Ia = calculate_ambient_component_material_texture(tex_coord);
  		Id = calculate_diffuse_component_material_texture(normalized_normal, light_direction, tex_coord);
- 	}
+ 	//}
 
 	color   = vec4(Ia + Id, 1.0f);
 }

@@ -18,6 +18,7 @@
 #include "BoundingBox.h" 
 #include "BoundingSphere.h"
 #include "Material.h"
+#include "glm/gtc/constants.hpp"
 
 namespace Rendering
 {
@@ -66,7 +67,9 @@ namespace Rendering
 			//this->calculate_center_of_mass();
 			this->calculate_area();
 			this->calculate_bounding_box(); 
+			//this->calculate_tex_coord();
 			this->setupMesh();
+
 		}   
 
 
@@ -95,7 +98,7 @@ namespace Rendering
 					GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
 					glUniform1i(shader_location, i);
 					// And finally bind the texture
-					glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
+					glBindTexture(GL_TEXTURE_3D, this->m_textures[i].id);
 				}
 				glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 			}
@@ -124,6 +127,7 @@ namespace Rendering
 		/*  Functions    */
 		// Initializes all the buffer objects/arrays
 		void setupMesh()
+
 		{
 			// Create buffers/arrays
 			glGenVertexArrays(1, &this->d_VAO);
@@ -226,6 +230,28 @@ namespace Rendering
 		void calculate_bounding_box()
 		{
 			d_bounding_box = BoundingBox(m_vertices);
+
+		}
+
+		void calculate_tex_coord()
+		{
+			size_t N = m_vertices.size();
+			if (N % 3 != 0) return;
+
+			for (int i = 0; i < N; i = i + 3)
+			{
+				auto v1 = m_vertices[i].Position;
+				auto v2 = m_vertices[i+1].Position;
+				auto v3 = m_vertices[i+2].Position;
+
+				auto mod1 = fmod( atan2( v1.z, v1.x )  +  glm::pi<float>() , glm::pi<float>());
+				auto mod2 = fmod( atan2( v2.z, v2.x )  +  glm::pi<float>() , glm::pi<float>());
+				auto mod3 = fmod( atan2( v3.z, v3.x )  +  glm::pi<float>() , glm::pi<float>());
+
+				m_vertices[i].TexCoords = glm::vec2(1.0f - ( mod1 / glm::pi<float>() * 0.5f ), 0.5f - v1.y / 2.0f );
+				m_vertices[i+1].TexCoords = glm::vec2( 1.0f - ( mod2  / glm::pi<float>() * 0.5 ), 0.5 - v2.y / 2.0f );
+				m_vertices[i+2]	.TexCoords =  glm::vec2( 1.0f - ( mod3 / glm::pi<float>() * 0.5 ), 0.5 - v3.y / 2.0f );
+			}
 
 		}
 

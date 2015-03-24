@@ -13,5 +13,5 @@ out vec4 vFragColor;
  
 void main() 
 {
-	vFragColor =out_color;// texture(material.texture_diffuse1,tex_coord);
+	vFragColor = texture(material.texture_diffuse1,tex_coord);
 }
