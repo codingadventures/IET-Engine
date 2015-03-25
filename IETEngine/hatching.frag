@@ -18,12 +18,14 @@ in vec2  tex_coord_geom;
 in vec3 light_direction; 
 in vec3 normalized_normal;
 in vec3 eye_direction;
+in vec3 vertex_view_space;
 out vec4 color;
 
 void main() {
 
 	vec3 reflection_direction 	= 	reflect(-light_direction, normalized_normal);
 	vec3  hatching =  calculate_hatching_3d(normalized_normal, light_direction,eye_direction,reflection_direction, tex_coord_geom);
-	//vec4  hatching =  calculate_hatching(nDotVP,normalized_normal,vertex_view_space, tex_coord_geom, ink_color, light_direction);
-	color = vec4( hatching, 1.0);
+	//vec4  hatching =  calculate_hatching(0.6,normalized_normal,vertex_view_space, tex_coord_geom, ink_color, light_direction);
+	 color = vec4( hatching, 1.0);
+	//color = hatching;
 }

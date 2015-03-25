@@ -22,6 +22,7 @@ out vec2 tex_coord_geom;
 out vec3 light_direction;
 out vec3 normalized_normal;
 out vec3 eye_direction;
+out vec3 vertex_view_space;
 void main()
 {
 
@@ -31,7 +32,7 @@ void main()
 
 	vec3 ab = v2 - v1;
 	vec3 ac = v3 - v1;
-	vec3 N = normalize(mat3(model_transpose_inverse) * cross(ab, ac));
+	vec3 N = normalize(cross(ab, ac));
 	vec3 N_v1 = normalize(mat3(model_transpose_inverse) * out_normal[0]); // normalize(cross(ab, ac));
 	vec3 N_v2 = normalize(mat3(model_transpose_inverse) * out_normal[1]);// normalize(cross(ab, ac));
 	vec3 N_v3 = normalize(mat3(model_transpose_inverse) * out_normal[2]); // normalize(cross(ab, ac));
@@ -39,12 +40,9 @@ void main()
     vec3 G = ( v1 + v2 + v3 ) / 3.0;
 
     vec3 L = light.position - G;
-
-    float NdotL = dot(N, vec3(dot(L, N)));
-    // float NdotL_v2 = dot(N_v2, vec3(dot(L, N)));
-    // float NdotL_v3 = dot(N, vec3(dot(L, N)));
-
-    vec3 B = normalize( L - vec3(NdotL) );
+  
+    
+    vec3 B = normalize( L - N * dot(L, N) );
     // vec3 B_v2 = normalize( L - vec3(NdotL_v2) );
     // vec3 B_v3 = normalize( L - vec3(NdotL_v3) );
 
@@ -58,6 +56,7 @@ void main()
   	light_direction = normalize(light.position - v1);
   	normalized_normal = N_v1;
   	eye_direction 	=  normalize(eye_position - v1);
+    vertex_view_space = v1;
     EmitVertex();
  	 
     
@@ -67,6 +66,7 @@ void main()
   	light_direction = normalize(light.position - v2);
   	normalized_normal = N_v2 ;
   	eye_direction 	=  normalize(eye_position - v2);
+    vertex_view_space = v2;
     EmitVertex();
     
     gl_Position =  mvp * gl_in[2].gl_Position;
@@ -75,6 +75,7 @@ void main()
     light_direction = normalize(light.position - v3);
   	 normalized_normal = N_v3 ;
   	 eye_direction 	=  normalize(eye_position - v3);
+     vertex_view_space = v3;
 
     EmitVertex();
     

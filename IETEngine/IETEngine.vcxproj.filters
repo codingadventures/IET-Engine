@@ -385,5 +385,8 @@
     <None Include="hatching.vert">
       <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="hatching_blend.geom">
+      <Filter>Header Files\Shaders\Geometry</Filter>
+    </None>
   </ItemGroup>
 </Project>

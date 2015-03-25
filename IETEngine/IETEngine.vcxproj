@@ -182,6 +182,7 @@
     <None Include="hatching.frag" />
     <None Include="hatching.geom" />
     <None Include="hatching.vert" />
+    <None Include="hatching_blend.geom" />
     <None Include="particle.frag" />
     <None Include="skybox.frag" />
     <None Include="specular.frag" />
