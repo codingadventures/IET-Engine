@@ -107,7 +107,8 @@ namespace Rendering
 
 			// Draw mesh
 			glBindVertexArray(this->d_VAO);
-			glDrawElements(GL_TRIANGLES_ADJACENCY, this->m_indices.size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES_ADJACENCY, this->m_indices.size() * 2, GL_UNSIGNED_SHORT, 0);
+			 
 			glBindVertexArray(0);
 		}
 
