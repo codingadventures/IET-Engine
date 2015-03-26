@@ -138,7 +138,7 @@ namespace Controller
 		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching.frag"),string("common.frag")); 
 
 
-		d_shader = new Shader(v_shader,f_shader,"hatching.geom"); 
+		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
 
 		d_nano_model = new Model("models\\torus.dae");
 

@@ -73,7 +73,8 @@ void main()
     tex_coord_geom.s = dot(v3, T );
     tex_coord_geom.t = dot(v3, B );
     light_direction = normalize(light.position - v3);
-  	 normalized_normal = N_v3 ;
+  	 normalized_normal = N_v3
+      ;
   	 eye_direction 	=  normalize(eye_position - v3);
      vertex_view_space = v3;
 
