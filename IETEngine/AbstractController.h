@@ -124,12 +124,13 @@ namespace Controller
 		glutKeyboardFunc(Callbacks::keyboardCallback);
 		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
 		glutPassiveMotionFunc(Callbacks::mouseCallback);
+		glutMouseFunc(Callbacks::mouseClickCallback);
 
 		glutSetCursor(GLUT_CURSOR_NONE); 
 		glutWarpPointer(VIEWPORT_WIDTH/2, VIEWPORT_HEIGHT/2);
 		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT); 
 
-
+		//glFrontFace(GL_CW);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 	}

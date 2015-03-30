@@ -37,13 +37,13 @@ uniform mat4 model_matrix;
 uniform vec3 eye_position;
 uniform mat4 mvp;
   
-out vec2 tex_coord_geom;
+out vec3 tex_coord_geom[4];
 
 
 out vec3 normalized_normal;
 out vec3 eye_direction;
 out vec3 vertex_view_space;
-
+out vec3 L;
 
 void init()
 {
@@ -130,122 +130,44 @@ bool areTrianglesEqual(int triangleIndex1,int triangleIndex2)
 
 void RenderGeometry()
 {
-	// gl_Position = mvp * gl_in[0].gl_Position;
-	// //tex_coord_geom = texture_coordinates[0].st * texture_coordinates[0].p;
-
-	// light_direction = normalize(light.position - triangles[gamma].vertices[0]);
-	// normalized_normal = triangles[gamma].calculated_normal[0];
-	// eye_direction 	=  normalize(eye_position - triangles[gamma].vertices[0]);
-	// vertex_view_space = triangles[gamma].vertices[0];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[1].gl_Position;
-	// //tex_coord_geom = texture_coordinates[4].st * texture_coordinates[4].p;
-
-	// light_direction = normalize(light.position - triangles[gamma].vertices[1]);
-	// normalized_normal = triangles[gamma].calculated_normal[1];
-	// eye_direction 	=  normalize(eye_position - triangles[gamma].vertices[1]);
-	// vertex_view_space = triangles[gamma].vertices[1];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[2].gl_Position;
-	// //tex_coord_geom = texture_coordinates[8].st * texture_coordinates[8].p;
-
-	// light_direction = normalize(light.position - triangles[gamma].vertices[2]);
-	// normalized_normal = triangles[gamma].calculated_normal[2];
-	// eye_direction 	=  normalize(eye_position - triangles[gamma].vertices[2]);
-	// vertex_view_space = triangles[gamma].vertices[2];
-	// EmitVertex();
-
-	// EndPrimitive();
-
-	// //----------------------
-	// gl_Position = mvp * gl_in[2].gl_Position;
-	// //tex_coord_geom = texture_coordinates[1].st * texture_coordinates[1].p;
-
-	// light_direction = normalize(light.position - triangles[beta].vertices[0]);
-	// normalized_normal = triangles[beta].calculated_normal[0];
-	// eye_direction 	=  normalize(eye_position - triangles[beta].vertices[0]);
-	// vertex_view_space = triangles[beta].vertices[0];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[3].gl_Position;
-	// //tex_coord_geom = texture_coordinates[5].st * texture_coordinates[5].p;
-
-	// light_direction = normalize(light.position - triangles[beta].vertices[1]);
-	// normalized_normal = triangles[beta].calculated_normal[1];
-	// eye_direction 	=  normalize(eye_position - triangles[beta].vertices[1]);
-	// vertex_view_space = triangles[beta].vertices[1];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[4].gl_Position;
-	// //tex_coord_geom = texture_coordinates[9].st * texture_coordinates[9].p;
-
-	// light_direction = normalize(light.position - triangles[beta].vertices[2]);
-	// normalized_normal = triangles[beta].calculated_normal[2];
-	// eye_direction 	=  normalize(eye_position - triangles[beta].vertices[2]);
-	// vertex_view_space = triangles[beta].vertices[2];
-	// EmitVertex();
-
-	// EndPrimitive();
-
-	// //----------------------
-	// gl_Position = mvp * gl_in[4].gl_Position;
-	// //tex_coord_geom = texture_coordinates[1].st * texture_coordinates[1].p;
-
-	// light_direction = normalize(light.position - triangles[alpha].vertices[0]);
-	// normalized_normal = triangles[alpha].calculated_normal[0];
-	// eye_direction 	=  normalize(eye_position - triangles[alpha].vertices[0]);
-	// vertex_view_space = triangles[alpha].vertices[0];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[5].gl_Position;
-	// //tex_coord_geom = texture_coordinates[5].st * texture_coordinates[5].p;
-
-	// light_direction = normalize(light.position - triangles[alpha].vertices[1]);
-	// normalized_normal = triangles[alpha].calculated_normal[1];
-	// eye_direction 	=  normalize(eye_position - triangles[alpha].vertices[1]);
-	// vertex_view_space = triangles[alpha].vertices[1];
-	// EmitVertex();
-
-	// gl_Position = mvp * gl_in[0].gl_Position;
-	// //tex_coord_geom = texture_coordinates[9].st * texture_coordinates[9].p;
-
-	// light_direction = normalize(light.position - triangles[alpha].vertices[2]);
-	// normalized_normal = triangles[alpha].calculated_normal[2];
-	// eye_direction 	=  normalize(eye_position - triangles[alpha].vertices[2]);
-	// vertex_view_space = triangles[alpha].vertices[2];
-	// EmitVertex();
-
-	// EndPrimitive();
-
-
 	//----------------------
 	gl_Position = mvp * gl_in[0].gl_Position;
-	tex_coord_geom = texture_coordinates[0].st * texture_coordinates[0].p;
-
+	tex_coord_geom[0] = texture_coordinates[0];
+	tex_coord_geom[1] = texture_coordinates[1];
+	tex_coord_geom[2] = texture_coordinates[2];
+	tex_coord_geom[3] = texture_coordinates[3]; 
 	light_direction = normalize(light.position - triangles[c].vertices[0]);
-	normalized_normal = triangles[c].calculated_normal[0];
+	normalized_normal  = triangles[c].calculated_normal[0]; 
 	eye_direction 	=  normalize(eye_position - triangles[c].vertices[0]);
 	vertex_view_space = triangles[c].vertices[0];
+	L =  triangles[c].L;
 	EmitVertex();
 
-	gl_Position = mvp * gl_in[2].gl_Position;
-	tex_coord_geom = texture_coordinates[4].st * texture_coordinates[4].p;
-
-	light_direction = normalize(light.position - triangles[c].vertices[1]);
-	normalized_normal = triangles[c].calculated_normal[1];
+	gl_Position = mvp * gl_in[2].gl_Position; 
+	tex_coord_geom[0] = texture_coordinates[4];
+	tex_coord_geom[1] = texture_coordinates[5];
+	tex_coord_geom[2] = texture_coordinates[6];
+	tex_coord_geom[3] = texture_coordinates[7];
+ 	light_direction = normalize(light.position - triangles[c].vertices[1]);
+	normalized_normal  = triangles[c].calculated_normal[0]; 
 	eye_direction 	=  normalize(eye_position - triangles[c].vertices[1]);
 	vertex_view_space = triangles[c].vertices[1];
+	L =  triangles[c].L;
+
 	EmitVertex();
 
-	gl_Position = mvp * gl_in[4].gl_Position;
-	tex_coord_geom = texture_coordinates[8].st * texture_coordinates[8].p;
+	gl_Position = mvp * gl_in[4].gl_Position; 
+	tex_coord_geom[0] = texture_coordinates[8];
+	tex_coord_geom[1] = texture_coordinates[9];
+	tex_coord_geom[2] = texture_coordinates[10];
+	tex_coord_geom[3] = texture_coordinates[11];
 
 	light_direction = normalize(light.position - triangles[c].vertices[2]);
-	normalized_normal = triangles[c].calculated_normal[2];
+	normalized_normal  = triangles[c].calculated_normal[0]; 
 	eye_direction 	=  normalize(eye_position - triangles[c].vertices[2]);
 	vertex_view_space = triangles[c].vertices[2];
+	L =  triangles[c].L;
+
 	EmitVertex();
 
 	EndPrimitive();
@@ -277,7 +199,7 @@ void main()
 				texture_coordinates[i * 4 + c].t = dot(triangles[c].vertices[i], triangles[c].B ); 
 				texture_coordinates[i * 4 + c].p = 1.0;
 			}
-			else if(isVertexInTriangle(t,triangles[c].vertices[i]))
+			else if(!isVertexInTriangle(t,triangles[c].vertices[i]))
 			{
 				vec3 projectedVi = triangles[c].vertices[i] - triangles[t].vertices[0];
 				float distance = dot(projectedVi, triangles[t].N);
@@ -289,62 +211,15 @@ void main()
 			}
 			else
 			{
-				calculateTB(t);
-				texture_coordinates[i * 4 + t].s = dot(triangles[t].vertices[i], triangles[t].T ); 
-				texture_coordinates[i * 4 + t].t = dot(triangles[t].vertices[i], triangles[t].B ); 
+				calculateTB(c);
+				texture_coordinates[i * 4 + t].s = dot(triangles[c].vertices[i], triangles[c].T ); 
+				texture_coordinates[i * 4 + t].t = dot(triangles[c].vertices[i], triangles[c].B ); 
 				texture_coordinates[i * 4 + t].p = dot(triangles[c].N, triangles[t].N);
 			}
 		}
 	}
 
-	// for(int i = 0; i < 6; i++)
-	// {
-	// 	if (i<3)
-	// 	tex_coord_geom = 
-	// 		texture_coordinates[i * 4].st * texture_coordinates[i * 4].p + 
-	// 		texture_coordinates[i * 4 + 1].st * texture_coordinates[i * 4 + 1].p + 
-	// 		texture_coordinates[i * 4 + 2].st * texture_coordinates[i * 4 + 2].p + 
-	// 		texture_coordinates[i * 4 + 3].st * texture_coordinates[i * 4 + 3].p;
-
-	// 	gl_Position = mvp * gl_in[i].gl_Position;
-   	 
- //  		light_direction = normalize(light.position - triangles[c].vertices[i]);
- //  		normalized_normal = normalize(mat3(model_transpose_inverse) * out_normal[i]);
- //  		eye_direction 	=  normalize(eye_position - triangles[c].vertices[i]);
- //    	vertex_view_space = triangles[c].vertices[i];
- //    	EmitVertex();	
-	// }	
-
-	// for (int t = 0; t < triangles.length(); t++)
-	// {
-	// 	for (int i = 0; i < 3; i++)
-	// 	{
-	// 		gl_Position = mvp * vec4(triangles[t].vertices[i],1.0);
-
-	// 		tex_coord_geom = texture_coordinates[i * 4 + t].st  * texture_coordinates[i * 4 + t].p;// + vertex_light_direction[i * 4 + t].xy;
-	// 		light_direction = normalize(light.position - triangles[t].vertices[i]);//;
-	// 		eye_direction 	=  normalize(eye_position - triangles[t].vertices[i]);
-	// 		normalized_normal = triangles[t].calculated_normal[i];
-	// 		EmitVertex();	
-	// 	}
-	// 	EndPrimitive();
-	// }
+	 
 	RenderGeometry();
-	// for (int i = 1; i < 4; i++)
-	// {
-	// 	for (int j = 0; j < 3; j++)
-	// 	{
-	// 		gl_Position = mvp * vec4(triangles[i].vertices[j],1.0);
-	// 		tex_coord_geom = 
-	// 		texture_coordinates[j * 4 + i].st * texture_coordinates[j * 4 + i].p;
 
-	// 		light_direction = normalize(light.position - triangles[i].vertices[j]);
-	//   		//normalized_normal = normalize(mat3(model_transpose_inverse) * out_normal[i]);
-	//   		eye_direction 	=  normalize(eye_position - triangles[i].vertices[j]);
-	//     	vertex_view_space = triangles[i].vertices[j];
-	// 		EmitVertex();
-	// 	}
-	// }
-
-	
 }

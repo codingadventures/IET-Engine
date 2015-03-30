@@ -69,7 +69,7 @@ bool Texture::Load(string directory)
 	string stringFileName(m_file_name);
 	string fullPath = directory + "\\" + stringFileName;
 	try {
-		image = new Magick::Image(fullPath.c_str());
+		image = new Magick::Image(fullPath);
 		image->write(&blob, "RGBA");
 	}
 	catch (Magick::Error& Error) {
@@ -78,7 +78,7 @@ bool Texture::Load(string directory)
 	}
 
  
-
+	int col = image->columns();
 
 	//SOIL_load_OGL_texture(filename.c_str(),SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);;
 	glGenTextures(1, &id);
@@ -101,7 +101,7 @@ bool Texture::Load(string directory)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	
-	delete image; 
+//	delete image; 
 	//	SOIL_free_image_data(image); 
 	return true;
 }
@@ -139,9 +139,9 @@ bool Texture::Load3D(  vector<string> textures)
 	glBindTexture(GL_TEXTURE_3D, id);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	 glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	 glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, width, 
 		height, depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);

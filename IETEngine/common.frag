@@ -125,6 +125,14 @@ vec3 get_light_ambient()
 	return light.ambient;
 }
 
+mat3 calculate_bumped_matrix(vec3 normal,vec3 tangent)                                                                 
+{                                                                                                                                              
+    tangent = normalize(tangent - dot(tangent, normal) * normal);                           
+    vec3 Bitangent = cross(tangent, normal);                                                                                                                    
+    mat3 TBN = mat3(tangent, Bitangent, normal);                                            
+    return TBN;                                                    
+}     
+
 vec3 calculate_bumped_normal(mat3 TBN,vec2 tex_coord)
 {
 
@@ -133,8 +141,7 @@ vec3 calculate_bumped_normal(mat3 TBN,vec2 tex_coord)
     return   BumpMapNormal ;    
 }
   
-vec4 calculate_hatching(
-    float nDotVP, 
+vec4 calculate_hatching( 
     vec3 normalized_normal, 
     vec3 vertex_view_space,
     vec2 tex_coord,
@@ -144,11 +151,11 @@ vec4 calculate_hatching(
 {
     vec4 c;
     vec3 Ia,Id,Is;
-    float diffuse = nDotVP;
     float specular = 0.;
     float ambient = 1.;
-
-    vec3 n = normalize( normalized_normal );
+    float nDotVP = max( 0., dot( normalized_normal, normalize( vec3( light.position ) ) ) );
+    vec3 n =   normalized_normal ;
+    float diffuse = nDotVP;
 
     vec3 r = -reflect(light.position, n);
     r = normalize(r);
@@ -160,13 +167,13 @@ vec4 calculate_hatching(
     //float rim = max( 0., abs( dot( n, normalize( -vertex_view_space.xyz ) ) ) );
     //if( invertRim == 1 ) rim = 1. - rim;
 
-
-    // Ia =  calculate_ambient_component_material();
-    // Id =  calculate_diffuse_component_material(normalized_normal,light_dir);
-    // Is =  calculate_specular_component_material(specular);
+    //Stex_coord = tex_coord * 3;
+    Ia =  calculate_ambient_component_material();
+    Id =  calculate_diffuse_component_material(normalized_normal,light_dir);
+    Is =  calculate_specular_component_material(specular);
  
-    // float shading = Ia + Id /*+ rimWeight * rim */+ Is;
-    float shading = 0.5 * ambient + 0.6 * diffuse + 0.4 * specular;
+     float shading = Ia + Id /*+ rimWeight * rim */+ Is;
+   // float shading = 0.5 * ambient + 0.6 * diffuse + 0.4 * specular;
 
     float step = 1. / 6.;
     if( shading <= step ){   
@@ -195,12 +202,9 @@ vec4 calculate_hatching(
 
 vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec2 tex_coord)
 {
+    vec3 finalColor; 
     ivec3 sizeOfTex = textureSize(hatch3d, 0);
-    vec3 Ia,Id,Is;
-   
-   // vec3 texCoordXYZ =   tex_coord.xyz / sizeOfTex.x; 
-      vec2 texCoordXY  = tex_coord.xy/sizeOfTex.x;
-
+    vec3 Ia,Id,Is; 
     // sample depth of the texture by light intensity
      
     float specular = calculate_specular_component(normalized_normal,  eye_direction,  reflection_direction);
@@ -209,9 +213,19 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
     Id =  calculate_diffuse_component_material(normalized_normal, light_dir);
     Is =  calculate_specular_component_material(specular);
 
-    float shading =  clamp(Ia + Id + Is,0.0, 1.0);
+    float shading = clamp(Ia + Id + Is,0,1);
 
-    vec3 hatching = texture(hatch3d, vec3(tex_coord, shading)).rgb;
+    // for(int i = 0; i< 4; i++)
+    // {
+        
+     finalColor = texture(hatch3d, vec3(gl_FragCoord.xy / sizeOfTex.x, shading)).rgb;
+     //   sumF += ;    
+    //}
 
-    return hatching * (1.0 + shading * 2)/3;;
+    // for(int i =0; i < 4; i++)
+    // {
+    //     finalColor += (colort[i] * tex_coord_geom[i].p); 
+    // }
+ 
+    return finalColor ;// hatching * (1.0 + shading * 2)/3; 
 }

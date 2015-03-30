@@ -19,7 +19,6 @@ uniform vec3 eye_position;
 uniform bool draw_sky_box;
 uniform bool use_refraction;
 uniform float refractive_index;
-uniform bool hatching;
 
 out vec3 normalized_normal;  
 out vec2 tex_coord; 
@@ -32,7 +31,6 @@ out vec3 vertex_world_space;
 out vec3 vertex_view_space;
 out vec3 not_normalized_normal;
 out vec4 out_color;
-out float nDotVP;
 
  
 
@@ -65,10 +63,8 @@ void main()
 	gl_Position 		=  mvpTransform(position_vec4);
 
 	tex_coord 			=  texCoord;
-	vs_out.tex_coord    =  texCoord;
 	out_color			=  color;
 	
-	nDotVP				=  calculate_NdotL(normalized_normal);
  	 
 	if (draw_sky_box)
 		tex_coord_skybox	=  position;

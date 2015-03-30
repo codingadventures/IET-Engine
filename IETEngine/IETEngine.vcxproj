@@ -48,21 +48,28 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\include\ImageMagick-6\Magick++;$(ProjectDir)\include\wand;$(ProjectDir)\include\magick;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;USE_GRAPHICAL_BENCHMARK;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;BT_USE_FREEGLUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>
+      </SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\include\ImageMagick-6\Magick++;$(ProjectDir)\include\wand;$(ProjectDir)\include\magick;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>tet.lib;opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;LinearMath_Debug.lib;ConvexDecomposition_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:library  /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -71,11 +78,14 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,7 +93,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tet.lib;opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_RL_Magick++_.lib;assimp.lib;SOIL.lib;BulletCollision.lib;BulletDynamics.lib;LinearMath.lib;ConvexDecomposition.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -184,6 +194,7 @@
     <None Include="hatching.vert" />
     <None Include="hatching_blend.geom" />
     <None Include="particle.frag" />
+    <None Include="physics.vert" />
     <None Include="skybox.frag" />
     <None Include="specular.frag" />
     <None Include="vertex.vert" />

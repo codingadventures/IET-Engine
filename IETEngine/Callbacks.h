@@ -12,7 +12,7 @@ bool firstMouse = true;
 typedef std::function<void(GLfloat,GLfloat)> MouseCallbackFunction;
 typedef std::function<void(GLfloat)> MouseScrollCallbackFunction;
 typedef std::function<void(void)> KeyboardCallbackFunction;
-typedef std::function<void(MOUSE,KEY_STATE)> MouseClickCallbackFunction;
+typedef std::function<void(MOUSE,KEY_STATE,GLuint,GLuint)> MouseClickCallbackFunction;
 
 static MouseCallbackFunction UserMouseCallback;
 static MouseScrollCallbackFunction UserMouseScrollCallback;
@@ -110,10 +110,11 @@ public:
 	}   
 
 	static void Callbacks::mouseClickCallback(int Button, int State, int x, int y){
+		TwEventMouseButtonGLUT(Button,State, x, y);
 		MOUSE mouse = GLUTMouseToMouse(Button);
 		KEY_STATE KeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
 
-		UserMouseClickCallback(mouse,KeyState);
+		UserMouseClickCallback(mouse,KeyState,x,y);
 
 	}
 	/*

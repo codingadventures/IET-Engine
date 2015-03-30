@@ -258,11 +258,11 @@ inline void DrawGrid(int size){
 	glEnd();
 
 	glBegin(GL_LINES);
-	for(int i=-size/2;i<=size/2;i++) {
-		if (i==0) { glColor3f(.6,.3,.3); } else { glColor3f(.25,.25,.25); };
+	for(int i=-size/2;i<=size/2;i=i+4) {
+		if (i==0) { glColor3f(.6,.6,.6); } else { glColor3f(.25,.25,.25); };
 		glVertex3f(i,0,-size/2);
 		glVertex3f(i,0,size/2);
-		if (i==0) { glColor3f(.3,.3,.6); } else { glColor3f(.25,.25,.25); };
+		if (i==0) { glColor3f(.6,.6,.6); } else { glColor3f(.25,.25,.25); };
 		glVertex3f(-size/2,0,i);
 		glVertex3f(size/2,0,i);
 	};

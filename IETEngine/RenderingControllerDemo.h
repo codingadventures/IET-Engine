@@ -135,14 +135,14 @@ namespace Controller
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("hatching.vert"),string("common.vert")); 
 
-		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching.frag"),string("common.frag")); 
+		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag")); 
 
 
-		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
+		d_shader = new Shader(v_shader,f_shader,"hatching.geom"); 
 
-		d_nano_model = new Model("models\\torus.dae");
+		d_nano_model = new Model("C:\\Users\\Johnny\\Desktop\\sybenik.obj");
 
-		d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
+		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		d_quaternion_rotation = d_nano_model->Rotation();
 		tweak_bar_setup();
 
