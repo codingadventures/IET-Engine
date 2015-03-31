@@ -43,6 +43,14 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define HATCH05 "hatch_4.jpg"
 #define HATCH06 "hatch_5.jpg"
 
+#define H0 "H0.jpg"
+#define H1 "H1.jpg"
+#define H2 "H2.jpg"
+#define H3 "H3.jpg"
+#define H4 "H4.jpg"
+#define H5 "H5.jpg"
+#define H6 "H6.jpg"
+#define H7 "H7.jpg"
 
 #pragma region [ MODELS ]
 #define CONES_MODEL "models\\Cones3.dae"
@@ -65,6 +73,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define DROID_NO_WEAPON_MODEL "models\\Droids\\droid_no_weapon.dae"
 #define DROID_OBJ_MODEL "models\\dragon_low_poly.obj"
 #define CUBE_MODEL "models\\cubeTri.obj"
+#define TORUS_MODEL "models\\torus.dae"
  
 #pragma endregion [ MODELS ]
 

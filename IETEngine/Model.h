@@ -15,7 +15,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
+#include <assimp/scene.h> 
 #include <assimp/postprocess.h>
 #include <SOIL.h>
 #include "Mesh.h"
@@ -91,7 +91,7 @@ namespace Rendering
 
 		~Model()
 		{
-			delete m_animation_matrix;
+//			delete m_animation_matrix;
 			delete d_bone_location;
 			delete m_skeleton;
 
@@ -224,7 +224,7 @@ namespace Rendering
 		void loadModel(string path)
 		{
 			// Read file via ASSIMP
-			Assimp::Importer importer;
+			Assimp::Importer importer; 
 			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 			// Check for errors
 			if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
@@ -232,6 +232,7 @@ namespace Rendering
 				cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 				return;
 			}
+			 
 			/*const auto materialCount = scene->mNumMaterials;
 
 			for (auto i = 0; i < materialCount; ++i)
@@ -315,7 +316,7 @@ namespace Rendering
 			vector<VertexWeight> boneWeights;
 			Material material;
 			glm::uint numBones = 0; 
-
+		 
 #pragma region [ Process Vertices ]
 			// Walk through each of the mesh's vertices
 			for(GLuint i = 0; i < ai_mesh->mNumVertices; i++)
@@ -367,6 +368,7 @@ namespace Rendering
 			for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
 			{
 				aiFace face = ai_mesh->mFaces[i];
+			 
 				// Retrieve all indices of the face and store them in the indices vector
 				for(GLuint j = 0; j < face.mNumIndices; j++)
 					indices.push_back(face.mIndices[j]);

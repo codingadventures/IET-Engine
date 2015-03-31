@@ -26,9 +26,9 @@ out vec3 vertex_view_space;
 void main()
 {
 
-    vec3 v1 = vec3( model_matrix * gl_in[0].gl_Position);
-    vec3 v2 = vec3( model_matrix * gl_in[1].gl_Position);
-    vec3 v3 = vec3( model_matrix * gl_in[2].gl_Position);
+    vec3 v1 = vec3( gl_in[0].gl_Position);
+    vec3 v2 = vec3( gl_in[1].gl_Position);
+    vec3 v3 = vec3( gl_in[2].gl_Position);
 
 	vec3 ab = v2 - v1;
 	vec3 ac = v3 - v1;
@@ -37,46 +37,41 @@ void main()
 	vec3 N_v2 = normalize(mat3(model_transpose_inverse) * out_normal[1]);// normalize(cross(ab, ac));
 	vec3 N_v3 = normalize(mat3(model_transpose_inverse) * out_normal[2]); // normalize(cross(ab, ac));
  
-    vec3 G = ( v1 + v2 + v3 ) / 3.0;
+    vec3 G = ( v1 + v2 + v3 ) * 0.333333;
 
-    vec3 L = light.position - G;
+    vec3 L = mat3(inverse(model_matrix)) * light.position - G;
   
     
-    vec3 B = normalize( L - N * dot(L, N) );
-    // vec3 B_v2 = normalize( L - vec3(NdotL_v2) );
-    // vec3 B_v3 = normalize( L - vec3(NdotL_v3) );
+    vec3 B = normalize(  L - N * max(0.0,dot(L, N)) ); 
 
-    vec3 T  = cross(B , N );
-   // vec3 T_v2 = cross(B_v2, N_v2);
-   // vec3 T_v3 = cross(B_v3, N_v3);
+    vec3 T  = cross(B , N ); 
 
   	gl_Position = mvp * gl_in[0].gl_Position;
    	tex_coord_geom.s = dot(v1, T );
     tex_coord_geom.t = dot(v1, B );
-  	light_direction = normalize(light.position - v1);
+  	light_direction = normalize(light.position - vec3(model_matrix * gl_in[0].gl_Position));
   	normalized_normal = N_v1;
-  	eye_direction 	=  normalize(eye_position - v1);
-    vertex_view_space = v1;
+  	eye_direction 	=  normalize(eye_position -  vec3(model_matrix * gl_in[0].gl_Position));
+    vertex_view_space = vec3(model_matrix * gl_in[0].gl_Position);
     EmitVertex();
  	 
     
     gl_Position =  mvp * gl_in[1].gl_Position;
     tex_coord_geom.s = dot(v2, T );
     tex_coord_geom.t = dot(v2, B );
-  	light_direction = normalize(light.position - v2);
+  	light_direction = normalize(light.position - vec3(model_matrix * gl_in[1].gl_Position));
   	normalized_normal = N_v2 ;
-  	eye_direction 	=  normalize(eye_position - v2);
-    vertex_view_space = v2;
+  	eye_direction 	=  normalize(eye_position -  vec3(model_matrix * gl_in[1].gl_Position));
+    vertex_view_space = vec3(model_matrix * gl_in[1].gl_Position);
     EmitVertex();
     
     gl_Position =  mvp * gl_in[2].gl_Position;
     tex_coord_geom.s = dot(v3, T );
     tex_coord_geom.t = dot(v3, B );
-    light_direction = normalize(light.position - v3);
-  	 normalized_normal = N_v3
-      ;
-  	 eye_direction 	=  normalize(eye_position - v3);
-     vertex_view_space = v3;
+    light_direction = normalize(light.position - vec3(model_matrix * gl_in[2].gl_Position));
+  	normalized_normal = N_v3;
+  	eye_direction 	=  normalize(eye_position -  vec3(model_matrix * gl_in[2].gl_Position));
+    vertex_view_space = vec3(model_matrix * gl_in[2].gl_Position);
 
     EmitVertex();
     

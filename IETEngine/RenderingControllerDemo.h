@@ -118,9 +118,9 @@ namespace Controller
 	{
 		AbstractController::Init(argc,argv);  
 
-		this->d_camera->Position = glm::vec3(0.0f,0.0f,0.0f);
+		this->d_camera->Position = glm::vec3(0.0f,20.0f,0.0f);
 		d_camera->CameraType = FREE_FLY;
-		d_camera->MovementSpeed = 0.1f;
+		d_camera->MovementSpeed = 0.5f;
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
@@ -135,13 +135,14 @@ namespace Controller
 
 		vector<string> v_shader				= ArrayConversion<string>(2,string("hatching.vert"),string("common.vert")); 
 
-		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag")); 
+		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching_blend.frag") ,string("common.frag")); 
 
 
-		d_shader = new Shader(v_shader,f_shader,"hatching.geom"); 
+		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
 
-		d_nano_model = new Model("C:\\Users\\Johnny\\Desktop\\sybenik.obj");
+		d_nano_model = new Model(CUBE_MODEL);
 
+		//d_nano_model->Scale(glm::vec3(0.5f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
 		d_quaternion_rotation = d_nano_model->Rotation();
 		tweak_bar_setup();
@@ -175,12 +176,20 @@ namespace Controller
 		auto hatch = Texture("textures", "hatch3d");
 		vector<string> texturesToLoad;
 
-		texturesToLoad.push_back(HATCH01);
+		/*texturesToLoad.push_back(HATCH01);
 		texturesToLoad.push_back(HATCH02);
 		texturesToLoad.push_back(HATCH03);
 		texturesToLoad.push_back(HATCH04);
 		texturesToLoad.push_back(HATCH05);
-		texturesToLoad.push_back(HATCH06);
+		texturesToLoad.push_back(HATCH06);*/
+		texturesToLoad.push_back(H0);
+		texturesToLoad.push_back(H1);
+		texturesToLoad.push_back(H2);
+		texturesToLoad.push_back(H3);
+		texturesToLoad.push_back(H4);
+		texturesToLoad.push_back(H5);
+		texturesToLoad.push_back(H6);
+		texturesToLoad.push_back(H7);
 
 		hatch.Load3D(texturesToLoad);
 
@@ -196,7 +205,7 @@ namespace Controller
 		Shader* current_shader = d_shader;
 		glm::mat4 projection_view;
 
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);  

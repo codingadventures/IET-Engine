@@ -67,7 +67,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tet.lib;opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;LinearMath_Debug.lib;ConvexDecomposition_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:library  /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -192,6 +192,7 @@
     <None Include="hatching.frag" />
     <None Include="hatching.geom" />
     <None Include="hatching.vert" />
+    <None Include="hatching_blend.frag" />
     <None Include="hatching_blend.geom" />
     <None Include="particle.frag" />
     <None Include="physics.vert" />

@@ -154,7 +154,7 @@ bool Texture::Load3D(  vector<string> textures)
 		blob.data()
 		);
 
-	delete image;
+//	delete image;
 
 	for (int i = 1; i < textures.size(); i++)
 	{
@@ -170,7 +170,7 @@ bool Texture::Load3D(  vector<string> textures)
 			blob.data()
 			);
 
-		delete image;
+	//	delete image;
 	} 
 
 	glGenerateMipmap(GL_TEXTURE_3D);

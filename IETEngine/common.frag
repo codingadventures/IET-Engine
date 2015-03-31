@@ -1,7 +1,9 @@
+
+
 struct Material {
     vec3 ambient;
     vec3 diffuse;
-	sampler2D texture_diffuse1;
+    sampler2D texture_diffuse1;
     sampler2D texture_specular1;
     sampler2D texture_normal1;
     vec3 specular;
@@ -41,88 +43,88 @@ uniform float   fresnelReflectance;// fresnel reflectance at normal incidence
 
 float calculate_specular_cook_torrance_component(vec3 eye_direction,vec3 light_direction, vec3 normalized_normal, vec3 H)
 { 
-	float NdotL 				= 	dot(normalized_normal, light_direction);
-	
-	float NdotH 				= 	dot(normalized_normal, H); 
-    float NdotV 				= 	dot(normalized_normal, eye_direction); // note: this could also be NdotL, which is the same value
-    float VdotH 				= 	dot(eye_direction, H);
- 	float mSquared 				= 	roughnessValue * roughnessValue;
+    float NdotL                 =   dot(normalized_normal, light_direction);
+    
+    float NdotH                 =   dot(normalized_normal, H); 
+    float NdotV                 =   dot(normalized_normal, eye_direction); // note: this could also be NdotL, which is the same value
+    float VdotH                 =   dot(eye_direction, H);
+    float mSquared              =   roughnessValue * roughnessValue;
  
 
- 	float Gc 					=	2 * ( NdotH * NdotV ) / VdotH;
-	float Gb 					=	2 * ( NdotH * NdotL ) / VdotH;
-	float geo_attenuation 		= 	min(1.0,min(Gb,Gc));
+    float Gc                    =   2 * ( NdotH * NdotV ) / VdotH;
+    float Gb                    =   2 * ( NdotH * NdotL ) / VdotH;
+    float geo_attenuation       =   min(1.0,min(Gb,Gc));
 
-	// roughness (or: microfacet distribution function)
+    // roughness (or: microfacet distribution function)
     // beckmann distribution function
-    float r1 					= 	1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
-    float r2 					= 	(NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
-    float roughness 			= 	r1 * exp(r2);
+    float r1                    =   1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
+    float r2                    =   (NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
+    float roughness             =   r1 * exp(r2);
 
-	// fresnel
+    // fresnel
     // Schlick approximation
-    float fresnel 				= 	fresnelReflectance + (1.0 - fresnelReflectance) * pow(1.0 - VdotH, 5.0);
+    float fresnel               =   fresnelReflectance + (1.0 - fresnelReflectance) * pow(1.0 - VdotH, 5.0);
   
-    float specular 				=   max(0.0,(fresnel * geo_attenuation * roughness) / (NdotV * NdotL * 4.0));
+    float specular              =   max(0.0,(fresnel * geo_attenuation * roughness) / (NdotV * NdotL * 4.0));
 
     return specular;
 }
 
 vec3 calculate_diffuse_component(vec3 normal, vec3 light_direction)
 {
-	vec3 normalized_normal = normalize(normal);
-	float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
-	return diffuse_factor * light.diffuse;
+    vec3 normalized_normal = normalize(normal);
+    float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
+    return diffuse_factor * light.diffuse;
 }
 
 vec3 calculate_diffuse_component_material(vec3 normal, vec3 light_direction)
 {
-	vec3 normalized_normal = normalize(normal);
-	float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
-	return  light.diffuse * diffuse_factor * material.diffuse;
+    vec3 normalized_normal = normalize(normal);
+    float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
+    return  light.diffuse * diffuse_factor * material.diffuse;
 }
 
 vec3 calculate_diffuse_component_material_texture(vec3 normal, vec3 light_direction, vec2 tex_coord)
 {
-	vec3 normalized_normal = normalize(normal);
-	float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
-	return  light.diffuse * diffuse_factor * vec3(texture(material.texture_diffuse1,tex_coord));
+    vec3 normalized_normal = normalize(normal);
+    float diffuse_factor =  max(dot(normalized_normal, light_direction), 0.0);
+    return  light.diffuse * diffuse_factor * vec3(texture(material.texture_diffuse1,tex_coord));
 }
 
 
 vec3 calculate_ambient_component_material()
 {
 
-	return light.ambient * material.ambient;
+    return light.ambient * material.ambient;
 }
 
 vec3 calculate_ambient_component_material_texture(vec2 tex_coord)
 { 
 
-	return  light.ambient *  vec3(texture(material.texture_diffuse1,tex_coord));
+    return  light.ambient *  vec3(texture(material.texture_diffuse1,tex_coord));
 }
 
 
 float calculate_specular_component(vec3 normalized_normal, vec3 eye_direction, vec3 reflection_direction)
 {
-	//Specular Shading
-	float specular 	= pow(max(dot(eye_direction, reflection_direction), 0.0), 32);
-	return 	specular;
+    //Specular Shading
+    float specular  = pow(max(dot(eye_direction, reflection_direction), 0.0), 32);
+    return  specular;
 }
 
 vec3 calculate_specular_component_material(float specular)
 {
-		return	light.specular * specular * material.specular;
+        return  light.specular * specular * material.specular;
 }
 
 vec3  calculate_specular_component_material_texture(float specular,vec2 tex_coord)
 {
-		return	light.specular * specular * vec3(texture(material.texture_specular1,tex_coord));
+        return  light.specular * specular * vec3(texture(material.texture_specular1,tex_coord));
 } 
 
 vec3 get_light_ambient()
 {
-	return light.ambient;
+    return light.ambient;
 }
 
 mat3 calculate_bumped_matrix(vec3 normal,vec3 tangent)                                                                 
@@ -200,11 +202,13 @@ vec4 calculate_hatching(
     return src;
 }
 
-vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec2 tex_coord)
+vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
 {
     vec3 finalColor; 
     ivec3 sizeOfTex = textureSize(hatch3d, 0);
     vec3 Ia,Id,Is; 
+    float sumF = 0.0;
+    vec3 colort[4];
     // sample depth of the texture by light intensity
      
     float specular = calculate_specular_component(normalized_normal,  eye_direction,  reflection_direction);
@@ -213,19 +217,19 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
     Id =  calculate_diffuse_component_material(normalized_normal, light_dir);
     Is =  calculate_specular_component_material(specular);
 
-    float shading = clamp(Ia + Id + Is,0,1);
+    float shading = clamp(Ia + Id + Is, 0 , 1);
 
-    // for(int i = 0; i< 4; i++)
-    // {
+    for(int i = 0; i< 4; i++)
+    {
         
-     finalColor = texture(hatch3d, vec3(gl_FragCoord.xy / sizeOfTex.x, shading)).rgb;
-     //   sumF += ;    
-    //}
+        colort[i] = texture(hatch3d, vec3(tex_coord[i].st , shading)).rgb;
+        sumF += tex_coord[i].p;    
+    }
 
-    // for(int i =0; i < 4; i++)
-    // {
-    //     finalColor += (colort[i] * tex_coord_geom[i].p); 
-    // }
- 
+    for(int i =0; i < 4; i++)
+    {
+        finalColor +=  colort[i] * tex_coord[i].p; 
+    }
+    finalColor = finalColor / sumF;
     return finalColor ;// hatching * (1.0 + shading * 2)/3; 
 }

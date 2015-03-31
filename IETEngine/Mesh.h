@@ -98,7 +98,7 @@ namespace Rendering
 					GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
 					glUniform1i(shader_location, i);
 					// And finally bind the texture
-					glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
+					glBindTexture(GL_TEXTURE_3D, this->m_textures[i].id);
 				}
 				glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 			}
@@ -107,11 +107,11 @@ namespace Rendering
 
 			// Draw mesh
 			glBindVertexArray(this->d_VAO);
-			/*glDrawElements(GL_TRIANGLES_ADJACENCY, this->m_indices.size() * 2
-				, GL_UNSIGNED_SHORT, 0);*/
-			glDrawElements(GL_TRIANGLES , this->m_indices.size() 
-				, GL_UNSIGNED_INT, 0);
-			 
+			glDrawElements(GL_TRIANGLES_ADJACENCY, this->m_indices.size() * 2
+				, GL_UNSIGNED_SHORT, 0);
+			/*glDrawElements(GL_TRIANGLES , this->m_indices.size() 
+			, GL_UNSIGNED_INT, 0);*/
+
 			glBindVertexArray(0);
 		}
 
