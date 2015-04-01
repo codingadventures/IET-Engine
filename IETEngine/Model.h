@@ -23,6 +23,7 @@
 #include "KeyFrameAnimator.h"
 #include "Inertia.h"
 #include "AntTweakBar.h"
+#include "VertexTriangleAdjacency.h"
 
 namespace Rendering
 {
@@ -55,13 +56,12 @@ namespace Rendering
 
 		glm::quat		d_rotation;
 
-		bool			d_withAdjacencies;
-
+		 
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
-		Model(GLchar* path, bool withAdjacencies = false) :
-			d_withAdjacencies(withAdjacencies),
+		Model(GLchar* path) :
+			 
 			d_numberOfBone(0)
 		{ 
 			assert(path);
@@ -96,7 +96,7 @@ namespace Rendering
 
 		}
 		// Draws the model, and thus all its meshes
-		void Draw(Shader& shader)
+		void Draw(Shader& shader, bool withAdjacencies = false)
 		{
 			shader.Use();
 
@@ -109,7 +109,7 @@ namespace Rendering
 			shader.SetUniform("hasTexture",Has_Texture());
 
 			for(GLuint i = 0; i < this->d_meshes.size(); i++)
-				this->d_meshes[i].Draw(shader, d_withAdjacencies);
+				this->d_meshes[i].Draw(shader, withAdjacencies);
 		}
 
 		void Scale(glm::vec3 scale_vector)
@@ -367,6 +367,19 @@ namespace Rendering
 
 		void FindAdjacencies(const aiMesh* paiMesh, vector<unsigned int>& Indices)
 		{       
+
+			/*	VertexTriangleAdjacency adj(paiMesh->mFaces,paiMesh->mNumFaces, paiMesh->mNumVertices,true);
+			int i = 0;
+			for (auto i = 0 ; i < paiMesh->mNumFaces ; i++) {
+			const aiFace& face = paiMesh->mFaces[i];
+			for (auto j = 0 ; j < 3 ; j++) {    
+			auto Index = face.mIndices[j];
+			auto triangles = adj.GetAdjacentTriangles(Index);
+			auto num = adj.GetNumTrianglesPtr(Index);
+			i++;
+			}
+			}*/
+
 			// Step 1 - find the two triangles that share every edge
 			for (auto i = 0 ; i < paiMesh->mNumFaces ; i++) {
 				const aiFace& face = paiMesh->mFaces[i];
@@ -518,6 +531,7 @@ namespace Rendering
 			// Data to fill
 			vector<Vertex> vertices;
 			vector<GLuint> indices;
+			vector<GLuint> adjacent_indices;
 			vector<Texture> textures;
 			vector<VertexWeight> boneWeights;
 			Material material;
@@ -569,113 +583,113 @@ namespace Rendering
 #pragma endregion
 
 #pragma region [ Process Faces ]
-			if (d_withAdjacencies)
-				FindAdjacencies(ai_mesh, indices);
-			else
-				//Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-				for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
-				{
-					aiFace face = ai_mesh->mFaces[i];
+			//if (d_withAdjacencies)
+			//FindAdjacencies(ai_mesh, adjacent_indices);
+			//	else
+			//Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+			for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
+			{
+				aiFace face = ai_mesh->mFaces[i];
 
-					// Retrieve all indices of the face and store them in the indices vector
-					for(GLuint j = 0; j < face.mNumIndices; j++)
-						indices.push_back(face.mIndices[j]);
-				}
+				// Retrieve all indices of the face and store them in the indices vector
+				for(GLuint j = 0; j < face.mNumIndices; j++)
+					indices.push_back(face.mIndices[j]);
+			}
 #pragma endregion
 
 #pragma region [ Process Materials ]
-				// Process materials
-				if(ai_mesh->mMaterialIndex >= 0)
-				{
-					aiMaterial* aiMaterial = scene->mMaterials[ai_mesh->mMaterialIndex];
+			// Process materials
+			if(ai_mesh->mMaterialIndex >= 0)
+			{
+				aiMaterial* aiMaterial = scene->mMaterials[ai_mesh->mMaterialIndex];
 
-					aiColor4D ambient;
-					glm::vec3 glmAmbient;
-					aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
+				aiColor4D ambient;
+				glm::vec3 glmAmbient;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
 
-					glmAmbient =   aiColor4DToGlm(ambient);
+				glmAmbient =   aiColor4DToGlm(ambient);
 
-					aiColor4D diffuse;
-					glm::vec3 glmDiffuse;
-					aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
-					glmDiffuse = aiColor4DToGlm(diffuse);
+				aiColor4D diffuse;
+				glm::vec3 glmDiffuse;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
+				glmDiffuse = aiColor4DToGlm(diffuse);
 
-					aiColor4D specular;
-					glm::vec3 glmSpecular;
-					aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, &specular);
-					glmSpecular = aiColor4DToGlm(specular);
+				aiColor4D specular;
+				glm::vec3 glmSpecular;
+				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, &specular);
+				glmSpecular = aiColor4DToGlm(specular);
 
-					float shininess = 0.0f;
-					aiGetMaterialFloat(aiMaterial, AI_MATKEY_SHININESS, &shininess);
+				float shininess = 0.0f;
+				aiGetMaterialFloat(aiMaterial, AI_MATKEY_SHININESS, &shininess);
 
-					material = Material(glmAmbient,glmDiffuse,glmSpecular,32.0f);
+				material = Material(glmAmbient,glmDiffuse,glmSpecular,32.0f);
 
-					// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
-					// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-					// Same applies to other texture as the following list summarizes:
-					// Diffuse: texture_diffuseN
-					// Specular: texture_specularN
-					// Normal: texture_normalN
+				// We assume a convention for sampler names in the Shaders. Each diffuse texture should be named
+				// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+				// Same applies to other texture as the following list summarizes:
+				// Diffuse: texture_diffuseN
+				// Specular: texture_specularN
+				// Normal: texture_normalN
 
-					// 1. Diffuse maps
-					vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, TextureType_DIFFUSE);
-					textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-					// 2. Specular maps
-					vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, TextureType_SPECULAR);
-					textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+				// 1. Diffuse maps
+				vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, TextureType_DIFFUSE);
+				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+				// 2. Specular maps
+				vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, TextureType_SPECULAR);
+				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-					// 3. Normal maps
-					vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_NORMALS, TextureType_NORMAL);
-					textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+				// 3. Normal maps
+				vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_NORMALS, TextureType_NORMAL);
+				textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-					// 4. Ref maps
-					vector<Texture> reflMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);
-					textures.insert(textures.end(), reflMaps.begin(), reflMaps.end());
-				}
+				// 4. Ref maps
+				vector<Texture> reflMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);
+				textures.insert(textures.end(), reflMaps.begin(), reflMaps.end());
+			}
 #pragma endregion  
 
 #pragma region [ Process Bones ]
 
-				if(ai_mesh->HasBones())
-				{
-					int bone_count =  ai_mesh->mNumBones;
+			if(ai_mesh->HasBones())
+			{
+				int bone_count =  ai_mesh->mNumBones;
 
-					boneWeights.resize(ai_mesh->mNumVertices);
+				boneWeights.resize(ai_mesh->mNumVertices);
 
-					for (GLuint i = 0 ; i < ai_mesh->mNumBones ; i++) {                
-						int BoneIndex = 0;        
-						string BoneName(ai_mesh->mBones[i]->mName.data);
+				for (GLuint i = 0 ; i < ai_mesh->mNumBones ; i++) {                
+					int BoneIndex = 0;        
+					string BoneName(ai_mesh->mBones[i]->mName.data);
 
-						if ( m_skeleton->boneMapping.find(BoneName) == m_skeleton->boneMapping.end()) {
-							// Allocate an index for a new bone
-							BoneInfo info;
+					if ( m_skeleton->boneMapping.find(BoneName) == m_skeleton->boneMapping.end()) {
+						// Allocate an index for a new bone
+						BoneInfo info;
 
-							BoneIndex = d_numberOfBone++; 
-							info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
-							info.index = BoneIndex;
-							m_skeleton->boneMapping[BoneName] = info;
+						BoneIndex = d_numberOfBone++; 
+						info.offset = aiMatrix4x4ToGlm(&ai_mesh->mBones[i]->mOffsetMatrix);
+						info.index = BoneIndex;
+						m_skeleton->boneMapping[BoneName] = info;
+					}
+					else
+						BoneIndex = m_skeleton->boneMapping[BoneName].index;
+
+					for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
+						int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
+						float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
+						for (glm::uint i = 0 ; i < 4 ; i++) {
+							if (boneWeights[VertexID].Weights[i] == 0.0) {
+								boneWeights[VertexID].IDs[i]     = BoneIndex;
+								boneWeights[VertexID].Weights[i] = Weight;
+								break;
+							}        
 						}
-						else
-							BoneIndex = m_skeleton->boneMapping[BoneName].index;
-
-						for (GLuint j = 0 ; j < ai_mesh->mBones[i]->mNumWeights ; j++) {
-							int VertexID =   ai_mesh->mBones[i]->mWeights[j].mVertexId;
-							float Weight  = ai_mesh->mBones[i]->mWeights[j].mWeight;   
-							for (glm::uint i = 0 ; i < 4 ; i++) {
-								if (boneWeights[VertexID].Weights[i] == 0.0) {
-									boneWeights[VertexID].IDs[i]     = BoneIndex;
-									boneWeights[VertexID].Weights[i] = Weight;
-									break;
-								}        
-							}
-						}
-					}     
-				}
+					}
+				}     
+			}
 
 #pragma endregion  
 
-				// Return a mesh object created from the extracted mesh data
-				return Mesh(vertices, indices, textures, boneWeights,material);
+			// Return a mesh object created from the extracted mesh data
+			return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material);
 		}
 
 		// Checks all material textures of a given type and loads the textures if they're not loaded yet.

@@ -173,6 +173,7 @@
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VertexTriangleAdjacency.h" />
     <ClInclude Include="VertexWeight.h" />
     <ClInclude Include="WalkForward.h" />
     <ClInclude Include="WalkForwardLeft.h" />

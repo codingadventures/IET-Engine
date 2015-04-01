@@ -28,7 +28,7 @@ namespace Controller
 		Shader*			d_shader;
 		Shader*			d_shader_hatching; 
 
-		Model*			d_nano_model;
+		Model*			d_model;
 
 
 		RenderingType	d_rendering_type;
@@ -58,6 +58,8 @@ namespace Controller
 		Shader* d_shader_hatchingnormal;
 		glm::vec3 d_ink_color;
 		Shader* d_shader_weigthed_hatching;
+		Model* d_model_3d;
+		bool		d_use_3d_texture;
 	};
 	void RenderingControllerDemo::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -66,10 +68,11 @@ namespace Controller
 	RenderingControllerDemo::RenderingControllerDemo()
 		: 
 		AbstractController("Real Time Rendering"),
-		d_rendering_type(NONE)
+		d_rendering_type(NONE),
+		d_use_3d_texture(false)
 	{
 		setup_current_instance();
-		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_light_ambient = glm::vec3(0.5f,0.5f,0.5f); //0.2
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_refractive_index =1.0f;
@@ -101,7 +104,7 @@ namespace Controller
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
-		TwEnumVal lightEv[] = { { WEIGHTED_HATCHING, "Weighted Hatching"}, { NORMAL_HATCHING, "Hatching"},{GEOMETRY_HATCHING,"TBN Hatching"},{GEOMETRY_BLENDING_HATCHING,"TBN Adjacency Hatching"}, {NORMAL_3D_HATCHING,"3D Hatching"}};
+		TwEnumVal lightEv[] = { { WEIGHTED_HATCHING, "Weighted Hatching"}, { NORMAL_HATCHING, "Hatching"},{GEOMETRY_HATCHING,"TBN Hatching"},{GEOMETRY_BLENDING_HATCHING,"TBN Adjacency Hatching"}};
 		TwType lightType = TwDefineEnum("LightType", lightEv, 4);
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, " group='System' ");
@@ -109,7 +112,7 @@ namespace Controller
 		//	TwAddVarRW(Helper::g_tweak_bar, "LightDir", TW_TYPE_DIR3F, &d_light_direction," group='Light' label='Light direction' opened=true help='Change the light direction.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Rotation", TW_TYPE_QUAT4F, &d_quaternion_rotation, 
 			" group='Model' label='Object rotation' opened=true help='Change the object orientation.' ");
-
+	 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
@@ -151,7 +154,7 @@ namespace Controller
 
 		vector<string> f_shader_hatching			= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag"));  
 
-		vector<string> f_shader_weighted_hatching			= ArrayConversion<string>(2,string("weighted_hatch.frag") ,string("common.frag"));  
+		vector<string> f_shader_weighted_hatching	= ArrayConversion<string>(2,string("weighted_hatch.frag") ,string("common.frag"));  
 
 		d_shader_hatchingnormal = new Shader(v_shader_hatching_normal,f_shader_hatching);
 
@@ -160,11 +163,12 @@ namespace Controller
 
 		d_shader_weigthed_hatching = new Shader(v_shader_weighted_hatch,f_shader_weighted_hatching); 
 
-		d_nano_model = new Model(CHURCH_MODEL, false);
+		d_model = new Model(CHURCH_MODEL );
+		//d_model_3d = new Model(CHURCH_MODEL, false);
 
 		//d_nano_model->Scale(glm::vec3(0.5f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
-		d_quaternion_rotation = d_nano_model->Rotation();
+		d_quaternion_rotation = d_model->Rotation();
 		tweak_bar_setup();
 
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
@@ -184,36 +188,29 @@ namespace Controller
 		hatch5.Load("textures");
 		hatch6.Load("textures");
 
-		d_nano_model->addTextures(hatch1);
-		d_nano_model->addTextures(hatch2);
-		d_nano_model->addTextures(hatch3);
-		d_nano_model->addTextures(hatch4);
-		d_nano_model->addTextures(hatch5);
-		d_nano_model->addTextures(hatch6);
+		d_model->addTextures(hatch1);
+		d_model->addTextures(hatch2);
+		d_model->addTextures(hatch3);
+		d_model->addTextures(hatch4);
+		d_model->addTextures(hatch5);
+		d_model->addTextures(hatch6);
 
 
 
-		//auto hatch = Texture("textures", "hatch3d");
-		//vector<string> texturesToLoad;
+		/*auto hatch = Texture("textures", "hatch3d");
+		vector<string> texturesToLoad;
 
-		//texturesToLoad.push_back(HATCH01);
-		//texturesToLoad.push_back(HATCH02);
-		//texturesToLoad.push_back(HATCH03);
-		//texturesToLoad.push_back(HATCH04);
-		//texturesToLoad.push_back(HATCH05);
-		//texturesToLoad.push_back(HATCH06);
-		///*texturesToLoad.push_back(H0);
-		//texturesToLoad.push_back(H1);
-		//texturesToLoad.push_back(H2);
-		//texturesToLoad.push_back(H3);
-		//texturesToLoad.push_back(H4);
-		//texturesToLoad.push_back(H5);
-		//texturesToLoad.push_back(H6);
-		//texturesToLoad.push_back(H7);
-		//*/
+		texturesToLoad.push_back(HATCH01);
+		texturesToLoad.push_back(HATCH02);
+		texturesToLoad.push_back(HATCH03);
+		texturesToLoad.push_back(HATCH04);
+		texturesToLoad.push_back(HATCH05);
+		texturesToLoad.push_back(HATCH06);*/
+		/*
+		*/
 		//hatch.Load3D(texturesToLoad);
 
-		//d_nano_model->addTextures(hatch); 
+		//d_model->addTextures(hatch); 
 
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
@@ -246,17 +243,17 @@ namespace Controller
 
 		projection_view = d_projection_matrix * d_view_matrix;  
 
-		d_nano_model->Rotate(d_quaternion_rotation);
+		d_model->Rotate(d_quaternion_rotation);
+		//d_model_3d->Rotate(d_quaternion_rotation);
 
 		switch (d_rendering_type)
 		{
+
 		case WEIGHTED_HATCHING:
 			current_shader = d_shader_weigthed_hatching;
 			break;
 		case NORMAL_HATCHING:
 			current_shader = d_shader_hatchingnormal;
-			current_shader->SetUniform("Hatching3D", false);  
-
 			break;
 		case GEOMETRY_HATCHING:
 			current_shader = d_shader_hatching;
@@ -264,22 +261,18 @@ namespace Controller
 		case GEOMETRY_BLENDING_HATCHING:
 			current_shader = d_shader_hatchingblend;
 			break;
-
-		case NORMAL_3D_HATCHING:
-
-			break;
+			  
 		}
 		current_shader->Use(); 
-		light.SetShader(*current_shader);	 
-		current_shader->SetUniform("hatching", true);  
+		light.SetShader(*current_shader);	  
 		//current_shader->SetUniform("draw_sky_box", false);  
 		current_shader->SetUniform("ink_color", glm::vec4(d_ink_color,1.0));  
 		//current_shader->SetUniform("material.shininess",32.0f);
 		current_shader->SetUniform("eye_position", d_camera->Position);  
-		current_shader->SetUniform("mvp", d_projection_matrix * d_view_matrix * d_nano_model->GetModelMatrix());
-		current_shader->SetUniform("mv",   d_view_matrix * d_nano_model->GetModelMatrix());
-		current_shader->SetUniform("model_matrix", d_nano_model->GetModelMatrix());
-		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_nano_model->GetModelMatrix())));  
+		current_shader->SetUniform("mvp", d_projection_matrix * d_view_matrix * d_model->GetModelMatrix());
+		current_shader->SetUniform("mv",   d_view_matrix * d_model->GetModelMatrix());
+		current_shader->SetUniform("model_matrix", d_model->GetModelMatrix());
+		current_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_model->GetModelMatrix())));  
 
 
 		static glm::quat random_cube_rotation;
@@ -304,8 +297,9 @@ namespace Controller
 
 		//d_cube_model->Draw(*current_shader);
 
+	 
+		d_model->Draw(*current_shader, d_rendering_type == GEOMETRY_BLENDING_HATCHING);
 
-		d_nano_model->Draw(*current_shader);
 		//	text_to_screen();
 
 		//	glDisable(GL_BLEND);

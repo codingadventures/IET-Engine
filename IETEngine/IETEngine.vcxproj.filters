@@ -326,6 +326,9 @@
     <ClInclude Include="RenderingControllerDemo.h">
       <Filter>Header Files\Controller</Filter>
     </ClInclude>
+    <ClInclude Include="VertexTriangleAdjacency.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex_bone.vert">

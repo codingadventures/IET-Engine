@@ -31,6 +31,7 @@ namespace Rendering
 		/*  Mesh Data  */
 		vector<Vertex>				m_vertices;
 		vector<GLuint>				m_indices;
+		vector<GLuint>				m_adjacent_indices;
 		vector<Texture>				m_textures; 
 		vector<VertexWeight>		m_boneWeights;
 
@@ -53,12 +54,13 @@ namespace Rendering
 	public:
 		/*  Functions  */
 		// Constructor
-		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights,Material material) 
+		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights,vector<GLuint>  adjacent_indices ,Material material) 
 			: 
 			d_area(0.0f),
 			d_bounding_sphere(BoundingSphere(vertices)),
 			d_bounding_box(BoundingBox(vertices)),
-			d_material(material)
+			d_material(material),
+			m_adjacent_indices(adjacent_indices)
 		{ 
 			this->m_vertices = vertices;
 			this->m_indices = indices;
@@ -84,7 +86,7 @@ namespace Rendering
 			{
 				for(GLuint i = 0; i < this->m_textures.size(); i++)
 				{
-					GLuint textureType = m_textures[i].m_has3dTexture ? GL_TEXTURE_3D : GL_TEXTURE_2D;
+					GLuint textureType = GL_TEXTURE_2D;
 					glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
 					// Retrieve texture number (the N in diffuse_textureN)
 					stringstream ss;
@@ -110,8 +112,14 @@ namespace Rendering
 			glBindVertexArray(this->d_VAO);
 
 			GLuint drawMode = withAdjecencies ? GL_TRIANGLES_ADJACENCY : GL_TRIANGLES;
+			GLuint indices_size = withAdjecencies ? m_adjacent_indices.size() : m_indices.size();
+			if (withAdjecencies)
+			{
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_adjacent_indices.size() * sizeof(GLuint), &this->m_adjacent_indices[0], GL_STATIC_DRAW);
 
-			glDrawElements(drawMode, this->m_indices.size(), GL_UNSIGNED_INT, 0);
+			}
+			glDrawElements(drawMode, indices_size, GL_UNSIGNED_INT, 0);
 		 
 
 			glBindVertexArray(0);
