@@ -140,7 +140,7 @@ namespace Controller
 
 		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
 
-		d_nano_model = new Model(TORUS_MODEL);
+		d_nano_model = new Model(DROID_OBJ_MODEL);
 
 		//d_nano_model->Scale(glm::vec3(0.5f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));

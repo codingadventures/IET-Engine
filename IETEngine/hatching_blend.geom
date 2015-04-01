@@ -12,8 +12,7 @@ struct Triangle
 	vec3 vertices[3];
 	vec3 T; 
 	vec3 B;
-	vec3 N;
-	vec3 calculated_normal[3];
+	vec3 N; 
 };
 
 Triangle triangles[4];
@@ -80,14 +79,12 @@ void init()
 	// Initialize triangles in local/object space!
 	for(int i = 0; i < 4; i++)
 	{
-		 
-
 		vec3 v1 = vec3(gl_in[triangle_indexes[i * 3 + 0]].gl_Position);
 		vec3 v2 = vec3(gl_in[triangle_indexes[i * 3 + 1]].gl_Position);
 		vec3 v3 = vec3(gl_in[triangle_indexes[i * 3 + 2]].gl_Position);
 		vec3 ab = v2 - v1;
 		vec3 ac = v3 - v1;
-		vec3 N = normalize(cross(ab, ac));
+		vec3 N = out_normal[triangle_indexes[i * 3]];//normalize(cross(ab, ac));
 
 		vec3 G = ( v1 + v2 + v3 ) / 3.0;
 
@@ -201,8 +198,8 @@ void main()
 			}
 			else
 			{ 
-				texture_coordinates[i * 4 + t].s = dot(triangles[c].vertices[i], triangles[c].T ); 
-				texture_coordinates[i * 4 + t].t = dot(triangles[c].vertices[i], triangles[c].B ); 
+				texture_coordinates[i * 4 + t].s = dot(triangles[c].vertices[i], triangles[t].T ); 
+				texture_coordinates[i * 4 + t].t = dot(triangles[c].vertices[i], triangles[t].B ); 
 				texture_coordinates[i * 4 + t].p = dot(triangles[c].N, triangles[t].N);
 			}
 		}
