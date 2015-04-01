@@ -1,7 +1,8 @@
 #ifndef RenderingType_h__
 #define RenderingType_h__
 
-enum RenderingType{
+enum RenderingType
+{
 	NONE,
 	SKYBOX,
 	SKYBOX_REFR,
@@ -14,6 +15,14 @@ enum RenderingType{
 	FRESNEL,
 	HATCHING
 
+};
+
+enum HatchingType
+{
+	NORMAL_HATCHING,
+	GEOMETRY_HATCHING,
+	GEOMETRY_BLENDING_HATCHING,
+	NORMAL_3D_HATCHING
 };
 
 #endif // RenderingType_h__

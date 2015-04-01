@@ -202,13 +202,13 @@ vec4 calculate_hatching(
     return src;
 }
 
-vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
+vec3 calculate_hatching_3d_adj(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
 {
     vec3 finalColor; 
     ivec3 sizeOfTex = textureSize(hatch3d, 0);
     vec3 Ia,Id,Is; 
     float sumF = 0.0;
-    vec3 colort[4];
+    vec2 colort[4];
     // sample depth of the texture by light intensity
      
     float specular = calculate_specular_component(normalized_normal,  eye_direction,  reflection_direction);
@@ -222,15 +222,37 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
     for(int i = 0; i< 4; i++)
     {
         
-       colort[i] = texture(hatch3d, vec3(tex_coord[i].st, shading)).rgb;
+       colort[i] = tex_coord[i].st * tex_coord[i].p;
        sumF += tex_coord[i].p;  
            
     }
 
     for(int i =0; i < 4; i++)
     {
-        finalColor +=  colort[i] * tex_coord[i].p; 
+        finalColor += texture(hatch3d, vec3(colort[i], shading)).rgb; 
     }
-    finalColor = finalColor / sumF;
+    finalColor = finalColor / ( sumF * 2);
     return finalColor;// hatching * (1.0 + shading * 2)/3; 
+}
+
+vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
+{
+    vec3 finalColor; 
+    ivec3 sizeOfTex = textureSize(hatch3d, 0);
+    vec3 Ia,Id,Is; 
+    float sumF = 0.0;
+    vec2 colort[4];
+    // sample depth of the texture by light intensity
+     
+    float specular = calculate_specular_component(normalized_normal,  eye_direction,  reflection_direction);
+
+    Ia =  calculate_ambient_component_material();
+    Id =  calculate_diffuse_component_material(normalized_normal, light_dir);
+    Is =  calculate_specular_component_material(specular);
+
+    float shading = clamp(Ia + Id + Is, 0 , 1);
+
+    finalColor = 
+    texture(hatch3d, vec3(colort[i], shading)).rgb; 
+    return   finalColor * (1.0 + shading * 2)/3; 
 }

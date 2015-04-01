@@ -54,6 +54,8 @@ namespace Controller
 		float			d_shininess_component;
 		float			d_refractive_index;
 		bool			d_use_bump_mapping;
+		Shader*			d_shader_hatchingblend;
+		Shader* d_shader_hatchingnormal;
 	};
 	void RenderingControllerDemo::setup_current_instance(){
 		Controller::g_CurrentInstance = this; 
@@ -97,7 +99,8 @@ namespace Controller
 
 		Helper::g_tweak_bar = TwNewBar("TweakBar");
 		TwDefine(" TweakBar size='300 400' color='96 216 224' valueswidth=140 "); // change default tweak bar size and color
-
+		TwEnumVal lightEv[] = { { NORMAL_HATCHING, "Hatching"},{GEOMETRY_HATCHING,"TBN Hatching"},{GEOMETRY_BLENDING_HATCHING,"TBN Adjacency Hatching"}, {NORMAL_3D_HATCHING,"3D Hatching"}};
+		TwType lightType = TwDefineEnum("LightType", lightEv, 4);
 
 		TwAddVarRO(Helper::g_tweak_bar, "FPS", TW_TYPE_FLOAT, &d_fps, " group='System' ");
 
@@ -106,11 +109,12 @@ namespace Controller
 			" group='Model' label='Object rotation' opened=true help='Change the object orientation.' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Light P.", TW_TYPE_DIR3F, &d_light_position," group='Light' label='Light Position' help='Change the light Position.' ");
+		TwAddVarRW(Helper::g_tweak_bar, "Light Type", lightType, &d_rendering_type," group='Light' ");
 
 		TwAddVarRW(Helper::g_tweak_bar, "Ambient", TW_TYPE_COLOR3F, &d_light_ambient, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Diffuse", TW_TYPE_COLOR3F, &d_light_diffuse, " group='Light' ");
 		TwAddVarRW(Helper::g_tweak_bar, "Specular", TW_TYPE_COLOR3F, &d_light_specular, " group='Light' ");
-		TwAddVarRW(Helper::g_tweak_bar, "Refr. Index", TW_TYPE_FLOAT, &d_refractive_index, " group='Light' ");
+		//TwAddVarRW(Helper::g_tweak_bar, "Refr. Index", TW_TYPE_FLOAT, &d_refractive_index, " group='Light' ");
 
 	}
 
@@ -118,7 +122,7 @@ namespace Controller
 	{
 		AbstractController::Init(argc,argv);  
 
-		this->d_camera->Position = glm::vec3(0.0f,20.0f,0.0f);
+		this->d_camera->Position = glm::vec3(0.0f,5.0f,0.0f);
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 0.5f;
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
@@ -133,14 +137,19 @@ namespace Controller
 		// send the ''glutGetModifers'' function pointer to AntTweakBar
 		TwGLUTModifiersFunc(glutGetModifiers);
 
-		vector<string> v_shader				= ArrayConversion<string>(2,string("hatching.vert"),string("common.vert")); 
+		vector<string> v_shader_hatching_normal		= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
 
-		vector<string> f_shader				= ArrayConversion<string>(2,string("hatching_blend.frag") ,string("common.frag")); 
+		vector<string> v_shader_hatching			= ArrayConversion<string>(2,string("hatching.vert"),string("common.vert")); 
 
+		vector<string> f_shader_hatchingblend		= ArrayConversion<string>(2,string("hatching_blend.frag") ,string("common.frag")); 
 
-		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
+		vector<string> f_shader_hatching			= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag")); 
 
-		d_nano_model = new Model(DROID_OBJ_MODEL);
+		d_shader_hatchingnormal = new Shader(v_shader_hatching_normal,f_shader_hatching);
+		d_shader_hatchingblend = new Shader(v_shader_hatching,f_shader_hatchingblend,"hatching_blend.geom"); 
+		d_shader_hatching = new Shader(v_shader_hatching,f_shader_hatchingblend,"hatching.geom"); 
+
+		d_nano_model = new Model(TORUS_MODEL, true);
 
 		//d_nano_model->Scale(glm::vec3(0.5f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
@@ -190,7 +199,7 @@ namespace Controller
 		texturesToLoad.push_back(H5);
 		texturesToLoad.push_back(H6);
 		texturesToLoad.push_back(H7);
-*/
+		*/
 		hatch.Load3D(texturesToLoad);
 
 		d_nano_model->addTextures(hatch); 
@@ -228,6 +237,13 @@ namespace Controller
 
 		d_nano_model->Rotate(d_quaternion_rotation);
 
+		switch (d_rendering_type)
+		{
+		case NORMAL_HATCHING:
+			current_shader = 
+			break;
+
+		}
 		current_shader->Use(); 
 		current_shader->SetUniform("hatching", true);  
 		current_shader->SetUniform("draw_sky_box", false);  

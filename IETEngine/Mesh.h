@@ -74,7 +74,7 @@ namespace Rendering
 
 
 		// Render the mesh
-		void Draw(Shader& shader ) 
+		void Draw(Shader& shader, bool withAdjecencies = false ) 
 		{
 			// Bind appropriate textures
 			GLuint diffuseNr = 1;
@@ -107,10 +107,11 @@ namespace Rendering
 
 			// Draw mesh
 			glBindVertexArray(this->d_VAO);
-			glDrawElements(GL_TRIANGLES_ADJACENCY, this->m_indices.size() 
-				, GL_UNSIGNED_INT, 0);
-			/*glDrawElements(GL_TRIANGLES , this->m_indices.size() 
-			, GL_UNSIGNED_INT, 0);*/
+
+			GLuint drawMode = withAdjecencies ? GL_TRIANGLES_ADJACENCY : GL_TRIANGLES;
+
+			glDrawElements(drawMode, this->m_indices.size(), GL_UNSIGNED_INT, 0);
+		 
 
 			glBindVertexArray(0);
 		}
