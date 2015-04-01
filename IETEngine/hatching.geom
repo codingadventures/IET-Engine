@@ -42,7 +42,7 @@ void main()
     vec3 L = mat3(inverse(model_matrix)) * light.position - G;
   
     
-    vec3 B = normalize(  L - N * max(0.0,dot(L, N)) ); 
+    vec3 B = normalize(  L - N *  max(0,dot(L, N))  ); 
 
     vec3 T  = cross(B , N ); 
 

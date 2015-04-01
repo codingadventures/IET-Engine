@@ -406,5 +406,8 @@
     <None Include="weighted_hatch.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="hatching_round.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

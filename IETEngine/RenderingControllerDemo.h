@@ -152,14 +152,16 @@ namespace Controller
 
 		vector<string> f_shader_hatchingblend		= ArrayConversion<string>(2,string("hatching_blend.frag") ,string("common.frag")); 
 
-		vector<string> f_shader_hatching			= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag"));  
+		vector<string> f_shader_hatching_round		= ArrayConversion<string>(2,string("hatching_round.frag") ,string("common.frag"));  
+		
+		vector<string> f_shader_hatching 			= ArrayConversion<string>(2,string("hatching.frag") ,string("common.frag"));  
 
 		vector<string> f_shader_weighted_hatching	= ArrayConversion<string>(2,string("weighted_hatch.frag") ,string("common.frag"));  
 
 		d_shader_hatchingnormal = new Shader(v_shader_hatching_normal,f_shader_hatching);
 
 		d_shader_hatchingblend = new Shader(v_shader_hatching,f_shader_hatchingblend,"hatching_blend.geom"); 
-		d_shader_hatching = new Shader(v_shader_hatching,f_shader_hatchingblend,"hatching.geom"); 
+		d_shader_hatching = new Shader(v_shader_hatching,f_shader_hatching_round,"hatching.geom"); 
 
 		d_shader_weigthed_hatching = new Shader(v_shader_weighted_hatch,f_shader_weighted_hatching); 
 
@@ -180,7 +182,13 @@ namespace Controller
 		auto hatch4  = Texture(HATCH04,TextureType_DIFFUSE,"hatching.hatch4"); 
 		auto hatch5  = Texture(HATCH05,TextureType_DIFFUSE,"hatching.hatch5"); 
 		auto hatch6  = Texture(HATCH06,TextureType_DIFFUSE,"hatching.hatch6"); 
-
+		/*auto hatch1  = Texture(H0,TextureType_DIFFUSE,"hatching.hatch1");
+		auto hatch2  = Texture(H1,TextureType_DIFFUSE,"hatching.hatch2"); 
+		auto hatch3  = Texture(H2,TextureType_DIFFUSE,"hatching.hatch3"); 
+		auto hatch4  = Texture(H3,TextureType_DIFFUSE,"hatching.hatch4"); 
+		auto hatch5  = Texture(H4,TextureType_DIFFUSE,"hatching.hatch5"); 
+		auto hatch6  = Texture(H5,TextureType_DIFFUSE,"hatching.hatch6"); */
+							   
 		hatch1.Load("textures");
 		hatch2.Load("textures");
 		hatch3.Load("textures");
