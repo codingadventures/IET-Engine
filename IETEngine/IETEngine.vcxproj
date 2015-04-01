@@ -203,6 +203,8 @@
     <None Include="boundings.frag" />
     <None Include="toon.frag" />
     <None Include="vertex_bone.vert" />
+    <None Include="weighted_hatch.frag" />
+    <None Include="weighted_hatching.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

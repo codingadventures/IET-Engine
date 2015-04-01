@@ -145,7 +145,7 @@ vec3 calculate_bumped_normal(mat3 TBN,vec2 tex_coord)
   
 vec4 calculate_hatching( 
     vec3 normalized_normal, 
-    vec3 vertex_view_space,
+    vec3 vertex_world_space,
     vec2 tex_coord,
     vec4 ink_color,
     vec3 light_dir
@@ -161,22 +161,22 @@ vec4 calculate_hatching(
 
     vec3 r = -reflect(light.position, n);
     r = normalize(r);
-    vec3 v = -vertex_view_space.xyz;
+    vec3 v = -vertex_world_space.xyz;
     v = normalize(v);
     float nDotHV = max( 0., dot( r, v ) );
 
     if( nDotVP != 0. ) specular = pow ( nDotHV, material.shininess );
-    //float rim = max( 0., abs( dot( n, normalize( -vertex_view_space.xyz ) ) ) );
+    float rim = max( 0., abs( dot( n, normalize( -vertex_world_space.xyz ) ) ) );
     //if( invertRim == 1 ) rim = 1. - rim;
 
-    //Stex_coord = tex_coord * 3;
+     
     Ia =  calculate_ambient_component_material();
-    Id =  calculate_diffuse_component_material(normalized_normal,light_dir);
+    Id =  calculate_diffuse_component_material(normalized_normal, light_dir);
     Is =  calculate_specular_component_material(specular);
  
-     float shading = Ia + Id /*+ rimWeight * rim */+ Is;
+     float shading = clamp(Ia + Id  + 0.65 * rim + Is, 0, 1);
    // float shading = 0.5 * ambient + 0.6 * diffuse + 0.4 * specular;
-
+ 
     float step = 1. / 6.;
     if( shading <= step ){   
         c = mix( texture2D( hatching.hatch6, tex_coord ), texture2D( hatching.hatch5, tex_coord ), 6. * shading );
@@ -202,7 +202,7 @@ vec4 calculate_hatching(
     return src;
 }
 
-vec3 calculate_hatching_3d_adj(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
+vec4 calculate_hatching_3d_adj(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
 {
     vec3 finalColor; 
     ivec3 sizeOfTex = textureSize(hatch3d, 0);
@@ -232,10 +232,10 @@ vec3 calculate_hatching_3d_adj(vec3 normalized_normal, vec3 light_dir, vec3 eye_
         finalColor += texture(hatch3d, vec3(colort[i], shading)).rgb; 
     }
     finalColor = finalColor / ( sumF * 2);
-    return finalColor;// hatching * (1.0 + shading * 2)/3; 
+    return vec4(finalColor * (1.0 + shading * 2)/3,1.0); 
 }
 
-vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec3 tex_coord[4])
+vec4 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_direction, vec3 reflection_direction,vec2 tex_coord)
 {
     vec3 finalColor; 
     ivec3 sizeOfTex = textureSize(hatch3d, 0);
@@ -252,7 +252,27 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
 
     float shading = clamp(Ia + Id + Is, 0 , 1);
 
-    finalColor = 
-    texture(hatch3d, vec3(colort[i], shading)).rgb; 
-    return   finalColor * (1.0 + shading * 2)/3; 
+    finalColor = texture(hatch3d, vec3(tex_coord, shading)).rgb; 
+    return   vec4(finalColor * (1.0 + shading * 2)/3,1.0); 
+}
+
+vec4 weighted_hatching(vec2 tex_coord, vec3 vHatchWeights0, vec3 vHatchWeights1)
+{
+ 
+    vec4 hatchTex0 = texture2D(hatching.hatch1,tex_coord) * vHatchWeights0.x;
+    vec4 hatchTex1 = texture2D(hatching.hatch2,tex_coord) * vHatchWeights0.y;
+    vec4 hatchTex2 = texture2D(hatching.hatch3,tex_coord) * vHatchWeights0.z;
+    vec4 hatchTex3 = texture2D(hatching.hatch4,tex_coord) * vHatchWeights1.x;
+    vec4 hatchTex4 = texture2D(hatching.hatch5,tex_coord) * vHatchWeights1.y;
+    vec4 hatchTex5 = texture2D(hatching.hatch6,tex_coord) * vHatchWeights1.z;
+    
+    
+    vec4 hatchColor =   hatchTex0 +
+                        hatchTex1 +
+                        hatchTex2 +
+                        hatchTex3 +
+                        hatchTex4 +
+                        hatchTex5;
+
+    return hatchColor;
 }

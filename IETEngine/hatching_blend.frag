@@ -26,10 +26,6 @@ void main() {
     
     vec3 normal = normalize(normalized_normal );
 	vec3 reflection_direction 	= 	reflect(-light_direction, normal);
-    
-    if (Hatching3D)
-	   color =  calculate_hatching_3d_adj(normal, light_direction,eye_direction,reflection_direction, tex_coord_geom); 
-	else
-        color =  calculate_hatching(normal, vertex_view_space, tex_coord_geom, ink_color, normalize(light_direction));
-
+ 
+	color =  calculate_hatching_3d_adj(normal, light_direction,eye_direction,reflection_direction, tex_coord_geom); 
 }

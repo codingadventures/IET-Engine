@@ -397,5 +397,11 @@
     <None Include="hatching_normal.vert">
       <Filter>Header Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="weighted_hatching.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="weighted_hatch.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

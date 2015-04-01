@@ -15,61 +15,35 @@ vec3 calculate_light_direction(vec3 vertex_world_space);
 
 uniform mat4 model_transpose_inverse;
 uniform mat4 model_matrix;
-uniform vec3 eye_position;
-uniform bool draw_sky_box;
-uniform bool use_refraction; 
+uniform vec3 eye_position; 
+
 
 out vec3 normalized_normal;  
-out vec2 tex_coord; 
+
 out vec3 light_direction;
 out vec3 eye_direction;
-out vec3 normal_world_space;
+
 out vec3 tex_coord_skybox;  
-out vec3 vertex_world_space;
-out vec3 vertex_view_space;  
-out vec3 not_normalized_normal;
- 
+out vec3 vertex_world_space;  
+out vec2 tex_coord_geom; 
 
 void main()
 {  
- 
-    
-	vec4 position_vec4 	=  vec4(position, 1.0f);
-  	vertex_world_space 	
-  						=  vec3(model_matrix * position_vec4); 
+    tex_coord_geom 		=  texCoord;
 
-  	vertex_view_space	=  vec3(mvTransform(position_vec4));
+	vec4 position_vec4 	=  vec4(position, 1.0f);
+
+  	vertex_world_space 	
+  						=  vec3(model_matrix * position_vec4 ); 
+ 
  
 	vec3 normal  		=  normal_transform(model_transpose_inverse, normals); 
 	eye_direction 		=  normalize(eye_position - vertex_world_space);
-
-
-	not_normalized_normal 
-						= normal;
-
+ 
 	normalized_normal 	=  normalize(normal);
-
-    normal_world_space  =  mat3(model_matrix) * normals;
 
     light_direction 	=  calculate_light_direction(vertex_world_space);
  
 	gl_Position 		=  mvpTransform(position_vec4);
-
-	tex_coord 			=  texCoord;
-	out_color			=  color;
-	
- 	 
-	if (draw_sky_box)
-		tex_coord_skybox	=  position;
-	else
-	{	
-		if (!use_refraction)	
-			tex_coord_skybox = cube_map_reflection;
-		else
-			tex_coord_skybox = cube_map_refraction;
-	}
-
-  	float dist = length(eye_position.xyz);
-    float att = inversesqrt(0.1f*dist);
-    gl_PointSize = 2.0f * att;
+ 
 }

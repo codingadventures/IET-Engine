@@ -19,6 +19,7 @@ struct Texture {
 	string m_file_name;
 	string m_directory;
 	string m_uniform_name;
+	bool  m_has3dTexture;
 	Texture(string file_name, TextureType type, string uniform_name = "");
 	Texture(string directory, string uniform_name = "");
 	bool Load(string directory);
@@ -26,13 +27,14 @@ struct Texture {
 	string Get_Uniform_Name(string index);
 };
 
-Texture::Texture(string file_name, TextureType type, string uniform_name ) : m_texture_type(type),m_file_name(file_name), m_uniform_name(uniform_name)
+Texture::Texture(string file_name, TextureType type, string uniform_name ) 
+	: m_texture_type(type),m_file_name(file_name), m_uniform_name(uniform_name), m_has3dTexture(false)
 {
 	assert(file_name!= "");
 }
 
 Texture::Texture(string directory, string uniform_name /*= ""*/) 
-	: m_directory(directory), m_uniform_name(uniform_name)
+	: m_directory(directory), m_uniform_name(uniform_name), m_has3dTexture(false)
 {
 	
 }
@@ -90,14 +92,11 @@ bool Texture::Load(string directory)
 
 	// Parameters
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	//glGenerateMipmap(GL_TEXTURE_2D);	/**/
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);/* */
-
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );  
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glGenerateMipmap(GL_TEXTURE_2D);	
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	
@@ -172,7 +171,7 @@ bool Texture::Load3D(  vector<string> textures)
 
 	//	delete image;
 	} 
-
+	m_has3dTexture = true;
 	glGenerateMipmap(GL_TEXTURE_3D);
 	glBindTexture(GL_TEXTURE_3D, 0);
 }

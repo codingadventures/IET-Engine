@@ -84,6 +84,7 @@ namespace Rendering
 			{
 				for(GLuint i = 0; i < this->m_textures.size(); i++)
 				{
+					GLuint textureType = m_textures[i].m_has3dTexture ? GL_TEXTURE_3D : GL_TEXTURE_2D;
 					glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
 					// Retrieve texture number (the N in diffuse_textureN)
 					stringstream ss;
@@ -98,7 +99,7 @@ namespace Rendering
 					GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
 					glUniform1i(shader_location, i);
 					// And finally bind the texture
-					glBindTexture(GL_TEXTURE_3D, this->m_textures[i].id);
+					glBindTexture(textureType, this->m_textures[i].id);
 				}
 				glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 			}
