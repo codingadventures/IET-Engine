@@ -222,8 +222,9 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
     for(int i = 0; i< 4; i++)
     {
         
-        colort[i] = texture(hatch3d, vec3(tex_coord[i].st , shading)).rgb;
-        sumF += tex_coord[i].p;    
+       colort[i] = texture(hatch3d, vec3(tex_coord[i].st * 4, shading)).rgb;
+       sumF += tex_coord[i].p;  
+           
     }
 
     for(int i =0; i < 4; i++)
@@ -231,5 +232,5 @@ vec3 calculate_hatching_3d(vec3 normalized_normal, vec3 light_dir, vec3 eye_dire
         finalColor +=  colort[i] * tex_coord[i].p; 
     }
     finalColor = finalColor / sumF;
-    return finalColor ;// hatching * (1.0 + shading * 2)/3; 
+    return finalColor;// hatching * (1.0 + shading * 2)/3; 
 }

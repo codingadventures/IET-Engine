@@ -75,19 +75,16 @@ void init()
 	triangleverticesIndexesOnEdge[0] = -1;
  	triangleverticesIndexesOnEdge[1] =  5;
  	triangleverticesIndexesOnEdge[2] =  3;
- 	triangleverticesIndexesOnEdge[3] =  1;
-
-
-
+ 	triangleverticesIndexesOnEdge[3] =  1; 
 
 	// Initialize triangles in local/object space!
 	for(int i = 0; i < 4; i++)
 	{
-		int offset = triangle_indexes[i * 3];
+		 
 
-		vec3 v1 = vec3(gl_in[offset + 0].gl_Position);
-		vec3 v2 = vec3(gl_in[offset + 1].gl_Position);
-		vec3 v3 = vec3(gl_in[offset + 2].gl_Position);
+		vec3 v1 = vec3(gl_in[triangle_indexes[i * 3 + 0]].gl_Position);
+		vec3 v2 = vec3(gl_in[triangle_indexes[i * 3 + 1]].gl_Position);
+		vec3 v3 = vec3(gl_in[triangle_indexes[i * 3 + 2]].gl_Position);
 		vec3 ab = v2 - v1;
 		vec3 ac = v3 - v1;
 		vec3 N = normalize(cross(ab, ac));
@@ -96,7 +93,7 @@ void init()
 
     	vec3 L = mat3(inverse(model_matrix)) * light.position - G; // light position in local space
  		
- 		float NdotL = max(0, dot( L, N));
+ 		float NdotL =  dot( L, N);
 
  		vec3 B = normalize( L -  N * NdotL ); //plane projection
     
@@ -206,7 +203,7 @@ void main()
 			{ 
 				texture_coordinates[i * 4 + t].s = dot(triangles[c].vertices[i], triangles[c].T ); 
 				texture_coordinates[i * 4 + t].t = dot(triangles[c].vertices[i], triangles[c].B ); 
-				texture_coordinates[i * 4 + t].p = max(0,dot(triangles[c].N, triangles[t].N));
+				texture_coordinates[i * 4 + t].p = dot(triangles[c].N, triangles[t].N);
 			}
 		}
 	}

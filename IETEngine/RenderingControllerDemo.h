@@ -140,7 +140,7 @@ namespace Controller
 
 		d_shader = new Shader(v_shader,f_shader,"hatching_blend.geom"); 
 
-		d_nano_model = new Model(CUBE_MODEL);
+		d_nano_model = new Model(TORUS_MODEL);
 
 		//d_nano_model->Scale(glm::vec3(0.5f));
 		//d_nano_model->Rotate(glm::vec3(1,0,0),glm::radians(-90.0f));
@@ -176,13 +176,13 @@ namespace Controller
 		auto hatch = Texture("textures", "hatch3d");
 		vector<string> texturesToLoad;
 
-		/*texturesToLoad.push_back(HATCH01);
+		texturesToLoad.push_back(HATCH01);
 		texturesToLoad.push_back(HATCH02);
 		texturesToLoad.push_back(HATCH03);
 		texturesToLoad.push_back(HATCH04);
 		texturesToLoad.push_back(HATCH05);
-		texturesToLoad.push_back(HATCH06);*/
-		texturesToLoad.push_back(H0);
+		texturesToLoad.push_back(HATCH06);
+		/*texturesToLoad.push_back(H0);
 		texturesToLoad.push_back(H1);
 		texturesToLoad.push_back(H2);
 		texturesToLoad.push_back(H3);
@@ -190,7 +190,7 @@ namespace Controller
 		texturesToLoad.push_back(H5);
 		texturesToLoad.push_back(H6);
 		texturesToLoad.push_back(H7);
-
+*/
 		hatch.Load3D(texturesToLoad);
 
 		d_nano_model->addTextures(hatch); 

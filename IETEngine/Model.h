@@ -218,6 +218,209 @@ namespace Rendering
 
 	private:
 		/*  Model Data  */
+		
+
+		struct Edge
+		{
+			Edge(int _a, int _b)
+			{
+				assert(_a != _b);
+
+				if (_a < _b)
+				{
+					a = _a;
+					b = _b;                   
+				}
+				else
+				{
+					a = _b;
+					b = _a;
+				}
+			}
+
+			void Print()
+			{
+				printf("Edge %d %d\n", a, b);
+			}
+
+			int a;
+			int b;
+		};
+
+		struct Neighbors
+		{
+			int n1;
+			int n2;
+
+			Neighbors()
+			{
+				n1 = n2 = (int)-1;
+			}
+
+			void AddNeigbor(int n)
+			{
+				if (n1 == -1) {
+					n1 = n;
+				}
+				else if (n2 == -1) {
+					n2 = n;
+				}
+				else {
+					assert(0);
+				}
+			}
+
+			int GetOther(int me) const
+			{
+				if (n1 == me) {
+					return n2;
+				}
+				else if (n2 == me) {
+					return n1;
+				}
+				else {
+					assert(0);
+				}
+
+				return 0;
+			}
+		};
+
+		struct CompareEdges
+		{
+			bool operator()(const Edge& Edge1, const Edge& Edge2)
+			{
+				if (Edge1.a < Edge2.a) {
+					return true;
+				}
+				else if (Edge1.a == Edge2.a) {
+					return (Edge1.b < Edge2.b);
+				}        
+				else {
+					return false;
+				}            
+			}
+		};
+
+
+		struct CompareVectors
+		{
+			bool operator()(const aiVector3D& a, const aiVector3D& b)
+			{
+				if (a.x < b.x) {
+					return true;
+				}
+				else if (a.x == b.x) {
+					if (a.y < b.y) {
+						return true;
+					}
+					else if (a.y == b.y) {
+						if (a.z < b.z) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+		};
+
+
+		struct Face
+		{
+			int Indices[3];
+
+			int GetOppositeIndex(const Edge& e) const
+			{
+				for (int i = 0 ; i < 3 ; i++) {
+					int Index = Indices[i];
+
+					if (Index != e.a && Index != e.b) {
+						return Index;
+					}
+				}
+
+				assert(0);
+
+				return 0;
+			}
+		};
+
+		std::map<Edge, Neighbors, CompareEdges> m_indexMap;
+		std::map<aiVector3D, int, CompareVectors> m_posMap;    
+		std::vector<Face> m_uniqueFaces;
+
+		static int GetOppositeIndex(const aiFace& Face, const Edge& e)
+		{
+			for (auto i = 0 ; i < 3 ; i++) {
+				auto Index = Face.mIndices[i];
+
+				if (Index != e.a && Index != e.b) {
+					return Index;
+				}
+			}
+
+			assert(0);      
+
+			return 0;
+		}
+
+
+		void FindAdjacencies(const aiMesh* paiMesh, vector<unsigned int>& Indices)
+		{       
+			// Step 1 - find the two triangles that share every edge
+			for (auto i = 0 ; i < paiMesh->mNumFaces ; i++) {
+				const aiFace& face = paiMesh->mFaces[i];
+
+				Face Unique;
+
+				// If a position vector is duplicated in the VB we fetch the 
+				// index of the first occurrence.
+				for (auto j = 0 ; j < 3 ; j++) {            
+					auto Index = face.mIndices[j];
+					aiVector3D& v = paiMesh->mVertices[Index];
+
+					if (m_posMap.find(v) == m_posMap.end()) {
+						m_posMap[v] = Index;
+					}
+					else {
+						Index = m_posMap[v];
+					}           
+
+					Unique.Indices[j] = Index;
+				}
+
+				m_uniqueFaces.push_back(Unique);
+
+				Edge e1(Unique.Indices[0], Unique.Indices[1]);
+				Edge e2(Unique.Indices[1], Unique.Indices[2]);
+				Edge e3(Unique.Indices[2], Unique.Indices[0]);
+
+				m_indexMap[e1].AddNeigbor(i);
+				m_indexMap[e2].AddNeigbor(i);
+				m_indexMap[e3].AddNeigbor(i);
+			}   
+
+			// Step 2 - build the index buffer with the adjacency info
+			for (int i = 0 ; i < paiMesh->mNumFaces ; i++) {        
+				const Face& face = m_uniqueFaces[i];
+
+				for (int j = 0 ; j < 3 ; j++) {            
+					Edge e(face.Indices[j], face.Indices[(j + 1) % 3]);
+					assert(m_indexMap.find(e) != m_indexMap.end());
+					Neighbors n = m_indexMap[e];
+					int OtherTri = n.GetOther(i);
+
+					assert(OtherTri != -1);
+
+					const Face& OtherFace = m_uniqueFaces[OtherTri];
+					int OppositeIndex = OtherFace.GetOppositeIndex(e);
+
+					Indices.push_back(face.Indices[j]);
+					Indices.push_back(OppositeIndex);             
+				}
+			}    
+		}
 
 		/*  Functions   */
 		// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -225,7 +428,10 @@ namespace Rendering
 		{
 			// Read file via ASSIMP
 			Assimp::Importer importer; 
-			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+			const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate | 
+				aiProcess_GenSmoothNormals | 
+				aiProcess_FlipUVs |
+				aiProcess_JoinIdenticalVertices);
 			// Check for errors
 			if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 			{
@@ -363,16 +569,16 @@ namespace Rendering
 #pragma endregion
 
 #pragma region [ Process Faces ]
-
+			FindAdjacencies(ai_mesh, indices);
 			// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-			for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
-			{
-				aiFace face = ai_mesh->mFaces[i];
-			 
-				// Retrieve all indices of the face and store them in the indices vector
-				for(GLuint j = 0; j < face.mNumIndices; j++)
-					indices.push_back(face.mIndices[j]);
-			}
+			//for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
+			//{
+			//	aiFace face = ai_mesh->mFaces[i];
+			// 
+			//	// Retrieve all indices of the face and store them in the indices vector
+			//	for(GLuint j = 0; j < face.mNumIndices; j++)
+			//		indices.push_back(face.mIndices[j]);
+			//}
 #pragma endregion
 
 #pragma region [ Process Materials ]
