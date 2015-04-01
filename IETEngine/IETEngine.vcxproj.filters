@@ -394,5 +394,8 @@
     <None Include="hatching_blend.frag">
       <Filter>Header Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="hatching_normal.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>

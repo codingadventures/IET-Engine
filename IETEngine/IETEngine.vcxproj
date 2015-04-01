@@ -194,6 +194,7 @@
     <None Include="hatching.vert" />
     <None Include="hatching_blend.frag" />
     <None Include="hatching_blend.geom" />
+    <None Include="hatching_normal.vert" />
     <None Include="particle.frag" />
     <None Include="physics.vert" />
     <None Include="skybox.frag" />
