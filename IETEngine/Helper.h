@@ -7,8 +7,8 @@
 
 #include <windows.h>
 #include "GL/glew.h"
-#include <glm/gtc/matrix_transform.hpp>
 
+using namespace std;
 #pragma region [ Helper Functions ]
 
 inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)

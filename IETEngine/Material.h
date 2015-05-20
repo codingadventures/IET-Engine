@@ -2,11 +2,10 @@
 #define Material_h__
 
 #include "glm\detail\type_vec3.hpp"
-#include "Shader.h"
-#include "glm\gtc\type_ptr.hpp"
 
 namespace Rendering
 {
+	using namespace Shaders;
 	class Material
 	{
 	public:

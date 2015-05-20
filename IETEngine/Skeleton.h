@@ -6,11 +6,6 @@
 #include <map>
 
 #include "Bone.h"  
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/normalize_dot.hpp> 
-#include "ScreenOutput.h"
-#include "IKInfo.h"
 #include "Helper.h"
 
 using namespace std;
