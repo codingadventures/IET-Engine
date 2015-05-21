@@ -8,36 +8,36 @@ class WalkForward;
 
 class Idle : public PlayerState
 {
-public: 
-	Idle(string transitionClipName);
+public:
+	explicit Idle(string transitionClipName);
 
 
-	virtual PlayerState* Idle::handleInput(bool* inputKeys);
+	virtual PlayerState* Idle::handleInput(bool* inputKeys) override;
 
-	virtual void Update(Player* player, double deltaTime);
+	virtual void Update(Player* player, double deltaTime) override;
 
 }; 
 
 #include "WalkForward.h"
 
-Idle::Idle(string transitionClipName) 
+inline Idle::Idle(string transitionClipName) 
 {
-	m_currentStateClipName = "idle";
-	this->m_nextStateClipName = transitionClipName;
+	d_current_state_clip_name = "idle";
+	this->d_next_state_clip_name = transitionClipName;
 }
 
 
-PlayerState* Idle::handleInput(bool* inputKeys)
+inline PlayerState* Idle::handleInput(bool* inputKeys)
 {
 
 	if (WALK_FORWARD)
-		return new WalkForward(this->m_currentStateClipName);
+		return new WalkForward(this->d_current_state_clip_name);
 
 	if (WALK_LEFT)
-		return new WalkLeft(this->m_currentStateClipName);
+		return new WalkLeft(this->d_current_state_clip_name);
 
 	if (WALK_RIGHT)
-		return new WalkRight(this->m_currentStateClipName);
+		return new WalkRight(this->d_current_state_clip_name);
 
 	if (WALK_BACKWARD)
 		;//implement 
@@ -48,13 +48,12 @@ PlayerState* Idle::handleInput(bool* inputKeys)
 	/*if (inputKeys[KEY_r] && inputKeys[KEY_i])
 	return new Run(this->mAnimationClip);*/
 
-	return new Idle(this->m_currentStateClipName);
+	return new Idle(this->d_current_state_clip_name);
 }
 
-void Idle::Update(Player* player, double deltaTime){
-
+inline void Idle::Update(Player* player, double deltaTime)
+{
 	PlayerState::Update(player,deltaTime);
-
 }
 
 #endif // Idle_h__

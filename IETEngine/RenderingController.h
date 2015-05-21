@@ -70,7 +70,7 @@ namespace Controller
 		bool			d_use_bump_mapping;
 	};
 	void RenderingController::setup_current_instance(){
-		Controller::g_CurrentInstance = this; 
+		Controller::g_CurrentControllerInstance = this; 
 	}
 
 	RenderingController::RenderingController()
@@ -234,8 +234,8 @@ namespace Controller
 
 		glEnable(GL_PROGRAM_POINT_SIZE);  
 
-		Update_Timer(); 
-		Calculate_Fps( ); 
+		updateTimer(); 
+		calculateFps( ); 
 
 		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 

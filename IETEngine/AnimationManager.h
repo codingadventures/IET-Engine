@@ -2,59 +2,57 @@
 #define AnimationManager_h__
 
 #include <map>
-#include <string>
 #include "AnimationClip.h"
 #include "Blender.h"
 #include <vector>
+#include "AnimationEventController.h"
 
 
 class AnimationManager
 {
 public:
 	~AnimationManager();
-	void Load(double animationSpeed, string file_name, string animationName,std::map<string,bool> bonesToInclude = std::map<string,bool>()); 
+	void Load(double animationSpeed, string const &file_name, string const &animationName,map<string,bool> bonesToInclude = map<string,bool>()); 
 	void AddAnimationOnQueue(string animation_name);
-	void Animate(Model* model, double deltaTime);
-	void AnimateTruncate(Model* model, double deltaTime);
+	void Animate(const Model* model, double deltaTime);
+	void AnimateTruncate(const Model* model, double deltaTime);
 private:
-	std::map<string,AnimationClip*> m_animationSet;
-	AnimationEventController m_animationEventController;
+	map<string,AnimationClip*> d_animation_set;
+	AnimationEventController d_animation_event_controller;
 };
 
-void AnimationManager::Load(double animationSpeed, string file_name, string animationName, std::map<string,bool> bonesToInclude )
+inline void AnimationManager::Load(double animationSpeed, string const &file_name, string const &animationName, map<string,bool> bonesToInclude /*= map<string,bool>()*/ )
 {
 	if (file_name.empty())
-		throw new std::exception("AnimationManager::Load - Insert a Valid Not Empty File Name");
+		throw new exception("AnimationManager::Load - Insert a Valid Not Empty File Name");
 
 	if (animationName.empty())
-		throw new std::exception("AnimationManager::Load - Insert a Valid Not Empty Animation Name");
+		throw new exception("AnimationManager::Load - Insert a Valid Not Empty Animation Name");
 
-	AnimationClip* animationLoad = new AnimationClip(animationSpeed, file_name, animationName); //I'm not sure this works
+	auto animationLoad = new AnimationClip(animationSpeed, file_name, animationName); //I'm not sure this works
 	
 	animationLoad->m_bonesToInclude = bonesToInclude;
 
-	this->m_animationSet[animationName] = animationLoad;
-	 
-
+	this->d_animation_set[animationName] = animationLoad;
 }
- 
 
-void AnimationManager::AddAnimationOnQueue(string animation_name)
+
+inline void AnimationManager::AddAnimationOnQueue(string animation_name)
 {
 	if (animation_name.empty()) return;
 
-	if ( this->m_animationSet.find(animation_name) == this->m_animationSet.end())
-		throw new std::exception("AnimationManager::AddAnimationOnQueue - Animation Name Not Available");
+	if ( this->d_animation_set.find(animation_name) == this->d_animation_set.end())
+		throw new exception("AnimationManager::AddAnimationOnQueue - Animation Name Not Available");
 
-	auto pAnimation = this->m_animationSet[animation_name];
+	auto pAnimation = this->d_animation_set[animation_name];
 
-	m_animationEventController.AddAnimation(pAnimation);
+	d_animation_event_controller.AddAnimation(pAnimation);
 }
- 
-void AnimationManager::Animate(Model* model, double deltaTime)
+
+inline void AnimationManager::Animate(const Model* model, double deltaTime)
 {
 	AnimationClip* clipToAnimate;
-	auto clips = this->m_animationEventController.GetNextAnimations();
+	auto clips = this->d_animation_event_controller.GetNextAnimations();
 
 	int clipSize = clips.size();
 
@@ -71,47 +69,44 @@ void AnimationManager::Animate(Model* model, double deltaTime)
 
 		break;
 	}
- 
-	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
+
+	auto pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
 
 	pKeyFrameAnimator->Animate(model->m_animation_matrix, clipToAnimate);
 
-	m_animationEventController.PurgeEndedClips(deltaTime);
+	d_animation_event_controller.PurgeEndedClips(deltaTime);
 
-	for (AnimationClip* clip : clips)
+	for (auto clip : clips)
 		clip->Update(deltaTime);
 
 	delete pKeyFrameAnimator;
 
 	if (clipSize > 1)
 		delete clipToAnimate;
-
-
 }
 
-void AnimationManager::AnimateTruncate(Model* model, double deltaTime)
+inline void AnimationManager::AnimateTruncate(const Model* model, double deltaTime)
 { 
-	auto clips = this->m_animationEventController.GetNextAnimations();
+	auto clips = this->d_animation_event_controller.GetNextAnimations();
 	
-	KeyFrameAnimator*  pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
+	auto pKeyFrameAnimator = new KeyFrameAnimator(model->m_skeleton);
 
-	for (int i = 0; i < clips.size(); i++)
+	for (auto i = 0; i < clips.size(); i++)
 	{
 		pKeyFrameAnimator->Animate(model->m_animation_matrix, clips[i]);
 	}
 	 
-	m_animationEventController.PurgeEndedClips(deltaTime);
+	d_animation_event_controller.PurgeEndedClips(deltaTime);
 
-	for (AnimationClip* clip : clips)
+	for (auto clip : clips)
 		clip->Update(deltaTime);
 
 	delete pKeyFrameAnimator;
 }
 
-AnimationManager::~AnimationManager()
+inline AnimationManager::~AnimationManager()
 {
-
-	for(auto iterator = m_animationSet.begin(); iterator != m_animationSet.end(); iterator++) {
+	for(auto iterator = d_animation_set.begin(); iterator != d_animation_set.end(); ++iterator) {
 
 		delete iterator->second;
 		// iterator->first = key

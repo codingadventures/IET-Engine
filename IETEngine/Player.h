@@ -1,9 +1,7 @@
 #ifndef Player_h__
 #define Player_h__
-
-#include "AnimationEventController.h"
-#include "Model.h"
-#include "Blender.h"
+ 
+#include "Model.h" 
 
 class Idle;
 class SwordIdle;
@@ -12,27 +10,29 @@ class PlayerState;
 class Player
 {
 public:
-	Model* model;
+	Model* m_model;
 
 	PlayerState* m_walkingState;
 	PlayerState* m_swordState;
-
-	Player(Model* model);
+	
 	AnimationManager m_animationManagerWalk; 
 	AnimationManager m_animationManagerFight; 
-
-	void HandleInput(bool* inputKeys);
-	void Update(double deltaTime,glm::vec3 direction);
-	~Player();
-
-	void Run(glm::vec3 direction);
-	void Move(glm::vec3 direction);
-	glm::vec3 GetDirection() const; 
 
 private:
 	static const float MOVE_SPEED;
 	static const float RUN_SPEED;
 	glm::vec3 m_direction;
+
+public:
+	explicit Player(Model* model);
+	~Player();
+
+	void HandleInput(bool* inputKeys);
+	void Update(double deltaTime,glm::vec3 direction);
+
+	void Run(glm::vec3 direction);
+	void Move(glm::vec3 direction);
+	glm::vec3 GetDirection() const; 
 };
 
 const float Player::MOVE_SPEED = 0.2f;
@@ -43,21 +43,21 @@ const float Player::RUN_SPEED = 0.4f;
 #include "PlayerState.h"
 
 
-Player::Player(Model* model) : model(model)
+inline Player::Player(Model* model) : m_model(model)
 {
 	m_walkingState = new Idle("");
 	m_swordState = new SwordIdle("");
 }
 
-Player::~Player()
+inline Player::~Player()
 { 
 
-}   
+}
 
-void Player::HandleInput(bool* inputKeys)
+inline void Player::HandleInput(bool* inputKeys)
 {
-	PlayerState* walkState = m_walkingState->handleInput(inputKeys);
-	PlayerState* fightState = m_swordState->handleInput(inputKeys);
+	auto walkState = m_walkingState->handleInput(inputKeys);
+	auto fightState = m_swordState->handleInput(inputKeys);
 
 	if (walkState != nullptr)
 	{
@@ -78,28 +78,25 @@ void Player::HandleInput(bool* inputKeys)
 
 		m_swordState = fightState;
 	}
-
 }
 
-void Player::Update(double deltaTime, glm::vec3 direction)
+inline void Player::Update(double deltaTime, glm::vec3 direction)
 {
 	this->m_direction = direction * glm::vec3(1,0,1); //I set to 0 the y
 	m_walkingState->Update(this, deltaTime); 
-
 }
 
-void Player::Move(glm::vec3 direction)
+inline void Player::Move(glm::vec3 direction)
 {
-	this->model->Translate(direction * MOVE_SPEED);
+	this->m_model->Translate(direction * MOVE_SPEED);
 }
 
-void Player::Run(glm::vec3 direction)
+inline void Player::Run(glm::vec3 direction)
 {
-	this->model->Translate(direction * RUN_SPEED);
-
+	this->m_model->Translate(direction * RUN_SPEED);
 }
 
-glm::vec3 Player::GetDirection() const
+inline glm::vec3 Player::GetDirection() const
 {
 	return m_direction;
 }

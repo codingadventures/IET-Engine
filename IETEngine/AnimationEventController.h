@@ -5,61 +5,62 @@
 #include <queue>
 #include "AnimationClip.h"
 class AnimationEventController
-{
+{ 
+
 public:
 	void AddAnimation(AnimationClip* animationClip);
-	std::vector<AnimationClip*> GetNextAnimations();
+	vector<AnimationClip*> GetNextAnimations();
 	void PurgeEndedClips(double deltaTime);
 private:
-	std::deque<AnimationClip*> mEventQueue;
-	std::map<string,bool> mAnimationOnQueue;
+	deque<AnimationClip*> d_event_queue;
+	map<string,bool> d_animation_on_queue;
 };
 
-void AnimationEventController::AddAnimation(AnimationClip* animationClip)
+inline void AnimationEventController::AddAnimation(AnimationClip* animationClip)
 {
 	if (animationClip == nullptr) return;
 
-	if (mAnimationOnQueue.find(animationClip->mAnimationName) == mAnimationOnQueue.end())	//if it's not already there
+	if (d_animation_on_queue.find(animationClip->mAnimationName) == d_animation_on_queue.end())	//if it's not already there
 	{
-		this->mEventQueue.push_back(animationClip);
-		mAnimationOnQueue[animationClip->mAnimationName] = true;	
+		this->d_event_queue.push_back(animationClip);
+		d_animation_on_queue[animationClip->mAnimationName] = true;	
 	}
 }
 
-std::vector<AnimationClip*> AnimationEventController::GetNextAnimations()
+inline vector<AnimationClip*> AnimationEventController::GetNextAnimations()
 {
-	std::vector <AnimationClip*> lReturnVector;
+	vector <AnimationClip*> lReturnVector;
 
-	if (this->mEventQueue.empty()) return lReturnVector;
+	if (this->d_event_queue.empty()) return lReturnVector;
 
-	int queueSize =  mEventQueue.size();
+	int queueSize =  d_event_queue.size();
 
 	for (int i = 0; i < queueSize; i++)
 	{
-		AnimationClip* clip = mEventQueue[i];
+		auto clip = d_event_queue[i];
 
 		lReturnVector.push_back(clip);
 	} 
 
 	return lReturnVector;
-} 
+}
 
-void AnimationEventController::PurgeEndedClips(double deltaTime)
+inline void AnimationEventController::PurgeEndedClips(double deltaTime)
 {
-	if (this->mEventQueue.empty()) return;
-	int dequeSize = this->mEventQueue.size();
+	if (this->d_event_queue.empty()) return;
+	int dequeSize = this->d_event_queue.size();
 
 	for (int i = dequeSize - 1; i > -1 ; i--)
 	{
-		auto clip = this->mEventQueue.front();
-		this->mEventQueue.pop_front();
+		auto clip = this->d_event_queue.front();
+		this->d_event_queue.pop_front();
 
 		if (clip->IsOver(deltaTime)){
-			mAnimationOnQueue.erase(clip->mAnimationName);
+			d_animation_on_queue.erase(clip->mAnimationName);
 			continue;
 		}
 
-		this->mEventQueue.push_back(clip);
+		this->d_event_queue.push_back(clip);
 	}
 }
 

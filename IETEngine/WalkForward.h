@@ -14,43 +14,39 @@ class WalkForward : public PlayerState
 {
 public:
 
-	WalkForward(string);
+	explicit WalkForward(string);
 
-	virtual PlayerState* handleInput(bool* inputKeys);
+	virtual PlayerState* handleInput(bool* inputKeys) override;
 
-	virtual void Update(Player* player, double deltaTime);
+	virtual void Update(Player* player, double deltaTime) override;
 };
 
-#include "Idle.h"
-#include "Player.h"
-#include "AnimationManager.h"
 #include "Run.h"
 #include "WalkLeft.h"
 #include "WalkRight.h"
 #include "WalkForwardLeft.h"
 
-WalkForward::WalkForward(string transitionClipName) 
+inline WalkForward::WalkForward(string transitionClipName) 
 { 
-	m_currentStateClipName = "walk";
-	this->m_nextStateClipName = transitionClipName; 
+	d_current_state_clip_name = "walk";
+	this->d_next_state_clip_name = transitionClipName; 
 
 }
 
-
-PlayerState* WalkForward::handleInput(bool* inputKeys)
+inline PlayerState* WalkForward::handleInput(bool* inputKeys)
 {
 	 
 	if (RUN)
-		return new Run(this->m_currentStateClipName);
+		return new Run(this->d_current_state_clip_name);
 
 	if (IDLE)
-		return new Idle(this->m_currentStateClipName);
+		return new Idle(this->d_current_state_clip_name);
 	  
 	if (WALK_RIGHT)
-		return new WalkRight(this->m_currentStateClipName);
+		return new WalkRight(this->d_current_state_clip_name);
 
 	if (WALK_LEFT)
-		return new WalkLeft(this->m_currentStateClipName);
+		return new WalkLeft(this->d_current_state_clip_name);
 
 	if (WALK_FORWARD_LEFT)
 		return new WalkForwardLeft();
@@ -58,16 +54,14 @@ PlayerState* WalkForward::handleInput(bool* inputKeys)
 	if(WALK_BACKWARD)
 		;//Implement
 
+	return new WalkForward(this->d_current_state_clip_name);
+}
 
-	return new WalkForward(this->m_currentStateClipName);
-}  
 
-
-void WalkForward::Update(Player* player, double deltaTime)
+inline void WalkForward::Update(Player* player, double deltaTime)
 {
 	PlayerState::Update(player,deltaTime);
 
 	player->Move(player->GetDirection());
-
 }
 #endif // Walk_h__

@@ -29,8 +29,8 @@ public:
 
 WalkLeft::WalkLeft(string transitionClipName) 
 { 
-	m_currentStateClipName = "walkleft";
-	this->m_nextStateClipName = transitionClipName; 
+	d_current_state_clip_name = "walkleft";
+	this->d_next_state_clip_name = transitionClipName; 
 
 }
 
@@ -39,13 +39,13 @@ PlayerState* WalkLeft::handleInput(bool* inputKeys)
 {
 	  
 	 if (IDLE)
-		 return new Idle(this->m_currentStateClipName);
+		 return new Idle(this->d_current_state_clip_name);
 
 	 if (WALK_RIGHT)
-		 return new WalkRight(this->m_currentStateClipName);
+		 return new WalkRight(this->d_current_state_clip_name);
 
 	 if (WALK_FORWARD)
-		 return new WalkForward(this->m_currentStateClipName);
+		 return new WalkForward(this->d_current_state_clip_name);
 
 	 if (WALK_BACKWARD)
 		 ;//implement 
@@ -53,7 +53,7 @@ PlayerState* WalkLeft::handleInput(bool* inputKeys)
 	 if (WALK_FORWARD_LEFT)
 		 return new WalkForwardLeft();
 
-	return new WalkLeft(this->m_currentStateClipName);
+	return new WalkLeft(this->d_current_state_clip_name);
 }  
 
 

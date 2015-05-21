@@ -1,58 +1,57 @@
-#include "Model.h"
-#include "PlayerState.h"
+
 #ifndef Enemy_h__
 #define Enemy_h__
 
+#include "Model.h" 
+
 class Enemy
-{
+{ 
 public:
-public:
-	Model* model;
+	Model* m_model;
 
-	AnimationManager m_animationManagerWalk;  
+	AnimationManager m_animationManagerWalk;
 
-	Enemy(Model* model);
+	explicit Enemy( Model* model);
 	void Update(double deltaTime);
 	~Enemy();
 
 	void Kill();
-	bool IsDead() const { return isDead; } 
+	bool IsDead() const { return d_is_dead; } 
 
 private:
-	bool isDead;
+	bool d_is_dead;
 	static const float MOVE_SPEED;
 };
 
 
 const float Enemy::MOVE_SPEED = 0.2f;
 
-Enemy::Enemy(Model* model) : model(model)
+inline Enemy::Enemy( Model* model) : m_model(model)
 {
-	isDead = false;
+	d_is_dead = false;
 }
 
- 
 
-void Enemy::Kill()
+inline void Enemy::Kill()
 {
-	this->isDead = true;
+	this->d_is_dead = true;
 	m_animationManagerWalk.AddAnimationOnQueue("death");
 }
 
-Enemy::~Enemy()
+inline Enemy::~Enemy()
 {
 }
 
-void Enemy::Update(double deltaTime)
+inline void Enemy::Update(double deltaTime)
 {
-	if (!isDead)
+	if (!d_is_dead)
 	{
 		m_animationManagerWalk.AddAnimationOnQueue("shoot");
 		m_animationManagerWalk.AddAnimationOnQueue("walk");
 	}
-	 
 
-	m_animationManagerWalk.AnimateTruncate(model,deltaTime);
+
+	m_animationManagerWalk.AnimateTruncate(m_model,deltaTime);
 }
 
 #endif // Enemy_h__

@@ -26,8 +26,8 @@ private:
 
 WalkForwardLeft::WalkForwardLeft()
 {
-	m_currentStateClipName = "walkleft";
-	this->m_nextStateClipName = "walk"; 
+	d_current_state_clip_name = "walkleft";
+	this->d_next_state_clip_name = "walk"; 
 }
 
 WalkForwardLeft::~WalkForwardLeft()
@@ -37,13 +37,13 @@ WalkForwardLeft::~WalkForwardLeft()
 PlayerState* WalkForwardLeft::handleInput(bool* inputKeys)
 {
 	if (IDLE)
-		return new Idle(this->m_currentStateClipName);
+		return new Idle(this->d_current_state_clip_name);
 
 	if (WALK_LEFT)
-		return new WalkLeft(this->m_currentStateClipName);
+		return new WalkLeft(this->d_current_state_clip_name);
 
 	if (WALK_FORWARD)
-		return new WalkForward(this->m_nextStateClipName);
+		return new WalkForward(this->d_next_state_clip_name);
 	 
 
 	return new WalkForwardLeft();

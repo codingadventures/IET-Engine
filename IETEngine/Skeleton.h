@@ -16,7 +16,7 @@ public:
 	// Root node of the tree
 	Bone* rootBone;  
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
-	std::map<std::string, BoneInfo> boneMapping;
+	map<string, BoneInfo> boneMapping;
 	glm::mat4 inverseGlobal;
 
 private:
@@ -29,7 +29,7 @@ public:
 	}
 
 	~Skeleton(){
-		free(rootBone);
+		delete rootBone;
 		// TODO
 
 		//Consider a recursive method to free all the space
@@ -86,8 +86,7 @@ public:
 
 	// Import the hierarchical data structure from Assimp
 	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
-	{
-		static int boneIndex = 0;
+	{  
 		bool has_bone = false;
 		bool has_useful_child = false;
 		const char* boneName = assimp_node->mName.C_Str ();

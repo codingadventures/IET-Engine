@@ -175,7 +175,7 @@ namespace Controller
 	};
 
 	void PhysicsController::setup_current_instance(){
-		Controller::g_CurrentInstance = this; 
+		Controller::g_CurrentControllerInstance = this; 
 	}
 
 	void PhysicsController::ReadMouse(MOUSE mouse, KEY_STATE state,int x, int y){
@@ -571,8 +571,8 @@ namespace Controller
 		glEnable(GL_PROGRAM_POINT_SIZE);  
 
 
-		Update_Timer(); 
-		Calculate_Fps( );
+		updateTimer(); 
+		calculateFps( );
 
 		m_dynamicsWorld->stepSimulation(1. / 60., 0);
 

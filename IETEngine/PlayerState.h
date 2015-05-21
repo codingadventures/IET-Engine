@@ -1,4 +1,3 @@
-
 #ifndef PlayerState__
 #define PlayerState__
 
@@ -23,41 +22,39 @@ class Player;
 
 class PlayerState
 {
+public:
+	string m_state_name;
+
 protected: 
-	string m_nextStateClipName;
+	string d_next_state_clip_name;
 	//glm::vec3 m_direction;
-	string m_currentStateClipName;
+	string d_current_state_clip_name;
 public:
 	PlayerState(){}
-	~PlayerState() {}
+
+	virtual ~PlayerState() {}
 	virtual PlayerState* handleInput(bool* inputKeys) = 0;
 	virtual void Update(Player* player, double deltaTime);
 	string GetCurrentAnimationName() const;
 	string GetNextAnimationName() const;
-	string m_stateName;
 
 };
 
-#include "Player.h"
-
-
-void PlayerState::Update(Player* player, double deltaTime){
+inline void PlayerState::Update(Player* player, double deltaTime){
  
-	player->m_animationManagerWalk.Animate(player->model, deltaTime); 
-	player->m_animationManagerFight.Animate(player->model, deltaTime); 
+	player->m_animationManagerWalk.Animate(player->m_model, deltaTime); 
+	player->m_animationManagerFight.Animate(player->m_model, deltaTime); 
 }
 
 
-std::string PlayerState::GetCurrentAnimationName() const
+inline string PlayerState::GetCurrentAnimationName() const
 {
-	return m_currentStateClipName;
-
+	return d_current_state_clip_name;
 }
 
-std::string PlayerState::GetNextAnimationName() const
+inline string PlayerState::GetNextAnimationName() const
 {
-	return m_nextStateClipName;
-
+	return d_next_state_clip_name;
 }
 
 

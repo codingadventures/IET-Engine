@@ -23,9 +23,9 @@ private:
 
 SwordBlock::SwordBlock(string transitionClipName)
 {
-	this->m_stateName = "blocksword";
-	this->m_currentStateClipName = "blocksword";
-	this->m_nextStateClipName = transitionClipName;
+	this->m_state_name = "blocksword";
+	this->d_current_state_clip_name = "blocksword";
+	this->d_next_state_clip_name = transitionClipName;
 }
 
 void SwordBlock::Update(Player* player, double deltaTime)
@@ -36,12 +36,12 @@ void SwordBlock::Update(Player* player, double deltaTime)
 PlayerState* SwordBlock::handleInput(bool* inputKeys)
 {
 	if (!SWING_SWORD)
-		return new SwordIdle(this->m_currentStateClipName);
+		return new SwordIdle(this->d_current_state_clip_name);
 
 	if (SWING_SWORD)
-		return new SwingSword(this->m_currentStateClipName);
+		return new SwingSword(this->d_current_state_clip_name);
 
-	return new SwordBlock(this->m_currentStateClipName);
+	return new SwordBlock(this->d_current_state_clip_name);
 }
 
 

@@ -4,29 +4,25 @@
 #define GLM_FORCE_RADIANS
 
 #include <glm/glm.hpp> 
-#include <glm/gtx/random.hpp>
 #include "Callbacks.h"
-#include "ScreenOutput.h"
-#include "Shader.h"
 #include "Camera.h"
 #include "RigidBodyManager.h"
 
-
-
 namespace Controller
 {
-
 	extern "C" static void drawCallback();
 
-	using namespace std::placeholders;
+	using namespace placeholders;
 	namespace Cam = Camera;
 
 	class AbstractController
 	{
-	public: 
-		AbstractController(string window_name);
-		~AbstractController();
+	public:
+		explicit AbstractController(string window_name);
+		virtual ~AbstractController();
 		virtual void Draw() = 0;
+		virtual void Init(int argc, char* argv[]);
+		virtual void Run() = 0;
 
 	protected:
 		double				d_delta_time; 
@@ -42,51 +38,44 @@ namespace Controller
 		Cam::Camera*		d_camera;						//Freed in destructor
 		string				d_window_name;
 		RigidBodyManager*	d_rigid_body_manager;
-	protected:
-		virtual void Init(int argc, char* argv[]);
-		virtual void Run() = 0;
 
-		inline void Update_Timer( );
-		inline void Calculate_Fps( );
-	private:
-
+		
+		void updateTimer( );
+	    void calculateFps( );
 	};
 
-	AbstractController::AbstractController(string window_name):
+	inline AbstractController::AbstractController(string window_name):
 		d_delta_time(0.0),
+		d_delta_time_secs(0.0),
 		d_old_time_since_start(0.0),
 		d_global_clock(0.0),
-		d_delta_time_secs(0.0),
 		d_time_at_reset(0.0),
-		d_fps(0.0f),
 		d_pause(false),
+		d_fps(0.0f),
 		d_camera(nullptr),
 		d_window_name(window_name),
 		d_rigid_body_manager(nullptr)
-	{
-		
-	}
+	{}
 
-	void AbstractController::Calculate_Fps( )
+	inline void AbstractController::calculateFps( )
 	{
 		static unsigned int frame = 0;
-		static int time_base = 0;
+		static auto time_base = 0;
 
 		frame++;
 
-		int t = glutGet(GLUT_ELAPSED_TIME);
+		auto t = glutGet(GLUT_ELAPSED_TIME);
 		if (t - time_base > 1000) 
 		{
-			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/(float)(t - time_base));
+			d_fps = 0.5f*( d_fps) + 0.5f*(frame*1000.0f/static_cast<float>(t - time_base));
 			time_base = t;		
 			frame = 0;
 		}
-
 	}
 
-	inline void AbstractController::Update_Timer( )
+	inline void AbstractController::updateTimer( )
 	{
-		double time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
+		auto time_since_start = glutGet(GLUT_ELAPSED_TIME) - d_time_at_reset;
 		d_delta_time = time_since_start - d_old_time_since_start;
 		d_delta_time_secs = d_delta_time / 1000.0f;
 		if (d_pause)
@@ -98,7 +87,7 @@ namespace Controller
 		}
 	}
 
-	void AbstractController::Init(int argc, char* argv[])
+	inline void AbstractController::Init(int argc, char* argv[])
 	{
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
@@ -117,7 +106,6 @@ namespace Controller
 		glewExperimental = GL_TRUE;
 		glewInit();
 
-
 		glutDisplayFunc(drawCallback);
 		glutIdleFunc(drawCallback);
 
@@ -135,16 +123,16 @@ namespace Controller
 		glEnable(GL_CULL_FACE);
 	}
 
-	AbstractController::~AbstractController()
+	inline AbstractController::~AbstractController()
 	{
-		//delete d_camera;
+		delete d_camera;
 	}
 
-	static AbstractController* g_CurrentInstance;
+	static AbstractController* g_CurrentControllerInstance;
 
 	static void drawCallback()
 	{
-		g_CurrentInstance->Draw();
+		g_CurrentControllerInstance->Draw();
 	}
 }
 

@@ -24,8 +24,8 @@ public:
 Run::Run(string transitionClipName)
 {
 	 
-	m_currentStateClipName = "run";
-	this->m_nextStateClipName = transitionClipName; 
+	d_current_state_clip_name = "run";
+	this->d_next_state_clip_name = transitionClipName; 
 }
 
 
@@ -33,12 +33,12 @@ PlayerState* Run::handleInput(bool* inputKeys)
 { 
 
 	if (WALK_FORWARD)
-		return new  WalkForward(this->m_currentStateClipName);
+		return new  WalkForward(this->d_current_state_clip_name);
 
 	if (IDLE)
-		return new Idle(this->m_currentStateClipName);
+		return new Idle(this->d_current_state_clip_name);
 
-	return new Run(this->m_currentStateClipName);
+	return new Run(this->d_current_state_clip_name);
 }
 
 void Run::Update(Player* player, double deltaTime)

@@ -24,8 +24,8 @@ private:
 
 WalkRight::WalkRight(string transitionClipName)
 { 
-	m_currentStateClipName = "walkright";
-	this->m_nextStateClipName = transitionClipName;
+	d_current_state_clip_name = "walkright";
+	this->d_next_state_clip_name = transitionClipName;
  
 }
 
@@ -34,19 +34,19 @@ WalkRight::WalkRight(string transitionClipName)
 PlayerState* WalkRight::handleInput(bool* inputKeys)
 {
 	if (IDLE)
-		return new Idle(this->m_currentStateClipName);
+		return new Idle(this->d_current_state_clip_name);
 
 	if (WALK_LEFT)
-		return new WalkLeft(this->m_currentStateClipName);
+		return new WalkLeft(this->d_current_state_clip_name);
 
 	if (WALK_FORWARD)
-		return new WalkForward(this->m_currentStateClipName);
+		return new WalkForward(this->d_current_state_clip_name);
 
 	if (WALK_BACKWARD)
 		;//implement it please
 
 
-	return new WalkRight(this->m_currentStateClipName);
+	return new WalkRight(this->d_current_state_clip_name);
 }
 
 void WalkRight::Update(Player* player, double deltaTime)
