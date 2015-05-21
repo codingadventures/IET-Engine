@@ -9,29 +9,23 @@ class WalkForward;
 class Run : public PlayerState
 {
 public:
-	Run(string);
+	explicit Run(string);
 
-	virtual PlayerState* handleInput(bool* inputKeys);
+	virtual PlayerState* handleInput(bool* inputKeys) override;
 
-	virtual void Update(Player* player, double deltaTime) ;
+	virtual void Update(Player* player, double deltaTime) override;
 };
 
-#include "Idle.h"
-#include "WalkForward.h"
 
-
-
-Run::Run(string transitionClipName)
+inline Run::Run(string transitionClipName)
 {
-	 
 	d_current_state_clip_name = "run";
 	this->d_next_state_clip_name = transitionClipName; 
 }
 
 
-PlayerState* Run::handleInput(bool* inputKeys)
+inline PlayerState* Run::handleInput(bool* inputKeys)
 { 
-
 	if (WALK_FORWARD)
 		return new  WalkForward(this->d_current_state_clip_name);
 
@@ -41,13 +35,11 @@ PlayerState* Run::handleInput(bool* inputKeys)
 	return new Run(this->d_current_state_clip_name);
 }
 
-void Run::Update(Player* player, double deltaTime)
+inline void Run::Update(Player* player, double deltaTime)
 {
-
 	PlayerState::Update(player,deltaTime);
 
 	player->Run(player->GetDirection());
-
 } 
 
 #endif // Run_h__

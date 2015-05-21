@@ -9,25 +9,24 @@ class SwordIdle : public PlayerState
 public:
 	SwordIdle(string transitionClipName); 
 
-	virtual PlayerState* handleInput(bool* inputKeys) ;
+	virtual PlayerState* handleInput(bool* inputKeys) override;
 
-	virtual void Update(Player* player, double deltaTime) ;
+	virtual void Update(Player* player, double deltaTime) override;
 
-private:
 
 };
 #include "SwingSword.h"
 
-SwordIdle::SwordIdle(string transitionClipName)
+inline SwordIdle::SwordIdle(string transitionClipName)
 {
 	this->m_state_name = "swordidle";
 	this->d_current_state_clip_name = "";
 	this->d_next_state_clip_name = transitionClipName;
 
 }
- 
 
-PlayerState* SwordIdle::handleInput(bool* inputKeys)
+
+inline PlayerState* SwordIdle::handleInput(bool* inputKeys)
 {
 	if (SWING_SWORD)
 		return new SwingSword(this->d_current_state_clip_name);
@@ -37,7 +36,8 @@ PlayerState* SwordIdle::handleInput(bool* inputKeys)
 
 	return new SwordIdle(this->d_current_state_clip_name);
 }
-void SwordIdle::Update(Player* player, double deltaTime)
+
+inline void SwordIdle::Update(Player* player, double deltaTime)
 {
 	PlayerState::Update(player,deltaTime);
 }

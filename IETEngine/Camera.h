@@ -1,17 +1,10 @@
 #ifndef Camera_h__
 #define Camera_h__
 
- 
-
-// Std. Includes
-#include <vector>
 
 // GL Includes
 #include <GL\glew.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -27,7 +20,7 @@ enum Camera_Type{
 };
 
 // Beware, brain-compiled code ahead! 
-Camera_Type& operator++(Camera_Type& cameraType)
+inline Camera_Type& operator++(Camera_Type& cameraType)
 { 
 	int val = static_cast<int>(cameraType);
 	if (val>1)
@@ -36,7 +29,7 @@ Camera_Type& operator++(Camera_Type& cameraType)
 	return cameraType = static_cast<Camera_Type>( ++val );
 }
 
-Camera_Type operator++(Camera_Type& cameraType, int)
+inline Camera_Type operator++(Camera_Type& cameraType, int)
 {
 	Camera_Type tmp(cameraType);
 	++cameraType;

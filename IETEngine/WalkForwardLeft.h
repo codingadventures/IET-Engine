@@ -12,29 +12,24 @@ public:
 	WalkForwardLeft();
 	~WalkForwardLeft();
 
-	virtual PlayerState* handleInput(bool* inputKeys);
+	virtual PlayerState* handleInput(bool* inputKeys) override;
 
-	virtual void Update(Player* player, double deltaTime);
-
-private:
+	virtual void Update(Player* player, double deltaTime) override;
 
 };
 
-#include "Idle.h"
-#include "WalkLeft.h"
-#include "WalkForward.h"
 
-WalkForwardLeft::WalkForwardLeft()
+inline WalkForwardLeft::WalkForwardLeft()
 {
 	d_current_state_clip_name = "walkleft";
 	this->d_next_state_clip_name = "walk"; 
 }
 
-WalkForwardLeft::~WalkForwardLeft()
+inline WalkForwardLeft::~WalkForwardLeft()
 {
 }
 
-PlayerState* WalkForwardLeft::handleInput(bool* inputKeys)
+inline PlayerState* WalkForwardLeft::handleInput(bool* inputKeys)
 {
 	if (IDLE)
 		return new Idle(this->d_current_state_clip_name);
@@ -50,7 +45,7 @@ PlayerState* WalkForwardLeft::handleInput(bool* inputKeys)
 
 }
 
-void WalkForwardLeft::Update(Player* player, double deltaTime)
+inline void WalkForwardLeft::Update(Player* player, double deltaTime)
 {
 	PlayerState::Update(player,deltaTime);
 

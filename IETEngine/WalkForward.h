@@ -29,7 +29,7 @@ public:
 inline WalkForward::WalkForward(string transitionClipName) 
 { 
 	d_current_state_clip_name = "walk";
-	this->d_next_state_clip_name = transitionClipName; 
+	d_next_state_clip_name = transitionClipName; 
 
 }
 
