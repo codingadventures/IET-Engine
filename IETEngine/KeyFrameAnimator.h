@@ -35,7 +35,7 @@ inline void KeyFrameAnimator::Animate(glm::mat4* outAnimationSequence, Animation
 	this->d_animation_matrix = outAnimationSequence;
 	this->d_animation_clip = animationClip;
 	d_is_map_empty = d_animation_clip->m_bonesToInclude.empty() ;
-	animateKeyFrames(d_skeleton->rootBone, d_animation_clip->GetLocalTimer());
+	animateKeyFrames(d_skeleton->m_root_bone, d_animation_clip->GetLocalTimer());
 }
 
 inline void KeyFrameAnimator::animateKeyFrames(Bone* const bone, float animationTime)

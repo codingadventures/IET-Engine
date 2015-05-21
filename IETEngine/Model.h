@@ -4,32 +4,25 @@
 
 // Std. Includes
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 #include <map>
 #include <vector>
 #include "Skeleton.h"
 // GL Includes
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h> 
 #include <assimp/postprocess.h>
-#include <SOIL.h>
 #include "Mesh.h"
-#include "IAnimation.h"
-#include "KeyFrameAnimator.h"
+#include "IAnimation.h" 
 #include "Inertia.h"
-#include "AntTweakBar.h"
-#include "VertexTriangleAdjacency.h"
 
 namespace Rendering
 {
 
 	using namespace std;
-	using namespace Physics::Tensor;
+	using namespace Tensor;
 
 	class Model 
 	{
@@ -60,7 +53,7 @@ namespace Rendering
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
-		Model(GLchar* path) :
+		explicit Model(GLchar* path) :
 			 
 			d_numberOfBone(0)
 		{ 
@@ -112,22 +105,22 @@ namespace Rendering
 				this->d_meshes[i].Draw(shader, withAdjacencies);
 		}
 
-		void Scale(glm::vec3 scale_vector)
+		void Scale(glm::vec3 const& scale_vector)
 		{
 			this->d_scale = glm::scale(this->d_scale,scale_vector);
 		}
-		void Translate(glm::vec3 translation_vector)
+		void Translate(glm::vec3 const& translation_vector)
 		{
 			this->d_position = glm::translate(this->d_position,translation_vector);
 		}
 
-		void TranslateFromOrigin(glm::vec3 translation_vector)
+		void TranslateFromOrigin(glm::vec3 const& translation_vector)
 		{
 			this->d_position = glm::translate(glm::mat4(),translation_vector);
 
 
 		}
-		void Rotate(glm::vec3 rotation_vector, float radians)
+		void Rotate(glm::vec3 const& rotation_vector, float radians)
 		{
 
 			this->d_rotation =  glm::rotate(d_rotation,radians,rotation_vector);
@@ -168,7 +161,7 @@ namespace Rendering
 			return d_position * glm::toMat4(d_rotation) * d_scale;
 		}
 
-		void Animate(IAnimation* animationInvoker, glm::vec3 target, string boneEffector, int numParent = 4)
+		void Animate(IAnimation* animationInvoker, glm::vec3 const& target, string const& boneEffector, int numParent = 4)
 		{
 			assert(animationInvoker);
 
@@ -203,12 +196,11 @@ namespace Rendering
 			CleanAnimationMatrix();
 		}
 
-		void setJointLimit(string boneName, AngleRestriction angleRestriction )
+		void SetJointLimit(string boneName, AngleRestriction angleRestriction )
 		{ 
 			m_skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 		}
-
-
+		 
 
 		void ClearJointsLimit(){
 			m_skeleton->ResetAllJointLimits();
@@ -218,221 +210,7 @@ namespace Rendering
 	private:
 		/*  Model Data  */
 
-
-		struct Edge
-		{
-			Edge(int _a, int _b)
-			{
-				assert(_a != _b);
-
-				if (_a < _b)
-				{
-					a = _a;
-					b = _b;                   
-				}
-				else
-				{
-					a = _b;
-					b = _a;
-				}
-			}
-
-			void Print()
-			{
-				printf("Edge %d %d\n", a, b);
-			}
-
-			int a;
-			int b;
-		};
-
-		struct Neighbors
-		{
-			int n1;
-			int n2;
-
-			Neighbors()
-			{
-				n1 = n2 = (int)-1;
-			}
-
-			void AddNeigbor(int n)
-			{
-				if (n1 == -1) {
-					n1 = n;
-				}
-				else if (n2 == -1) {
-					n2 = n;
-				}
-				else {
-					assert(0);
-				}
-			}
-
-			int GetOther(int me) const
-			{
-				if (n1 == me) {
-					return n2;
-				}
-				else if (n2 == me) {
-					return n1;
-				}
-				else {
-					assert(0);
-				}
-
-				return 0;
-			}
-		};
-
-		struct CompareEdges
-		{
-			bool operator()(const Edge& Edge1, const Edge& Edge2)
-			{
-				if (Edge1.a < Edge2.a) {
-					return true;
-				}
-				else if (Edge1.a == Edge2.a) {
-					return (Edge1.b < Edge2.b);
-				}        
-				else {
-					return false;
-				}            
-			}
-		};
-
-
-		struct CompareVectors
-		{
-			bool operator()(const aiVector3D& a, const aiVector3D& b)
-			{
-				if (a.x < b.x) {
-					return true;
-				}
-				else if (a.x == b.x) {
-					if (a.y < b.y) {
-						return true;
-					}
-					else if (a.y == b.y) {
-						if (a.z < b.z) {
-							return true;
-						}
-					}
-				}
-
-				return false;
-			}
-		};
-
-
-		struct Face
-		{
-			int Indices[3];
-
-			int GetOppositeIndex(const Edge& e) const
-			{
-				for (int i = 0 ; i < 3 ; i++) {
-					int Index = Indices[i];
-
-					if (Index != e.a && Index != e.b) {
-						return Index;
-					}
-				}
-
-				assert(0);
-
-				return 0;
-			}
-		};
-
-		std::map<Edge, Neighbors, CompareEdges> m_indexMap;
-		std::map<aiVector3D, int, CompareVectors> m_posMap;    
-		std::vector<Face> m_uniqueFaces;
-
-		static int GetOppositeIndex(const aiFace& Face, const Edge& e)
-		{
-			for (auto i = 0 ; i < 3 ; i++) {
-				auto Index = Face.mIndices[i];
-
-				if (Index != e.a && Index != e.b) {
-					return Index;
-				}
-			}
-
-			assert(0);      
-
-			return 0;
-		}
-
-
-		void FindAdjacencies(const aiMesh* paiMesh, vector<unsigned int>& Indices)
-		{       
-
-			/*	VertexTriangleAdjacency adj(paiMesh->mFaces,paiMesh->mNumFaces, paiMesh->mNumVertices,true);
-			int i = 0;
-			for (auto i = 0 ; i < paiMesh->mNumFaces ; i++) {
-			const aiFace& face = paiMesh->mFaces[i];
-			for (auto j = 0 ; j < 3 ; j++) {    
-			auto Index = face.mIndices[j];
-			auto triangles = adj.GetAdjacentTriangles(Index);
-			auto num = adj.GetNumTrianglesPtr(Index);
-			i++;
-			}
-			}*/
-
-			// Step 1 - find the two triangles that share every edge
-			for (auto i = 0 ; i < paiMesh->mNumFaces ; i++) {
-				const aiFace& face = paiMesh->mFaces[i];
-
-				Face Unique;
-
-				// If a position vector is duplicated in the VB we fetch the 
-				// index of the first occurrence.
-				for (auto j = 0 ; j < 3 ; j++) {            
-					auto Index = face.mIndices[j];
-					aiVector3D& v = paiMesh->mVertices[Index];
-
-					if (m_posMap.find(v) == m_posMap.end()) {
-						m_posMap[v] = Index;
-					}
-					else {
-						Index = m_posMap[v];
-					}           
-
-					Unique.Indices[j] = Index;
-				}
-
-				m_uniqueFaces.push_back(Unique);
-
-				Edge e1(Unique.Indices[0], Unique.Indices[1]);
-				Edge e2(Unique.Indices[1], Unique.Indices[2]);
-				Edge e3(Unique.Indices[2], Unique.Indices[0]);
-
-				m_indexMap[e1].AddNeigbor(i);
-				m_indexMap[e2].AddNeigbor(i);
-				m_indexMap[e3].AddNeigbor(i);
-			}   
-
-			// Step 2 - build the index buffer with the adjacency info
-			for (int i = 0 ; i < paiMesh->mNumFaces ; i++) {        
-				const Face& face = m_uniqueFaces[i];
-
-				for (int j = 0 ; j < 3 ; j++) {            
-					Edge e(face.Indices[j], face.Indices[(j + 1) % 3]);
-					assert(m_indexMap.find(e) != m_indexMap.end());
-					Neighbors n = m_indexMap[e];
-					int OtherTri = n.GetOther(i);
-
-					assert(OtherTri != -1);
-
-					const Face& OtherFace = m_uniqueFaces[OtherTri];
-					int OppositeIndex = OtherFace.GetOppositeIndex(e);
-
-					Indices.push_back(face.Indices[j]);
-					Indices.push_back(OppositeIndex);             
-				}
-			}    
-		}
+ 
 
 		/*  Functions   */
 		// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -451,24 +229,7 @@ namespace Rendering
 				cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 				return;
 			}
-
-			/*const auto materialCount = scene->mNumMaterials;
-
-			for (auto i = 0; i < materialCount; ++i)
-			{
-			int mapping = aiTextureMapping_PLANE;
-			scene->mMaterials[i]->Get(AI_MATKEY_MAPPING_DIFFUSE(0), mapping);
-			scene->mMaterials[i]->AddProperty(&mapping, 1, AI_MATKEY_MAPPING_DIFFUSE(0));
-			}
-			scene = importer.ApplyPostProcessing(aiProcess_CalcTangentSpace              |  \
-			aiProcess_GenNormals                    |  \
-			aiProcess_JoinIdenticalVertices |  \
-			aiProcess_GenSmoothNormals | \
-			aiProcess_Triangulate                   |  \
-			aiProcess_GenUVCoords           |  \
-			aiProcess_TransformUVCoords | \
-			aiProcess_SortByPType     );*/
-
+ 
 			// Retrieve the directory path of the filepath
 			this->d_directory = path.substr(0, path.find_last_of('\\'));
 
@@ -479,7 +240,7 @@ namespace Rendering
 			if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
 				fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 			} // endif 
-			m_skeleton->inverseGlobal =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
+			m_skeleton->m_inverse_global =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
 			int numOfBones = m_skeleton->getNumberOfBones();
 			if (numOfBones > 0)
 			{ 

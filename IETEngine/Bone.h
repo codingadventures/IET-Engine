@@ -2,10 +2,8 @@
 #define Bone_h__
 
 
-#include <vector>
-#include <glm/glm.hpp>  
-#include "AngleRestriction.h"
-#include "KeyFrame.h"
+#include <vector>  
+#include "AngleRestriction.h" 
 #include "Helper.h"
 
 struct BoneInfo
@@ -18,7 +16,7 @@ struct Bone {
 
 	Bone()
 	{
-		parent = NULL;
+		parent = nullptr;
 		boneIndex = -1;
 	}
 	// Reference to its parent
@@ -26,7 +24,7 @@ struct Bone {
 
 	//Alternatively we can declare a double pointer of children
 	//Bone** children;
-	std::vector<Bone> children;
+	vector<Bone> children;
 
 	// General index of this bone
 	int boneIndex;
@@ -48,30 +46,31 @@ struct Bone {
 	//Calculated at runtime traversing the tree. offset of the bone in respect of its parent. 
 	glm::mat4 finalTransform;
 	glm::mat4 localTransform;
-	glm::mat4 getParentTransform()
-	{
-		if (this->parent)
-			return parent->globalTransform;
-		else 
-			return glm::mat4(1.0f);
-	}
+	glm::mat4 getParentTransform();
 
 	glm::mat4 Bone::getGlobalTransform(){
 		return getParentTransform() * glm::inverse(this->boneOffset);
 	}
 
-	glm::mat4 Bone::getWorldSpace (glm::mat4 model)
+	glm::mat4 Bone::getWorldSpace (glm::mat4 const& model)
 	{
-		glm::mat4 position = model * this->finalTransform * glm::inverse(this->boneOffset);  
+		auto position = model * this->finalTransform * glm::inverse(this->boneOffset);  
 		return position;
 	}
 
-	glm::vec3 Bone::getWorldSpacePosition(glm::mat4 model)
+	glm::vec3 Bone::getWorldSpacePosition(glm::mat4 const& model)
 	{
-		glm::mat4 position = model * this->finalTransform * glm::inverse(this->boneOffset);  //all this is how i do it
+		auto position = model * this->finalTransform * glm::inverse(this->boneOffset);  //all this is how i do it
 		return decomposeT(position);
 	}
  
 
 };
+
+inline glm::mat4 Bone::getParentTransform()
+{
+	if (this->parent)
+		return parent->globalTransform;
+	return glm::mat4(1.0f);
+}
 #endif // Bone_h__

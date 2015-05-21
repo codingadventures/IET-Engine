@@ -51,7 +51,7 @@ public:
 		}
 	}
 
-	void traversePositions(Bone* bone, glm::mat4 modelMatrix, vector<glm::vec3> &positions){
+	void traversePositions(Bone* bone, glm::mat4 const& modelMatrix, vector<glm::vec3> &positions){
 
 		if(!bone)
 		{
@@ -65,7 +65,7 @@ public:
 		}
 	}
 
-	vector<glm::vec3> getBonePositions(glm::mat4 modelMatrix)
+	vector<glm::vec3> getBonePositions(glm::mat4 const& modelMatrix)
 	{
 		vector<glm::vec3> positions;
 
@@ -74,7 +74,7 @@ public:
 		return positions;
 	} 
 
-	glm::vec3  getBonePosition(string boneName, glm::mat4 modelMatrix)
+	glm::vec3  getBonePosition(string boneName, glm::mat4 const& modelMatrix)
 	{ 
 		Bone* bone = GetBone(boneName.c_str());
 

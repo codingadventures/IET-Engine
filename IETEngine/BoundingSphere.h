@@ -4,6 +4,7 @@
 #include <vector>
 #include "Vertex.h" 
 #include <glm/detail/type_vec3.hpp>
+#include <glm/gtx/norm.hpp>
 
 namespace Physics
 {
