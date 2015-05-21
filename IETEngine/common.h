@@ -66,6 +66,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define NANO_MODEL "models\\Nanosuit2\\nanosuit.dae"
 #define DROID_MODEL "models\\Droids\\droid.dae"
 #define CHURCH_MODEL "models\\sibenik\\sibenik.dae"
+#define CHURCH_MODEL_OBJ "models\\sibenik\\sibenik_quad.obj"
 #define NANOSUIT_BUMP "models\\nanosuit\\nanosuit.obj"
 #define DROID_BUMP "models\\Droids\\droid_bump_mapping.obj"
 #define DROID_BUMP_2 "models\\Droids\\droid_bump.dae"

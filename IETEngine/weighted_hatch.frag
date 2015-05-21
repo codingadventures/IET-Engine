@@ -18,8 +18,6 @@ in vec3 vertex_view_space;
 out vec4 color;
 
 void main() {
-
-    vec3 normal = normalize(normalized_normal );
-	vec3 reflection_direction 	= 	reflect(-light_direction, normal); 
+ 
     color = weighted_hatching(tex_coord_geom,vHatchWeights0,vHatchWeights1);
 }
