@@ -673,12 +673,12 @@ namespace Controller
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		if (d_draw_spheres)
 		{
-			d_rigid_body_manager->Check_Sphere_Collisions();
+			d_rigid_body_manager->CheckSphereCollisions();
 
 			d_rigid_body_manager->Draw_Bounding_Sphere(*d_shader_boundings, projection_view);
 		}
 
-		d_rigid_body_manager->Check_AABB_Collisions();
+		d_rigid_body_manager->CheckAABBCollisions();
 
 
 		d_rigid_body_manager->Draw_Bounding_Box(*d_shader_boundings, projection_view);
@@ -691,7 +691,7 @@ namespace Controller
 
 		//	d_shader_boundings->SetUniform("shape_color",d_collision_color);
 #ifdef NARROW_PHASE
-		auto colliding_pairs = d_rigid_body_manager->Colliding_Pairs();
+		auto colliding_pairs = d_rigid_body_manager->CollidingPairs();
 		if (colliding_pairs->size())
 		{
 			d_shader_boundings->Use();

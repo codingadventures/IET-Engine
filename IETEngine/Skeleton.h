@@ -14,36 +14,36 @@ class Skeleton
 {
 public:
 	// Root node of the tree
-	Bone* rootBone;  
+	Bone* m_root_bone;  
 	// name - Bone Offset mapping. Used to load, during a first loading step, information about the bone structure in Assimp.
 	map<string, BoneInfo> boneMapping;
-	glm::mat4 inverseGlobal;
+	glm::mat4 m_inverse_global;
 
 private:
-	int numOfBones; 
+	int d_num_of_bones; 
 public:
 	Skeleton( ) 
 	{
-		rootBone = new Bone();
-		numOfBones = -1;//Initial Value
+		m_root_bone = new Bone();
+		d_num_of_bones = -1;//Initial Value
 	}
 
 	~Skeleton(){
-		delete rootBone;
+		delete m_root_bone;
 		// TODO
 
 		//Consider a recursive method to free all the space
 	}
 
-	void updateSkeleton(Bone* bone = NULL)
+	void updateSkeleton(Bone* bone = nullptr)
 	{
-		if (numOfBones == 0) return;
+		if (d_num_of_bones == 0) return;
 
 		root_bone_check(&bone);
 
 		bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
 
-		bone->finalTransform = inverseGlobal * bone->globalTransform  * bone->boneOffset;  
+		bone->finalTransform = m_inverse_global * bone->globalTransform  * bone->boneOffset;  
 
 
 		for (int i = 0; i < bone->children.size(); i++) {
@@ -55,7 +55,7 @@ public:
 
 		if(!bone)
 		{
-			bone = rootBone;
+			bone = m_root_bone;
 		}
 
 		positions.push_back( bone->getWorldSpacePosition(modelMatrix));
@@ -69,7 +69,7 @@ public:
 	{
 		vector<glm::vec3> positions;
 
-		traversePositions(rootBone, modelMatrix,positions);
+		traversePositions(m_root_bone, modelMatrix,positions);
 
 		return positions;
 	} 
@@ -85,7 +85,7 @@ public:
 	} 
 
 	// Import the hierarchical data structure from Assimp
-	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = NULL)
+	bool importSkeletonBone(aiNode* assimp_node , Bone* bone = nullptr)
 	{  
 		bool has_bone = false;
 		bool has_useful_child = false;
@@ -136,7 +136,7 @@ public:
 		return false;
 	}
 
-	Bone* GetBone(int boneIndex, Bone* boneToFind = NULL)
+	Bone* GetBone(int boneIndex, Bone* boneToFind = nullptr)
 	{
 		root_bone_check(&boneToFind);
 
@@ -147,18 +147,18 @@ public:
 
 		// recurse to children
 		for (int i = 0; i < boneToFind->children.size(); i++) {
-			Bone* child = GetBone (boneIndex,	&boneToFind->children[i]);
-			if (child != NULL) {
+			auto child = GetBone (boneIndex,	&boneToFind->children[i]);
+			if (child != nullptr) {
 				return child;
 			}
 		}
 
 		// no children match and no self match
-		return NULL;
+		return nullptr;
 	}
 
 	// Retrieve a bone given the name
-	Bone* GetBone (const char* node_name, Bone* boneToFind = NULL) {
+	Bone* GetBone (const char* node_name, Bone* boneToFind = nullptr) {
 
 		root_bone_check(&boneToFind); 
 
@@ -169,28 +169,28 @@ public:
 
 		// recurse to children
 		for (unsigned int i = 0; i < boneToFind->children.size(); i++) {
-			Bone* child = GetBone (node_name,	&boneToFind->children[i]);
-			if (child != NULL) {
+			auto child = GetBone (node_name,	&boneToFind->children[i]);
+			if (child != nullptr) {
 				return child;
 			}
 		}
 
 		// no children match and no self match
-		return NULL;
+		return nullptr;
 	}
 
 
 	// get the total number of bones. traverses the tree to count them
 	int getNumberOfBones()
 	{ 
-		if (numOfBones != -1) return numOfBones;
+		if (d_num_of_bones != -1) return d_num_of_bones;
 
-		numOfBones = traverseGetNumberOfBones(rootBone);
+		d_num_of_bones = traverseGetNumberOfBones(m_root_bone);
 
-		return numOfBones;
+		return d_num_of_bones;
 	}
 
-	void updateAnimationMatrix(glm::mat4* animationMatrix, Bone* bone = NULL)
+	void updateAnimationMatrix(glm::mat4* animationMatrix, Bone* bone = nullptr)
 	{
 		assert(animationMatrix);
 
@@ -206,7 +206,7 @@ public:
 
 	} 
 
-	void ResetAllJointLimits(Bone* bone = NULL)
+	void ResetAllJointLimits(Bone* bone = nullptr)
 	{
 		root_bone_check(&bone);
 		AngleRestriction newRestr;
@@ -223,7 +223,7 @@ private:
 	void root_bone_check(Bone** bone)
 	{
 		if(!*bone)
-			*bone = rootBone;
+			*bone = m_root_bone;
 
 		assert(*bone);
 	}

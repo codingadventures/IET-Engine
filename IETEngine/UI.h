@@ -33,7 +33,7 @@ namespace Helper
 		}
 		static void TW_CALL SetPosition(const void *value, void *clientData)
 		{ 
-			auto translation = *(const glm::vec3 *)value;  // for instance
+			auto translation = *static_cast<const glm::vec3 *>(value);  // for instance
 			auto model = static_cast<Model*>(clientData);
 
 			model->TranslateFromOrigin(translation);
@@ -47,10 +47,10 @@ namespace Helper
 		}
 		static void TW_CALL Set_Damping(const void *value, void *clientData)
 		{ 
-			auto damping_factor = *(const float *)value;  // for instance
+			auto damping_factor = *static_cast<const float *>(value);  // for instance
 			 auto rb_manager   = static_cast<RigidBodyManager*>(clientData);
 
-			rb_manager->Set_Damping_Factor(damping_factor);
+			rb_manager->SetDampingFactor(damping_factor);
 		}
 
 		static void TW_CALL Get_Is_Damping_Enabled(void *value, void *clientData)
@@ -59,7 +59,7 @@ namespace Helper
 		}
 		static void TW_CALL Set_Is_Damping_Enabled(const void *value, void *clientData)
 		{ 
-			auto enable = *(const bool *)value;  // for instance
+			auto enable = *static_cast<const bool *>(value);  // for instance
 			auto rb_manager = static_cast<RigidBodyManager*>(clientData);
 
 			rb_manager->Damping(enable);
@@ -69,7 +69,7 @@ namespace Helper
 		{ 
 			auto rb_manager   = static_cast<RigidBodyManager*>(clientData);
 
-			rb_manager->Apply_Impulse_To_All();
+			rb_manager->ApplyImpulseToAll();
 		}
 
 	};

@@ -41,42 +41,42 @@ namespace Physics
 			Rigid_bodies() const { return d_rigid_bodies; } 
 
 		void		Add(Model* rigid_body);
-		void		Add_Collision_Plane(glm::vec3 center, glm::vec3 normal);
+		void		Add_Collision_Plane(glm::vec3 const& center, glm::vec3 const& normal);
 		void		Update(double delta_time); 
-		void		Check_Sphere_Collisions();
-		void		Check_AABB_Collisions();
+		void		CheckSphereCollisions();
+		void		CheckAABBCollisions();
 		void		Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view);
 		void		Draw_Boundings(Shader& shader, glm::mat4 projection_view);
-		void Apply_Impulse_To_All();
-		void		Set_Damping_Factor(float damping);
+		void		ApplyImpulseToAll();
+		void		SetDampingFactor(float damping);
 		void		Damping(bool enable);
 
-		vector<CollidingPair<RigidBody>>* 
-			Colliding_Pairs();
+		vector<CollidingPair<RigidBody>> 
+					const& CollidingPairs() const;
 
 
 
 	private:
-		void		draw_bounding_sphere(RigidBody& rigid_body);
-		void		draw_center_of_mass(RigidBody& rigid_body);
-		void		Check_Plane_Collision(RigidBody& rigid_body, float delta_time);
+		void		drawBoundingSphere(RigidBody& rigid_body);
+		void		drawCenterOfMass(RigidBody& rigid_body);
+		void		checkPlaneCollision(RigidBody& rigid_body, float delta_time);
 	};
 
 
-	RigidBodyManager::RigidBodyManager()
+	inline RigidBodyManager::RigidBodyManager()
 		: m_use_polyhedral(false),
-		d_non_colliding_color(glm::vec4(0.0f,0.0f,1.0f,1.0f)),
-		d_colliding_color(glm::vec4(1.0f,0.0f,0.0f,0.3f)),
-		d_sort_axis(0),
 		m_damping_factor(0.2f),
-		m_use_damping(true)
+		m_use_damping(true),
+		d_colliding_color(glm::vec4(1.0f,0.0f,0.0f,0.3f)),
+		d_non_colliding_color(glm::vec4(0.0f,0.0f,1.0f,1.0f)),
+		d_sort_axis(0)
 	{
 
 	}
 
 
-	void RigidBodyManager::Add(Model* model)
+	inline void RigidBodyManager::Add(Model* model)
 	{
 		auto rigid_body = new RigidBody(*model);
 		this->d_rigid_bodies.push_back(rigid_body);
@@ -86,25 +86,25 @@ namespace Physics
 		auto cube = new Cube(
 			rigid_body->Bounding_box()->m_min_coordinate ,
 			rigid_body->Bounding_box()->m_max_coordinate  ,
-			 rigid_body->Bounding_box()->Color() 
+			rigid_body->Bounding_box()->Color() 
 			);
 
 		d_bounding_spheres.push_back(sphere);
 		d_bounding_cubes.push_back(cube);
 	}
 
-	void RigidBodyManager::Update(double delta_time)
+	inline void RigidBodyManager::Update(double delta_time)
 	{
 		for (auto rigid_body : d_rigid_bodies)
 		{
-			rigid_body->Bounding_sphere()->Change_Color(d_non_colliding_color);
+			rigid_body->Bounding_sphere()->ChangeColor(d_non_colliding_color);
 			rigid_body->Bounding_box()->m_is_colliding = glm::vec3(0.0f);
 			rigid_body->Update(delta_time,m_use_polyhedral);
-			Check_Plane_Collision(*rigid_body, delta_time);
+			checkPlaneCollision(*rigid_body, delta_time);
 		}
 	}
 
-	void RigidBodyManager::Check_Sphere_Collisions()
+	inline void RigidBodyManager::CheckSphereCollisions()
 	{
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{
@@ -119,14 +119,14 @@ namespace Physics
 
 				if (overlap) 
 				{
-					sphere2->Change_Color(d_colliding_color);
-					sphere1->Change_Color(d_colliding_color);
+					sphere2->ChangeColor(d_colliding_color);
+					sphere1->ChangeColor(d_colliding_color);
 				}
 			}
 		}
 	}
 
-	void RigidBodyManager::Check_AABB_Collisions()
+	inline void RigidBodyManager::CheckAABBCollisions()
 	{
 		vector<EndPoint> x_axis,y_axis,z_axis;
 		bool x_overlap,y_overlap,z_overlap;
@@ -198,7 +198,7 @@ namespace Physics
 	}
 
 
-	void RigidBodyManager::draw_center_of_mass(RigidBody& rigid_body)
+	inline void RigidBodyManager::drawCenterOfMass(RigidBody& rigid_body)
 	{
 		Vertex v ;//= new Vertex();
 
@@ -209,7 +209,7 @@ namespace Physics
 		p.Draw();
 	}
 
-	void RigidBodyManager::Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view)
+	inline void RigidBodyManager::Draw_Bounding_Box(Shader& shader, glm::mat4 projection_view)
 	{
 		shader.Use();
 
@@ -220,11 +220,11 @@ namespace Physics
 			shader.SetUniform("mvp",projection_view * d_rigid_bodies[i]->m_model.GetPosition() * scale);
 
 			shader.SetUniform("shape_color",d_rigid_bodies[i]->Bounding_box()->Color());
-			 
+
 			d_bounding_cubes[i]->Draw(shader);
 		}
 	} 
-	void RigidBodyManager::Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view)
+	inline void RigidBodyManager::Draw_Bounding_Sphere(Shader& shader, glm::mat4 projection_view)
 	{ 
 		shader.Use();
 
@@ -238,13 +238,21 @@ namespace Physics
 		}
 	}
 
-	vector<CollidingPair<RigidBody>>* RigidBodyManager::Colliding_Pairs()
+	inline void RigidBodyManager::Draw_Boundings(Shader& shader, glm::mat4 projection_view)
 	{
-		return &d_colliding_pairs;   
 	}
 
-	void RigidBodyManager::Apply_Impulse_To_All()
-{
+	inline vector<CollidingPair<RigidBody>> const& RigidBodyManager::CollidingPairs() const
+	{
+		return d_colliding_pairs;   
+	}
+
+	inline void RigidBodyManager::drawBoundingSphere(RigidBody& rigid_body)
+	{
+	}
+
+	inline void RigidBodyManager::ApplyImpulseToAll()
+	{
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
 		{ 
 			d_rigid_bodies[i]->Apply_Impulse(glm::linearRand(glm::vec3(-1.0f),glm::vec3(1.0f)) * glm::linearRand(1.0f,100.0f) ,
@@ -252,7 +260,7 @@ namespace Physics
 		}
 	}
 
-	RigidBodyManager::~RigidBodyManager()
+	inline RigidBodyManager::~RigidBodyManager()
 	{
 		for (auto sphere : d_bounding_spheres)
 		{
@@ -270,14 +278,14 @@ namespace Physics
 		}
 	}
 
-	void RigidBodyManager::Add_Collision_Plane(glm::vec3 center, glm::vec3 normal)
+	inline void RigidBodyManager::Add_Collision_Plane(glm::vec3 const& center, glm::vec3 const& normal)
 	{
 		Plane plane(center,normal);
 		d_planes.push_back( plane);
 	}
 
 
-	void RigidBodyManager::Check_Plane_Collision(RigidBody& rigid_body, float delta_time)
+	inline void RigidBodyManager::checkPlaneCollision(RigidBody& rigid_body, float delta_time)
 	{
 		for (auto plane : d_planes)
 		{
@@ -285,7 +293,6 @@ namespace Physics
 			auto ws_max_coord = rigid_body.Bounding_box()->Get_Max_Coordinate_World_Space();
 
 			auto min_collision = glm::dot(ws_min_coord - plane.x, plane.n_normal);
-			auto max_collision = glm::dot(ws_max_coord - plane.x, plane.n_normal);
 
 			if  ( min_collision  > 0 ) continue;
 
@@ -302,7 +309,7 @@ namespace Physics
 		}
 	}
 
-	void RigidBodyManager::Set_Damping_Factor(float damping)
+	inline void RigidBodyManager::SetDampingFactor(float damping)
 	{
 		m_damping_factor = damping;
 		for (auto rigid_body : d_rigid_bodies)
@@ -311,7 +318,7 @@ namespace Physics
 		}
 	}
 
-	void RigidBodyManager::Damping(bool enable)
+	inline void RigidBodyManager::Damping(bool enable)
 	{
 		m_use_damping = enable;
 		for (auto rigid_body : d_rigid_bodies)
