@@ -132,10 +132,15 @@ namespace Controller
 
 		d_simulation_iteration = 0;
 		d_bone_index = 0;
-		d_shader = new Shader("vertex.vert", "fragment.frag");
-		d_shader_bones = new Shader("vertex_bone.vert", "fragment_bone.frag");
-		d_shader_bones_noTexture = new Shader("vertex_bone.vert", "fragment_notexture.frag");
-		d_shader_noTexture = new Shader("vertex.vert", "fragment_notexture.frag");
+		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
+		vector<string> v_shaderBone				= ArrayConversion<string>(2,string("vertex_bone.vert"),string("common.vert")); 
+
+		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
+
+		d_shader = new Shader(v_shader, f_shader_texture);
+		d_shader_bones = new Shader(v_shaderBone, "fragment_bone.frag");
+		d_shader_bones_noTexture = new Shader(v_shaderBone, "fragment_notexture.frag");
+		d_shader_noTexture = new Shader(v_shader, "fragment_notexture.frag");
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE);
