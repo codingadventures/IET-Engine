@@ -12,6 +12,7 @@
 #include "Player.h" 
 #include "Enemy.h"
 #include <functional> 
+#include "Light.h"
 
 
 namespace Controller
@@ -31,6 +32,10 @@ namespace Controller
 
 		glm::vec3 d_darth_maul_world_pos;
 		glm::vec3 d_laser_translate;
+		glm::vec3		d_light_position;
+		glm::vec3		d_light_ambient;
+		glm::vec3		d_light_diffuse;
+		glm::vec3		d_light_specular;
 
 		GLuint* d_bone_location;
 		glm::uint numberOfBones;
@@ -76,6 +81,8 @@ namespace Controller
 		void setDofOnModel();
 		void render();
 		void intro();
+		void Read_Input();
+
 	public:
 		AnimationController(void);
 
@@ -86,6 +93,7 @@ namespace Controller
 		void Init(int argc, char* argv[]) override;
 
 		void Draw() override;
+		void tweak_bar_setup();
 	};
 
 #pragma region [ Public Methods ]
@@ -94,56 +102,43 @@ namespace Controller
 	{
 		glutMainLoop();
 	}
-
+	void AnimationController::tweak_bar_setup()
+	{
+		TwInit(TW_OPENGL_CORE, NULL);
+		TwWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+	}
 	inline void AnimationController::Init(int argc, char* argv[])
 	{
-		glutInit(&argc, argv);
-		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-		glutInitWindowSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-		glutCreateWindow("The Revenge of Darth Maul  - Directed By: Mr. Stark");
-
-		glewExperimental = GL_TRUE;
-		glewInit();
-
-		glutDisplayFunc(drawCallback);
-		glutIdleFunc(drawCallback);
-
-		this->d_camera = new Cam::Camera(glm::vec3(0.0f, 30.0f, 0.0f));
-		d_camera->Offset = CAMERA_OFFSET;
+		AbstractController::Init(argc,argv);
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P
-		UserMouseCallback = bind(&Cam::Camera::ProcessMouseMovement, d_camera, _1, _2);
-		UserMouseScrollCallback = bind(&Cam::Camera::ProcessMouseScroll, d_camera, _1);
-		UserKeyboardCallback = bind(&AnimationController::readInput, this);
-		UserMouseClickCallback = bind(&AnimationController::readMouse, this, _1, _2);
+		UserKeyboardCallback = std::bind(&AnimationController::readInput,this); 
 
-		glutKeyboardFunc(Callbacks::keyboardCallback);
-		glutKeyboardUpFunc(Callbacks::keyboardUpCallback);
-		glutPassiveMotionFunc(Callbacks::mouseCallback);
-		glutMouseFunc(Callbacks::mouseClickCallback);
+		glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
+		glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
+		glutMouseFunc((GLUTmousebuttonfun)TwEventMouseButtonGLUT);
+		// send the ''glutGetModifers'' function pointer to AntTweakBar
+		TwGLUTModifiersFunc(glutGetModifiers);
 
-		glutSetCursor(GLUT_CURSOR_NONE);
+		 
+		d_camera->Offset = CAMERA_OFFSET; 
 
-		glutWarpPointer(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2);
-
-
-		glViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
 		d_simulation_iteration = 0;
 		d_bone_index = 0;
 		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
-		vector<string> v_shaderBone				= ArrayConversion<string>(2,string("vertex_bone.vert"),string("common.vert")); 
+		vector<string> v_shaderBone			= ArrayConversion<string>(2,string("vertex_bone.vert"),string("common.vert")); 
 
 		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
+		vector<string> f_shader_bone_texture = ArrayConversion<string>(2,string("fragment_bone.frag"),string("common.frag"));
 
 		d_shader = new Shader(v_shader, f_shader_texture);
-		d_shader_bones = new Shader(v_shaderBone, "fragment_bone.frag");
+		d_shader_bones = new Shader(v_shaderBone, f_shader_bone_texture);
 		d_shader_bones_noTexture = new Shader(v_shaderBone, "fragment_notexture.frag");
 		d_shader_noTexture = new Shader(v_shader, "fragment_notexture.frag");
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_PROGRAM_POINT_SIZE);
+
 
 		//Wire frame
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -187,11 +182,11 @@ namespace Controller
 
 		loadPlayer();
 		loadEnemies();
-
+		tweak_bar_setup();
 		/*model_laser->Translate(models_drone[0]->mSkeleton->getBonePosition("chest",models_drone[0]->GetModelMatrix()));
 		model_laser->Rotate(glm::vec3(0,0,1),glm::radians(90.0f));
 		model_laser->Scale(glm::vec3(0.5f,1.0f,0.5f));*/
-
+		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
 		d_is_intro_over = true;
 		d_go_ahead = false;
 		d_gameState = INTRO;
@@ -207,6 +202,7 @@ namespace Controller
 		calculateFps( ); 
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 15000.0f);
+		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
 
 		if (d_is_intro_over && !pause)
 		{
@@ -226,6 +222,8 @@ namespace Controller
 
 		d_view_matrix = d_camera->GetViewMatrix();
 
+		d_shader->Use();
+		light.SetShader(*d_shader);
 
 		/*	
 		vector<glm::vec3> bonesPositions = model_bob->getBonesOrientation();
@@ -248,55 +246,58 @@ namespace Controller
 		render();
 
 		//model_dartmaul->Translate(-CAMERA_OFFSET);
-		bool isAttacking = d_player->m_swordState->m_state_name == "SwingSword";
+		/*bool isAttacking = d_player->m_swordState->m_state_name == "SwingSword";
 		int droidsSize = d_droids.size();
 		if (d_is_intro_over)
 		{
-			for (int i = 0; i < droidsSize; i++)
-			{
-				d_shader_bones->SetUniform("model_matrix",d_droids[i]->m_model->GetModelMatrix());
-				auto totalDist = glm::distance(d_droids[i]->m_model->GetPositionVec(), d_model_dartmaul->GetPositionVec());
-				auto vec = d_droids[i]->m_model->GetPositionVec() - d_model_dartmaul->GetPositionVec();
-				if (!pause)
-				{
-					if (!d_droids[i]->IsDead() && isAttacking && totalDist < 3.0f)
-					{
-						d_droids[i]->Kill();
-					}
-					else
-					{
-						if (!d_droids[i]->IsDead())
-						{
-							glm::vec3 trans = totalDist * (static_cast<float>(d_delta_time_secs)* 0.001f) * vec * glm::vec3(-1, 0, 0);
-							d_droids[i]->m_model->Translate(trans);
-						}
-					}
-
-					d_droids[i]->Update(d_delta_time_secs);
-				}
-				d_droids[i]->m_model->Draw(*d_shader_bones);
-			}
+		for (int i = 0; i < droidsSize; i++)
+		{
+		d_shader_bones->SetUniform("model_matrix",d_droids[i]->m_model->GetModelMatrix());
+		auto totalDist = glm::distance(d_droids[i]->m_model->GetPositionVec(), d_model_dartmaul->GetPositionVec());
+		auto vec = d_droids[i]->m_model->GetPositionVec() - d_model_dartmaul->GetPositionVec();
+		if (!pause)
+		{
+		if (!d_droids[i]->IsDead() && isAttacking && totalDist < 3.0f)
+		{
+		d_droids[i]->Kill();
+		}
+		else
+		{
+		if (!d_droids[i]->IsDead())
+		{
+		glm::vec3 trans = totalDist * (static_cast<float>(d_delta_time_secs)* 0.001f) * vec * glm::vec3(-1, 0, 0);
+		d_droids[i]->m_model->Translate(trans);
+		}
 		}
 
+		d_droids[i]->Update(d_delta_time_secs);
+		}
+		d_droids[i]->m_model->Draw(*d_shader_bones);
+		}
+		}
+		*/
 		d_shader_noTexture->Use();
 
 
-		intro();
+		//intro();
 
 
-		g_leftMouseButtonIsPressed = g_rightMouseButtonIsPressed = false;
+		//	g_leftMouseButtonIsPressed = g_rightMouseButtonIsPressed = false;
 
 		if (d_is_intro_over)
 			textToScreen();
 
 
-
+		TwDraw();
 		glutSwapBuffers();
 	}
 
 	inline AnimationController::AnimationController():	AbstractController("The Revenge of Darth Maul")
 	{
 		setupCurrentInstance();
+		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
+		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
 	}
 
 	inline AnimationController::~AnimationController()
@@ -307,12 +308,12 @@ namespace Controller
 
 #pragma endregion
 
-#pragma region [ Private Methods ]
+#pragma region [ Private Methods ] 
 	inline void AnimationController::setupCurrentInstance()
 	{
 		g_CurrentControllerInstance = this;
 	}
- 
+
 	inline void AnimationController::loadEnemies()
 	{
 		map<string, bool> shootingBones;
@@ -526,13 +527,24 @@ namespace Controller
 		d_shader->Use();
 
 		auto vpMatrix = d_projection_matrix * d_view_matrix;
+
 		d_shader->SetUniform("mvp", vpMatrix * d_model_battlecruise->GetModelMatrix() );
+		d_shader->SetUniform("eye_position", d_camera->Position);  
+		d_shader->SetUniform("mv",   d_view_matrix * d_model_battlecruise->GetModelMatrix());
+		d_shader->SetUniform("model_matrix", d_model_battlecruise->GetModelMatrix());
+		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_model_battlecruise->GetModelMatrix())));  
+		d_shader->SetUniform("light_position", d_light_position);  
 
 		d_model_battlecruise->Draw(*d_shader);
 
 		d_shader_bones->Use();
 
-		d_shader_bones->SetUniform("mvp",vpMatrix * d_model_dartmaul->GetModelMatrix());
+		d_shader_bones->SetUniform("mvp",vpMatrix * d_model_dartmaul->GetModelMatrix()); 
+		d_shader_bones->SetUniform("eye_position", d_camera->Position);  
+		d_shader_bones->SetUniform("mv",   d_view_matrix * d_model_dartmaul->GetModelMatrix());
+		d_shader_bones->SetUniform("model_matrix", d_model_dartmaul->GetModelMatrix());
+		d_shader_bones->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_model_dartmaul->GetModelMatrix())));  
+		d_shader_bones->SetUniform("light_position", d_light_position);  
 
 		d_model_dartmaul->Draw(*d_shader_bones);
 	}

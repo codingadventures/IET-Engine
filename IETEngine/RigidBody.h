@@ -211,8 +211,8 @@ namespace Physics
 		{
 			d_area += mesh.Area();
 
-			d_bounding_box = new BoundingBox(mesh.Bounding_box());
-			d_bounding_sphere = new BoundingSphere(mesh.Bounding_sphere()); 
+		//	d_bounding_box = new BoundingBox(mesh.Bounding_box());
+//			d_bounding_sphere = new BoundingSphere(mesh.Bounding_sphere()); 
 			d_center_of_mass += mesh.m_center_of_mass;
 			d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;
 

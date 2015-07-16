@@ -66,17 +66,17 @@ void main()
 	out_color			=  color;
 	
  	 
-	if (draw_sky_box)
-		tex_coord_skybox	=  position;
-	else
-	{	
-		if (!use_refraction)	
-			tex_coord_skybox = cube_map_reflection;
-		else
-			tex_coord_skybox = cube_map_refraction;
-	}
+	// if (draw_sky_box)
+	// 	tex_coord_skybox	=  position;
+	// else
+	// {	
+	// 	if (!use_refraction)	
+	// 		tex_coord_skybox = cube_map_reflection;
+	// 	else
+	// 		tex_coord_skybox = cube_map_refraction;
+	// }
 
-  	float dist = length(eye_position.xyz);
-    float att = inversesqrt(0.1f*dist);
-    gl_PointSize = 2.0f * att;
+  	// float dist = length(eye_position.xyz);
+   //  float att = inversesqrt(0.1f*dist);
+   //  gl_PointSize = 2.0f * att;
 }

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -51,10 +51,10 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;USE_GRAPHICAL_BENCHMARK;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;BT_USE_FREEGLUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;USE_GRAPHICAL_BENCHMARK;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;BT_USE_FREEGLUT;SOFA_DEVICE_CPU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>
       </SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\include\ImageMagick-6\Magick++;$(ProjectDir)\include\wand;$(ProjectDir)\include\magick;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\include\ImageMagick-6\Magick++;$(ProjectDir)\include\wand;$(ProjectDir)\include\magick;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition;$(ProjectDir)\include\sofa;$(ProjectDir)\include\mesh</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
@@ -80,9 +80,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;SOFA_DEVICE_CPU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\include\ImageMagick-6\Magick++;$(ProjectDir)\include\wand;$(ProjectDir)\include\magick;C:\Users\Johnny\Documents\GitHub\bullet3\src;%(AdditionalIncludeDirectories);C:\Users\Johnny\Downloads\OpenTissue;C:\Users\Johnny\Downloads\tetgen1.5.1-beta1;C:\Users\Johnny\Downloads\boost_1_39_0\boost_1_39_0;C:\Program Files %28x86%29\qhull\include;C:\Users\Johnny\Downloads\OpenTissue\third_party\include\windows;C:\Users\Johnny\Documents\GitHub\bullet3\Extras\ConvexDecomposition;$(ProjectDir)\include\sofa;$(ProjectDir)\include\mesh</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -93,7 +93,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;assimp.lib;CORE_RL_Magick++_.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -112,17 +112,31 @@
     <ClInclude Include="BoxGenerator.h" />
     <ClInclude Include="ClosestPoint.h" />
     <ClInclude Include="CollidingPair.h" />
+    <ClInclude Include="cpu\CPUBarycentricMapping.h" />
+    <ClInclude Include="cpu\CPUFixedConstraint.h" />
+    <ClInclude Include="cpu\CPUMechanicalObject.h" />
+    <ClInclude Include="cpu\CPUMergedKernels.h" />
+    <ClInclude Include="cpu\CPUPlaneForceField.h" />
+    <ClInclude Include="cpu\CPUSphereForceField.h" />
+    <ClInclude Include="cpu\CPUTetrahedronFEMForceField.h" />
+    <ClInclude Include="cpu\CPUUniformMass.h" />
+    <ClInclude Include="cpu\CPUVisualModel.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="EndPoint.h" />
     <ClInclude Include="EPA.h" />
     <ClInclude Include="EulerUpdater.h" />
+    <ClInclude Include="FemController.h" />
+    <ClInclude Include="FEMMesh.h" />
     <ClInclude Include="Friction.h" />
     <ClInclude Include="GJK.h" />
     <ClInclude Include="GLParticleRenderer.h" />
+    <ClInclude Include="GPU.h" />
     <ClInclude Include="Inertia.h" />
     <ClInclude Include="IParticleRenderer.h" />
+    <ClInclude Include="kernels.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="octree.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleData.h" />
     <ClInclude Include="ParticleEmitter.h" />
@@ -137,11 +151,14 @@
     <ClInclude Include="RenderingType.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="RigidBodyManager.h" />
+    <ClInclude Include="simulation.h" />
+    <ClInclude Include="SimulationParameters.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpringGenerator.h" />
     <ClInclude Include="SupportMapping.h" />
     <ClInclude Include="SupportPoint.h" />
+    <ClInclude Include="SurfaceMesh.h" />
     <ClInclude Include="SwordBlock.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="AngleRestriction.h" />
@@ -170,6 +187,7 @@
     <ClInclude Include="SwingSword.h" />
     <ClInclude Include="SwordIdle.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="MecanicalMatrix.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Vertex.h" />

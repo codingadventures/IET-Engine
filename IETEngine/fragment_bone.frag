@@ -1,14 +1,14 @@
 #version 330 core
   
-
-uniform sampler2D texture_diffuse1;
-in vec2 TexCoords; 
+ vec4 get_texture_diffuse(vec2 tex_coord);
+ 
+in vec2 tex_coord; 
 
 out vec4 frag_color;
 
 void main()
 {
 	
-		frag_color = texture(texture_diffuse1, TexCoords); 
+		frag_color =   get_texture_diffuse(tex_coord);
 	//
 }

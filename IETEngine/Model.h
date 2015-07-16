@@ -49,13 +49,13 @@ namespace Rendering
 
 		glm::quat		d_rotation;
 
-		 
+
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
 		explicit Model(GLchar* path) :
-			 
-			d_numberOfBone(0)
+
+		d_numberOfBone(0)
 		{ 
 			assert(path);
 
@@ -76,6 +76,10 @@ namespace Rendering
 
 		} 
 
+		vector<Mesh>* GetMeshes()  
+		{
+			 return &d_meshes;
+		}
 
 		glm::vec3		Position() const { return decomposeT(d_position); } 
 
@@ -84,7 +88,8 @@ namespace Rendering
 		~Model()
 		{
 			//			delete m_animation_matrix;
-			delete d_bone_location;
+			if (d_bone_location)
+				delete d_bone_location;
 			delete m_skeleton;
 
 		}
@@ -200,7 +205,7 @@ namespace Rendering
 		{ 
 			m_skeleton->GetBone(boneName.c_str())->angleRestriction = angleRestriction;
 		}
-		 
+
 
 		void ClearJointsLimit(){
 			m_skeleton->ResetAllJointLimits();
@@ -210,7 +215,7 @@ namespace Rendering
 	private:
 		/*  Model Data  */
 
- 
+
 
 		/*  Functions   */
 		// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -229,7 +234,7 @@ namespace Rendering
 				cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 				return;
 			}
- 
+
 			// Retrieve the directory path of the filepath
 			this->d_directory = path.substr(0, path.find_last_of('\\'));
 
@@ -290,11 +295,12 @@ namespace Rendering
 		Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene )
 		{
 			// Data to fill
-			vector<Vertex> vertices;
+			TVecCoord vertices;
 			vector<GLuint> indices;
 			vector<GLuint> adjacent_indices;
 			vector<Texture> textures;
 			vector<VertexWeight> boneWeights;
+			vector<glm::vec2> textCoordVert;
 			Material material;
 			glm::uint numBones = 0; 
 
@@ -303,12 +309,14 @@ namespace Rendering
 			for(GLuint i = 0; i < ai_mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
-				glm::vec3 vector; // We declare a placeholder vector since Assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				glm::vec3 vector;
+				TCoord vectorVert; // We declare a placeholder vector since Assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 				// Positions
-				vector.x = ai_mesh->mVertices[i].x;
-				vector.y = ai_mesh->mVertices[i].y;
-				vector.z = ai_mesh->mVertices[i].z;
-				vertex.Position = vector;
+				vectorVert[0] = ai_mesh->mVertices[i].x;
+				vectorVert[1] = ai_mesh->mVertices[i].y;
+				vectorVert[2] = ai_mesh->mVertices[i].z;
+				//vertex.Position = vector;
+				vertices.push_back(vectorVert);
 				// Normals
 				if (ai_mesh->HasNormals())
 				{
@@ -326,9 +334,13 @@ namespace Rendering
 					vec.x = ai_mesh->mTextureCoords[0][i].x; 
 					vec.y = ai_mesh->mTextureCoords[0][i].y;
 					vertex.TexCoords = vec;
+					textCoordVert.push_back(vec);
 				}
 				else
+				{
 					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+					textCoordVert.push_back(glm::vec2(0.0f));
+				}
 
 				if (ai_mesh->HasTangentsAndBitangents())
 				{
@@ -339,7 +351,7 @@ namespace Rendering
 
 					vertex.Tangent = tangent;
 				}
-				vertices.push_back(vertex);
+				//vertices.push_back(vertex);
 			}
 #pragma endregion
 
@@ -368,7 +380,7 @@ namespace Rendering
 				glm::vec3 glmAmbient;
 				aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, &ambient);
 
-				glmAmbient =   aiColor4DToGlm(ambient);
+				glmAmbient = glm::vec3(0.5f,0.5f,0.5f);//  aiColor4DToGlm(ambient);
 
 				aiColor4D diffuse;
 				glm::vec3 glmDiffuse;
@@ -450,7 +462,7 @@ namespace Rendering
 #pragma endregion  
 
 			// Return a mesh object created from the extracted mesh data
-			return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material);
+			return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material, textCoordVert);
 		}
 
 		// Checks all material textures of a given type and loads the textures if they're not loaded yet.

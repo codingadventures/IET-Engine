@@ -18,6 +18,9 @@
 #include <glm/detail/type_vec3.hpp>
 #include "Cube.h"
 #include <glm/detail/type_vec3.hpp>
+#include "FEMMesh.h"
+#include "octree.h"
+#include "cpu/CPUBarycentricMapping.h"
 
 namespace Rendering
 {
@@ -28,7 +31,9 @@ namespace Rendering
 	class Mesh {
 	public:
 		/*  Mesh Data  */
-		vector<Vertex>				m_vertices;
+		//vector<Vertex>				m_vertices;
+		TVecCoord					m_vertices;
+		vector<glm::vec2>			m_texCoords;
 		vector<GLuint>				m_indices;
 		vector<GLuint>				m_adjacent_indices;
 		vector<Texture>				m_textures; 
@@ -38,36 +43,40 @@ namespace Rendering
 		glm::vec3					m_polyhedral_center_of_mass;
 
 	private:						
-		BoundingBox					d_bounding_box;
-		BoundingSphere				d_bounding_sphere;
+		//BoundingBox					d_bounding_box;
+		//BoundingSphere				d_bounding_sphere;
 
 		/*  Render data  */			
 		GLuint						d_VAO;
 		GLuint						d_VBO;
+		GLuint						d_VBO_textures;
+
 		GLuint						d_EBO;
 		GLuint						d_bone_VBO;
 		map<string, Bone>			d_bone_mapping;
 		Material					d_material;
-
+		MyVector(TTetra)			d_map_i;
+		MyVector(TCoord4)			d_map_f;
 		float						d_area;
 	public:
 		/*  Functions  */
 		// Constructor
-		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material);
+		Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords);
 
-
+		void init(FEMMesh* inputMesh);
 		// Render the mesh
 		void Draw(Shader& shader, bool withAdjecencies = false);
 
 		float Area() const { return d_area; } 
+		void updatePositions(FEMMesh* inputMesh);
 
-		BoundingBox  const& Bounding_box() const { 
-			return d_bounding_box; 
+		/*	BoundingBox  const& Bounding_box() const { 
+		return d_bounding_box; 
 		} 
 		BoundingSphere const&   Bounding_sphere() const {
-			return  d_bounding_sphere; 
+		return  d_bounding_sphere; 
 		} 
-
+		*/
 	private:
 		bool hasBones() const{
 			return m_boneWeights.size() >0;
@@ -76,10 +85,11 @@ namespace Rendering
 		// Initializes all the buffer objects/arrays
 		void setupMesh();
 
+		void updateNormals();
 		// Calculation of the center of mass based on paul bourke's website
 		// http://paulbourke.net/geometry/polygonmesh/
 		void calculateCenterOfMass();
-		
+
 		void calculateArea();
 
 		void calculateBoundingBox();
@@ -87,10 +97,10 @@ namespace Rendering
 		void calculateTexCoord();
 	};
 
-	inline Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material): 
+	inline Mesh::Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords): 
 	m_adjacent_indices(adjacent_indices),
-		d_bounding_box(BoundingBox(vertices)),
-		d_bounding_sphere(BoundingSphere(vertices)),
+		//d_bounding_box(BoundingBox(nullptr)),
+		//d_bounding_sphere(BoundingSphere(NULL)),
 		d_material(material),
 		d_area(0.0f)
 	{ 
@@ -98,12 +108,127 @@ namespace Rendering
 		this->m_indices = indices;
 		this->m_textures = textures; 
 		this->m_boneWeights = boneWeights; 
+		this->m_texCoords = textCoords;
 		//this->calculate_center_of_mass();
-		this->calculateArea();
-		this->calculateBoundingBox(); 
+		//this->calculateArea();
+		//this->calculateBoundingBox(); 
 		//this->calculate_tex_coord();
 		this->setupMesh();
 
+	}
+
+	void Mesh::init(FEMMesh* inputMesh)
+	{ 
+		if (inputMesh)
+		{
+			std::cout << "Creating mapping between simulation mesh \"" << inputMesh->filename << "\" and surface mesh \" "  << std::endl;
+			static std::string input_filename;
+			static sofa::helper::vector<Mat3x3d> bases;
+			static sofa::helper::vector<Vec3d> centers;
+			static Octree<Vec3d> octree;
+			const TVecTetra& tetras = inputMesh->tetrahedra;
+			const TVecCoord& in = inputMesh->positions;
+			const TVecCoord& out = m_vertices;
+			d_map_i.resize(out.size());
+			d_map_f.resize(out.size());
+			if (input_filename != inputMesh->filename || bases.size() != tetras.size()) // we have to recompute the octree and bases
+			{
+				input_filename = inputMesh->filename;
+				sofa::helper::vector< BBox<Vec3d> > bbox;
+				bases.resize(tetras.size());
+				centers.resize(tetras.size());
+				bbox.resize(tetras.size());
+				std::cout << "  Preparing tetrahedra" << std::endl;
+				for (unsigned int t=0; t<tetras.size(); ++t)
+				{
+					Mat3x3d m, mt;
+					m[0] = in[tetras[t][1]]-in[tetras[t][0]];
+					m[1] = in[tetras[t][2]]-in[tetras[t][0]];
+					m[2] = in[tetras[t][3]]-in[tetras[t][0]];
+					mt.transpose(m);
+					bases[t].invert(mt);
+					centers[t] = (in[tetras[t][0]]+in[tetras[t][1]]+in[tetras[t][2]]+in[tetras[t][3]])*0.25;
+					bbox[t].add(tetras[t].begin(), tetras[t].end(), in);
+				}
+				std::cout << "  Building octree" << std::endl;
+				octree.init(bbox,8,8);
+			}
+			std::cout << "  Processing vertices" << std::endl;
+			int outside = 0;
+			sofa::helper::vector<Octree<Vec3d>*> cells;
+			for (unsigned int i=0;i<out.size();i++)
+			{
+				Vec3d pos = out[i];
+				Vec3d coefs;
+				int index = -1;
+				double distance = 1e10;
+				Octree<Vec3d>* cell = octree.findNear(pos);
+				if (cell)
+				{
+					const sofa::helper::vector<int>& elems = cell->elems();
+					for (unsigned int e = 0; e < elems.size(); e++)
+					{
+						unsigned int t = elems[e];
+						Vec3d v = bases[t] * (pos - in[tetras[t][0]]);
+						double d = std::max(std::max(-v[0],-v[1]),std::max(-v[2],v[0]+v[1]+v[2]-1));
+						if (d>0) d = (pos-centers[t]).norm2();
+						if (d<distance) { coefs = v; distance = d; index = t; }
+					}
+				}
+				if (distance > 0)
+				{ // pos is outside of the fem mesh, find the nearest tetra
+
+					// first let's find at least one tetra that is close, if not already found
+					if (index >= 0) // we already have a close tetra, we need to look only for closer ones
+					{
+						cells.clear();
+						octree.findAllAround(cells, pos, sqrt(distance)*1.5);
+						for (unsigned int ci = 0; ci < cells.size(); ++ci)
+						{
+							if (cells[ci] == cell) continue; // already processed this cell
+							const sofa::helper::vector<int>& elems = cells[ci]->elems();
+							for (unsigned int e = 0; e < elems.size(); e++)
+							{
+								unsigned int t = elems[e];
+								double d = (pos-centers[t]).norm2();
+								if (d<distance)
+								{
+									coefs = bases[t] * (pos - in[tetras[t][0]]);
+									distance = d; index = t;
+								}
+							}
+						}
+					}
+					else
+					{
+						// failsafe case (should not happen...), to be sure we do a brute-force search
+						for (unsigned int t = 0; t < tetras.size(); t++)
+						{
+							double d = (pos-centers[t]).norm2();
+							if (d<distance)
+							{
+								coefs = bases[t] * (pos - in[tetras[t][0]]);
+								distance = d; index = t;
+							}
+						}
+					}
+					if (index >= 0)
+					{
+						//if (verbose >= 1) std::cout << "Surface vertex " << i << " mapped outside of tetra " << index << " with coefs " << coefs << std::endl;
+						++outside;
+					}
+				}
+				if (index >= 0)
+				{
+					//std::cout << "Surface vertex " << i << " mapped from tetra " << index << " with coefs " << coefs << std::endl;
+					d_map_i[i][0] = tetras[index][0]; d_map_f[i][0] = (float)(1-coefs[0]-coefs[1]-coefs[2]);
+					d_map_i[i][1] = tetras[index][1]; d_map_f[i][1] = (float)(coefs[0]);
+					d_map_i[i][2] = tetras[index][2]; d_map_f[i][2] = (float)(coefs[1]);
+					d_map_i[i][3] = tetras[index][3]; d_map_f[i][3] = (float)(coefs[2]);
+				}
+			}
+			std::cout << "Mapping done: " << outside << " / " << out.size() << " vertices outside of simulation mesh" << std::endl;
+		}
 	}
 
 	inline void Mesh::Draw(Shader& shader, bool withAdjecencies)
@@ -140,12 +265,12 @@ namespace Rendering
 
 		GLuint drawMode = withAdjecencies ? GL_TRIANGLES_ADJACENCY : GL_TRIANGLES;
 		GLuint indices_size = withAdjecencies ? m_adjacent_indices.size() : m_indices.size();
-		if (withAdjecencies)
+		/*	if (withAdjecencies)
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_adjacent_indices.size() * sizeof(GLuint), &this->m_adjacent_indices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_adjacent_indices.size() * sizeof(GLuint), &this->m_adjacent_indices[0], GL_STATIC_DRAW);
 
-		}
+		}*/
 		glDrawElements(drawMode, indices_size, GL_UNSIGNED_INT, 0);
 
 
@@ -156,8 +281,10 @@ namespace Rendering
 	{
 		// Create buffers/arrays
 		glGenVertexArrays(1, &this->d_VAO);
+
 		glGenBuffers(1, &this->d_VBO);
 		glGenBuffers(1, &this->d_EBO);
+		glGenBuffers(1,&this->d_VBO_textures);
 
 		glBindVertexArray(this->d_VAO);
 		// Load data into vertex buffers
@@ -165,21 +292,27 @@ namespace Rendering
 		// A great thing about struct is that their memory layout is sequential for all its items.
 		// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
 		// again translates to 3/2 floats which translates to a byte array.
-		glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex), &this->m_vertices[0], GL_STATIC_DRAW);  
+		glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(TCoord), &this->m_vertices[0], GL_STREAM_DRAW); 
+
+
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->d_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_indices.size() * sizeof(GLuint), &this->m_indices[0], GL_STATIC_DRAW);
 
+
+
 		// Set the vertex attribute pointers
 		// Vertex Positions
 		glEnableVertexAttribArray(0);	
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TCoord), (GLvoid*)0);
 		// Vertex Normals
 		glEnableVertexAttribArray(1);	
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
 		// Vertex Texture Coordinates
 		glEnableVertexAttribArray(2);	
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
+		glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_textures);
+		glBufferData(GL_ARRAY_BUFFER, this->m_texCoords.size() * sizeof(glm::vec2), &this->m_texCoords[0], GL_STATIC_DRAW); 
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 
 		/*glEnableVertexAttribArray(3);	
@@ -209,50 +342,156 @@ namespace Rendering
 		glBindVertexArray(0);
 	}
 
-	inline void Mesh::calculateCenterOfMass()
+
+	void Mesh::updatePositions(FEMMesh* inputMesh)
 	{
-	}
+		const TVecCoord& in = inputMesh->positions;
+		TVecCoord& out = m_vertices;
+		if (d_map_f.size() != out.size() || d_map_i.size() != out.size()) return;
 
-	inline void Mesh::calculateArea()
-	{	 
-		size_t N = m_vertices.size();
-		if (N % 3 != 0) return;
+		DEVICE_METHOD(TetraMapper3f_apply)( out.size(), d_map_i.deviceRead(), d_map_f.deviceRead(), out.deviceWrite(), in.deviceRead() );
+		const GLvoid * pointer = NULL;
 
-		for (int i = 0; i < N; i = i + 3)
+		pointer = this->m_vertices.hostRead();
+
+		glBindBuffer(GL_ARRAY_BUFFER, d_VBO);
+		glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(TCoord), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+		glBufferSubData(GL_ARRAY_BUFFER, 0, this->m_vertices.size() * sizeof(TCoord), pointer );
+
+
+		/*for (unsigned int i=0;i<out.size();++i)
 		{
-			glm::vec3 v1 = m_vertices[i].Position;
-			glm::vec3 v2 = m_vertices[i+1].Position;
-			glm::vec3 v3 = m_vertices[i+2].Position;
-			d_area += glm::length(glm::cross(v2 - v1,v3 - v1)) * 0.5f;
-		}
+		out[i] = 
+		in[map_i[i][0]] * map_f[i][0] +
+		in[map_i[i][1]] * map_f[i][1] +
+		in[map_i[i][2]] * map_f[i][2] +
+		in[map_i[i][3]] * map_f[i][3];
+		}*/
 	}
+	//
+	//void Mesh::updateNormals()
+	//{
+	//    normals.recreate(positions.size());
+	//    if (computeTangents)
+	//        tangents.recreate(positions.size());
+	//#ifdef SOFA_DEVICE_CUDA
+	//    if (!velems.empty())
+	//    { // use GPU
+	//        if (!computeTangents)
+	//        {
+	//            fnormals.recreate(triangles.size());
+	//            CudaVisualModel3f_calcTNormals(triangles.size(), positions.size(), triangles.deviceRead(), fnormals.deviceWrite(), positions.deviceRead());
+	//            CudaVisualModel3f_calcVNormals(triangles.size(), positions.size(), nbElemPerVertex, velems.deviceRead(), normals.deviceWrite(), fnormals.deviceRead(), positions.deviceRead());
+	//        }
+	//        else
+	//        {
+	//            fnormals.recreate(triangles.size());
+	//            ftangents.recreate(triangles.size());
+	//            CudaVisualModel3f_calcTNormalsAndTangents(triangles.size(), positions.size(), triangles.deviceRead(), fnormals.deviceWrite(), ftangents.deviceWrite(), positions.deviceRead(), texcoords.deviceRead());
+	//            CudaVisualModel3f_calcVNormalsAndTangents(triangles.size(), positions.size(), nbElemPerVertex, velems.deviceRead(), normals.deviceWrite(), tangents.deviceWrite(), fnormals.deviceRead(), ftangents.deviceRead(), positions.deviceRead(), texcoords.deviceRead());
+	//        }
+	//    }
+	//    else
+	//#endif
+	//    { // use CPU
+	//        if (!computeTangents)
+	//        {
+	//            for (unsigned int i=0;i<normals.size();++i)
+	//                normals[i].clear();
+	//            for (unsigned int i=0;i<triangles.size();++i)
+	//            {
+	//                TCoord n = cross(positions[triangles[i][1]]-positions[triangles[i][0]], 
+	//                                 positions[triangles[i][2]]-positions[triangles[i][0]]);
+	//                n.normalize();
+	//                for (unsigned int j=0;j<3;++j)
+	//                    normals[triangles[i][j]] += n;
+	//            }
+	//            for (unsigned int i=0;i<normals.size();++i)
+	//                normals[i].normalize();
+	//        }
+	//        else
+	//        {
+	//            for (unsigned int i=0;i<normals.size();++i)
+	//            {
+	//                normals[i].clear();
+	//                tangents[i].clear();
+	//            }
+	//            for (unsigned int i=0;i<triangles.size();++i)
+	//            {
+	//                TCoord A = positions[triangles[i][0]];
+	//                TCoord B = positions[triangles[i][1]];
+	//                TCoord C = positions[triangles[i][2]];
+	//                B -= A;
+	//                C -= A;
+	//                TCoord n = cross(B,C);
+	//                n.normalize();
+	//                TReal Au = texcoords[triangles[i][0]][0];
+	//                TReal Bu = texcoords[triangles[i][1]][0];
+	//                TReal Cu = texcoords[triangles[i][2]][0];
+	//                Bu -= Au;
+	//                Cu -= Au;
+	//                TCoord t = B * Cu - C * Bu;
+	//                t.normalize();
+	//                for (unsigned int j=0;j<3;++j)
+	//                {
+	//                    normals[triangles[i][j]] += n;
+	//                    tangents[triangles[i][j]] += t;
+	//                }
+	//            }
+	//            for (unsigned int i=0;i<normals.size();++i)
+	//            {
+	//                tangents[i] = cross(normals[i],tangents[i]);
+	//                normals[i].normalize();
+	//                tangents[i].normalize();
+	//            }
+	//        }
+	//    }
+	//}
 
-	inline void Mesh::calculateBoundingBox()
-	{
-		d_bounding_box = BoundingBox(m_vertices);
+	//inline void Mesh::calculateCenterOfMass()
+	//{
+	//}
 
-	}
+	//inline void Mesh::calculateArea()
+	//{	 
+	//	size_t N = m_vertices.size();
+	//	if (N % 3 != 0) return;
 
-	inline void Mesh::calculateTexCoord()
-	{
-		size_t N = m_vertices.size();
-		if (N % 3 != 0) return;
+	//	for (int i = 0; i < N; i = i + 3)
+	//	{
+	//		glm::vec3 v1 = m_vertices[i].Position;
+	//		glm::vec3 v2 = m_vertices[i+1].Position;
+	//		glm::vec3 v3 = m_vertices[i+2].Position;
+	//		d_area += glm::length(glm::cross(v2 - v1,v3 - v1)) * 0.5f;
+	//	}
+	//}
 
-		for (int i = 0; i < N; i = i + 3)
-		{
-			auto v1 = m_vertices[i].Position;
-			auto v2 = m_vertices[i+1].Position;
-			auto v3 = m_vertices[i+2].Position;
+	//inline void Mesh::calculateBoundingBox()
+	//{
+	//	d_bounding_box = BoundingBox(m_vertices);
 
-			auto mod1 = fmod( atan2( v1.z, v1.x )  +  glm::pi<float>() , glm::pi<float>());
-			auto mod2 = fmod( atan2( v2.z, v2.x )  +  glm::pi<float>() , glm::pi<float>());
-			auto mod3 = fmod( atan2( v3.z, v3.x )  +  glm::pi<float>() , glm::pi<float>());
+	//}
 
-			m_vertices[i].TexCoords		= glm::vec2(1.0f - ( mod1 / glm::pi<float>() * 0.5f ), 0.5f - v1.y / 2.0f );
-			m_vertices[i+1].TexCoords	= glm::vec2( 1.0f - ( mod2  / glm::pi<float>() * 0.5 ), 0.5 - v2.y / 2.0f );
-			m_vertices[i+2]	.TexCoords	=  glm::vec2( 1.0f - ( mod3 / glm::pi<float>() * 0.5 ), 0.5 - v3.y / 2.0f );
-		}
-	}
+	//inline void Mesh::calculateTexCoord()
+	//{
+	//	size_t N = m_vertices.size();
+	//	if (N % 3 != 0) return;
+
+	//	for (int i = 0; i < N; i = i + 3)
+	//	{
+	//		auto v1 = m_vertices[i].Position;
+	//		auto v2 = m_vertices[i+1].Position;
+	//		auto v3 = m_vertices[i+2].Position;
+
+	//		auto mod1 = fmod( atan2( v1.z, v1.x )  +  glm::pi<float>() , glm::pi<float>());
+	//		auto mod2 = fmod( atan2( v2.z, v2.x )  +  glm::pi<float>() , glm::pi<float>());
+	//		auto mod3 = fmod( atan2( v3.z, v3.x )  +  glm::pi<float>() , glm::pi<float>());
+
+	//		m_vertices[i].TexCoords		= glm::vec2(1.0f - ( mod1 / glm::pi<float>() * 0.5f ), 0.5f - v1.y / 2.0f );
+	//		m_vertices[i+1].TexCoords	= glm::vec2( 1.0f - ( mod2  / glm::pi<float>() * 0.5 ), 0.5 - v2.y / 2.0f );
+	//		m_vertices[i+2]	.TexCoords	=  glm::vec2( 1.0f - ( mod3 / glm::pi<float>() * 0.5 ), 0.5 - v3.y / 2.0f );
+	//	}
+	//}
 }
 
 #endif // Mesh_h__

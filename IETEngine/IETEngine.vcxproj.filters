@@ -85,6 +85,12 @@
     <Filter Include="Header Files\Shaders\Geometry">
       <UniqueIdentifier>{56547525-b6ad-4218-8b2d-beaa07f0eb84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Simulation">
+      <UniqueIdentifier>{5643ab5c-6ea8-4b8b-9395-07c05ed1c3c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Simulation\FEM">
+      <UniqueIdentifier>{71cff1dd-9e4c-4f70-bac1-8b7afb34744c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RealTimeAnimation.cpp">
@@ -328,6 +334,60 @@
     </ClInclude>
     <ClInclude Include="VertexTriangleAdjacency.h">
       <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="FemController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="kernels.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="octree.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="SurfaceMesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="FEMMesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GPU.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationParameters.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUBarycentricMapping.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="MecanicalMatrix.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUFixedConstraint.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUMechanicalObject.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUMergedKernels.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUPlaneForceField.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUSphereForceField.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUTetrahedronFEMForceField.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUUniformMass.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\CPUVisualModel.h">
+      <Filter>Header Files\Simulation\FEM</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

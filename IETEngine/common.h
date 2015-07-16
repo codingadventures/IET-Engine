@@ -20,7 +20,9 @@
 #include <glm/gtx/spline.hpp>
 
 
-
+#include <sofa/defaulttype/Vec.h>
+#include <sofa/defaulttype/Mat.h>
+#include <sofa/helper/vector.h>
 
 #include "Keys.h"
 
@@ -75,6 +77,8 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define DROID_OBJ_MODEL "models\\dragon_low_poly.obj"
 #define CUBE_MODEL "models\\cubeTri.obj"
 #define TORUS_MODEL "models\\torus.dae"
+#define RAPTOR_MODEL "models\\raptor.obj"
+#define RAPTOR_NETGEN_MESH "models\\raptor-8418.mesh"
  
 #pragma endregion [ MODELS ]
 
@@ -93,6 +97,11 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #pragma endregion [ ANIMATIONS ]
 
 
+enum TimeIntegration
+{
+	ODE_EulerExplicit = 0,
+	ODE_EulerImplicit,
+};
 
 enum GameState
 {
@@ -111,6 +120,57 @@ bool pause = false;
 bool moved = false,animationStep = false;
 
 
+#if defined(SOFA_DEVICE_CPU)
+#define SOFA_DEVICE "CPU"
+#elif defined(SOFA_DEVICE_CUDA)
+#define SOFA_DEVICE "CUDA"
+#else
+#error Please define SOFA_DEVICE_CPU or SOFA_DEVICE_CUDA
+#endif
 
+#if defined(SOFA_DEVICE_CUDA)
+#include <cuda/CudaMemoryManager.h>
+using namespace sofa::gpu::cuda;
+#define MyMemoryManager sofa::gpu::cuda::CudaMemoryManager
+#else
+enum { BSIZE=1 };
+#define MyMemoryManager sofa::helper::CPUMemoryManager
+#endif
+// we can't use templated typedefs yet...
+#define MyVector(T) sofa::helper::vector<T,MyMemoryManager< T > >
+
+// Flag to use 2x3 values instead of 3x3 for co-rotational FEM rotation matrices
+#define USE_ROT6
+
+#if defined(SOFA_DEVICE_CUDA)
+#define PARALLEL_REDUCTION
+#define PARALLEL_GATHER
+#define USE_VEC4
+#endif
+
+typedef float TReal;
+typedef sofa::defaulttype::Vec<3,TReal> TCoord;
+typedef sofa::defaulttype::Vec<3,TReal> TDeriv;
+typedef sofa::defaulttype::Vec<4,TReal> TCoord4;
+typedef MyVector(TReal) TVecReal;
+typedef MyVector(TCoord) TVecCoord;
+typedef MyVector(TDeriv) TVecDeriv;
+
+typedef sofa::helper::fixed_array<unsigned int, 3> TTriangle;
+typedef sofa::helper::fixed_array<unsigned int, 4> TTetra;
+typedef MyVector(TTriangle) TVecTriangle;
+typedef MyVector(TTetra) TVecTetra;
+
+typedef sofa::defaulttype::Vec<2,float> TTexCoord;
+typedef sofa::defaulttype::Vec<4,float> TColor;
+typedef MyVector(TTexCoord) TVecTexCoord;
+
+typedef sofa::defaulttype::Vec<3,float> Vec3f;
+typedef sofa::defaulttype::Vec<3,double> Vec3d;
+typedef sofa::defaulttype::Vec<4,float> Vec4f;
+typedef sofa::defaulttype::Vec<4,double> Vec4d;
+typedef sofa::defaulttype::Vec<4,int> Vec4i;
+typedef sofa::defaulttype::Mat<3,3,float> Mat3x3f;
+typedef sofa::defaulttype::Mat<3,3,double> Mat3x3d;
 
 #endif // COMMON_H
