@@ -1,0 +1,493 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3867487e-5a6c-4c82-8a86-d0ed956de823}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation">
+      <UniqueIdentifier>{34e055be-6409-4bce-833d-8fb35e669374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation\InverseKinematic">
+      <UniqueIdentifier>{1fa01333-1f72-4cac-9d43-da0eaf67bdcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation\KeyFrame">
+      <UniqueIdentifier>{34b1165d-ea58-41d7-97d1-78de79b10990}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation\Skeleton">
+      <UniqueIdentifier>{27ac1d5d-84dc-438f-b99c-3029adb09be7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Controller">
+      <UniqueIdentifier>{6d391fac-9d40-4c72-aa05-51c720f12201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{d1f908b4-b013-4f3b-93c2-598d687d46b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{131a5d66-e579-420b-b983-997f10263521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Vertex">
+      <UniqueIdentifier>{49ee5e27-ad0a-4994-85ee-fa59264548a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Fragment">
+      <UniqueIdentifier>{45c7280c-8ebc-4dd9-bfd5-04294c16f23c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Geometry">
+      <UniqueIdentifier>{2d10afeb-3eb0-458c-9444-328847c1a548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{0335d7a5-5dd2-44b4-9a45-f08f05bb52df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Debugging">
+      <UniqueIdentifier>{5f0551d7-b9be-4a7a-a1d1-fc53bacd2b35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Player">
+      <UniqueIdentifier>{e9df129f-7f8d-4a3b-8705-f8a4b70588ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Player\States">
+      <UniqueIdentifier>{0b7c360a-4bdc-4c2c-b98b-9ad4810221f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\User Control">
+      <UniqueIdentifier>{10dff85e-795c-493b-9573-44a051caa81d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Helper">
+      <UniqueIdentifier>{858a91bf-02de-47c9-8821-98ba8dc6767e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{cf0a711d-e1fd-4265-86d7-fe02f6fe746d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles">
+      <UniqueIdentifier>{fe0f81f8-84a4-40e4-a908-e6fe344cf55b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles\Updater">
+      <UniqueIdentifier>{fae846ad-9b74-4433-b673-b8c46263756b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles\Generator">
+      <UniqueIdentifier>{eb4e1659-ddee-4588-bfb0-5899625a5cdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Particles\Renderer">
+      <UniqueIdentifier>{da3a29a3-04ce-4df8-a7bd-93c05cd7ed6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Tensor">
+      <UniqueIdentifier>{a1129ed2-7b83-423e-9e0a-b3358e94c61c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\Drag">
+      <UniqueIdentifier>{fde0d745-f266-44a2-bd96-e1430ca5d0c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\NarrowPhase">
+      <UniqueIdentifier>{e3a7dc7a-9312-4ccd-b19e-1bd1170375f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Simulation">
+      <UniqueIdentifier>{274f8c12-5eb8-4766-bf91-33a23beecca7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{35d0be6e-3a45-490a-8e94-bf9ac79d765a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Simulation\CUDA">
+      <UniqueIdentifier>{68eeac1b-bd5d-4d50-a781-8ea2945e46fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\IETEngine\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AnimationClip.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AnimationEventController.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AnimationManager.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AnimationPose.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Blender.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\KeyFrame.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Spline.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AngleRestriction.h">
+      <Filter>Header Files\Animation\InverseKinematic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\IKAnimator.h">
+      <Filter>Header Files\Animation\InverseKinematic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\IKInfo.h">
+      <Filter>Header Files\Animation\InverseKinematic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\KeyFrameAnimator.h">
+      <Filter>Header Files\Animation\KeyFrame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Bone.h">
+      <Filter>Header Files\Animation\Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Skeleton.h">
+      <Filter>Header Files\Animation\Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AnimationController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\AbstractController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\FemController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\PhysicsController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\RenderingController.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\RenderingControllerDemo.h">
+      <Filter>Header Files\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Camera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Shader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Cube.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\FEMMesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\GPU.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Light.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Material.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\RenderingType.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SkyBox.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Sphere.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SurfaceMesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Point.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Line.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Mesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Model.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Texture.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Triangle.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Vertex.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\VertexWeight.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ScreenOutput.h">
+      <Filter>Header Files\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Enemy.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Player.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\PlayerState.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SwordBlock.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Idle.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Run.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SwingSword.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SwordIdle.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\WalkForward.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\WalkForwardLeft.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\WalkLeft.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\WalkRight.h">
+      <Filter>Header Files\Player\States</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Callbacks.h">
+      <Filter>Header Files\User Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Keys.h">
+      <Filter>Header Files\User Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Helper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\UI.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\VertexTriangleAdjacency.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\BoundingBox.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\BoundingSphere.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ClosestPoint.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\CollidingPair.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\EndPoint.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\EPA.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\GJK.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Plane.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\RigidBody.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\RigidBodyManager.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SpringGenerator.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Particle.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleData.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleEmitter.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleSystem.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleSystem2.h">
+      <Filter>Header Files\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\EulerUpdater.h">
+      <Filter>Header Files\Physics\Particles\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleUpdater.h">
+      <Filter>Header Files\Physics\Particles\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\BoxGenerator.h">
+      <Filter>Header Files\Physics\Particles\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\ParticleGenerator.h">
+      <Filter>Header Files\Physics\Particles\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\GLParticleRenderer.h">
+      <Filter>Header Files\Physics\Particles\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\IParticleRenderer.h">
+      <Filter>Header Files\Physics\Particles\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Inertia.h">
+      <Filter>Header Files\Physics\Tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\Friction.h">
+      <Filter>Header Files\Physics\Drag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SupportMapping.h">
+      <Filter>Header Files\Physics\NarrowPhase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SupportPoint.h">
+      <Filter>Header Files\Physics\NarrowPhase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\kernels.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\octree.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\simulation.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\SimulationParameters.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\MecanicalMatrix.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\CudaCommon.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\CudaMath.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\CudaMemoryManager.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\CudaTexture.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\gpucuda.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\cuda\mycuda.h">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\IETEngine\common.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching_normal.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\physics.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\vertex.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\vertex_bone.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\weighted_hatching.vert">
+      <Filter>Header Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\IETEngine\ambient.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\common.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\cook_torrance.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\diffuse.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\fragment.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\fragment_bone.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\fragment_notexture.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\fresnel.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching_blend.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching_round.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\particle.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\skybox.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\specular.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\boundings.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\toon.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\weighted_hatch.frag">
+      <Filter>Header Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching.geom">
+      <Filter>Header Files\Shaders\Geometry</Filter>
+    </None>
+    <None Include="..\IETEngine\hatching_blend.geom">
+      <Filter>Header Files\Shaders\Geometry</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\IETEngine\RealTimeAnimation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IETEngine\cuda\mycuda.cpp">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\IETEngine\cuda\CudaBarycentricMapping.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaFixedConstraint.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaMechanicalObject.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaMergedKernels.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaPlaneForceField.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaSphereForceField.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaTetrahedronFEMForceField.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaUniformMass.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaVisualModel.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\mycuda.cu">
+      <Filter>Header Files\Simulation\CUDA</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>

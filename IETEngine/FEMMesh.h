@@ -6,6 +6,9 @@
 #include <iostream>
 #include "SimulationParameters.h"
 #include <mesh/write_mesh_obj.h>
+#ifdef SOFA_DEVICE_CUDA
+#include "kernels.h"
+#endif
 
 struct FEMMesh
 {

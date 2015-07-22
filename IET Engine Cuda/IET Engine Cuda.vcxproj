@@ -1,0 +1,351 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\IETEngine\AbstractController.h" />
+    <ClInclude Include="..\IETEngine\AngleRestriction.h" />
+    <ClInclude Include="..\IETEngine\AnimationClip.h" />
+    <ClInclude Include="..\IETEngine\AnimationController.h" />
+    <ClInclude Include="..\IETEngine\AnimationEventController.h" />
+    <ClInclude Include="..\IETEngine\AnimationManager.h" />
+    <ClInclude Include="..\IETEngine\AnimationPose.h" />
+    <ClInclude Include="..\IETEngine\Blender.h" />
+    <ClInclude Include="..\IETEngine\Bone.h" />
+    <ClInclude Include="..\IETEngine\BoundingBox.h" />
+    <ClInclude Include="..\IETEngine\BoundingSphere.h" />
+    <ClInclude Include="..\IETEngine\BoxGenerator.h" />
+    <ClInclude Include="..\IETEngine\Callbacks.h" />
+    <ClInclude Include="..\IETEngine\Camera.h" />
+    <ClInclude Include="..\IETEngine\ClosestPoint.h" />
+    <ClInclude Include="..\IETEngine\CollidingPair.h" />
+    <ClInclude Include="..\IETEngine\common.h" />
+    <ClInclude Include="..\IETEngine\Cube.h" />
+    <ClInclude Include="..\IETEngine\cuda\CudaCommon.h" />
+    <ClInclude Include="..\IETEngine\cuda\CudaMath.h" />
+    <ClInclude Include="..\IETEngine\cuda\CudaMemoryManager.h" />
+    <ClInclude Include="..\IETEngine\cuda\CudaTexture.h" />
+    <ClInclude Include="..\IETEngine\cuda\gpucuda.h" />
+    <ClInclude Include="..\IETEngine\cuda\mycuda.h" />
+    <ClInclude Include="..\IETEngine\EndPoint.h" />
+    <ClInclude Include="..\IETEngine\Enemy.h" />
+    <ClInclude Include="..\IETEngine\EPA.h" />
+    <ClInclude Include="..\IETEngine\EulerUpdater.h" />
+    <ClInclude Include="..\IETEngine\FemController.h" />
+    <ClInclude Include="..\IETEngine\FEMMesh.h" />
+    <ClInclude Include="..\IETEngine\Friction.h" />
+    <ClInclude Include="..\IETEngine\GJK.h" />
+    <ClInclude Include="..\IETEngine\GLParticleRenderer.h" />
+    <ClInclude Include="..\IETEngine\GPU.h" />
+    <ClInclude Include="..\IETEngine\Helper.h" />
+    <ClInclude Include="..\IETEngine\Idle.h" />
+    <ClInclude Include="..\IETEngine\IKAnimator.h" />
+    <ClInclude Include="..\IETEngine\IKInfo.h" />
+    <ClInclude Include="..\IETEngine\Inertia.h" />
+    <ClInclude Include="..\IETEngine\IParticleRenderer.h" />
+    <ClInclude Include="..\IETEngine\kernels.h" />
+    <ClInclude Include="..\IETEngine\KeyFrame.h" />
+    <ClInclude Include="..\IETEngine\KeyFrameAnimator.h" />
+    <ClInclude Include="..\IETEngine\Keys.h" />
+    <ClInclude Include="..\IETEngine\Light.h" />
+    <ClInclude Include="..\IETEngine\Line.h" />
+    <ClInclude Include="..\IETEngine\Material.h" />
+    <ClInclude Include="..\IETEngine\MecanicalMatrix.h" />
+    <ClInclude Include="..\IETEngine\Mesh.h" />
+    <ClInclude Include="..\IETEngine\Model.h" />
+    <ClInclude Include="..\IETEngine\octree.h" />
+    <ClInclude Include="..\IETEngine\Particle.h" />
+    <ClInclude Include="..\IETEngine\ParticleData.h" />
+    <ClInclude Include="..\IETEngine\ParticleEmitter.h" />
+    <ClInclude Include="..\IETEngine\ParticleGenerator.h" />
+    <ClInclude Include="..\IETEngine\ParticleSystem.h" />
+    <ClInclude Include="..\IETEngine\ParticleSystem2.h" />
+    <ClInclude Include="..\IETEngine\ParticleUpdater.h" />
+    <ClInclude Include="..\IETEngine\PhysicsController.h" />
+    <ClInclude Include="..\IETEngine\Plane.h" />
+    <ClInclude Include="..\IETEngine\Player.h" />
+    <ClInclude Include="..\IETEngine\PlayerState.h" />
+    <ClInclude Include="..\IETEngine\Point.h" />
+    <ClInclude Include="..\IETEngine\RenderingController.h" />
+    <ClInclude Include="..\IETEngine\RenderingControllerDemo.h" />
+    <ClInclude Include="..\IETEngine\RenderingType.h" />
+    <ClInclude Include="..\IETEngine\RigidBody.h" />
+    <ClInclude Include="..\IETEngine\RigidBodyManager.h" />
+    <ClInclude Include="..\IETEngine\Run.h" />
+    <ClInclude Include="..\IETEngine\ScreenOutput.h" />
+    <ClInclude Include="..\IETEngine\Shader.h" />
+    <ClInclude Include="..\IETEngine\simulation.h" />
+    <ClInclude Include="..\IETEngine\SimulationParameters.h" />
+    <ClInclude Include="..\IETEngine\Skeleton.h" />
+    <ClInclude Include="..\IETEngine\SkyBox.h" />
+    <ClInclude Include="..\IETEngine\Sphere.h" />
+    <ClInclude Include="..\IETEngine\Spline.h" />
+    <ClInclude Include="..\IETEngine\SpringGenerator.h" />
+    <ClInclude Include="..\IETEngine\SupportMapping.h" />
+    <ClInclude Include="..\IETEngine\SupportPoint.h" />
+    <ClInclude Include="..\IETEngine\SurfaceMesh.h" />
+    <ClInclude Include="..\IETEngine\SwingSword.h" />
+    <ClInclude Include="..\IETEngine\SwordBlock.h" />
+    <ClInclude Include="..\IETEngine\SwordIdle.h" />
+    <ClInclude Include="..\IETEngine\Texture.h" />
+    <ClInclude Include="..\IETEngine\Triangle.h" />
+    <ClInclude Include="..\IETEngine\UI.h" />
+    <ClInclude Include="..\IETEngine\Vertex.h" />
+    <ClInclude Include="..\IETEngine\VertexTriangleAdjacency.h" />
+    <ClInclude Include="..\IETEngine\VertexWeight.h" />
+    <ClInclude Include="..\IETEngine\WalkForward.h" />
+    <ClInclude Include="..\IETEngine\WalkForwardLeft.h" />
+    <ClInclude Include="..\IETEngine\WalkLeft.h" />
+    <ClInclude Include="..\IETEngine\WalkRight.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\IETEngine\ambient.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\boundings.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\common.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\common.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\cook_torrance.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\diffuse.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\fragment.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\fragment_bone.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\fragment_notexture.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\fresnel.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching.geom">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching_blend.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching_blend.geom">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching_normal.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\hatching_round.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\particle.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\physics.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\skybox.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\specular.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\toon.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\vertex.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\vertex_bone.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\weighted_hatch.frag">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\IETEngine\weighted_hatching.vert">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\IETEngine\cuda\mycuda.cpp" />
+    <ClCompile Include="..\IETEngine\RealTimeAnimation.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\IETEngine\cuda\CudaBarycentricMapping.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaFixedConstraint.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaMechanicalObject.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaMergedKernels.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaPlaneForceField.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaSphereForceField.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaTetrahedronFEMForceField.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaUniformMass.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\CudaVisualModel.cu" />
+    <CudaCompile Include="..\IETEngine\cuda\mycuda.cu" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0579BB46-22D4-484E-933D-FF4228392C04}</ProjectGuid>
+    <RootNamespace>IET_Engine_Cuda</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;SOFA_DEVICE_CUDA;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Jarvis\Documents\GitHub\IET-Engine\IETEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glew32s.lib;glfw3.lib;freeglut.lib;CORE_DB_Magick++_.lib;assimp.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Jarvis\Documents\GitHub\IET-Engine\IETEngine\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.0.targets" />
+  </ImportGroup>
+</Project>
