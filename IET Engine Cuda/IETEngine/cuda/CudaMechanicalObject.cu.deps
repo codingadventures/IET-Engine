@@ -378,9 +378,9 @@ c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\host_defines.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\vector_functions.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\device_launch_parameters.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\vector_types.h
-c:\users\jarvis\documents\github\iet-engine\ietengine\cuda\CudaCommon.h
-c:\users\jarvis\documents\github\iet-engine\ietengine\cuda\CudaMath.h
+c:\users\giovanni\documents\github\iet-engine\ietengine\cuda\CudaCommon.h
+c:\users\giovanni\documents\github\iet-engine\ietengine\cuda\CudaMath.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include\cuda.h
-c:\users\jarvis\documents\github\iet-engine\ietengine\cuda\mycuda.h
-c:\users\jarvis\documents\github\iet-engine\ietengine\cuda\gpucuda.h
+c:\users\giovanni\documents\github\iet-engine\ietengine\cuda\mycuda.h
+c:\users\giovanni\documents\github\iet-engine\ietengine\cuda\gpucuda.h
