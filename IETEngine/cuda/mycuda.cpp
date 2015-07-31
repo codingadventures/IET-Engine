@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mycuda.h"
+#include <cuda/mycuda.h>
 
 // namespace sofa
 // {

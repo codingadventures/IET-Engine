@@ -22,11 +22,11 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "CudaCommon.h"
-#include "CudaMath.h"
-#include "CudaTexture.h"
+#include <cuda/CudaCommon.h>
+#include <cuda/CudaMath.h>
+#include <cuda/CudaTexture.h>
 #include "cuda.h"
-#include "mycuda.h"
+#include <cuda/mycuda.h>
 //#define ATOMIC_ADD_FORCE
 //#define ATOMIC_SHARED
 

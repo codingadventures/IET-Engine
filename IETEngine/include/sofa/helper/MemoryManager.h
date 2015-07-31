@@ -29,8 +29,13 @@
 
 #include <sofa/helper/helper.h>
 #include <cstring>
-#include <sofa/helper/system/gl.h>
 
+#ifndef NO_OPENGL
+
+#include <sofa/helper/system/gl.h>
+#endif // !NO_OPENGL
+
+typedef unsigned int GLuint;
 namespace sofa
 {
 
@@ -54,7 +59,7 @@ public:
     //have to be changed according to the type of device
     typedef void* device_pointer;
     typedef const void* const_device_pointer;
-
+	
     typedef GLuint gl_buffer;
 
     enum { MAX_DEVICES = 0 };

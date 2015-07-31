@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CUDA">
+      <UniqueIdentifier>{a9444a50-e8fd-4887-b4fc-846470c2da44}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\IETEngine\cuda\CudaBarycentricMapping.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaFixedConstraint.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaMechanicalObject.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaMergedKernels.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaPlaneForceField.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaSphereForceField.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaTetrahedronFEMForceField.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaUniformMass.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\CudaVisualModel.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\IETEngine\cuda\mycuda.cu">
+      <Filter>CUDA</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\IETEngine\cuda\mycuda.h">
+      <Filter>CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IETEngine\common.h" />
+    <ClInclude Include="..\IETEngine\Mesh.h" />
+    <ClInclude Include="..\IETEngine\Model.h" />
+    <ClInclude Include="..\IETEngine\simulation.h" />
+    <ClInclude Include="..\IETEngine\SimulationParameters.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\IETEngine\cuda\mycuda.cpp">
+      <Filter>CUDA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IETEngine\main.cpp" />
+  </ItemGroup>
+</Project>

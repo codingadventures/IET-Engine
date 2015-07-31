@@ -7,10 +7,7 @@
 #include <vector>
 
 // GLEW
-#define GLEW_STATIC
-#include <GL/glew.h> 
 
-#include <gl/glut.h>
  
 //GLM
 #include <glm/glm.hpp>
@@ -24,6 +21,12 @@
 #include <sofa/defaulttype/Mat.h>
 #include <sofa/helper/vector.h>
 
+#ifndef NO_OPENGL
+
+#define GLEW_STATIC
+#include <GL/glew.h> 
+
+#include <gl/glut.h>
 #include "Keys.h"
 
 #define VIEWPORT_WIDTH 1280
@@ -53,6 +56,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define H5 "H5.jpg"
 #define H6 "H6.jpg"
 #define H7 "H7.jpg"
+#endif
 
 #pragma region [ MODELS ]
 #define CONES_MODEL "models\\Cones3.dae"
@@ -77,8 +81,8 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define DROID_OBJ_MODEL "models\\dragon_low_poly.obj"
 #define CUBE_MODEL "models\\cubeTri.obj"
 #define TORUS_MODEL "models\\torus.dae"
-#define RAPTOR_MODEL "models\\raptor.obj"
-#define RAPTOR_NETGEN_MESH "models\\raptor-8418.mesh"
+#define RAPTOR_MODEL "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor.dae"
+#define RAPTOR_NETGEN_MESH "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor-8418.mesh"
  
 #pragma endregion [ MODELS ]
 

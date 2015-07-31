@@ -57,11 +57,13 @@ extern void SOFA_GPU_CUDA_API mycudaMemcpyHostToDevice2D(void *dst, size_t dpitc
 extern void SOFA_GPU_CUDA_API mycudaMemcpyDeviceToDevice2D(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height);
 extern void SOFA_GPU_CUDA_API mycudaMemcpyDeviceToHost2D(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height);
 
+#ifndef  NO_OPENGL
 extern void SOFA_GPU_CUDA_API mycudaGLRegisterBufferObject(int id);
 extern void SOFA_GPU_CUDA_API mycudaGLUnregisterBufferObject(int id);
 
 extern void SOFA_GPU_CUDA_API mycudaGLMapBufferObject(void** ptr, int id);
 extern void SOFA_GPU_CUDA_API mycudaGLUnmapBufferObject(int id);
+#endif
 
 extern void SOFA_GPU_CUDA_API mycudaMemset(void * devPtr, int val , size_t size,int d = mycudaGetBufferDevice());
 extern void SOFA_GPU_CUDA_API mycudaThreadSynchronize();

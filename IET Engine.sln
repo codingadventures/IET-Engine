@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IET Engine", "IETEngine\IET
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IET Engine Cuda", "IET Engine Cuda\IET Engine Cuda.vcxproj", "{0579BB46-22D4-484E-933D-FF4228392C04}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FEM Cuda Only", "FEM Cuda Only\FEM Cuda Only.vcxproj", "{23825F2D-E36D-4DE5-A596-38187A1AAE2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +29,14 @@ Global
 		{0579BB46-22D4-484E-933D-FF4228392C04}.Release|Win32.Build.0 = Release|Win32
 		{0579BB46-22D4-484E-933D-FF4228392C04}.Release|x64.ActiveCfg = Release|x64
 		{0579BB46-22D4-484E-933D-FF4228392C04}.Release|x64.Build.0 = Release|x64
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Debug|Win32.Build.0 = Debug|Win32
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Debug|x64.ActiveCfg = Debug|x64
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Debug|x64.Build.0 = Debug|x64
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Release|Win32.ActiveCfg = Release|Win32
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Release|Win32.Build.0 = Release|Win32
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Release|x64.ActiveCfg = Release|x64
+		{23825F2D-E36D-4DE5-A596-38187A1AAE2A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

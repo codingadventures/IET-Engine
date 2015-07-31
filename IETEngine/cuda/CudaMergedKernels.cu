@@ -1,5 +1,5 @@
-#include "CudaCommon.h"
-#include "CudaMath.h"
+#include <cuda/CudaCommon.h>
+#include <cuda/CudaMath.h>
 #include "cuda.h"
 
 template<class real>

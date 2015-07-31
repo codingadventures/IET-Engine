@@ -5,28 +5,39 @@
 // Std. Includes
 #include <sstream>
 #include <vector>
-#include "Shader.h"
 #include "Vertex.h"
-#include "Texture.h" 
+
+
 // GL Includes
+#ifndef NO_OPENGL
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
+#include "Shader.h"
+#include "Texture.h"
+
 #include "BoundingBox.h" 
 #include "BoundingSphere.h"
 #include "Material.h"
+#include "Cube.h"
+#endif // !NO_OPENGL
+
 #include "glm/gtc/constants.hpp"
 #include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec3.hpp>
-#include "Cube.h"
+
 #include <glm/detail/type_vec3.hpp>
 #include "FEMMesh.h"
-#include "octree.h"
-#include "cpu/CPUBarycentricMapping.h"
+#include "octree.h" 
 
 namespace Rendering
 {
 
 	using namespace std;
+#ifndef NO_OPENGL
 	using namespace Physics;
+#else
+	//typedef unsigned int GLuint;
+#endif // !NO_OPENGL
+
 
 	class Mesh {
 	public:
@@ -36,9 +47,10 @@ namespace Rendering
 		vector<glm::vec2>			m_texCoords;
 		vector<GLuint>				m_indices;
 		vector<GLuint>				m_adjacent_indices;
+		#ifndef NO_OPENGL
 		vector<Texture>				m_textures; 
 		vector<VertexWeight>		m_boneWeights;
-
+		#endif // !NO_OPENGL
 		glm::vec3					m_center_of_mass; 
 		glm::vec3					m_polyhedral_center_of_mass;
 
@@ -47,6 +59,8 @@ namespace Rendering
 		//BoundingSphere				d_bounding_sphere;
 
 		/*  Render data  */			
+#ifndef NO_OPENGL
+
 		GLuint						d_VAO;
 		GLuint						d_VBO;
 		GLuint						d_VBO_textures;
@@ -55,21 +69,29 @@ namespace Rendering
 		GLuint						d_bone_VBO;
 		map<string, Bone>			d_bone_mapping;
 		Material					d_material;
+#endif
 		MyVector(TTetra)			d_map_i;
 		MyVector(TCoord4)			d_map_f;
 		float						d_area;
 	public:
 		/*  Functions  */
 		// Constructor
+#ifndef NO_OPENGL
 		Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords);
-
+		void Draw(Shader& shader, bool withAdjecencies = false);
+		float Area() const { return d_area; } 
+#else
+		Mesh(TVecCoord vertices, vector<GLuint> indices);
+		
+#endif // !NO_OPENGL
+		#ifdef SOFA_DEVICE_CUDA
+		void updatePositions(FEMMesh* inputMesh);
+#endif
 		void init(FEMMesh* inputMesh);
 		// Render the mesh
-		void Draw(Shader& shader, bool withAdjecencies = false);
+		
 
-		float Area() const { return d_area; } 
-		void updatePositions(FEMMesh* inputMesh);
-
+		
 		/*	BoundingBox  const& Bounding_box() const { 
 		return d_bounding_box; 
 		} 
@@ -78,12 +100,15 @@ namespace Rendering
 		} 
 		*/
 	private:
-		bool hasBones() const{
+		
+		#ifndef NO_OPENGL
+bool hasBones() const{
 			return m_boneWeights.size() >0;
 		}
 		/*  Functions    */
 		// Initializes all the buffer objects/arrays
 		void setupMesh();
+#endif
 
 		void updateNormals();
 		// Calculation of the center of mass based on paul bourke's website
@@ -96,6 +121,7 @@ namespace Rendering
 
 		void calculateTexCoord();
 	};
+#ifndef NO_OPENGL
 
 	inline Mesh::Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords): 
 	m_adjacent_indices(adjacent_indices),
@@ -116,6 +142,12 @@ namespace Rendering
 		this->setupMesh();
 
 	}
+#else
+	inline Mesh::Mesh(TVecCoord vertices, vector<unsigned int> indices){
+		this->m_vertices = vertices;
+		this->m_indices = indices;
+	}
+#endif
 
 	void Mesh::init(FEMMesh* inputMesh)
 	{ 
@@ -230,9 +262,11 @@ namespace Rendering
 			std::cout << "Mapping done: " << outside << " / " << out.size() << " vertices outside of simulation mesh" << std::endl;
 		}
 	}
-
+#ifndef NO_OPENGL
 	inline void Mesh::Draw(Shader& shader, bool withAdjecencies)
 	{
+
+
 		shader.Use();
 		if ( this->m_textures.size()>0)
 		{
@@ -275,11 +309,13 @@ namespace Rendering
 
 
 		glBindVertexArray(0);
+ 
 	}
 
 	inline void Mesh::setupMesh()
 	{
-		// Create buffers/arrays
+		 
+// Create buffers/arrays
 		glGenVertexArrays(1, &this->d_VAO);
 
 		glGenBuffers(1, &this->d_VBO);
@@ -342,6 +378,8 @@ namespace Rendering
 		glBindVertexArray(0);
 	}
 
+#endif
+#ifdef SOFA_DEVICE_CUDA
 
 	void Mesh::updatePositions(FEMMesh* inputMesh)
 	{
@@ -350,6 +388,8 @@ namespace Rendering
 		if (d_map_f.size() != out.size() || d_map_i.size() != out.size()) return;
 
 		DEVICE_METHOD(TetraMapper3f_apply)( out.size(), d_map_i.deviceRead(), d_map_f.deviceRead(), out.deviceWrite(), in.deviceRead() );
+#ifndef NO_OPENGL
+
 		const GLvoid * pointer = NULL;
 
 		pointer = this->m_vertices.hostRead();
@@ -357,7 +397,7 @@ namespace Rendering
 		glBindBuffer(GL_ARRAY_BUFFER, d_VBO);
 		glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(TCoord), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
 		glBufferSubData(GL_ARRAY_BUFFER, 0, this->m_vertices.size() * sizeof(TCoord), pointer );
-
+#endif
 
 		/*for (unsigned int i=0;i<out.size();++i)
 		{
@@ -368,6 +408,7 @@ namespace Rendering
 		in[map_i[i][3]] * map_f[i][3];
 		}*/
 	}
+	#endif
 	//
 	//void Mesh::updateNormals()
 	//{

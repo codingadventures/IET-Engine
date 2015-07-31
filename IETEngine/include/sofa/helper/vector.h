@@ -170,9 +170,12 @@ namespace sofa
 					hostRead(); // make sure the host copy is valid
 					unregisterBuffer();
 					//COMM fct opengl
+#ifndef NO_OPENGL
+
 					glBindBuffer( GL_ARRAY_BUFFER, bufferObject);
 					glBufferData( GL_ARRAY_BUFFER, allocSize*sizeof ( T ), 0, GL_DYNAMIC_DRAW);
 					glBindBuffer( GL_ARRAY_BUFFER, 0);
+					#endif
 					if ( vectorSize > 0 && deviceIsValid ) deviceIsValid = 0;
 				} else {
 					for (int d=0;d<MemoryManager::numDevices();d++) {

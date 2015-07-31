@@ -22,15 +22,21 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#ifndef NO_OPENGL
 #ifdef _WIN32
 # define WINDOWS_LEAN_AND_MEAN
 # define NOMINMAX
 # include <windows.h>
 # include <GL/glew.h>
 #endif
+#else
+typedef unsigned int GLuint;
+#endif
 #include <cuda.h>
+#ifndef NO_OPENGL
 #include <cuda_gl_interop.h>
-#include "mycuda.h"
+#endif
+#include <cuda/mycuda.h>
 
 //#define NO_CUDA
 
@@ -50,25 +56,25 @@ cudaDeviceProp mycudaDeviceProp;
 
 bool cudaCheck(cudaError_t, const char*)
 {
-    return true;
+	return true;
 }
 
 bool cudaInitCalled = false;
 
 int mycudaInit(int)
 {
-    cudaInitCalled = true;
-    return 0;
+	cudaInitCalled = true;
+	return 0;
 }
 
 void mycudaMalloc(void **devPtr, size_t,int )
 {
-    *devPtr = NULL;
+	*devPtr = NULL;
 }
 
 void mycudaMallocPitch(void **devPtr, size_t*, size_t, size_t)
 {
-    *devPtr = NULL;
+	*devPtr = NULL;
 }
 
 void mycudaFree(void *, int)
@@ -77,12 +83,12 @@ void mycudaFree(void *, int)
 
 void mycudaMallocHost(void **hostPtr, size_t size)
 {
-    *hostPtr = malloc(size);
+	*hostPtr = malloc(size);
 }
 
 void mycudaFreeHost(void *hostPtr)
 {
-    free(hostPtr);
+	free(hostPtr);
 }
 
 void mycudaMemcpyHostToDevice(void *, const void *, size_t, int)
@@ -119,7 +125,7 @@ void mycudaGLUnregisterBufferObject(int)
 
 void mycudaGLMapBufferObject(void** ptr, int)
 {
-    *ptr = NULL;
+	*ptr = NULL;
 }
 
 void mycudaGLUnmapBufferObject(int)
@@ -128,12 +134,12 @@ void mycudaGLUnmapBufferObject(int)
 
 int mycudaGetnumDevices() 
 {
-    return 0;
+	return 0;
 }
 
 int mycudaGetBufferDevice() 
 {
-    return 0;
+	return 0;
 }
 
 void mycudaMemset(void *devPtr, int val, size_t size,int ) 
@@ -148,7 +154,7 @@ void cuda_void_kernel()
 
 extern "C"
 {
-    void cuda_void_kernel();
+	void cuda_void_kernel();
 };
 
 bool cudaCheck(cudaError_t err, const char* src="?")
@@ -156,7 +162,7 @@ bool cudaCheck(cudaError_t err, const char* src="?")
 	if (err == cudaSuccess) return true;
 	//fprintf(stderr, "CUDA: Error %d returned from %s.\n",(int)err,src);
 	mycudaLogError(cudaGetErrorString(err), src);
-    return false;
+	return false;
 }
 
 bool cudaInitCalled = false;
@@ -172,9 +178,9 @@ int mycudaInit(int device)
 	{
 		cudaDeviceProp dev
 #ifdef cudaDevicePropDontCare
-		    = cudaDevicePropDontCare
+			= cudaDevicePropDontCare
 #endif
-		    ;
+			;
 		//memset(&dev,0,sizeof(dev));
 		//dev.name=NULL;
 		//dev.bytes=0;
@@ -184,20 +190,20 @@ int mycudaInit(int device)
 #if CUDA_VERSION >= 2010
 		myprintf("CUDA:  %d : \"%s\", %d MB, %d cores at %.3f GHz, revision %d.%d",i,dev.name, dev.totalGlobalMem/(1024*1024), dev.multiProcessorCount*8, dev.clockRate * 1e-6f, dev.major, dev.minor);
 		if (dev.kernelExecTimeoutEnabled)
-		    myprintf(", timeout enabled", dev.kernelExecTimeoutEnabled);
+			myprintf(", timeout enabled", dev.kernelExecTimeoutEnabled);
 		myprintf("\n");
 #elif CUDA_VERSION >= 2000
 		myprintf("CUDA:  %d : \"%s\", %d MB, %d cores at %.3f GHz, revision %d.%d\n",i,dev.name, dev.totalGlobalMem/(1024*1024), dev.multiProcessorCount*8, dev.clockRate * 1e-6f, dev.major, dev.minor);
 #else //if CUDA_VERSION >= 1000
 		myprintf("CUDA:  %d : \"%s\", %d MB, cores at %.3f GHz, revision %d.%d\n",i,dev.name, dev.totalGlobalMem/(1024*1024), dev.clockRate * 1e-6f, dev.major, dev.minor);
-//#else
-//		myprintf("CUDA:  %d : \"%s\", %d MB, revision %d.%d\n",i,(dev.name==NULL?"":dev.name), dev.bytes/(1024*1024), dev.major, dev.minor);
+		//#else
+		//		myprintf("CUDA:  %d : \"%s\", %d MB, revision %d.%d\n",i,(dev.name==NULL?"":dev.name), dev.bytes/(1024*1024), dev.major, dev.minor);
 #endif
 	}
 	if (device==-1)
 	{
-	    const char* var = mygetenv("CUDA_DEVICE");
-	    device = (var && *var) ? atoi(var):0;
+		const char* var = mygetenv("CUDA_DEVICE");
+		device = (var && *var) ? atoi(var):0;
 	}
 	if (device >= deviceCount)
 	{
@@ -209,60 +215,60 @@ int mycudaInit(int device)
 		cudaDeviceProp& dev = mycudaDeviceProp;
 		cudaCheck(cudaGetDeviceProperties(&dev,device));
 		myprintf("CUDA: Using device %d : \"%s\"\n",device,dev.name);
-        mycudaDeviceName = strdup(dev.name);
+		mycudaDeviceName = strdup(dev.name);
 
 		cudaCheck(cudaSetDevice(device));
 		mycudaPrivateInit(device);
-		
+
 	}
-    deviceCount = 1; // we only use one GPU
+	deviceCount = 1; // we only use one GPU
 	return 1;
 }
 
 int mycudaGetMultiProcessorCount() {
-    return mycudaDeviceProp.multiProcessorCount;
+	return mycudaDeviceProp.multiProcessorCount;
 }
 
 void mycudaMalloc(void **devPtr, size_t size,int /*d*/)
 {
-    if (!cudaInitCalled) mycudaInit();
-    if (mycudaVerboseLevel>=LOG_INFO) myprintf("CUDA: malloc(%d).\n",size);
-    cudaCheck(cudaMalloc(devPtr, size),"cudaMalloc");
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: malloc(%d) -> 0x%x.\n",size, *devPtr);
+	if (!cudaInitCalled) mycudaInit();
+	if (mycudaVerboseLevel>=LOG_INFO) myprintf("CUDA: malloc(%d).\n",size);
+	cudaCheck(cudaMalloc(devPtr, size),"cudaMalloc");
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: malloc(%d) -> 0x%x.\n",size, *devPtr);
 }
 
 void mycudaMallocPitch(void **devPtr, size_t* pitch, size_t width, size_t height)
 {
-    if (!cudaInitCalled) mycudaInit();
-    if (mycudaVerboseLevel>=LOG_INFO) myprintf("CUDA: mallocPitch(%d,%d).\n",width,height);
-    cudaCheck(cudaMallocPitch(devPtr, pitch, width, height),"cudaMalloc2D");
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocPitch(%d,%d) -> 0x%x at pitch %d.\n",width,height, *devPtr, (int)*pitch);
+	if (!cudaInitCalled) mycudaInit();
+	if (mycudaVerboseLevel>=LOG_INFO) myprintf("CUDA: mallocPitch(%d,%d).\n",width,height);
+	cudaCheck(cudaMallocPitch(devPtr, pitch, width, height),"cudaMalloc2D");
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocPitch(%d,%d) -> 0x%x at pitch %d.\n",width,height, *devPtr, (int)*pitch);
 }
 
 void mycudaFree(void *devPtr,int /*d*/)
 {
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: free(0x%x).\n",devPtr);
-    cudaCheck(cudaFree(devPtr),"cudaFree");
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: free(0x%x).\n",devPtr);
+	cudaCheck(cudaFree(devPtr),"cudaFree");
 }
 
 void mycudaMallocHost(void **hostPtr, size_t size)
 {
-    if (!cudaInitCalled) mycudaInit();
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocHost(%d).\n",size);
-    cudaCheck(cudaMallocHost(hostPtr, size),"cudaMallocHost");
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocHost(%d) -> 0x%x.\n",size, *hostPtr);
+	if (!cudaInitCalled) mycudaInit();
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocHost(%d).\n",size);
+	cudaCheck(cudaMallocHost(hostPtr, size),"cudaMallocHost");
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: mallocHost(%d) -> 0x%x.\n",size, *hostPtr);
 }
 
 void mycudaFreeHost(void *hostPtr)
 {
-    if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: freeHost(0x%x).\n",hostPtr);
-    cudaCheck(cudaFreeHost(hostPtr),"cudaFreeHost");
+	if (mycudaVerboseLevel>=LOG_TRACE) myprintf("CUDA: freeHost(0x%x).\n",hostPtr);
+	cudaCheck(cudaFreeHost(hostPtr),"cudaFreeHost");
 }
 
 void mycudaMemcpyHostToDevice(void *dst, const void *src, size_t count,int /*d*/)
 {
-    if (!cudaCheck(cudaMemcpy(dst, src, count, cudaMemcpyHostToDevice),"cudaMemcpyHostToDevice"))
-        myprintf("in mycudaMemcpyHostToDevice(0x%x, 0x%x, %d)\n",dst,src,count);
+	if (!cudaCheck(cudaMemcpy(dst, src, count, cudaMemcpyHostToDevice),"cudaMemcpyHostToDevice"))
+		myprintf("in mycudaMemcpyHostToDevice(0x%x, 0x%x, %d)\n",dst,src,count);
 }
 
 void mycudaMemcpyDeviceToDevice(void *dst, const void *src, size_t count,int /*d*/		)
@@ -298,48 +304,48 @@ void mycudaMemset(void *devPtr, int val, size_t size,int d)
 
 void mycudaThreadSynchronize()
 {
-    if (!cudaInitCalled) return; // no need to synchronize if no-one used cuda yet
+	if (!cudaInitCalled) return; // no need to synchronize if no-one used cuda yet
 
-    cudaThreadSynchronize();
+	cudaThreadSynchronize();
 }
-
+#ifndef NO_OPENGL
 void mycudaGLRegisterBufferObject(int id)
 {
-    if (!cudaInitCalled) mycudaInit();
-    myprintf("mycudaGLRegisterBufferObject %d\n",id);
-    cudaCheck(cudaGLRegisterBufferObject((GLuint)id),"cudaGLRegisterBufferObject");
+	if (!cudaInitCalled) mycudaInit();
+	myprintf("mycudaGLRegisterBufferObject %d\n",id);
+	cudaCheck(cudaGLRegisterBufferObject((GLuint)id),"cudaGLRegisterBufferObject");
 }
 
 void mycudaGLUnregisterBufferObject(int id)
 {
-    cudaCheck(cudaGLUnregisterBufferObject((GLuint)id),"cudaGLUnregisterBufferObject");
+	cudaCheck(cudaGLUnregisterBufferObject((GLuint)id),"cudaGLUnregisterBufferObject");
 }
 
 void mycudaGLMapBufferObject(void** ptr, int id)
 {
-    cudaCheck(cudaGLMapBufferObject(ptr, (GLuint)id),"cudaGLMapBufferObject");
+	cudaCheck(cudaGLMapBufferObject(ptr, (GLuint)id),"cudaGLMapBufferObject");
 }
 
 void mycudaGLUnmapBufferObject(int id)
 {
-    cudaCheck(cudaGLUnmapBufferObject((GLuint)id),"cudaGLUnmapBufferObject");
+	cudaCheck(cudaGLUnmapBufferObject((GLuint)id),"cudaGLUnmapBufferObject");
 }
-
+#endif
 const char* mycudaGetDeviceName()
 {
-    if (!cudaInitCalled) mycudaInit();
-    return mycudaDeviceName;
+	if (!cudaInitCalled) mycudaInit();
+	return mycudaDeviceName;
 }
 
 int mycudaGetnumDevices() 
 {
-    if (!cudaInitCalled) mycudaInit();
-    return deviceCount;
+	if (!cudaInitCalled) mycudaInit();
+	return deviceCount;
 }
 
 int mycudaGetBufferDevice() 
 {
-    return 0;
+	return 0;
 }
 
 __global__ void cuda_debug_kernel()
@@ -348,11 +354,11 @@ __global__ void cuda_debug_kernel()
 
 void cuda_void_kernel()
 {   
-    myprintf("WARNING : cuda_void_kernel should only be use for debug\n");
-    
-    dim3 threads(1,1);
-    dim3 grid(1,1);
-    cuda_debug_kernel<<< grid, threads >>>();
+	myprintf("WARNING : cuda_void_kernel should only be use for debug\n");
+
+	dim3 threads(1,1);
+	dim3 grid(1,1);
+	cuda_debug_kernel<<< grid, threads >>>();
 }
 
 #endif

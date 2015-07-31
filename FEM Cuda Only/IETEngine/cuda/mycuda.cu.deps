@@ -378,6 +378,10 @@ c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\host_defines.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\vector_functions.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\device_launch_parameters.h
 c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\vector_types.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include\cuda.h
+C:\Users\Jarvis\Documents\GitHub\IET-Engine\/IETEngine/include\cuda/mycuda.h
+c:\users\jarvis\documents\github\iet-engine\ietengine\include\cuda\gpucuda.h
+C:\Users\Jarvis\Documents\GitHub\IET-Engine\/IETEngine/include\sofa/helper/system/config.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\um\windows.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\shared\winapifamily.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\shared\sdkddkver.h
@@ -666,19 +670,3 @@ C:\Program Files (x86)\Windows Kits\8.0\Include\um\winsvc.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\um\mcx.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\um\imm.h
 C:\Program Files (x86)\Windows Kits\8.0\Include\um\ime_cmodes.h
-C:\Users\Jarvis\Documents\GitHub\IET-Engine\/IETEngine/include\GL/glew.h
-C:\Program Files (x86)\Windows Kits\8.0\Include\um\GL/glu.h
-C:\Program Files (x86)\Windows Kits\8.0\Include\um\GL/gl.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include\cuda.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include\cuda_gl_interop.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\builtin_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\device_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\driver_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\surface_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\texture_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\vector_types.h
-c:\program files\nvidia gpu computing toolkit\cuda\v7.0\include\host_defines.h
-C:\Program Files (x86)\Windows Kits\8.0\Include\um\GL/gl.h
-C:\Users\Jarvis\Documents\GitHub\IET-Engine\/IETEngine/include\cuda/mycuda.h
-c:\users\jarvis\documents\github\iet-engine\ietengine\include\cuda\gpucuda.h
-C:\Users\Jarvis\Documents\GitHub\IET-Engine\/IETEngine/include\sofa/helper/system/config.h

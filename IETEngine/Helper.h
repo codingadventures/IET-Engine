@@ -6,7 +6,12 @@
 #include <stdarg.h>
 
 #include <windows.h>
+#ifndef NO_OPENGL
 #include "GL/glew.h"
+#else
+typedef float GLfloat;
+#endif
+
 
 using namespace std;
 #pragma region [ Helper Functions ]
@@ -246,7 +251,8 @@ vector<T> ArrayConversion(int n_args,...)
 
 	return t;
 }
-
+#ifndef NO_OPENGL
+ 
 inline void DrawGrid(int size){
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(.3,.3,.3); 
@@ -269,6 +275,7 @@ inline void DrawGrid(int size){
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
+#endif
 
 #pragma endregion
 

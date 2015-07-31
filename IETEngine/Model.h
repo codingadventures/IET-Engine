@@ -7,36 +7,41 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#ifndef NO_OPENGL
+
 #include "Skeleton.h"
 // GL Includes
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
+#include "IAnimation.h" 
+#include "Inertia.h"
+#endif
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h> 
 #include <assimp/postprocess.h>
 #include "Mesh.h"
-#include "IAnimation.h" 
-#include "Inertia.h"
 
 namespace Rendering
 {
 
 	using namespace std;
+	#ifndef NO_OPENGL
 	using namespace Tensor;
-
+	#endif
 	class Model 
 	{
 	public:
-
+		#ifndef NO_OPENGL
 		glm::mat4*		m_animation_matrix;
 		Skeleton*		m_skeleton;
+		#endif
 		glm::vec3		m_Direction;
 
 	private:  
 		vector<Mesh>	d_meshes;
-
+		#ifndef NO_OPENGL
 		vector<Texture> d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-
+		#endif
 		string			d_directory;
 
 		GLuint*			d_bone_location;
@@ -53,16 +58,17 @@ namespace Rendering
 	public:
 		/*  Functions   */
 		// Constructor, expects a filepath to a 3D model.
-		explicit Model(GLchar* path) :
+		explicit Model(const char* path) :
 
 		d_numberOfBone(0)
 		{ 
 			assert(path);
 
-			m_skeleton = new Skeleton(); 
-
+			#ifndef NO_OPENGL
+m_skeleton = new Skeleton(); 
+#endif
 			this->loadModel(path); 
-
+			#ifndef NO_OPENGL
 			if (m_skeleton->getNumberOfBones()>0)
 			{
 				m_animation_matrix = (glm::mat4*) malloc(m_skeleton->getNumberOfBones() * sizeof(glm::mat4));
@@ -72,7 +78,7 @@ namespace Rendering
 				m_skeleton->updateSkeleton();
 				m_skeleton->updateAnimationMatrix(m_animation_matrix); 
 			}
-
+#endif
 
 		} 
 
@@ -81,19 +87,23 @@ namespace Rendering
 			 return &d_meshes;
 		}
 
+	
+		~Model()
+		{
+			//			delete m_animation_matrix;
+			#ifndef NO_OPENGL
+if (d_bone_location)
+				delete d_bone_location;
+			delete m_skeleton;
+#endif
+
+		}
+		#ifndef NO_OPENGL
 		glm::vec3		Position() const { return decomposeT(d_position); } 
 
 		bool			Has_Texture() {return d_textures_loaded.size()>0;}
 
-		~Model()
-		{
-			//			delete m_animation_matrix;
-			if (d_bone_location)
-				delete d_bone_location;
-			delete m_skeleton;
-
-		}
-		// Draws the model, and thus all its meshes
+// Draws the model, and thus all its meshes
 		void Draw(Shader& shader, bool withAdjacencies = false)
 		{
 			shader.Use();
@@ -133,10 +143,6 @@ namespace Rendering
 		}
 
 		glm::quat Rotation() const { return d_rotation; } 
-
-		vector<Mesh>* Meshes() { 
-			return &d_meshes; 
-		}
 
 		void addTextures(Texture texture)
 		{
@@ -210,6 +216,13 @@ namespace Rendering
 		void ClearJointsLimit(){
 			m_skeleton->ResetAllJointLimits();
 		}
+#endif
+
+		vector<Mesh>* Meshes() { 
+			return &d_meshes; 
+		}
+
+	
 
 
 	private:
@@ -242,9 +255,11 @@ namespace Rendering
 			this->processNode(scene->mRootNode, scene);
 
 			// there should always be a 'root node', even if no skeleton exists
-			if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
+			#ifndef NO_OPENGL
+if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
 				fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n",path.c_str());
 			} // endif 
+
 			m_skeleton->m_inverse_global =  aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
 			int numOfBones = m_skeleton->getNumberOfBones();
 			if (numOfBones > 0)
@@ -266,6 +281,7 @@ namespace Rendering
 					//d_bone_location[i] = location;
 				}
 			}
+			#endif
 
 		}
 
@@ -298,10 +314,12 @@ namespace Rendering
 			TVecCoord vertices;
 			vector<GLuint> indices;
 			vector<GLuint> adjacent_indices;
-			vector<Texture> textures;
+			#ifndef NO_OPENGL
+vector<Texture> textures;
 			vector<VertexWeight> boneWeights;
 			vector<glm::vec2> textCoordVert;
 			Material material;
+#endif
 			glm::uint numBones = 0; 
 
 #pragma region [ Process Vertices ]
@@ -326,7 +344,8 @@ namespace Rendering
 					vertex.Normal = vector;
 				}
 				// Texture Coordinates
-				if(ai_mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+			#ifndef NO_OPENGL
+	if(ai_mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 				{
 					glm::vec2 vec;
 					// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
@@ -351,6 +370,7 @@ namespace Rendering
 
 					vertex.Tangent = tangent;
 				}
+#endif
 				//vertices.push_back(vertex);
 			}
 #pragma endregion
@@ -369,6 +389,7 @@ namespace Rendering
 					indices.push_back(face.mIndices[j]);
 			}
 #pragma endregion
+#ifndef NO_OPENGL
 
 #pragma region [ Process Materials ]
 			// Process materials
@@ -460,14 +481,19 @@ namespace Rendering
 			}
 
 #pragma endregion  
-
+#endif
 			// Return a mesh object created from the extracted mesh data
-			return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material, textCoordVert);
+			#ifndef NO_OPENGL
+return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material, textCoordVert);
+#else
+return Mesh(vertices, indices);
+#endif
 		}
 
 		// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 		// The required info is returned as a Texture struct.
-		vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName)
+	#ifndef NO_OPENGL
+	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName)
 		{
 			vector<Texture> textures; 
 			for(GLuint i = 0; i < mat->GetTextureCount(type); i++)
@@ -501,6 +527,7 @@ namespace Rendering
 			}
 			return textures;
 		}
+#endif
 
 	};
 

@@ -41,13 +41,11 @@ namespace Controller
 		d_simulation = new Simulation();
 	}
 
-
 	FemController::~FemController()
 	{
 		delete d_shader;
 		//delete d_model;
 	}
-
 
 	int FemController::MeshLoad()
 	{

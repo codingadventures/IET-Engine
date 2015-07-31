@@ -22,9 +22,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "CudaCommon.h"
-#include "CudaMath.h"
-#include "mycuda.h"
+#include <cuda/CudaCommon.h>
+#include <cuda/CudaMath.h>
+#include <cuda/mycuda.h>
 #include "cuda.h"
 
 extern "C"
