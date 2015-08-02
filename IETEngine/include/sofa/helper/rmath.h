@@ -141,7 +141,7 @@ inline double rsqrt(const double& a)
 
 inline long double rsqrt(const long double& a)
 {
-    return sqrtl(a);
+    return sqrt(a);
 }
 
 template<class T>

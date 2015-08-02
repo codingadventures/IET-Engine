@@ -81,8 +81,15 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define DROID_OBJ_MODEL "models\\dragon_low_poly.obj"
 #define CUBE_MODEL "models\\cubeTri.obj"
 #define TORUS_MODEL "models\\torus.dae"
+#ifdef ANDROID
+#define RAPTOR_MODEL "raptor.dae"
+#define RAPTOR_NETGEN_MESH "raptor-8418.mesh"
+
+#else
 #define RAPTOR_MODEL "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor.dae"
 #define RAPTOR_NETGEN_MESH "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor-8418.mesh"
+
+#endif
  
 #pragma endregion [ MODELS ]
 
@@ -120,8 +127,8 @@ bool g_rightMouseButtonIsPressed;
 
 using  std::cout;
 using  std::endl;
-bool pause = false;
-bool moved = false,animationStep = false;
+bool g_pause = false;
+bool g_moved = false,animationStep = false;
 
 
 #if defined(SOFA_DEVICE_CPU)
