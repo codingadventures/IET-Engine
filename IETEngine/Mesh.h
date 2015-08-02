@@ -28,6 +28,8 @@
 #include "FEMMesh.h"
 #include "octree.h" 
 
+
+
 namespace Rendering
 {
 
@@ -84,9 +86,9 @@ namespace Rendering
 		Mesh(TVecCoord vertices, vector<GLuint> indices);
 		
 #endif // !NO_OPENGL
-		#ifdef SOFA_DEVICE_CUDA
+		 
 		void updatePositions(FEMMesh* inputMesh);
-#endif
+ 
 		void init(FEMMesh* inputMesh);
 		// Render the mesh
 		
@@ -379,7 +381,7 @@ bool hasBones() const{
 	}
 
 #endif
-#ifdef SOFA_DEVICE_CUDA
+ 
 
 	void Mesh::updatePositions(FEMMesh* inputMesh)
 	{
@@ -388,11 +390,11 @@ bool hasBones() const{
 		if (d_map_f.size() != out.size() || d_map_i.size() != out.size()) return;
 
 		DEVICE_METHOD(TetraMapper3f_apply)( out.size(), d_map_i.deviceRead(), d_map_f.deviceRead(), out.deviceWrite(), in.deviceRead() );
-#ifndef NO_OPENGL
-
 		const GLvoid * pointer = NULL;
 
 		pointer = this->m_vertices.hostRead();
+#ifndef NO_OPENGL
+
 
 		glBindBuffer(GL_ARRAY_BUFFER, d_VBO);
 		glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(TCoord), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
@@ -408,7 +410,7 @@ bool hasBones() const{
 		in[map_i[i][3]] * map_f[i][3];
 		}*/
 	}
-	#endif
+	 
 	//
 	//void Mesh::updateNormals()
 	//{

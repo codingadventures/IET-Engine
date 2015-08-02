@@ -11,7 +11,7 @@
 #include <mesh/read_mesh_netgen.h> 
 #include "Mesh.h"
 #ifdef SOFA_DEVICE_CPU
-
+#include "cpu/CPUBarycentricMapping.h"
 #include "cpu/CPUFixedConstraint.h"
 #include "cpu/CPUMechanicalObject.h"
 #include "cpu/CPUMergedKernels.h"
@@ -169,13 +169,12 @@ void Simulation::simulation_mapping()
 	if (!mesh) return;
 	for (unsigned int i = 0; i < d_meshes->size(); ++i)
 	{
-#ifdef SOFA_DEVICE_CUDA
+ 
 
 
 		(*d_meshes)[i].updatePositions(mesh);
 		//meshes[i]->updateNormals();
-
-#endif // SOFA_DEVICE_CUDA
+		 
 	}
 }
 //

@@ -86,8 +86,8 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #define RAPTOR_NETGEN_MESH "raptor-8418.mesh"
 
 #else
-#define RAPTOR_MODEL "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor.dae"
-#define RAPTOR_NETGEN_MESH "C:/Users/Jarvis/Documents/GitHub/IET-Engine/IETEngine/models/raptor-8418.mesh"
+#define RAPTOR_MODEL "models\\raptor.dae"
+#define RAPTOR_NETGEN_MESH "models\\raptor-8418.mesh"
 
 #endif
  

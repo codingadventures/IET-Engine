@@ -52,12 +52,12 @@ int main(int argc, char* argv[])
 
 	} 
 
-	std::chrono::time_point<std::chrono::system_clock> start, end;
+	std::chrono::time_point<std::chrono::system_clock> start,app_start, end;
 
 
-
+	 app_start = std::chrono::system_clock::now();
 	std::time_t end_time;
-	std::chrono::duration<double> elapsed_seconds;
+	std::chrono::duration<double> elapsed_seconds, total_duration;
 	while (true)
 	{
 		start = std::chrono::system_clock::now();
@@ -69,10 +69,13 @@ int main(int argc, char* argv[])
 		end = std::chrono::system_clock::now();
 		end_time = std::chrono::system_clock::to_time_t(end);
 		elapsed_seconds = end-start;
-
+		total_duration += elapsed_seconds;
 
 		std::cout << "FPS: " << 1.0f/elapsed_seconds .count()
 			<< "elapsed time: " << elapsed_seconds.count() << "s" << endl;
+
+		if (total_duration.count() > 15.0f)
+			break;
 	}
 
 
