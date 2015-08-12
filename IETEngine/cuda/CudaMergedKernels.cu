@@ -45,6 +45,8 @@ __global__ void MergedKernels_cgDelta_kernel(unsigned int n, real alpha, real* r
     unsigned int tid = threadIdx.x;
     unsigned int gridSize = gridDim.x*(blockSize);
     float sum = 0;
+
+	#pragma unroll
     for (unsigned int i = blockIdx.x*(blockSize) + tid; i < n; i += gridSize)
     {
         real di = d[i];
@@ -100,6 +102,7 @@ __global__ void MergedKernels_cgDot3_kernel(unsigned int n, const real* r, const
     float dot_dq = 0;
     float dot_rq = 0;
     float dot_qq = 0;
+	#pragma unroll
     for (unsigned int i = blockIdx.x*(blockSize) + tid; i < n; i += gridSize)
     {
         real qi = q[i];
@@ -184,6 +187,7 @@ __global__ void MergedKernels_cgOp3_kernel(unsigned int n, float alpha, float be
 {
     unsigned int tid = threadIdx.x;
     unsigned int gridSize = gridDim.x*(blockSize);
+	#pragma unroll
     for (unsigned int i = blockIdx.x*(blockSize) + tid; i < n; i += gridSize)
     {
         real qi = q[i];
@@ -205,6 +209,7 @@ __global__ void MergedKernels_cgOp3First_kernel(unsigned int n, float alpha, flo
 {
     unsigned int tid = threadIdx.x;
     unsigned int gridSize = gridDim.x*(blockSize);
+	#pragma unroll
     for (unsigned int i = blockIdx.x*(blockSize) + tid; i < n; i += gridSize)
     {
         real qi = q[i];
@@ -292,6 +297,7 @@ void CudaMergedKernels3f_cgDot3(unsigned int size, float* dot3,
     
     cudaMemcpy(cputmp,tmp,nblocs*3*sizeof(float),cudaMemcpyDeviceToHost);
     float sum[3] = {0.0f,0.0f,0.0f};
+	#pragma unroll
     for (int i=0;i<nblocs;i++)
     {
         sum[0]+=*(cputmp++);
@@ -323,6 +329,7 @@ void CudaMergedKernels3f_cgDot3First(unsigned int size, float* dot3,
     
     cudaMemcpy(cputmp,tmp,nblocs*3*sizeof(float),cudaMemcpyDeviceToHost);
     float sum[3] = {0.0f,0.0f,0.0f};
+	#pragma unroll
     for (int i=0;i<nblocs;i++)
     {
         sum[0]+=*(cputmp++);

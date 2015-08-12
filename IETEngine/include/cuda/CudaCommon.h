@@ -27,11 +27,11 @@
 
 // Default size of thread blocks
 // Between 16 and 512
-enum { BSIZE=64 };
+enum { BSIZE=256 };
 // Max size of thread blocks
-enum { MAXTHREADS=512 };
+enum { MAXTHREADS=2048 };
 
 // Size of shared memory
-enum { SHAREDMEMORYSIZE=16384 };
+enum { SHAREDMEMORYSIZE=65536 };
 
 #endif

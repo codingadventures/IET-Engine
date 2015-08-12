@@ -602,6 +602,7 @@ __global__ void CudaTetrahedronFEMForceField3t_addForce1_kernel(int nbVertex, un
     velems+=fastmul(index0,nbElemPerVertex)+index1;
 
     if (index0+index1 < nbVertex)
+		#pragma unroll
     for (int s = 0;s < nbElemPerVertex; s++)
     {
         int i = *velems -1;
@@ -646,6 +647,7 @@ __global__ void CudaTetrahedronFEMForceField3t_addForce4_kernel(int nbVertex, un
 
     velems+=(index0*nb4ElemPerVertex)+index1;
 
+	#pragma unroll
     //if (index0+index1 < (nbVertex<<2))
     for (int s = 0;s < nb4ElemPerVertex; s++)
     {

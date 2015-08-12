@@ -352,6 +352,7 @@ void FEMMesh::init(SimulationParameters* params)
 	// we will create group of GATHER_PT elements
 	int nbElemPerThread = (nbElemPerVertex+GATHER_PT-1)/GATHER_PT;
 	const int nbBpt = (nbp*GATHER_PT + GATHER_BSIZE-1)/GATHER_BSIZE;
+	cout << "Element per Thread: " << nbElemPerThread << " Points: " << nbBpt << endl;
 	// finally fill velems array
 	femVElems.resize(nbBpt*nbElemPerThread*GATHER_BSIZE);
 #else

@@ -390,7 +390,8 @@ bool hasBones() const{
 		if (d_map_f.size() != out.size() || d_map_i.size() != out.size()) return;
 
 		DEVICE_METHOD(TetraMapper3f_apply)( out.size(), d_map_i.deviceRead(), d_map_f.deviceRead(), out.deviceWrite(), in.deviceRead() );
-		const GLvoid * pointer = NULL;
+
+		const void * pointer = NULL;
 
 		pointer = this->m_vertices.hostRead();
 #ifndef NO_OPENGL

@@ -74,8 +74,8 @@ int main(int argc, char* argv[])
 		std::cout << "FPS: " << 1.0f/elapsed_seconds .count()
 			<< "elapsed time: " << elapsed_seconds.count() << "s" << endl;
 
-		if (total_duration.count() > 15.0f)
-			break;
+		/*if (total_duration.count() > 15.0f)
+			break*/;
 	}
 
 
