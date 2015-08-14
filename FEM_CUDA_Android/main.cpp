@@ -2,35 +2,21 @@
 #include <vector>
 #include <Model.h>
 #include <simulation.h>
-
+#include <chrono>
+#include <ctime>
 
 #include <cudaHelper/helper_timer.h>
 
 using namespace Rendering;
 using namespace std;
-
-int fpsCount;        
-	float fpsTotalCount; // FPS count for averaging
-	int fpsLimit;        // FPS limit for sampling
-	float ifps;
-	float m_average;
-StopWatchInterface *m_timer;
-
-
-void  reset()
-{
-	m_average = 0;
-	fpsCount = 0;
-	fpsTotalCount = 0;
-	fpsLimit = 1;
-	sdkResetTimer(&m_timer);
-}
+ 
+ 
 
 int MeshLoad(Simulation& simulation)
 {
 
 	std::cout << "Load meshes" << std::endl;
-	if (!simulation.simulation_load_fem_mesh(RAPTOR_NETGEN_MESH))
+	if (!simulation.simulation_load_fem_mesh(RAPTOR_NETGEN_MESH_HIGH))
 	{
 		//return 1;
 	}
@@ -45,43 +31,14 @@ int MeshLoad(Simulation& simulation)
 	return 0;
 }
  
-
   
-#ifndef MAX
-#define MAX(a,b) ((a > b) ? a : b)
-#endif
-
-float  computeFPS()
-{
-	fpsCount++;
-
-	if (fpsCount >= fpsLimit)
-	{
-		char fps[256];
-		ifps = 1.f / (sdkGetAverageTimerValue(&m_timer) / 1000.f);
-
-		cout << "FEM: " << ifps << "fps" << endl;
-
-		//glutSetWindowTitle(fps);
-		fpsTotalCount += fpsCount;
-		m_average = m_average * ((fpsTotalCount-1)/fpsTotalCount) + ifps/fpsTotalCount;
-		fpsCount = 0;
-
-		fpsLimit = (int)MAX(1.f, ifps);
-		sdkResetTimer(&m_timer);
-	}
-	return ifps;
-}
-
-
 int main(int argc, char* argv[])
 { 
+	static int ifps = 0;
+  	static float fpsCount = 0.0f;
 	Model* model = new Model(RAPTOR_MODEL);
 	Simulation* simulation  = new Simulation();
-	
-	sdkCreateTimer(&m_timer);
-	reset();
-	
+	 
 	vector<Mesh>* meshes = model->GetMeshes( );
 
 	simulation->SetMeshes(meshes);
@@ -97,18 +54,40 @@ int main(int argc, char* argv[])
 	}  
  	
 	cout << "Simulation is about to start:" << endl;
-	reset();
+	std::chrono::time_point<std::chrono::system_clock> start,app_start, end;
+
+
+	app_start = std::chrono::system_clock::now();
+	std::time_t end_time;
+	std::chrono::duration<double> elapsed_seconds, total_duration;
 	while (true)
 	{ 
+		start = std::chrono::system_clock::now();
 		//main loop
 		simulation->simulation_animate();
 
 		simulation->simulation_mapping();
 		 
-		computeFPS();
-	}
+		end = std::chrono::system_clock::now();
+		end_time = std::chrono::system_clock::to_time_t(end);
+		elapsed_seconds = end-start;
+		total_duration += elapsed_seconds;
 
-	sdkDeleteTimer(&m_timer);
+		if (total_duration.count() > 3.0f)
+		{
+			std::cout << "Avg. FPS: " << fpsCount /  (float)ifps << endl;
+			total_duration = std::chrono::duration<double>::zero();
+			ifps=0;  	
+			fpsCount = 0;
+		}
+		else
+		{
+			ifps++;
+			fpsCount += 1.0f/elapsed_seconds .count();
+		}
+		
+	}
+ 
 	delete model;
 	delete simulation;
 	return 0;

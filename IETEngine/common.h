@@ -84,7 +84,7 @@ GLfloat lastX = VIEWPORT_WIDTH/2, lastY = VIEWPORT_HEIGHT/2;
 #ifdef ANDROID
 #define RAPTOR_MODEL "raptor.dae"
 #define RAPTOR_NETGEN_MESH "raptor-8418.mesh"
-
+#define RAPTOR_NETGEN_MESH_HIGH "raptor-12580.mesh"
 #else
 #define RAPTOR_MODEL "models\\raptor.dae"
 #define RAPTOR_NETGEN_MESH "models\\raptor-8418.mesh"
