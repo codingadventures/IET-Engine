@@ -1,0 +1,232 @@
+Usage: nvprof [options] [CUDA-application] [application-arguments]
+Options:
+  -o,  --output-profile <file name>
+                            Output the result file which can be imported later
+                            or opened by the NVIDIA Visual Profiler.
+
+                            "%p" in the file name string is replaced with the
+                            process ID of the application being profiled.
+
+                            "%h" in the file name string is replaced with the
+                            hostname of the system.
+
+                            "%%" in the file name string is replaced with "%".
+
+                            Any other character following "%" is illegal.
+
+                            By default, this option disables the summary output.
+
+                            NOTE: If the application being profiled creates
+                            child processes, or if '--profile-all-processes' is
+                            used, the "%p" format is needed to get correct
+                            output files for each process.
+
+  -i,  --import-profile <file name>
+                            Import a result profile from a previous run.
+
+  -s,  --print-summary      Print a summary of the profiling result on screen.
+
+                            NOTE: This is the default unless "--output-profile"
+                            or other print options are used.
+
+       --print-summary-per-gpu
+                            Print a summary of the profiling result for each GPU.
+
+       --print-gpu-summary  Print a summary of the activities on the GPU
+                            (including CUDA kernels and memcpy's/memset's).
+
+       --print-api-summary  Print a summary of CUDA runtime/driver API calls.
+
+       --print-gpu-trace    Print individual kernel invocations (including CUDA
+                            memcpy's/memset's) and sort them in
+                            chronological order. In event/metric profiling mode,
+                            show events/metrics for each kernel invocation.
+
+       --print-api-trace    Print CUDA runtime/driver API trace.
+
+       --csv                Use comma-separated values in the output.
+
+  -u,  --normalized-time-unit <s|ms|us|ns|col|auto>
+                            Specify the unit of time that will be used in the
+                            output.
+                            Allowed values:
+                                s - second, ms - millisecond, us - microsecond,
+                                ns - nanosecond
+                                col - a fixed unit for each column
+                                auto (default) - nvprof chooses the scale for
+                                each time value based on its length
+
+  -t,  --timeout <seconds>  Set an execution timeout (in seconds) for the CUDA
+                            application.
+
+                            NOTE: Timeout starts counting from the moment the
+                            CUDA driver is initialized. If the application
+                            doesn't call any CUDA APIs, timeout won't be
+                            triggered.
+
+       --demangling <on|off>
+                            Turn on/off C++ name demangling of kernel names.
+                            Allowed values:
+                                on - turn on demangling (default)
+                                off - turn off demangling
+
+       --events <event names>
+                            Specify the events to be profiled on certain
+                            device(s). Multiple event names separated by comma
+                            can be specified. Which device(s) are profiled is
+                            controlled by the "--devices" option. Otherwise
+                            events will be collected on all devices.
+                            For a list of available events, use
+                            "--query-events".
+                            Use "--events all" to profile all events
+                            available for each device.
+                            Use "--devices" and "--kernels" to select a
+                            specific kernel invocation.
+
+       --metrics <metric names>
+                            Specify the metrics to be profiled on certain
+                            device(s). Multiple metric names separated by comma
+                            can be specified. Which device(s) are profiled is
+                            controlled by the "--devices" option. Otherwise
+                            metrics will be collected on all devices.
+                            For a list of available metrics, use
+                            "--query-metrics".
+                            Use "--metrics all" to profile all metrics
+                            available for each device.
+                            Use "--devices" and "--kernels" to select a
+                            specific kernel invocation.
+
+       --analysis-metrics   Collect profiling data that can be imported to
+                            Visual Profiler's "analysis" mode.
+
+                            NOTE: Use "--output-profile" to specify an output
+                            file.
+
+       --devices <device ids>
+                            This option changes the scope of subsequent
+                            "--events", "--metrics", "--query-events" and
+                            "--query-metrics" options.
+                            Allowed values:
+                                all - change scope to all valid devices
+                                comma-separated device IDs - change scope to
+                                specified devices
+
+       --kernels <kernel path syntax>
+                            This option changes the scope of subsequent
+                            "--events", "--metrics" options
+                            The syntax is as following:
+                                <context id/name>:<stream id/name>:<kernel name>
+                                :<invocation>
+                            The context/stream IDs, names, kernel name and
+                            invocation can be regular expressions. Empty string
+                            matches any number or characters.
+                            If <context id/name> or <stream id/name> is a
+                            number, it's matched against both the context/stream
+                            id and name specified by the NVTX library. Otherwise
+                            it's matched against the context/stream name.
+                            If the invocation count is a positive number, it's
+                            strictly matched against the invocation of the
+                            kernel. Otherwise it's treated as a regular
+                            expression.
+                            Example: --kernels "1:foo:bar:2"
+                                profile any kernel whose name contains "bar"
+                                and was the 2nd instance on context 1 and on
+                                stream named "foo".
+
+       --query-events       List all the events available on the device(s).
+                            Device(s) queried can be controlled by the
+                            "--devices" option.
+
+       --query-metrics      List all the metrics available on the device(s).
+                            Device(s) queried can be controlled by the
+                            "--devices" option.
+
+       --concurrent-kernels <on|off>
+                            Turn on/off concurrent kernel execution.
+                            If concurrent kernel execution is off, all kernels
+                            running on one device will be serialized.
+                            Allowed values:
+                                on - turn on concurrent kernel execution
+                                     (default)
+                                off - turn off concurrent kernel execution
+
+       --profile-from-start <on|off>
+                            Enable/disable profiling from the start of the
+                            application. If it's disabled, the application can
+                            use {cu,cuda}Profiler{Start,Stop} to turn on/off
+                            profiling.
+                            Allowed values:
+                                on - enable profiling from start (default)
+                                off - disable profiling from start
+
+       --aggregate-mode <on|off>
+                            This option turns on/off aggregate mode for events
+                            and metrics specified by subsequent "--events" and
+                            "--metrics" options. Those event/metric values will
+                            be collected for each domain instance, instead of
+                            the whole device.
+                            Allowed values:
+                                on - turn on aggregate mode (default)
+                                off - turn off aggregate mode
+
+       --system-profiling <on|off>
+                            Turn on/off power, clock, and thermal profiling.
+                            Allowed values:
+                                on - turn on system profiling
+                                off - turn off system profiling (default)
+
+       --unified-memory-profiling <per-process-device|off>
+                            Options for unified memory profiling.
+                            Allowed values:
+                                per-process-device - collect counts for each process and each device
+                                off - turn off unified memory profiling (default)
+
+       --profile-api-trace <none|runtime|driver|all>
+                            Turn on/off CUDA runtime/driver API tracing.
+                            Allowed values:
+                                none - turn off API tracing
+                                runtime - only turn on CUDA runtime API tracing
+                                driver - only turn on CUDA driver API tracing
+                                all - turn on all API tracing (default)
+
+       --log-file <file name>
+                            Make nvprof send all its output to the specified
+                            file, or one of the standard channels. The file will
+                            be overwritten. If the file doesn't exist, a new
+                            one will be created.
+
+                            "%1" as the whole file name indicates standard
+                            output channel (stdout).
+
+                            "%2" as the whole file name indicates standard
+                            error channel (stderr).
+
+                            NOTE: This is the default.
+
+                            "%p" in the file name string is replaced with
+                            nvprof's process ID.
+
+                            "%h" in the file name string is replaced with
+                            the hostname of the system.
+
+                            "%%" in the file name is replaced with "%".
+
+                            Any other character following "%" is illegal.
+
+       --quiet              Suppress all nvprof output.
+
+       --profile-child-processes
+                            Profile the application and all child processes
+                            launched by it.
+
+       --profile-all-processes
+                            Profile all processes launched by the same user who
+                            launched this nvprof instance.
+
+                            NOTE: Only one instance of nvprof can run with this
+                            option at the same time. Under this mode, there's
+                            no need to specify an application to run.
+  -V   --version            Print version information of this tool.
+
+  -h,  --help               Print this help information.
+

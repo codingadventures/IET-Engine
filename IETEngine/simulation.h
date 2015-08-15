@@ -21,6 +21,9 @@
 #include "cpu/CPUUniformMass.h"
 #include "cpu/CPUVisualModel.h"
 #endif
+
+#include "Timer.h"
+#include <iomanip>
 using namespace Rendering;
 class Simulation
 {
@@ -47,20 +50,63 @@ public:
 	void simulation_load();
 
 	FEMMesh* fem_mesh;
+	Timer *timer;
 	SimulationParameters simulation_params;
 	//std::vector<SurfaceMesh*> render_meshes;
 	std::vector<Mesh>* d_meshes;
 	int d_verbose;
-	Simulation(int verbose = 0);
+	bool d_profile;
+
+	int simulation_cg_iter;
+
+	Simulation(int verbose = 0, bool profile = false);
+	~Simulation();
+	ofstream d_mapping_time_o;
+	ofstream d_compute_force_time_o;
+	ofstream d_conjugate_gradient_time_o;
+	ofstream d_cgiteration_counts_o;
 
 	void SetMeshes(vector<Mesh>* meshes);
 };
 
+#define START_PROFILING(isProfiling) if (isProfiling) \
+										timer->Start()
 
-Simulation::Simulation(int verbose) :d_verbose(verbose)
+#define STOP_PROFILING(isProfiling) if (isProfiling) \
+								   	timer->Stop()
+
+#define SET_TIME_ELAPSED(isProfiling, profiler)	if (isProfiling) \
+								profiler << std::fixed << std::setprecision(8) << timer->ElapsedTime() << ",";
+
+Simulation::Simulation(int verbose, bool profile) : d_verbose(verbose), d_profile(profile), simulation_cg_iter(0)
 {
-
+	if (profile)
+	{
+		d_mapping_time_o.open ("./SimulationMapping.csv");
+		d_compute_force_time_o.open ("./ComputeForce.csv");
+		d_conjugate_gradient_time_o.open("./ConjugateGradient.csv");
+		d_cgiteration_counts_o.open("./CGIterationCount.csv");
+		if (!d_mapping_time_o.is_open())
+		{
+			cout << "Error opening the file..." << endl;
+		}
+		timer = new Timer();
+	}
 }
+
+Simulation::~Simulation()
+{
+	if (d_profile)
+	{
+		d_mapping_time_o.close();
+		d_compute_force_time_o.close();
+		d_conjugate_gradient_time_o.close();
+		d_cgiteration_counts_o.close();
+		delete timer;
+	}
+}
+
+
 void Simulation::SetMeshes(vector<Mesh>* meshes)
 {
 	d_meshes = meshes;
@@ -117,7 +163,9 @@ bool Simulation::simulation_init()
 		mesh->init(&simulation_params);
 
 		for (unsigned int i = 0; i < d_meshes->size(); ++i)
+		{
 			(*d_meshes)[i].init(mesh);
+		}
 	}
 
 	return true;
@@ -167,15 +215,19 @@ void Simulation::simulation_mapping()
 	simulation_params.simulation_mapping_needed = false;
 	FEMMesh* mesh = fem_mesh;
 	if (!mesh) return;
+
+	START_PROFILING(d_profile);
+
 	for (unsigned int i = 0; i < d_meshes->size(); ++i)
 	{
- 
-
-
 		(*d_meshes)[i].updatePositions(mesh);
-		//meshes[i]->updateNormals();
-		 
+		//meshes[i]->updateNormals();	 
 	}
+
+	STOP_PROFILING(d_profile);
+
+	SET_TIME_ELAPSED(d_profile, d_mapping_time_o);
+	
 }
 //
 void Simulation::simulation_animate()
@@ -207,19 +259,32 @@ void Simulation::timeIntegrator_EulerImplicit(const SimulationParameters* params
 	const double rM = params->rayleighMass;
 	const double rK = params->rayleighStiffness;
 
+	START_PROFILING(d_profile);
+
 	// Compute right-hand term b
 	TVecDeriv& b = mesh->b;
 	computeForce(params, mesh, b);
 	// no need to apply constraints as it will be done in addKv()
 	addKv(params, mesh, h);
+	STOP_PROFILING(d_profile);
+
+	SET_TIME_ELAPSED(d_profile, d_compute_force_time_o);
+
 
 	// Compute matrix
 	MechanicalMatrix systemMatrix;
 	systemMatrix.mFactor = 1 - h*rM;
 	systemMatrix.kFactor =   - h*rK - h*h;
-
+	START_PROFILING(d_profile);
 	// Solve system for a
 	linearSolver_ConjugateGradient(params, mesh, systemMatrix);
+	STOP_PROFILING(d_profile);
+
+	d_cgiteration_counts_o << simulation_cg_iter << ",";
+
+	SET_TIME_ELAPSED(d_profile, d_conjugate_gradient_time_o);
+
+	  
 
 	// Apply solution:  v = v + h a        x = x + h v
 	TVecCoord& x = mesh->positions;
@@ -231,6 +296,8 @@ void Simulation::timeIntegrator_EulerImplicit(const SimulationParameters* params
 	DEVICE_METHOD(MechanicalObject3f_vPEqBF)( x.size(), v.deviceWrite(), a.deviceRead(), (TReal)h );
 	DEVICE_METHOD(MechanicalObject3f_vPEqBF)( x.size(), x.deviceWrite(), v.deviceRead(), (TReal)h );
 #endif
+ 
+
 
 }
 
@@ -243,14 +310,26 @@ void Simulation::timeIntegrator_EulerExplicit(const SimulationParameters* params
 	TVecDeriv& f = mesh->f;
 	TVecDeriv& a = mesh->a;
 
+	START_PROFILING(d_profile);
+
 	// Compute force
 	computeForce(params, mesh, f);
+
+	STOP_PROFILING(d_profile);
+
+	SET_TIME_ELAPSED(d_profile, d_compute_force_time_o);
 
 	// Apply constraints
 	applyConstraints(params, mesh, f);
 
+	
 	// Compute acceleration
 	accFromF(params, mesh, f);
+
+	
+
+	START_PROFILING(d_profile);
+
 
 	// Apply damping
 	if (rM != 0.0)
@@ -259,6 +338,10 @@ void Simulation::timeIntegrator_EulerExplicit(const SimulationParameters* params
 	// Apply solution:  v = v + h a        x = x + h v
 	DEVICE_METHOD(MechanicalObject3f_vPEqBF)( x.size(), v.deviceWrite(), a.deviceRead(), (TReal)h );
 	DEVICE_METHOD(MechanicalObject3f_vPEqBF)( x.size(), x.deviceWrite(), v.deviceRead(), (TReal)h );
+
+	STOP_PROFILING(d_profile);
+
+	SET_TIME_ELAPSED(d_profile, d_conjugate_gradient_time_o);
 }
 
 
@@ -440,7 +523,6 @@ void Simulation::mulMatrixVector(const SimulationParameters* params, FEMMesh* me
 	}
 }
 
-int simulation_cg_iter = 0;
 
 void Simulation::linearSolver_ConjugateGradient(const SimulationParameters* params, FEMMesh* mesh, MechanicalMatrix matrix)
 {

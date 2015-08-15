@@ -269,7 +269,7 @@ void FEMMesh::init(SimulationParameters* params)
 	}
 
 	// Push Force
-	setPushForce(params);
+ 	setPushForce(params);
 
 	// FEM
 

@@ -31,6 +31,7 @@ namespace Controller
 		Simulation*		d_simulation;
 
 	};
+
 	void FemController::setup_current_instance()
 	{
 		Controller::g_CurrentControllerInstance = this; 
@@ -38,12 +39,13 @@ namespace Controller
 	FemController::FemController() : AbstractController("Fem GEM CPU")
 	{
 		setup_current_instance();
-		d_simulation = new Simulation();
+
 	}
 
 	FemController::~FemController()
 	{
 		delete d_shader;
+		delete d_simulation;
 		//delete d_model;
 	}
 
@@ -55,8 +57,8 @@ namespace Controller
 		{
 			//return 1;
 		}
-	/*	for (unsigned int a = 0; a < render_filenames.size(); ++a)
-			d_simulation->simulation_load_render_mesh(render_filenames[a].c_str());*/
+		/*	for (unsigned int a = 0; a < render_filenames.size(); ++a)
+		d_simulation->simulation_load_render_mesh(render_filenames[a].c_str());*/
 		/*	if (reorder)
 		d_simulation->simulation_reorder_fem_mesh();*/
 
@@ -69,7 +71,14 @@ namespace Controller
 	void FemController::Init(int argc, char* argv[])
 	{
 		AbstractController::Init(argc,argv);  
-		 
+
+		bool profile = false;
+		if (argc > 1 && strcmp(argv[1], "--benchmark") == 0)
+		{
+			profile = true;
+		}
+		d_simulation = new Simulation(0,profile);
+
 		this->d_camera->Position = glm::vec3(0.0f,10.0f,15.0f);
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 0.5f;
@@ -77,7 +86,7 @@ namespace Controller
 
 		UserKeyboardCallback = std::bind(&FemController::Read_Input,this); 
 		d_model = new Model(RAPTOR_MODEL);
-		
+
 		vector<Mesh>* meshes = d_model->GetMeshes( );
 
 		d_simulation->SetMeshes(meshes);
@@ -113,7 +122,7 @@ namespace Controller
 		calculateFps( );
 
 		d_simulation->simulation_animate();
-		 
+
 		d_simulation->simulation_mapping(); // make sure the surfaces are up-to-date
 
 		d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 1000.0f);  
@@ -132,7 +141,7 @@ namespace Controller
 
 		d_model->Draw(*d_shader);
 
-		cout << "FPS: " << d_fps << endl;
+		//cout << "FPS: " << d_fps << endl;
 
 		glutSwapBuffers();
 	}
