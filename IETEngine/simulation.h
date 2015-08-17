@@ -49,6 +49,7 @@ public:
 	void simulation_reset();
 	void simulation_save();
 	void simulation_load();
+	void setRandomForce(TVecCoord coord);
 
 	FEMMesh* fem_mesh;
 	Timer *timer;

@@ -7,6 +7,8 @@
 #include "Light.h"
 #include "Material.h" 
 #include "simulation.h"
+#include "Line.h"
+#include "Vertex.h"
 
 namespace Controller
 { 
@@ -113,6 +115,7 @@ namespace Controller
 
 	void FemController::Draw()
 	{
+		srand(time(NULL));
 		glm::mat4 projection_view;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -143,8 +146,33 @@ namespace Controller
 
 		d_model->Draw(*d_shader);
 
-		//cout << "FPS: " << d_fps << endl;
+		if (d_frame_count % 200 ==0 )
+		{
+			float x = rand() % 100 - 200;
+			float y = rand() % 100 - 200;
+			float z = rand() % 100 - 200;
+			d_simulation->fem_mesh->setPushRandomForce(TDeriv(x,y,z));
+			//cout << "FPS: " << d_fps << endl;
+		}
+		if (d_simulation->fem_mesh->externalForce.index != -1)
+		{
+			TCoord p1 = d_simulation->fem_mesh->positions[d_simulation->fem_mesh->externalForce.index];
+			TCoord p2 = p1 + d_simulation->fem_mesh->externalForce.value * 0.001;
+			auto v1 = Vertex(glm::vec3(p1.x(),p1.y(),p1.z()), glm::vec4(1,0,0,0));
+			auto v2 = Vertex(glm::vec3(p2.x(),p2.y(),p2.z()), glm::vec4(1,0,0,0));
 
+			Line l(v1,v2);
+			glLineWidth(3);
+			l.Draw();
+			glLineWidth(1);
+		}
+		
+		//glLineWidth(3);
+		//glBegin(GL_LINES);
+		//glColor3f(0.8f,0.2f,0.2f); glVertex3fv(p1.ptr());
+		//glColor3f(1.0f,0.6f,0.6f); glVertex3fv(p2.ptr());
+		//glEnd(); // GL_LINES
+		//glLineWidth(1);
 		glutSwapBuffers();
 	}
 
