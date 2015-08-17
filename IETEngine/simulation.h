@@ -236,7 +236,7 @@ void Simulation::simulation_mapping()
 	for (unsigned int i = 0; i < d_meshes->size(); ++i)
 	{
 		(*d_meshes)[i].updatePositions(mesh);
-		//meshes[i]->updateNormals();	 
+		(*d_meshes)[i].updateNormals(mesh);	 
 	}
 
 	STOP_PROFILING(d_profile);

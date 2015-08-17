@@ -38,14 +38,23 @@ namespace Controller
 		Cam::Camera*		d_camera;						//Freed in destructor
 		string				d_window_name;
 		RigidBodyManager*	d_rigid_body_manager;
+		glm::vec3			d_light_ambient;
+		glm::vec3			d_light_diffuse;
+		glm::vec3			d_light_specular;
+		glm::vec3			d_light_position;
 
-		
+		glm::vec3			d_material_ambient;
+		glm::vec3			d_material_diffuse;
+		glm::vec3			d_material_specular; 
+		float				d_shininess_component;
+		float				d_refractive_index;
+
 		void updateTimer( );
-	    void calculateFps( );
+		void calculateFps( );
 	};
 
 	inline AbstractController::AbstractController(string window_name):
-		d_delta_time(0.0),
+	d_delta_time(0.0),
 		d_delta_time_secs(0.0),
 		d_old_time_since_start(0.0),
 		d_global_clock(0.0),
@@ -56,7 +65,11 @@ namespace Controller
 		d_window_name(window_name),
 		d_rigid_body_manager(nullptr),
 		m_frame_simulation_limit(-1),
-		d_frame_count(0)
+		d_frame_count(0),
+		d_light_ambient(glm::vec3(0.2f,0.2f,0.2f)) ,
+		d_light_diffuse  (glm::vec3(0.5f,0.5f,0.5f)) ,
+		d_light_specular  (glm::vec3(0.5f,0.5f,0.5f)) ,
+		d_refractive_index(1.0f)
 	{}
 
 	inline void AbstractController::calculateFps( )
@@ -99,7 +112,7 @@ namespace Controller
 
 		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION); 
 		this->d_camera = new Cam::Camera();
-
+		d_light_position = glm::vec3(-30.0f,60.0f,0.0f); 
 
 		//I know it may sound strange but new lambdas in C++ 11 are like this :-) I miss C# a bit :P 
 		UserMouseCallback = std::bind(&Cam::Camera::ProcessMouseMovement,d_camera, _1, _2);

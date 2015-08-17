@@ -50,14 +50,7 @@ namespace Controller
 		glm::vec3		d_light_direction;
 		glm::vec3		d_object_color;
 
-		glm::vec3		d_light_ambient;
-		glm::vec3		d_light_diffuse;
-		glm::vec3		d_light_specular;
-		glm::vec3		d_light_position;
-
-		glm::vec3		d_material_ambient;
-		glm::vec3		d_material_diffuse;
-		glm::vec3		d_material_specular; 
+		
 
 		glm::quat		d_quaternion_rotation;
 
@@ -65,8 +58,7 @@ namespace Controller
 		string			d_diffuse_uniform_name;
 		string			d_specular_uniform_name;
 
-		float			d_shininess_component;
-		float			d_refractive_index;
+		
 		bool			d_use_bump_mapping;
 	};
 	void RenderingController::setup_current_instance(){
@@ -79,10 +71,7 @@ namespace Controller
 		d_rendering_type(NONE)
 	{
 		setup_current_instance();
-		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
-		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
-		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
-		d_refractive_index =1.0f;
+		
 		d_use_bump_mapping = false;
 	}
 	RenderingController::~RenderingController()
@@ -218,7 +207,7 @@ namespace Controller
 		d_quaternion_rotation = d_nano_model->Rotation();
 		tweak_bar_setup();
 
-		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
+		
 		//glEnable(GL_LIGHTING); //enable lighting
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}

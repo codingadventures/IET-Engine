@@ -30,6 +30,7 @@ namespace Controller
 
 		Shader*			d_shader;
 		Model*			d_model;
+		Model*			d_floor;
 		Simulation*		d_simulation;
 		 
 	};
@@ -55,7 +56,7 @@ namespace Controller
 	{
 
 		std::cout << "Load meshes" << std::endl;
-		if (!d_simulation->simulation_load_fem_mesh(RAPTOR_NETGEN_MESH_FULL))
+		if (!d_simulation->simulation_load_fem_mesh(RAPTOR_NETGEN_MESH))
 		{
 			//return 1;
 		}
@@ -80,16 +81,19 @@ namespace Controller
 			profile = true;
 			
 		}
-
+		d_floor	    = new Model(FLOOR_MODEL);
+		d_floor->Translate(glm::vec3(0.0f,-0.4f,0.0f));
 		d_simulation = new Simulation(0,profile);
 
-		this->d_camera->Position = glm::vec3(0.0f,10.0f,15.0f);
+		this->d_camera->Position = glm::vec3(0.0f,0.0f,0.0f);
 		d_camera->CameraType = FREE_FLY;
 		d_camera->MovementSpeed = 0.5f;
 		d_camera->SetTarget(glm::vec3(0,0,0)); 
 
 		UserKeyboardCallback = std::bind(&FemController::Read_Input,this); 
 		d_model = new Model(RAPTOR_MODEL);
+		
+	
 
 		vector<Mesh>* meshes = d_model->GetMeshes( );
 
@@ -106,10 +110,14 @@ namespace Controller
 		} 
 
 		vector<string> v_shader 			= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
-		vector<string> f_shader 			= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag")); 
+		vector<string> f_shader 			= ArrayConversion<string>(2,string("cook_torrance.frag"),string("common.frag")); 
 
 		d_shader = new Shader(v_shader,f_shader);
-
+		d_shader->SetUniform("roughnessValue",0.8f);
+		d_shader->SetUniform("fresnelReflectance",0.8f);
+		d_shader->SetUniform("eye_position", d_camera->Position);  
+		d_shader->SetUniform("use_bump_mapping",false);
+		
 		d_time_at_reset = glutGet(GLUT_ELAPSED_TIME);
 	}
 
@@ -125,6 +133,10 @@ namespace Controller
 
 		updateTimer(); 
 		calculateFps( );
+
+		Light light(d_light_position, d_light_ambient,d_light_diffuse,d_light_specular); 
+
+		light.SetShader(*d_shader);
 
 		d_simulation->simulation_animate();
 
@@ -166,7 +178,12 @@ namespace Controller
 			l.Draw();
 			glLineWidth(1);
 		}
-		
+		d_shader->Use();
+		d_shader->SetUniform("mvp", d_projection_matrix * d_view_matrix * d_floor->GetModelMatrix());
+		d_shader->SetUniform("mv",   d_view_matrix * d_floor->GetModelMatrix());
+		d_shader->SetUniform("model_matrix", d_floor->GetModelMatrix());
+		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_floor->GetModelMatrix())));  
+		d_floor->Draw(*d_shader);
 		//glLineWidth(3);
 		//glBegin(GL_LINES);
 		//glColor3f(0.8f,0.2f,0.2f); glVertex3fv(p1.ptr());

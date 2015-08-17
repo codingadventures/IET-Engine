@@ -46,6 +46,7 @@ namespace Rendering
 		/*  Mesh Data  */
 		//vector<Vertex>				m_vertices;
 		TVecCoord					m_vertices;
+		TVecCoord					m_normals;
 		vector<glm::vec2>			m_texCoords;
 		vector<GLuint>				m_indices;
 		vector<GLuint>				m_adjacent_indices;
@@ -66,7 +67,7 @@ namespace Rendering
 		GLuint						d_VAO;
 		GLuint						d_VBO;
 		GLuint						d_VBO_textures;
-
+		GLuint						d_VBO_normals;
 		GLuint						d_EBO;
 		GLuint						d_bone_VBO;
 		map<string, Bone>			d_bone_mapping;
@@ -75,11 +76,12 @@ namespace Rendering
 		MyVector(TTetra)			d_map_i;
 		MyVector(TCoord4)			d_map_f;
 		float						d_area;
+		
 	public:
 		/*  Functions  */
 		// Constructor
 #ifndef NO_OPENGL
-		Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords);
+		Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords, TVecCoord normals);
 		void Draw(Shader& shader, bool withAdjecencies = false);
 		float Area() const { return d_area; } 
 #else
@@ -88,7 +90,7 @@ namespace Rendering
 #endif // !NO_OPENGL
 		 
 		void updatePositions(FEMMesh* inputMesh);
- 
+		void updateNormals(FEMMesh*);
 		void init(FEMMesh* inputMesh);
 		// Render the mesh
 		
@@ -112,7 +114,7 @@ bool hasBones() const{
 		void setupMesh();
 #endif
 
-		void updateNormals();
+		
 		// Calculation of the center of mass based on paul bourke's website
 		// http://paulbourke.net/geometry/polygonmesh/
 		void calculateCenterOfMass();
@@ -125,8 +127,9 @@ bool hasBones() const{
 	};
 #ifndef NO_OPENGL
 
-	inline Mesh::Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords): 
+	inline Mesh::Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords, TVecCoord normals): 
 	m_adjacent_indices(adjacent_indices),
+		m_normals(normals),
 		//d_bounding_box(BoundingBox(nullptr)),
 		//d_bounding_sphere(BoundingSphere(NULL)),
 		d_material(material),
@@ -323,6 +326,7 @@ bool hasBones() const{
 		glGenBuffers(1, &this->d_VBO);
 		glGenBuffers(1, &this->d_EBO);
 		glGenBuffers(1,&this->d_VBO_textures);
+		glGenBuffers(1,&this->d_VBO_normals);
 
 		glBindVertexArray(this->d_VAO);
 		// Load data into vertex buffers
@@ -345,7 +349,9 @@ bool hasBones() const{
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TCoord), (GLvoid*)0);
 		// Vertex Normals
 		glEnableVertexAttribArray(1);	
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
+		glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_normals);
+		glBufferData(GL_ARRAY_BUFFER, this->m_normals.size() * sizeof(TCoord), &this->m_normals[0], GL_STATIC_DRAW); 
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,(GLvoid*)0);
 		// Vertex Texture Coordinates
 		glEnableVertexAttribArray(2);	
 		glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_textures);
@@ -413,24 +419,25 @@ bool hasBones() const{
 	}
 	 
 	//
-	//void Mesh::updateNormals()
-	//{
-	//    normals.recreate(positions.size());
-	//    if (computeTangents)
-	//        tangents.recreate(positions.size());
+	void Mesh::updateNormals(FEMMesh* inputMesh)
+	{
+	//	bool computeTangents = false;
+	//    m_normals.recreate(inputMesh->positions.size());
+	// /*   if (computeTangents)
+	//        tangents.recreate(positions.size());*/
 	//#ifdef SOFA_DEVICE_CUDA
-	//    if (!velems.empty())
+	//    if (!inputMesh->velems.empty())
 	//    { // use GPU
 	//        if (!computeTangents)
 	//        {
-	//            fnormals.recreate(triangles.size());
-	//            CudaVisualModel3f_calcTNormals(triangles.size(), positions.size(), triangles.deviceRead(), fnormals.deviceWrite(), positions.deviceRead());
-	//            CudaVisualModel3f_calcVNormals(triangles.size(), positions.size(), nbElemPerVertex, velems.deviceRead(), normals.deviceWrite(), fnormals.deviceRead(), positions.deviceRead());
+	//            fnormals.recreate(inputMesh->triangles.size());
+	//            CudaVisualModel3f_calcTNormals(inputMesh->triangles.size(), inputMesh->positions.size(), inputMesh->triangles.deviceRead(), fnormals.deviceWrite(), inputMesh->positions.deviceRead());
+	//            CudaVisualModel3f_calcVNormals(inputMesh->triangles.size(), inputMesh->positions.size(), nbElemPerVertex, velems.deviceRead(), normals.deviceWrite(), fnormals.deviceRead(), positions.deviceRead());
 	//        }
 	//        else
 	//        {
-	//            fnormals.recreate(triangles.size());
-	//            ftangents.recreate(triangles.size());
+	//            fnormals.recreate(inputMesh->triangles.size());
+	//            ftangents.recreate(inputMesh->triangles.size());
 	//            CudaVisualModel3f_calcTNormalsAndTangents(triangles.size(), positions.size(), triangles.deviceRead(), fnormals.deviceWrite(), ftangents.deviceWrite(), positions.deviceRead(), texcoords.deviceRead());
 	//            CudaVisualModel3f_calcVNormalsAndTangents(triangles.size(), positions.size(), nbElemPerVertex, velems.deviceRead(), normals.deviceWrite(), tangents.deviceWrite(), fnormals.deviceRead(), ftangents.deviceRead(), positions.deviceRead(), texcoords.deviceRead());
 	//        }
@@ -440,57 +447,57 @@ bool hasBones() const{
 	//    { // use CPU
 	//        if (!computeTangents)
 	//        {
-	//            for (unsigned int i=0;i<normals.size();++i)
-	//                normals[i].clear();
-	//            for (unsigned int i=0;i<triangles.size();++i)
+	//            for (unsigned int i=0;i<m_normals.size();++i)
+	//                m_normals[i].clear();
+	//            for (unsigned int i=0;i<inputMesh->triangles.size();++i)
 	//            {
-	//                TCoord n = cross(positions[triangles[i][1]]-positions[triangles[i][0]], 
-	//                                 positions[triangles[i][2]]-positions[triangles[i][0]]);
+	//                TCoord n = cross(inputMesh->positions[inputMesh->triangles[i][1]]-inputMesh->positions[inputMesh->triangles[i][0]], 
+	//                                 inputMesh->positions[inputMesh->triangles[i][2]]-inputMesh->positions[inputMesh->triangles[i][0]]);
 	//                n.normalize();
 	//                for (unsigned int j=0;j<3;++j)
-	//                    normals[triangles[i][j]] += n;
+	//                    m_normals[inputMesh->triangles[i][j]] += n;
 	//            }
-	//            for (unsigned int i=0;i<normals.size();++i)
-	//                normals[i].normalize();
+	//            for (unsigned int i=0;i<m_normals.size();++i)
+	//                m_normals[i].normalize();
 	//        }
 	//        else
 	//        {
-	//            for (unsigned int i=0;i<normals.size();++i)
+	//            for (unsigned int i=0;i<m_normals.size();++i)
 	//            {
-	//                normals[i].clear();
-	//                tangents[i].clear();
+	//                m_normals[i].clear();
+	//               // tangents[i].clear();
 	//            }
-	//            for (unsigned int i=0;i<triangles.size();++i)
+	//            for (unsigned int i=0;i<inputMesh->triangles.size();++i)
 	//            {
-	//                TCoord A = positions[triangles[i][0]];
-	//                TCoord B = positions[triangles[i][1]];
-	//                TCoord C = positions[triangles[i][2]];
+	//                TCoord A = inputMesh->positions[inputMesh->triangles[i][0]];
+	//                TCoord B = inputMesh->positions[inputMesh->triangles[i][1]];
+	//                TCoord C = inputMesh->positions[inputMesh->triangles[i][2]];
 	//                B -= A;
 	//                C -= A;
 	//                TCoord n = cross(B,C);
 	//                n.normalize();
-	//                TReal Au = texcoords[triangles[i][0]][0];
-	//                TReal Bu = texcoords[triangles[i][1]][0];
-	//                TReal Cu = texcoords[triangles[i][2]][0];
+	//                TReal Au = m_texCoords[inputMesh->triangles[i][0]][0];
+	//                TReal Bu = m_texCoords[inputMesh->triangles[i][1]][0];
+	//                TReal Cu = m_texCoords[inputMesh->triangles[i][2]][0];
 	//                Bu -= Au;
 	//                Cu -= Au;
 	//                TCoord t = B * Cu - C * Bu;
 	//                t.normalize();
 	//                for (unsigned int j=0;j<3;++j)
 	//                {
-	//                    normals[triangles[i][j]] += n;
-	//                    tangents[triangles[i][j]] += t;
+	//                    m_normals[inputMesh->triangles[i][j]] += n;
+	//                   // tangents[inputMesh->triangles[i][j]] += t;
 	//                }
 	//            }
-	//            for (unsigned int i=0;i<normals.size();++i)
+	//            for (unsigned int i=0;i<m_normals.size();++i)
 	//            {
-	//                tangents[i] = cross(normals[i],tangents[i]);
-	//                normals[i].normalize();
-	//                tangents[i].normalize();
+	//                //tangents[i] = cross(normals[i],tangents[i]);
+	//                m_normals[i].normalize();
+	//               // tangents[i].normalize();
 	//            }
 	//        }
 	//    }
-	//}
+	}
 
 	//inline void Mesh::calculateCenterOfMass()
 	//{
