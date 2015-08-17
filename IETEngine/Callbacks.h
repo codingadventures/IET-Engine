@@ -114,7 +114,7 @@ public:
 		MOUSE mouse = GLUTMouseToMouse(Button);
 		KEY_STATE KeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
 
-		UserMouseClickCallback(mouse,KeyState,x,y);
+		//UserMouseClickCallback(mouse,KeyState,x,y);
 
 	}
 	/*

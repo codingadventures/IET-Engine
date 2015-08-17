@@ -74,6 +74,7 @@ struct FEMMesh
 	void init(SimulationParameters* params);
 	void update(SimulationParameters* params);
 
+	void setPushRandomForce(TDeriv pushForce);
 	void reset();
 	void setPushForce(SimulationParameters* params);
 
@@ -405,7 +406,11 @@ void FEMMesh::update(SimulationParameters* params)
 	sphere.damping = 0;
 	//std::cout << "sphere r = " << sphere.radius << " stiffness = " << sphere.stiffness << " damping = " << sphere.damping << std::endl;
 }
-
+void FEMMesh::setPushRandomForce(TDeriv pushForce)
+{
+	externalForce.index = rand() % positions0.size();
+	externalForce.value = pushForce * d_simulationSize;
+}
 void FEMMesh::setPushForce(SimulationParameters* params)
 {
 	// find the most forward point in front of the mesh

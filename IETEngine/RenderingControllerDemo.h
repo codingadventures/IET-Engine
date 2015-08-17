@@ -40,10 +40,7 @@ namespace Controller
 		glm::vec3		d_light_diffuse;
 		glm::vec3		d_light_specular;
 		glm::vec3		d_light_position;
-
-		glm::vec3		d_material_ambient;
-		glm::vec3		d_material_diffuse;
-		glm::vec3		d_material_specular; 
+		 
 
 		glm::quat		d_quaternion_rotation;
 

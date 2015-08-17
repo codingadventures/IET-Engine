@@ -312,6 +312,7 @@ if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
 		{
 			// Data to fill
 			TVecCoord vertices;
+			TVecCoord normals;
 			vector<GLuint> indices;
 			vector<GLuint> adjacent_indices;
 			#ifndef NO_OPENGL
@@ -329,6 +330,7 @@ vector<Texture> textures;
 				Vertex vertex;
 				glm::vec3 vector;
 				TCoord vectorVert; // We declare a placeholder vector since Assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				TCoord vectorNorm;
 				// Positions
 				vectorVert[0] = ai_mesh->mVertices[i].x;
 				vectorVert[1] = ai_mesh->mVertices[i].y;
@@ -338,10 +340,11 @@ vector<Texture> textures;
 				// Normals
 				if (ai_mesh->HasNormals())
 				{
-					vector.x = ai_mesh->mNormals[i].x;
-					vector.y = ai_mesh->mNormals[i].y;
-					vector.z = ai_mesh->mNormals[i].z;
+					vectorNorm[0] = ai_mesh->mNormals[i].x;
+					vectorNorm[1] = ai_mesh->mNormals[i].y;
+					vectorNorm[2] = ai_mesh->mNormals[i].z;
 					vertex.Normal = vector;
+					normals.push_back(vectorNorm);
 				}
 				// Texture Coordinates
 			#ifndef NO_OPENGL
@@ -484,7 +487,7 @@ vector<Texture> textures;
 #endif
 			// Return a mesh object created from the extracted mesh data
 			#ifndef NO_OPENGL
-return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material, textCoordVert);
+return Mesh(vertices, indices, textures, boneWeights,adjacent_indices ,material, textCoordVert,normals);
 #else
 return Mesh(vertices, indices);
 #endif
