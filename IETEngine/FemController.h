@@ -29,14 +29,14 @@ namespace Controller
 		Shader*			d_shader;
 		Model*			d_model;
 		Simulation*		d_simulation;
-
+		 
 	};
 
 	void FemController::setup_current_instance()
 	{
 		Controller::g_CurrentControllerInstance = this; 
 	}
-	FemController::FemController() : AbstractController("Fem GEM CPU")
+	FemController::FemController() : AbstractController("Fem GEM CPU") 
 	{
 		setup_current_instance();
 
@@ -53,7 +53,7 @@ namespace Controller
 	{
 
 		std::cout << "Load meshes" << std::endl;
-		if (!d_simulation->simulation_load_fem_mesh(RAPTOR_NETGEN_MESH))
+		if (!d_simulation->simulation_load_fem_mesh(RAPTOR_NETGEN_MESH_FULL))
 		{
 			//return 1;
 		}
@@ -76,7 +76,9 @@ namespace Controller
 		if (argc > 1 && strcmp(argv[1], "--benchmark") == 0)
 		{
 			profile = true;
+			
 		}
+
 		d_simulation = new Simulation(0,profile);
 
 		this->d_camera->Position = glm::vec3(0.0f,10.0f,15.0f);

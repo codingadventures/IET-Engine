@@ -23,7 +23,7 @@ namespace Controller
 		virtual void Draw() = 0;
 		virtual void Init(int argc, char* argv[]);
 		virtual void Run() = 0;
-
+		int					m_frame_simulation_limit;
 	protected:
 		double				d_delta_time; 
 		double				d_delta_time_secs;
@@ -34,7 +34,7 @@ namespace Controller
 		glm::mat4			d_projection_matrix;
 		glm::mat4 			d_view_matrix;
 		float				d_fps;
-
+		int					d_frame_count;
 		Cam::Camera*		d_camera;						//Freed in destructor
 		string				d_window_name;
 		RigidBodyManager*	d_rigid_body_manager;
@@ -54,7 +54,9 @@ namespace Controller
 		d_fps(0.0f),
 		d_camera(nullptr),
 		d_window_name(window_name),
-		d_rigid_body_manager(nullptr)
+		d_rigid_body_manager(nullptr),
+		m_frame_simulation_limit(-1),
+		d_frame_count(0)
 	{}
 
 	inline void AbstractController::calculateFps( )
@@ -63,7 +65,7 @@ namespace Controller
 		static auto time_base = 0;
 
 		frame++;
-
+		d_frame_count++;
 		auto t = glutGet(GLUT_ELAPSED_TIME);
 		if (t - time_base > 1000) 
 		{

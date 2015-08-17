@@ -52,12 +52,12 @@ struct SimulationParameters
 };
 
 SimulationParameters::SimulationParameters()
-	: timeStep(0.1), 
+	: timeStep(0.04), 
 	//  odeSolver(ODE_EulerExplicit),
 	odeSolver(ODE_EulerImplicit),
 	rayleighMass(0.01), 
 	rayleighStiffness(0.01),
-	maxIter(10), 
+	maxIter(25), 
 	tolerance(1e-3),
 	youngModulusTop(100000), 
 	youngModulusBottom(1000000), 

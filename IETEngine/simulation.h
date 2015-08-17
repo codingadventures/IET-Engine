@@ -27,6 +27,7 @@
 using namespace Rendering;
 class Simulation
 {
+	void cancelLastComma(ofstream& stream);
 public:
 	bool simulation_preload();
 	bool simulation_load_fem_mesh(const char* filename);
@@ -85,7 +86,7 @@ Simulation::Simulation(int verbose, bool profile) : d_verbose(verbose), d_profil
 		d_mapping_time_o.open ("./SimulationMapping.csv");
 		d_compute_force_time_o.open ("./ComputeForce.csv");
 		d_conjugate_gradient_time_o.open("./ConjugateGradient.csv");
-		d_cgiteration_counts_o.open("./CGIterationCount.csv");
+		//d_cgiteration_counts_o.open("./CGIterationCount.csv");
 		if (!d_mapping_time_o.is_open())
 		{
 			cout << "Error opening the file..." << endl;
@@ -98,14 +99,27 @@ Simulation::~Simulation()
 {
 	if (d_profile)
 	{
+		cancelLastComma(d_mapping_time_o);
+		cancelLastComma(d_compute_force_time_o);
+		cancelLastComma(d_conjugate_gradient_time_o);
+		/*d_compute_force_time_o.write(" ", d_mapping_time_o.tellp());
+		d_conjugate_gradient_time_o.write(" ", d_mapping_time_o.tellp());
+		*/
 		d_mapping_time_o.close();
 		d_compute_force_time_o.close();
 		d_conjugate_gradient_time_o.close();
-		d_cgiteration_counts_o.close();
+		//d_cgiteration_counts_o.close();
 		delete timer;
 	}
 }
 
+void Simulation::cancelLastComma(ofstream& stream)
+{
+	long pos = stream.tellp();
+	stream.seekp(pos - 1);
+
+	stream << " ";
+}
 
 void Simulation::SetMeshes(vector<Mesh>* meshes)
 {
@@ -227,7 +241,6 @@ void Simulation::simulation_mapping()
 	STOP_PROFILING(d_profile);
 
 	SET_TIME_ELAPSED(d_profile, d_mapping_time_o);
-	
 }
 //
 void Simulation::simulation_animate()
