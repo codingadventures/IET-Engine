@@ -103,7 +103,7 @@ namespace Controller
 			cerr << "Error starting the simulation..." << endl;
 		}	
 
-		if (MeshLoad())
+	//	if (MeshLoad())
 		{
 			cerr << "Error initializing the meshes..." << endl;
 
@@ -163,7 +163,7 @@ namespace Controller
 			float x = rand() % 100 - 200;
 			float y = rand() % 100 - 200;
 			float z = rand() % 100 - 200;
-			d_simulation->fem_mesh->setPushRandomForce(TDeriv(x,y,z));
+		 	d_simulation->fem_mesh->setPushRandomForce(TDeriv(x,y,z));
 			//cout << "FPS: " << d_fps << endl;
 		}
 		if (d_simulation->fem_mesh->externalForce.index != -1)
@@ -184,12 +184,11 @@ namespace Controller
 		d_shader->SetUniform("model_matrix", d_floor->GetModelMatrix());
 		d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_floor->GetModelMatrix())));  
 		d_floor->Draw(*d_shader);
-		//glLineWidth(3);
-		//glBegin(GL_LINES);
-		//glColor3f(0.8f,0.2f,0.2f); glVertex3fv(p1.ptr());
-		//glColor3f(1.0f,0.6f,0.6f); glVertex3fv(p2.ptr());
-		//glEnd(); // GL_LINES
-		//glLineWidth(1);
+
+		//Testing frame loop
+		if (d_frame_count >= 1500)
+			glutLeaveMainLoop();
+	 
 		glutSwapBuffers();
 	}
 
