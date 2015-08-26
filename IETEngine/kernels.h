@@ -30,8 +30,8 @@ std::string device_name;
 
 // FEM add force: number of threads per bloc
 //#define GATHER_BSIZE 32
-//#define GATHER_BSIZE 64
-#define GATHER_BSIZE 128
+#define GATHER_BSIZE 64
+//#define GATHER_BSIZE 128
 //#define GATHER_BSIZE 256
 
 #endif
