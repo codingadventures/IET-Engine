@@ -57,8 +57,10 @@ dlldata.c
 .builds
 *.pidb
 *.svclog
-*.scc
-*.cu.deps
+*.scc 
+*.pdf
+ 
+*.cu.deps 
 # Chutzpah Test files
 _Chutzpah*
 
