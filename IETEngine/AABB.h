@@ -7,31 +7,31 @@
 namespace Physics
 { 
 
-	struct BoundingBox
+	class AABB
 	{
-		float			m_width;
+		/*float			m_width;
 		float			m_depth;
 		float			m_height;
-		 
+		*/ 
 		glm::vec3		m_min_coordinate;
 		glm::vec3		m_max_coordinate;
-		glm::vec3		m_center;
-		glm::vec3		m_is_colliding;
+		//glm::vec3		m_center;
+		//glm::vec3		m_is_colliding;
 
-		glm::vec3		m_scale_factor;
+		/*glm::vec3		m_scale_factor;
 
 		vector<Vertex>	m_vertices;
-		vector<Vertex>	m_model_space_vertices;
+		vector<Vertex>	m_model_space_vertices;*/
 
-		BoundingBox(const BoundingBox& bounding_box);
-		BoundingBox(vector<Vertex> vertices);
+		AABB(const AABB& bounding_box);
+		explicit AABB(vector<Vertex> &vertices);
 		
-		void operator+=(BoundingBox& const other_bbox){
+		void operator+=(AABB& const other_bbox){
 			*this = Calculate(*this,  other_bbox);
 		} 
 		glm::vec4 Color() const;
 
-		bool Overlaps(const BoundingBox& second);
+		bool Overlaps(const AABB& second);
 
 		bool Is_Colliding() const;
 
@@ -48,80 +48,48 @@ namespace Physics
 		glm::vec3 Get_Min_Coordinate_World_Space();
 		glm::vec3 Get_Max_Coordinate_World_Space();
 
-		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
-		void calculate(glm::vec3* translation ,glm::quat* rotation  );
+		static AABB Calculate(AABB& b1, AABB& b2);
+ 
 	};
 
-	BoundingBox::BoundingBox(vector<Vertex> vertices) 
-		: m_vertices(vertices),
-		m_model_space_vertices(vertices),
-		m_is_colliding(glm::vec3(false,false,false)),
-		m_width(0.0f),
-		m_depth(0.0f),
-		m_height(0.0f)
-	{
-
-		calculate(&glm::vec3(0.0f),&glm::quat());
-		d_initial_wdh.x = m_width;
-		d_initial_wdh.y = m_height;
-		d_initial_wdh.z = m_depth;
-	}
-
-	BoundingBox::BoundingBox(const BoundingBox& bounding_box)
-		: 
-		m_vertices(bounding_box.m_vertices),
-		m_model_space_vertices(bounding_box.m_model_space_vertices)
-
-	{
-		calculate(&glm::vec3(0.0f),&glm::quat());
-		d_initial_wdh.x = m_width;
-		d_initial_wdh.y = m_height;
-		d_initial_wdh.z = m_depth;
-	}
-
-	void BoundingBox::calculate(glm::vec3* translation,glm::quat* rotation)
-	{
+	inline AABB::AABB(vector<Vertex> &vertices)  
+	{ 
 		glm::vec3	min_coordinate;
 		glm::vec3   max_coordinate;
-		size_t		vert_size = m_vertices.size(); 
+
+		size_t		vert_size = vertices.size();
 		for (int i = 0; i < vert_size; i++)
 		{
-			glm::vec3 newPos  = glm::vec3(*rotation * glm::vec4(m_vertices[i].Position,1.0f));
+			if (vertices[i].Position.x < min_coordinate.x)
+				min_coordinate.x = vertices[i].Position.x;
 
-			if(newPos.x < min_coordinate.x) min_coordinate.x = newPos.x;
-			if(newPos.x > max_coordinate.x) max_coordinate.x = newPos.x;
+			if (vertices[i].Position.x > max_coordinate.x)
+				max_coordinate.x = vertices[i].Position.x;
 
-			if(newPos.y < min_coordinate.y) min_coordinate.y = newPos.y;
-			if(newPos.y > max_coordinate.y) max_coordinate.y = newPos.y;
+			if (vertices[i].Position.y < min_coordinate.y)
+				min_coordinate.y = vertices[i].Position.y;
+			if (vertices[i].Position.y > max_coordinate.y)
+				max_coordinate.y = vertices[i].Position.y;
 
-			if(newPos.z < min_coordinate.z) min_coordinate.z = newPos.z;
-			if(newPos.z > max_coordinate.z) max_coordinate.z = newPos.z;
-		}								
+			if (vertices[i].Position.z < min_coordinate.z)
+				min_coordinate.z = vertices[i].Position.z;
 
-
-
-		float depth  = glm::distance( min_coordinate.z,max_coordinate.z)
-			,width   = glm::distance( min_coordinate.x,max_coordinate.x)
-			,height  = glm::distance( min_coordinate.y,max_coordinate.y);
-
-
-		m_depth		= depth;
-		m_width		= width;
-		m_height	= height;
-
-
-		m_scale_factor = glm::vec3(m_width,m_height,m_depth) / d_initial_wdh;
-
-		m_center =  (min_coordinate + max_coordinate) * 0.5f + *translation;
-
+			if (vertices[i].Position.z > max_coordinate.z)
+				max_coordinate.z = vertices[i].Position.z;
+		} 
 
 		m_min_coordinate = min_coordinate;
 		m_max_coordinate = max_coordinate;
 	}
 
-	Physics::BoundingBox BoundingBox::Calculate(BoundingBox& b1, BoundingBox& b2)
+	inline AABB::AABB(const AABB& bounding_box)
+		: m_min_coordinate(bounding_box.m_min_coordinate), m_max_coordinate(bounding_box.m_max_coordinate)
+	{ 
+	} 
+
+	Physics::AABB AABB::Calculate(AABB& b1, AABB& b2)
 	{
-		BoundingBox temp(b1.m_vertices);
+		AABB temp(b1.m_vertices);
 		temp.m_min_coordinate.x = glm::min(b1.m_min_coordinate.x,b2.m_min_coordinate.x);
 		temp.m_max_coordinate.x = glm::max(b1.m_max_coordinate.x,b2.m_max_coordinate.x);
 
@@ -139,7 +107,7 @@ namespace Physics
 		return temp;
 	}
 
-	EndPoint BoundingBox::Get_EndPoint_X()
+	/*EndPoint AABB::Get_EndPoint_X()
 	{
 		EndPoint ep;
 		ep.m_min_point = m_min_coordinate.x + m_center.x;
@@ -148,7 +116,7 @@ namespace Physics
 		return ep;
 	}
 
-	EndPoint BoundingBox::Get_EndPoint_Y()
+	EndPoint AABB::Get_EndPoint_Y()
 	{
 		EndPoint ep;
 		ep.m_min_point = m_min_coordinate.y + m_center.y;
@@ -158,27 +126,27 @@ namespace Physics
 		return ep;
 	}
 
-	EndPoint BoundingBox::Get_EndPoint_Z()
+	EndPoint AABB::Get_EndPoint_Z()
 	{
 		EndPoint ep;
 		ep.m_min_point = m_min_coordinate.z + m_center.z;
 		ep.m_max_point = m_max_coordinate.z + m_center.z;
 		ep.m_bounding_box = this;
 		return ep;
-	}
+	}*/
 
-	glm::vec4 BoundingBox::Color()  const
+	glm::vec4 AABB::Color()  const
 	{
 		bool is_colliding = Is_Colliding();
 		return  is_colliding ? glm::vec4(1.0f,0.0f,0.0f,0.3f) : glm::vec4(0.0f,1.0f,0.0f,1.0f);
 	}
 
-	void BoundingBox::Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation)
+	void AABB::Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation)
 	{
 		calculate(translation, rotation);
 	}
 
-	void BoundingBox::Recalculate_Vertices(glm::mat4* model_matrix)
+	/*void AABB::Recalculate_Vertices(glm::mat4* model_matrix)
 	{
 		size_t vertices_count = m_vertices.size();
 		for (int i = 0; i < vertices_count; i++)
@@ -186,14 +154,14 @@ namespace Physics
 			m_model_space_vertices[i].Position = glm::vec3(*model_matrix * glm::vec4(m_vertices[i].Position,1.0f));
 		}
 
-	}
+	}*/
 
-	bool BoundingBox::Is_Colliding()  const
+	bool AABB::Is_Colliding()  const
 	{
-		return 	m_is_colliding.x &&  m_is_colliding.y && m_is_colliding.z;
+		return 	m_is_colliding;
 	}
 
-	bool BoundingBox::Overlaps(const BoundingBox& second)
+	bool AABB::Overlaps(const AABB& second)
 	{
 		if ( std::fabs(m_center.x -  second.m_center.x) > (m_width  * 0.5f + second.m_width  * 0.5f ) ) return false;
 		if ( std::fabs(m_center.y -  second.m_center.y) > (m_height * 0.5f + second.m_height * 0.5f ) ) return false;
@@ -203,11 +171,11 @@ namespace Physics
 		return true;
 	}
 
-	glm::vec3 BoundingBox::Get_Min_Coordinate_World_Space()
+	glm::vec3 AABB::Get_Min_Coordinate_World_Space()
 	{
 		return this->m_min_coordinate + m_center;
 	}
-	glm::vec3 BoundingBox::Get_Max_Coordinate_World_Space()
+	glm::vec3 AABB::Get_Max_Coordinate_World_Space()
 	{
 		return this->m_max_coordinate + m_center;
 	}

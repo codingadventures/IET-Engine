@@ -85,7 +85,7 @@ namespace Physics
 
 				//inertia = glm::transpose(inertia);
 			}
-			static void Compute_Tensor_With_AABB(BoundingBox& bb, float mass, glm::mat3 &inertia)
+			static void Compute_Tensor_With_AABB(AABB& bb, float mass, glm::mat3 &inertia)
 			{
 				float divisor = 0.0833f;
 				inertia[0][0] = divisor * mass * (glm::pow2(bb.m_height) + glm::pow2(bb.m_depth));

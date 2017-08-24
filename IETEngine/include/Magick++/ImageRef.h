@@ -1,6 +1,7 @@
 // This may look like C code, but it is really -*- C++ -*-
 //
 // Copyright Bob Friesenhahn, 1999, 2000, 2001, 2002
+// Copyright Dirk Lemstra 2014-2015
 //
 // Definition of an Image reference
 //
@@ -11,6 +12,7 @@
 #if !defined(Magick_ImageRef_header)
 #define Magick_ImageRef_header
 
+#include <string>
 #include "Magick++/Include.h"
 #include "Magick++/Thread.h"
 
@@ -21,60 +23,61 @@ namespace Magick
   //
   // Reference counted access to Image *
   //
-  class MagickPPExport ImageRef {
-    friend class Image; 
-  private:
-    // Construct with an image pointer and default options
-    ImageRef ( MagickCore::Image * image_ );
-    // Construct with an image pointer and options
-    ImageRef ( MagickCore::Image * image_, const Options * options_ );
+  class MagickPPExport ImageRef
+  {
+  public:
+
     // Construct with null image and default options
-    ImageRef ( void );
+    ImageRef(void);
+
+    // Construct with an image pointer and default options
+    ImageRef(MagickCore::Image *image_);
+
     // Destroy image and options
-    ~ImageRef ( void );
+    ~ImageRef(void);
+
+    // Decreases reference count and return the new count
+    size_t decrease();
+
+    // Retrieve image from reference
+    MagickCore::Image *&image(void);
+
+    // Increases reference count
+    void increase();
+
+    // Returns true if the reference count is more than one
+    bool isShared();
+
+    // Retrieve Options from reference
+    void options(Options *options_);
+    Options *options(void);
+
+    // Tries to replaces the images with the specified image, returns
+    // a new instance when the current image is shared.
+    static ImageRef *replaceImage(ImageRef *imgRef,
+      MagickCore::Image *replacement_);
+
+    // Image signature. Set force_ to true in order to re-calculate
+    // the signature regardless of whether the image data has been
+    // modified.
+    std::string signature(const bool force_=false);
+
+  private:
+
+    // Construct with an image pointer and options
+    ImageRef(MagickCore::Image *image_,const Options *options_);
 
     // Copy constructor and assignment are not supported
     ImageRef(const ImageRef&);
-    ImageRef& operator=(const ImageRef&);
-    
-    void                 image ( MagickCore::Image * image_ );
-    MagickCore::Image *&  image ( void );
-    
-    void                 options ( Options * options_ );
-    Options *            options ( void );
 
-    void                 id ( const ::ssize_t id_ );
-    ::ssize_t            id ( void ) const;
-    
-    MagickCore::Image *  _image;    // ImageMagick Image
-    Options *            _options;  // User-specified options
-    ::ssize_t            _id;       // Registry ID (-1 if not registered)
-    ::ssize_t            _refCount; // Reference count
-    MutexLock            _mutexLock;// Mutex lock
+    ImageRef& operator=(const ImageRef&);
+
+    MagickCore::Image *_image;    // ImageMagick Image
+    MutexLock         _mutexLock; // Mutex lock
+    Options           *_options;  // User-specified options
+    ::ssize_t         _refCount;  // Reference count
   };
 
 } // end of namespace Magick
-
-//
-// Inlines
-//
-
-// Retrieve image from reference
-inline MagickCore::Image *& Magick::ImageRef::image ( void )
-{
-  return _image;
-}
-
-// Retrieve Options from reference
-inline Magick::Options * Magick::ImageRef::options ( void )
-{
-  return _options;
-}
-
-// Retrieve registration id from reference
-inline ::ssize_t Magick::ImageRef::id ( void ) const
-{
-  return _id;
-}
 
 #endif // Magick_ImageRef_header

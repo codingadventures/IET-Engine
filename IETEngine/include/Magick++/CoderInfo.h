@@ -1,6 +1,7 @@
 // This may look like C code, but it is really -*- C++ -*-
 //
 // Copyright Bob Friesenhahn, 2001, 2002
+// Copyright Dirk Lemstra 2013-2015
 //
 // CoderInfo Definition
 //
@@ -20,60 +21,68 @@ namespace Magick
   public:
 
     enum MatchType {
-      AnyMatch,		// match any coder
-      TrueMatch,	// match coder if true
-      FalseMatch	// match coder if false
+      AnyMatch,  // match any coder
+      TrueMatch, // match coder if true
+      FalseMatch // match coder if false
     };
 
     // Default constructor
-    CoderInfo ( void );
+    CoderInfo(void);
 
     // Copy constructor
-    CoderInfo ( const CoderInfo &coder_ );
+    CoderInfo(const CoderInfo &coder_);
 
     // Construct with coder name
-    CoderInfo ( const std::string &name_ );
+    CoderInfo(const std::string &name_);
 
     // Destructor
-    ~CoderInfo ( void );
-
-    // Format name
-    std::string name( void ) const;
-
-    // Format description
-    std::string description( void ) const;
-
-    // Format is readable
-    bool isReadable( void ) const;
-
-    // Format is writeable
-    bool isWritable( void ) const;
-
-    // Format supports multiple frames
-    bool isMultiFrame( void ) const;
+    ~CoderInfo(void);
 
     // Assignment operator
-    CoderInfo& operator= (const CoderInfo &coder_ );
+    CoderInfo& operator=(const CoderInfo &coder_);
 
-    //
-    // Implemementation methods
-    //
-    CoderInfo ( const MagickCore::MagickInfo *magickInfo_ );
+    // Format can read multi-threaded
+    bool canReadMultithreaded(void) const;
+
+    // Format can write multi-threaded
+    bool canWriteMultithreaded(void) const;
+
+    // Format description
+    std::string description(void) const;
+
+    // Format supports multiple frames
+    bool isMultiFrame(void) const;
+
+    // Format is readable
+    bool isReadable(void) const;
+
+    // Format is writeable
+    bool isWritable(void) const;
+
+    // Format mime type
+    std::string mimeType(void) const;
+
+    // Name of the module
+    std::string module(void) const;
+
+    // Format name
+    std::string name(void) const;
+
+    // Unregisters this coder
+    bool unregister(void) const;
 
   private:
-
-    std::string		_name;
-    std::string		_description;
-    bool		_isReadable;
-    bool		_isWritable;
-    bool		_isMultiFrame;
-    
+    bool        _decoderThreadSupport;
+    std::string _description;
+    bool        _encoderThreadSupport;
+    bool        _isMultiFrame;
+    bool        _isReadable;
+    bool        _isWritable;
+    std::string _mimeType;
+    std::string _module;
+    std::string _name;
   };
+
 } // namespace Magick
-
-//
-// Inlines
-//
-
 
 #endif // Magick_CoderInfo_header

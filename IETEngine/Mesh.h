@@ -80,6 +80,7 @@ namespace Rendering
 	public:
 		/*  Functions  */
 		// Constructor
+<<<<<<< Updated upstream
 #ifndef NO_OPENGL
 		Mesh(TVecCoord vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights, vector<GLuint> adjacent_indices, Material material, vector<glm::vec2> textCoords, TVecCoord normals);
 		void Draw(Shader& shader, bool withAdjecencies = false);
@@ -88,6 +89,25 @@ namespace Rendering
 		Mesh(TVecCoord vertices, vector<GLuint> indices);
 		
 #endif // !NO_OPENGL
+=======
+		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights,Material material) 
+			: 
+			d_bounding_box(BoundingBox(vertices)),
+			d_bounding_sphere(BoundingSphere(vertices)),
+			d_material(material),
+			d_area(0.0f)
+		{ 
+			this->m_vertices = vertices;
+			this->m_indices = indices;
+			this->m_textures = textures; 
+			this->m_boneWeights = boneWeights; 
+			//this->calculate_center_of_mass();
+			this->calculate_area();
+			this->calculate_bounding_box(); 
+			this->setupMesh();
+		}   
+
+>>>>>>> Stashed changes
 		 
 		void updatePositions(FEMMesh* inputMesh);
 		void updateNormals(FEMMesh*);

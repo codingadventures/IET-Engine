@@ -128,10 +128,7 @@ namespace Physics
 
 	inline void RigidBodyManager::CheckAABBCollisions()
 	{
-		vector<EndPoint> x_axis,y_axis,z_axis;
-		bool x_overlap,y_overlap,z_overlap;
-		BoundingBox *x_current,*y_current,*z_current;
-		BoundingBox *x_next,*y_next,*z_next;
+		vector<EndPoint> x_axis,y_axis,z_axis; 
 		d_colliding_pairs.clear();
 		//First sweep and prune step algorithm. I use an ordered data structure to create the three axis lists.
 		//O(n)
@@ -152,17 +149,15 @@ namespace Physics
 		//O(n)
 		glm::vec3 s(0.0f);
 		glm::vec3 s2(0.0f);
-		glm::vec3 v;
 
 		for (int i = 0; i < d_rigid_bodies.size(); i++)
-		{
-
+		{ 
 			s   += d_rigid_bodies[i]->Center_of_mass();
 			s2  += d_rigid_bodies[i]->Center_of_mass() * d_rigid_bodies[i]->Center_of_mass();
 
 			for (int j = i+1; j < d_rigid_bodies.size(); j++)
 			{
-				vector<EndPoint>* current_axis = nullptr;
+				vector<EndPoint> *current_axis = nullptr;
 				switch (d_sort_axis)
 				{
 				case 0:
@@ -176,22 +171,25 @@ namespace Physics
 					break;
 				}
 
+				EndPoint &currentEndPoint = (*current_axis)[j];
+				EndPoint &nextEndPoint = (*current_axis)[i];
+
 				// Stop when tested AABBs are beyond the end of current AABB
-				if ((*current_axis)[j].m_min_point > (*current_axis)[i].m_max_point)
+				if (currentEndPoint.m_min_point > nextEndPoint.m_max_point)
 				{
 					break;
 				}
 
-				if (!(*current_axis)[j].m_bounding_box->Overlaps(*(*current_axis)[i].m_bounding_box)) continue;
+				if (!currentEndPoint.m_bounding_box->Overlaps(*nextEndPoint.m_bounding_box)) continue;
 
 				d_colliding_pairs.push_back(CollidingPair<RigidBody>(d_rigid_bodies[j] ,d_rigid_bodies[i]));
 
-				(*current_axis)[j].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
-				(*current_axis)[i].m_bounding_box->m_is_colliding = glm::vec3(1.0f);
+				currentEndPoint.m_bounding_box->m_is_colliding = glm::vec3(1.0f);
+				nextEndPoint.m_bounding_box->m_is_colliding = glm::vec3(1.0f);
 			}
 		}
 
-		v  = s2 - s * s / (float)d_rigid_bodies.size();
+		glm::vec3 v = s2 - s * s / static_cast<float>(d_rigid_bodies.size());
 		d_sort_axis = 0;
 		if (v[1] > v[0]) d_sort_axis = 1;
 		if (v[2] > v[d_sort_axis]) d_sort_axis = 2;
