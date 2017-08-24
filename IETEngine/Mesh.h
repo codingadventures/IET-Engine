@@ -15,7 +15,7 @@
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "BoundingBox.h" 
+#include "AABB.h" 
 #include "BoundingSphere.h"
 #include "Material.h"
 
@@ -37,7 +37,7 @@ namespace Rendering
 		glm::vec3					m_polyhedral_center_of_mass;
 									
 	private:						
-		BoundingBox					d_bounding_box;
+		AABB					d_bounding_box;
 		BoundingSphere				d_bounding_sphere;
 									
 		/*  Render data  */			
@@ -54,10 +54,10 @@ namespace Rendering
 		// Constructor
 		Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, vector<VertexWeight> boneWeights,Material material) 
 			: 
-			d_area(0.0f),
+			d_bounding_box(AABB(vertices)),
 			d_bounding_sphere(BoundingSphere(vertices)),
-			d_bounding_box(BoundingBox(vertices)),
-			d_material(material)
+			d_material(material),
+			d_area(0.0f)
 		{ 
 			this->m_vertices = vertices;
 			this->m_indices = indices;
@@ -110,7 +110,7 @@ namespace Rendering
 		
 		float Area() const { return d_area; } 
 
-		Physics::BoundingBox Bounding_box() const { 
+		Physics::AABB Bounding_box() const { 
 			return d_bounding_box; 
 		} 
 		Physics::BoundingSphere   Bounding_sphere()  {
@@ -225,7 +225,7 @@ namespace Rendering
 	
 		void calculate_bounding_box()
 		{
-		 	d_bounding_box = BoundingBox(m_vertices);
+		 	d_bounding_box = AABB(m_vertices);
 			 
 		}
 		

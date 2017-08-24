@@ -1,6 +1,7 @@
 // This may look like C code, but it is really -*- C++ -*-
 //
 // Copyright Bob Friesenhahn, 1999, 2000, 2001, 2002
+// Copyright Dirk Lemstra 2014-2015
 //
 // Blob reference class
 //
@@ -17,28 +18,33 @@
 
 namespace Magick
 {
-
-  class BlobRef {
+  class BlobRef
+  {
   public:
-    // There are no public methods in this class
 
     // Construct with data, making private copy of data
-    BlobRef ( const void* data_, size_t length_ );
+    BlobRef(const void* data_,const size_t length_);
 
     // Destructor (actually destroys data)
-    ~BlobRef ( void );
+    ~BlobRef(void);
+
+    // Decreases reference count and return the new count
+    size_t decrease();
+
+    // Increases reference count
+    void increase();
+
+    Blob::Allocator allocator; // Memory allocation system in use
+    size_t          length;    // Blob length
+    void*           data;      // Blob data
 
   private:
     // Copy constructor and assignment are not supported
-    BlobRef (const BlobRef&);
-    BlobRef& operator= (const BlobRef&);
+    BlobRef(const BlobRef&);
+    BlobRef& operator=(const BlobRef&);
 
-  public:
-    void *          _data;      // Blob data
-    size_t          _length;    // Blob length
-    Blob::Allocator _allocator; // Memory allocation system in use
-    ::ssize_t       _refCount;  // Reference count
-    MutexLock       _mutexLock; // Mutex lock
+    MutexLock _mutexLock; // Mutex lock
+    size_t    _refCount;  // Reference count
   };
 
 } // namespace Magick

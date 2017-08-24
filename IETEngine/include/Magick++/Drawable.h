@@ -1,6 +1,7 @@
 // This may look like C code, but it is really -*- C++ -*-
 //
 // Copyright Bob Friesenhahn, 1999, 2000, 2001, 2002
+// Copyright Dirk Lemstra 2014-2017
 //
 // Definition of Drawable (Graphic objects)
 //
@@ -21,7 +22,7 @@
 
 #include <functional>
 #include <string>
-#include <list>
+#include <vector>
 #include <utility>
 #include "Magick++/Color.h"
 #include "Magick++/Geometry.h"
@@ -39,150 +40,113 @@
 
 namespace Magick
 {
-
   //
   // Representation of an x,y coordinate
   //
   class MagickPPExport Coordinate
   {
   public:
-    Coordinate ( void )
+
+    Coordinate(void)
       : _x(0),
-        _y(0)
-      { }
-    Coordinate ( double x_, double y_ )
+        _y(0) {}
+
+    Coordinate(double x_,double y_)
       : _x(x_),
-        _y(y_)
-      { }
-    virtual ~Coordinate ()
-      { }
+        _y(y_) {}
 
-    void   x ( double x_ )
-      {
-        _x = x_;
-      }
-    double x ( void ) const
-      {
-        return _x;
-      }
+    virtual ~Coordinate() {}
 
-    void   y ( double y_ )
-      {
-        _y = y_;
-      }
-    double y ( void ) const
-      {
-        return _y;
-      }
+    void x(double x_) { _x=x_; }
+    double x(void) const { return _x; }
+
+    void y(double y_) { _y=y_; }
+    double y(void) const { return _y; }
 
   private:
     double _x;
     double _y;
   };
 
-  typedef std::list<Magick::Coordinate> CoordinateList;
+  typedef std::vector<Magick::Coordinate> CoordinateList;
 
 #if defined(MagickDLLExplicitTemplate)
 
   MagickDrawableExtern template class MagickPPExport
   std::allocator<Magick::Coordinate>;
 
-//   MagickDrawableExtern template class MagickPPExport
-//   std::list<Magick::Coordinate, std::allocator<Magick::Coordinate> >;
-
 #endif // MagickDLLExplicitTemplate
 
   // Compare two Coordinate objects regardless of LHS/RHS
-  MagickPPExport int operator == ( const Coordinate& left_,
-                                        const Coordinate& right_ );
-  MagickPPExport int operator != ( const Coordinate& left_,
-                                        const Coordinate& right_ );
-  MagickPPExport int operator >  ( const Coordinate& left_,
-                                        const Coordinate& right_ );
-  MagickPPExport int operator <  ( const Coordinate& left_,
-                                        const Coordinate& right_ );
-  MagickPPExport int operator >= ( const Coordinate& left_,
-                                        const Coordinate& right_ );
-  MagickPPExport int operator <= ( const Coordinate& left_,
-                                        const Coordinate& right_ );
+  extern MagickPPExport int operator ==
+    (const Coordinate& left_,const Coordinate& right_);
+  extern MagickPPExport int operator !=
+    (const Coordinate& left_, const Coordinate& right_);
+  extern MagickPPExport int operator >
+    (const Coordinate& left_, const Coordinate& right_);
+  extern MagickPPExport int operator <
+    (const Coordinate& left_, const Coordinate& right_);
+  extern MagickPPExport int operator >=
+    (const Coordinate& left_, const Coordinate& right_);
+  extern MagickPPExport int operator <=
+    (const Coordinate& left_, const Coordinate& right_);
 
   //
   // Base class for all drawable objects
   //
-  //struct MagickPPExport std::unary_function<MagickCore::DrawingWand,void>;
-  class MagickPPExport DrawableBase:
-    public std::unary_function<MagickCore::DrawingWand,void>
+  class MagickPPExport DrawableBase
   {
   public:
-    // Constructor
-    DrawableBase ( void )
-      { }
+
+    // Default constructor
+    DrawableBase(void);
 
     // Destructor
-    virtual ~DrawableBase ( void );
+    virtual ~DrawableBase(void);
 
     // Operator to invoke equivalent draw API call
-    virtual void operator()( MagickCore::DrawingWand *) const = 0;
+    virtual void operator()(MagickCore::DrawingWand *) const;
 
     // Return polymorphic copy of object
-    virtual DrawableBase* copy() const = 0;
-
-  private:
+    virtual DrawableBase* copy() const;
   };
 
   //
   // Representation of a drawable surrogate object to manage drawable objects
   //
-#undef Drawable  // Conflict with <X11/Xproto.h>
+  #undef Drawable // Conflict with <X11/Xproto.h>
   class MagickPPExport Drawable
   {
   public:
 
-    // Constructor
-    Drawable ( void );
+    // Default constructor
+    Drawable(void);
 
     // Construct from DrawableBase
-    Drawable ( const DrawableBase& original_ );
+    Drawable(const DrawableBase& original_);
 
     // Destructor
-    ~Drawable ( void );
+    ~Drawable(void);
 
     // Copy constructor
-    Drawable ( const Drawable& original_ );
+    Drawable(const Drawable& original_);
 
     // Assignment operator
-    Drawable& operator= (const Drawable& original_ );
+    Drawable& operator=(const Drawable& original_);
 
     // Operator to invoke contained object
-    void operator()( MagickCore::DrawingWand *context_ ) const;
+    void operator()(MagickCore::DrawingWand *) const;
 
   private:
     DrawableBase* dp;
   };
 
-  // Compare two Drawable objects regardless of LHS/RHS
-  MagickPPExport int operator == ( const Drawable& left_,
-                                        const Drawable& right_ );
-  MagickPPExport int operator != ( const Drawable& left_,
-                                        const Drawable& right_ );
-  MagickPPExport int operator >  ( const Drawable& left_,
-                                        const Drawable& right_ );
-  MagickPPExport int operator <  ( const Drawable& left_,
-                                        const Drawable& right_ );
-  MagickPPExport int operator >= ( const Drawable& left_,
-                                        const Drawable& right_ );
-  MagickPPExport int operator <= ( const Drawable& left_,
-                                        const Drawable& right_ );
-
-  typedef std::list<Magick::Drawable> DrawableList;
+  typedef std::vector<Magick::Drawable> DrawableList;
 
 #if defined(MagickDLLExplicitTemplate)
 
   MagickDrawableExtern template class MagickPPExport
   std::allocator<Magick::Drawable>;
-
-//   MagickDrawableExtern template class MagickPPExport
-//   std::list<Magick::Drawable, std::allocator<Magick::Drawable> >;
 
 #endif // MagickDLLExplicitTemplate
 
@@ -240,21 +204,7 @@ private:
   VPathBase* dp;
 };
 
-// Compare two VPath objects regardless of LHS/RHS
-MagickPPExport int operator == ( const VPath& left_,
-                                      const VPath& right_ );
-MagickPPExport int operator != ( const VPath& left_,
-                                      const VPath& right_ );
-MagickPPExport int operator >  ( const VPath& left_,
-                                      const VPath& right_ );
-MagickPPExport int operator <  ( const VPath& left_,
-                                      const VPath& right_ );
-MagickPPExport int operator >= ( const VPath& left_,
-                                      const VPath& right_ );
-MagickPPExport int operator <= ( const VPath& left_,
-                                      const VPath& right_ );
-
-typedef std::list<Magick::VPath> VPathList;
+typedef std::vector<Magick::VPath> VPathList;
 
 #if defined(MagickDLLExplicitTemplate)
 
@@ -262,7 +212,7 @@ MagickDrawableExtern template class MagickPPExport
 std::allocator<Magick::VPath>;
 
 // MagickDrawableExtern template class MagickPPExport
-// std::list<Magick::VPath, std::allocator<Magick::VPath> >;
+// std::vector<Magick::VPath, std::allocator<Magick::VPath> >;
 
 #endif // MagickDLLExplicitTemplate
 
@@ -345,6 +295,63 @@ public:
   
 private:
   MagickCore::AffineMatrix  _affine;
+};
+
+// Change pixel alpha value to transparent using PaintMethod
+class MagickPPExport DrawableAlpha : public DrawableBase
+{
+public:
+
+    DrawableAlpha(double x_, double y_,PaintMethod paintMethod_)
+      : _x(x_),
+        _y(y_),
+        _paintMethod(paintMethod_)
+    {
+    }
+
+    ~DrawableAlpha(void);
+
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
+
+    void x(double x_)
+    {
+      _x=x_;
+    }
+
+    double x(void) const
+    {
+      return(_x);
+    }
+
+    void y(double y_)
+    {
+      _y=y_;
+    }
+
+    double y(void) const
+    {
+      return(_y);
+    }
+
+    void paintMethod(PaintMethod paintMethod_)
+    {
+      _paintMethod=paintMethod_;
+    }
+
+    PaintMethod paintMethod(void) const
+    {
+      return(_paintMethod);
+    }
+
+  private:
+
+    double _x;
+    double _y;
+    PaintMethod _paintMethod;
 };
 
 // Arc
@@ -456,6 +463,73 @@ private:
   CoordinateList _coordinates;
 };
 
+  // Sets the border color to be used for drawing bordered objects.
+  class MagickPPExport DrawableBorderColor : public DrawableBase
+  {
+  public:
+
+    DrawableBorderColor(const Color &color_);
+  
+    DrawableBorderColor(const DrawableBorderColor &original_);
+  
+    ~DrawableBorderColor(void);
+  
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void color(const Color &color_);
+    Color color(void) const;
+  
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
+  
+  private:
+    Color _color;
+  };
+
+  // Sets the polygon fill rule to be used by the clipping path.
+  class MagickPPExport DrawableClipRule : public DrawableBase
+  {
+  public:
+
+    DrawableClipRule(const FillRule fillRule_);
+
+    ~DrawableClipRule(void);
+
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void fillRule(const FillRule fillRule_);
+    FillRule fillRule(void) const;
+
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
+
+  private:
+    FillRule _fillRule;
+  };
+
+  // Sets the interpretation of clip path units.
+  class MagickPPExport DrawableClipUnits : public DrawableBase
+  {
+  public:
+
+    DrawableClipUnits(const ClipPathUnits units_);
+
+    ~DrawableClipUnits(void);
+
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void units(const ClipPathUnits units_);
+    ClipPathUnits units(void) const;
+
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
+
+  private:
+    ClipPathUnits _units;
+  };
 
 // Pop (terminate) clip path definition
 class MagickPPExport DrawablePopClipPath : public DrawableBase
@@ -751,6 +825,25 @@ private:
   Image*             _image;
 };
 
+// Density
+class MagickPPExport DrawableDensity : public DrawableBase
+{
+public:
+
+  DrawableDensity(const Point &density_);
+
+  DrawableDensity(const std::string &density_);
+
+  ~DrawableDensity(void);
+
+  void operator()(MagickCore::DrawingWand *context_) const;
+
+  DrawableBase* copy() const;
+
+private:
+  std::string _density;
+};
+
 // Ellipse
 class MagickPPExport DrawableEllipse : public DrawableBase
 {
@@ -866,6 +959,33 @@ private:
   Color _color;
 };
 
+  // Sets the URL to use as a fill pattern for filling objects. Only local
+  // URLs("#identifier") are supported at this time. These local URLs are
+  // normally created by defining a named fill pattern with
+  // DrawablePushPattern/DrawablePopPattern.
+  class MagickPPExport DrawableFillPatternUrl : public DrawableBase
+  {
+  public:
+
+    DrawableFillPatternUrl(const std::string &url_);
+
+    ~DrawableFillPatternUrl(void);
+
+    DrawableFillPatternUrl(const DrawableFillPatternUrl& original_);
+
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void url(const std::string &url_);
+    std::string url(void) const;
+
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
+  
+  private:
+    std::string _url;
+  };
+
 // Specify fill rule (fill-rule)
 class MagickPPExport DrawableFillRule : public DrawableBase
 {
@@ -896,31 +1016,33 @@ private:
   FillRule _fillRule;
 };
 
-// Specify drawing fill opacity
+// Specify drawing fill alpha
 class MagickPPExport DrawableFillOpacity : public DrawableBase
 {
 public:
-  DrawableFillOpacity ( double opacity_ )
-    : _opacity(opacity_)
-    {
-    }
 
-  /*virtual*/ ~DrawableFillOpacity ( void );
+  DrawableFillOpacity(double opacity_)
+    : _opacity(opacity_)
+  {
+  }
+
+  ~DrawableFillOpacity ( void );
 
   // Operator to invoke equivalent draw API call
-  /*virtual*/ void operator()( MagickCore::DrawingWand *context_ ) const;
+  void operator()(MagickCore::DrawingWand *context_) const;
 
   // Return polymorphic copy of object
-  /*virtual*/ DrawableBase* copy() const;
+  DrawableBase* copy() const;
 
-  void opacity( double opacity_ )
-    {
-      _opacity = opacity_;
-    }
-  double opacity( void ) const
-    {
-      return _opacity;
-    }
+  void opacity(double opacity_)
+  {
+    _opacity=opacity_;
+  }
+
+  double opacity(void) const
+  {
+    return(_opacity);
+  }
 
 private:
   double _opacity;
@@ -1054,58 +1176,6 @@ private:
   double _startY;
   double _endX;
   double _endY;
-};
-
-// Change pixel matte value to transparent using PaintMethod
-class MagickPPExport DrawableMatte : public DrawableBase
-{
-public:
-  DrawableMatte ( double x_, double y_,
-                  PaintMethod paintMethod_ )
-    : _x(x_),
-      _y(y_),
-      _paintMethod(paintMethod_)
-    { }
-
-  /*virtual*/ ~DrawableMatte ( void );
-
-  // Operator to invoke equivalent draw API call
-  /*virtual*/ void operator()( MagickCore::DrawingWand *context_ ) const;
-
-  // Return polymorphic copy of object
-  /*virtual*/ DrawableBase* copy() const;
-
-  void x( double x_ )
-    {
-      _x = x_;
-    }
-  double x( void ) const
-    {
-      return _x;
-    }
-
-  void y( double y_ )
-    {
-      _y = y_;
-    }
-  double y( void ) const
-    {
-      return _y;
-    }
-
-  void paintMethod( PaintMethod paintMethod_ )
-    {
-      _paintMethod = paintMethod_;
-    }
-  PaintMethod paintMethod( void ) const
-    {
-      return _paintMethod;
-    }
-
-private:
-  double _x;
-  double _y;
-  PaintMethod _paintMethod;
 };
 
 // Drawable Path
@@ -1421,13 +1491,13 @@ private:
 class MagickPPExport DrawableRoundRectangle : public DrawableBase
 {
 public:
-  DrawableRoundRectangle ( double centerX_, double centerY_,
-                           double width_, double hight_,
+  DrawableRoundRectangle ( double upperLeftX_, double upperLeftY_,
+                           double lowerRightX_, double lowerRightY_,
                            double cornerWidth_, double cornerHeight_ )
-    : _centerX(centerX_),
-      _centerY(centerY_),
-      _width(width_),
-      _hight(hight_),
+    : _upperLeftX(upperLeftX_),
+      _upperLeftY(upperLeftY_),
+      _lowerRightX(lowerRightX_),
+      _lowerRightY(lowerRightY_),
       _cornerWidth(cornerWidth_),
       _cornerHeight(cornerHeight_)
     { }
@@ -1440,40 +1510,80 @@ public:
   // Return polymorphic copy of object
   /*virtual*/ DrawableBase* copy() const;
 
+#if !defined(MAGICKCORE_EXCLUDE_DEPRECATED)
+
   void centerX( double centerX_ )
     {
-      _centerX = centerX_;
+      _upperLeftX = centerX_;
     }
   double centerX( void ) const
     {
-      return _centerX;
+      return _upperLeftX;
     }
 
   void centerY( double centerY_ )
     {
-      _centerY = centerY_;
+      _upperLeftY = centerY_;
     }
   double centerY( void ) const
     {
-      return _centerY;
+      return _upperLeftY;
     }
 
   void width( double width_ )
     {
-      _width = width_;
+      _lowerRightX = width_;
     }
   double width( void ) const
     {
-      return _width;
+      return _lowerRightX;
     }
 
   void hight( double hight_ )
     {
-      _hight = hight_;
+      _lowerRightY = hight_;
     }
   double hight( void ) const
     {
-      return _hight;
+      return _lowerRightY;
+    }
+
+#endif
+
+  void upperLeftX( double upperLeftX_ )
+    {
+      _upperLeftX = upperLeftX_;
+    }
+  double upperLeftX( void ) const
+    {
+      return _upperLeftX;
+    }
+
+  void upperLeftY( double upperLeftY_ )
+    {
+      _upperLeftY = upperLeftY_;
+    }
+  double upperLeftY( void ) const
+    {
+      return _upperLeftY;
+    }
+
+  void lowerRightX( double lowerRightX_ )
+    {
+      _lowerRightX = lowerRightX_;
+    }
+  double lowerRightX( void ) const
+    {
+      return _lowerRightX;
+    }
+
+  void lowerRightY( double lowerRightY_ )
+    {
+      _lowerRightY = lowerRightY_;
+    }
+  double lowerRightY( void ) const
+    {
+      return _lowerRightY;
     }
 
   void cornerWidth( double cornerWidth_ )
@@ -1495,10 +1605,10 @@ public:
     }
 
 private:
-  double _centerX;
-  double _centerY;
-  double _width;
-  double _hight;
+  double _upperLeftX;
+  double _upperLeftY;
+  double _lowerRightX;
+  double _lowerRightY;
   double _cornerWidth;
   double _cornerHeight;
 };
@@ -1601,65 +1711,60 @@ private:
   double _angle;
 };
 
-// Stroke dasharray
-class MagickPPExport DrawableDashArray : public DrawableBase
-{
-public:
-  DrawableDashArray( const double* dasharray_ );
-  DrawableDashArray( const size_t* dasharray_ ); // Deprecated
-  DrawableDashArray( const Magick::DrawableDashArray &original_ );
+  // Stroke dasharray
+  //
+  // dasharray_ is an allocated array terminated by value 0.0 or 0.
+  // The array is copied so the original does not need to be preserved.
+  // Pass a null pointer to clear an existing dash array setting.
+  class MagickPPExport DrawableStrokeDashArray : public DrawableBase
+  {
+  public:
 
-  /*virtual*/ ~DrawableDashArray( void );
+      DrawableStrokeDashArray(const double* dasharray_);
 
-  // Operator to invoke equivalent draw API call
-  /*virtual*/ void operator()( MagickCore::DrawingWand *context_ ) const;
+      DrawableStrokeDashArray(const Magick::DrawableStrokeDashArray &original_);
 
-  // Return polymorphic copy of object
-  /*virtual*/ DrawableBase* copy() const;
+      ~DrawableStrokeDashArray(void);
 
-  void dasharray( const double* dasharray_ );
-  void dasharray( const size_t* dasharray_ ); // Deprecated
+      // Operator to invoke equivalent draw API call
+      void operator()(MagickCore::DrawingWand *context_) const;
+  
+      // Return polymorphic copy of object
+      DrawableBase* copy() const;
+  
+      void dasharray(const double* dasharray_);
+      const double* dasharray(void) const;
 
-  const double* dasharray( void ) const
-    {
-      return _dasharray;
-    }
+      DrawableStrokeDashArray& operator=(
+        const Magick::DrawableStrokeDashArray &original_);
 
-  DrawableDashArray& operator=(const Magick::DrawableDashArray &original_);
+  private:
+      size_t _size;
+      double *_dasharray;
+  };
 
-private:
-  size_t	_size;
-  double       *_dasharray;
-};
+  // Stroke dashoffset
+  class MagickPPExport DrawableStrokeDashOffset : public DrawableBase
+  {
+  public:
+    DrawableStrokeDashOffset(const double offset_)
+      : _offset(offset_)
+      { }
 
-// Stroke dashoffset
-class MagickPPExport DrawableDashOffset : public DrawableBase
-{
-public:
-  DrawableDashOffset ( const double offset_ )
-    : _offset(offset_)
-    { }
+     ~DrawableStrokeDashOffset(void);
 
-  /*virtual*/ ~DrawableDashOffset ( void );
+    // Operator to invoke equivalent draw API call
+    void operator()(MagickCore::DrawingWand *context_) const;
 
-  // Operator to invoke equivalent draw API call
-  /*virtual*/ void operator()( MagickCore::DrawingWand *context_ ) const;
+    // Return polymorphic copy of object
+    DrawableBase* copy() const;
 
-  // Return polymorphic copy of object
-  /*virtual*/ DrawableBase* copy() const;
-
-  void offset( const double offset_ )
-    {
-      _offset = offset_;
-    }
-  double offset( void ) const
-    {
-      return _offset;
-    }
-
-private:
-  double _offset;
-};
+    void offset(const double offset_);
+    double offset(void) const;
+  
+  private:
+    double _offset;
+  };
 
 // Stroke linecap
 class MagickPPExport DrawableStrokeLineCap : public DrawableBase
@@ -1748,6 +1853,29 @@ private:
   size_t _miterlimit;
 };
 
+// Sets the pattern used for stroking object outlines.
+class MagickPPExport DrawableStrokePatternUrl : public DrawableBase
+{
+public:
+
+  DrawableStrokePatternUrl(const std::string &url_);
+
+  ~DrawableStrokePatternUrl(void);
+
+  DrawableStrokePatternUrl(const DrawableStrokePatternUrl& original_);
+
+  // Operator to invoke equivalent draw API call
+  void operator()(MagickCore::DrawingWand *context_) const;
+
+  void url(const std::string &url_);
+  std::string url(void) const;
+
+  // Return polymorphic copy of object
+  DrawableBase* copy() const;
+
+private:
+  std::string _url;
+};
 
 // Stroke antialias
 class MagickPPExport DrawableStrokeAntialias : public DrawableBase
@@ -1811,27 +1939,29 @@ private:
 class MagickPPExport DrawableStrokeOpacity : public DrawableBase
 {
 public:
-  DrawableStrokeOpacity ( double opacity_ )
-    : _opacity(opacity_)
-    {
-    }
 
-  /*virtual*/ ~DrawableStrokeOpacity ( void );
+  DrawableStrokeOpacity(double opacity_)
+    : _opacity(opacity_)
+  {
+  }
+
+  ~DrawableStrokeOpacity(void);
 
   // Operator to invoke equivalent draw API call
-  /*virtual*/ void operator()( MagickCore::DrawingWand *context_ ) const;
+  void operator()(MagickCore::DrawingWand *context_) const;
 
   // Return polymorphic copy of object
-  /*virtual*/ DrawableBase* copy() const;
+  DrawableBase* copy() const;
 
-  void opacity( double opacity_ )
-    {
-      _opacity = opacity_;
-    }
-  double opacity( void ) const
-    {
-      return _opacity;
-    }
+  void opacity(double opacity_)
+  {
+    _opacity=opacity_;
+  }
+
+  double opacity(void) const
+  {
+    return(_opacity);
+  }
 
 private:
   double _opacity;
@@ -1924,6 +2054,30 @@ private:
   std::string _encoding;
 };
 
+// Text alignment
+class MagickPPExport DrawableTextAlignment : public DrawableBase
+{
+public:
+
+  DrawableTextAlignment(AlignType alignment_);
+
+  DrawableTextAlignment(const DrawableTextAlignment& original_);
+
+  ~DrawableTextAlignment(void);
+
+  // Operator to invoke equivalent draw API call
+  void operator()(MagickCore::DrawingWand *context_) const;
+
+  void alignment(AlignType alignment_);
+  AlignType alignment(void) const;
+
+  // Return polymorphic copy of object
+  DrawableBase* copy() const;
+
+private:
+  AlignType _alignment;
+};
+
 // Text antialias
 class MagickPPExport DrawableTextAntialias : public DrawableBase
 {
@@ -1981,6 +2135,86 @@ public:
 private:
   DecorationType _decoration;
 };
+
+  // Render text right-to-left or left-to-right.
+  class MagickPPExport DrawableTextDirection : public DrawableBase
+  {
+  public:
+
+    DrawableTextDirection(DirectionType direction_);
+
+    ~DrawableTextDirection(void);
+
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void direction(DirectionType direction_);
+    DirectionType direction(void) const;
+
+    DrawableBase* copy() const;
+
+  private:
+    DirectionType _direction;
+  };
+
+  // Specify text inter-line spacing
+  class MagickPPExport DrawableTextInterlineSpacing : public DrawableBase
+  {
+  public:
+
+    DrawableTextInterlineSpacing(double spacing_);
+
+    ~DrawableTextInterlineSpacing(void);
+
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void spacing(double spacing_);
+    double spacing(void) const;
+
+    DrawableBase* copy() const;
+
+  private:
+    double _spacing;
+  };
+
+  // Specify text inter-word spacing
+  class MagickPPExport DrawableTextInterwordSpacing : public DrawableBase
+  {
+  public:
+
+    DrawableTextInterwordSpacing(double spacing_);
+
+    ~DrawableTextInterwordSpacing(void);
+
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void spacing(double spacing_);
+    double spacing(void) const;
+
+    DrawableBase *copy() const;
+
+  private:
+    double _spacing;
+  };
+
+  // Specify text kerning
+  class MagickPPExport DrawableTextKerning : public DrawableBase
+  {
+  public:
+
+    DrawableTextKerning(double kerning_);
+
+    ~DrawableTextKerning(void);
+
+    void operator()(MagickCore::DrawingWand *context_) const;
+
+    void kerning(double kerning_);
+    double kerning(void) const;
+
+    DrawableBase *copy() const;
+
+  private:
+    double _kerning;
+  };
 
 // Text undercolor box
 class MagickPPExport DrawableTextUnderColor : public DrawableBase
@@ -2204,20 +2438,20 @@ private:
 };
 
 // Compare two PathArcArgs objects regardless of LHS/RHS
-MagickPPExport int operator == ( const PathArcArgs& left_,
+extern MagickPPExport int operator == ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
-MagickPPExport int operator != ( const PathArcArgs& left_,
+extern MagickPPExport int operator != ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
-MagickPPExport int operator >  ( const PathArcArgs& left_,
+extern MagickPPExport int operator >  ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
-MagickPPExport int operator <  ( const PathArcArgs& left_,
+extern MagickPPExport int operator <  ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
-MagickPPExport int operator >= ( const PathArcArgs& left_,
+extern MagickPPExport int operator >= ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
-MagickPPExport int operator <= ( const PathArcArgs& left_,
+extern MagickPPExport int operator <= ( const PathArcArgs& left_,
                                       const PathArcArgs& right_ );
 
-typedef std::list<Magick::PathArcArgs> PathArcArgsList;
+typedef std::vector<Magick::PathArcArgs> PathArcArgsList;
 
 #if defined(MagickDLLExplicitTemplate)
 
@@ -2225,7 +2459,7 @@ MagickDrawableExtern template class MagickPPExport
 std::allocator<Magick::PathArcArgs>;
 
 // MagickDrawableExtern template class MagickPPExport
-// std::list<Magick::PathArcArgs, std::allocator<Magick::PathArcArgs> >;
+// std::vector<Magick::PathArcArgs, std::allocator<Magick::PathArcArgs> >;
 
 #endif // MagickDLLExplicitTemplate
 
@@ -2378,20 +2612,20 @@ double _y;
 };
 
 // Compare two PathCurvetoArgs objects regardless of LHS/RHS
-MagickPPExport int operator == ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator == ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
-MagickPPExport int operator != ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator != ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
-MagickPPExport int operator >  ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator >  ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
-MagickPPExport int operator <  ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator <  ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
-MagickPPExport int operator >= ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator >= ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
-MagickPPExport int operator <= ( const PathCurvetoArgs& left_,
+extern MagickPPExport int operator <= ( const PathCurvetoArgs& left_,
                                       const PathCurvetoArgs& right_ );
 
-typedef std::list<Magick::PathCurvetoArgs> PathCurveToArgsList;
+typedef std::vector<Magick::PathCurvetoArgs> PathCurveToArgsList;
 
 #if defined(MagickDLLExplicitTemplate)
 
@@ -2399,7 +2633,7 @@ MagickDrawableExtern template class MagickPPExport
 std::allocator<Magick::PathCurvetoArgs>;
 
 // MagickDrawableExtern template class MagickPPExport
-// std::list<Magick::PathCurvetoArgs, std::allocator<Magick::PathCurvetoArgs> >;
+// std::vector<Magick::PathCurvetoArgs, std::allocator<Magick::PathCurvetoArgs> >;
 
 #endif // MagickDLLExplicitTemplate
 
@@ -2559,20 +2793,20 @@ private:
 };
 
 // Compare two PathQuadraticCurvetoArgs objects regardless of LHS/RHS
-MagickPPExport int operator == ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator == ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_ );
-MagickPPExport int operator != ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator != ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_);
-MagickPPExport int operator >  ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator >  ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_);
-MagickPPExport int operator <  ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator <  ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_);
-MagickPPExport int operator >= ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator >= ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_ );
-MagickPPExport int operator <= ( const PathQuadraticCurvetoArgs& left_,
+extern MagickPPExport int operator <= ( const PathQuadraticCurvetoArgs& left_,
                                       const PathQuadraticCurvetoArgs& right_ );
 
-typedef std::list<Magick::PathQuadraticCurvetoArgs> PathQuadraticCurvetoArgsList;
+typedef std::vector<Magick::PathQuadraticCurvetoArgs> PathQuadraticCurvetoArgsList;
 
 #if defined(MagickDLLExplicitTemplate)
 
@@ -2580,7 +2814,7 @@ MagickDrawableExtern template class MagickPPExport
 std::allocator<Magick::PathQuadraticCurvetoArgs>;
 
 // MagickDrawableExtern template class MagickPPExport
-// std::list<Magick::PathQuadraticCurvetoArgs, std::allocator<Magick::PathQuadraticCurvetoArgs> >;
+// std::vector<Magick::PathQuadraticCurvetoArgs, std::allocator<Magick::PathQuadraticCurvetoArgs> >;
 
 #endif // MagickDLLExplicitTemplate
 

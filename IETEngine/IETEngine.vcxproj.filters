@@ -257,9 +257,6 @@
     <ClInclude Include="Friction.h">
       <Filter>Header Files\Physics\Drag</Filter>
     </ClInclude>
-    <ClInclude Include="BoundingBox.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
@@ -319,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

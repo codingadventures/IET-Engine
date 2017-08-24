@@ -52,7 +52,7 @@ namespace Physics
 		glm::mat3				d_polyhedral_tensor;
 
 
-		BoundingBox*			d_bounding_box;
+		AABB*			d_bounding_box;
 		BoundingSphere*			d_bounding_sphere;
 
 	public:
@@ -69,7 +69,7 @@ namespace Physics
 		float					Area() const;
 		float					Polyhedral_Mass() const;
 		BoundingSphere*			Bounding_sphere();
-		BoundingBox*			Bounding_box() ;
+		AABB*			Bounding_box() ;
 		float Calculate_Collision_Response(const RigidBody& other, glm::vec3 contact_point_a, 
 			glm::vec3 contact_point_b, glm::vec3 normal, bool use_polyhedral);
 
@@ -90,7 +90,7 @@ namespace Physics
 	float					RigidBody::Polyhedral_Mass() const   { return d_polyhedral_mass; } 
 	glm::vec3				RigidBody::Center_of_mass()  const	 { return d_center_of_mass; } 
 	BoundingSphere*			RigidBody::Bounding_sphere()		 { return d_bounding_sphere; } 
-	BoundingBox*			RigidBody::Bounding_box()			 { return d_bounding_box ; } 
+	AABB*			RigidBody::Bounding_box()			 { return d_bounding_box ; } 
 
 #pragma endregion 
 
@@ -211,7 +211,7 @@ namespace Physics
 		{
 			d_area += mesh.Area();
 
-			d_bounding_box = new BoundingBox(mesh.Bounding_box());
+			d_bounding_box = new AABB(mesh.Bounding_box());
 			d_bounding_sphere = new BoundingSphere(mesh.Bounding_sphere()); 
 			d_center_of_mass += mesh.m_center_of_mass;
 			d_polyhedral_center_of_mass += mesh.m_polyhedral_center_of_mass;

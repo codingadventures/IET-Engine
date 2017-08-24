@@ -97,7 +97,7 @@ namespace Controller
 
 
 #pragma region Constructor/Destructor
-	PhysicsController::~PhysicsController()
+	inline PhysicsController::~PhysicsController()
 	{
 		delete d_camera;
 		delete d_shader; 
@@ -106,19 +106,19 @@ namespace Controller
 		delete d_application_force_point;
 	}
 
-	PhysicsController::PhysicsController() 	
+	inline PhysicsController::PhysicsController() 	
 		: 
 		AbstractController("Physics Simulations"),
 		d_shader(nullptr), 
-		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
 		d_force_impulse_magnitude(10.0f),
-		d_force_impulse_application_point(0.0f),
 		d_plane_size(40.f),
+		d_force_impulse_direction(glm::vec3(0.0f,1.0f,0.0f)),
+		d_force_impulse_application_point(0.0f),
 		d_draw_spheres(false)
 	{
 		setup_current_instance();
 
-		d_light_ambient = glm::vec3(0.2f,0.2f,0.2f); //0.2
+		d_light_ambient = glm::vec3(1.f, 1., 1.); //0.2
 		d_light_diffuse = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_specular = glm::vec3(0.5f,0.5f,0.5f); //0.5
 		d_light_position = glm::vec3(-10.0f,20.0f,0.0f); 
@@ -351,7 +351,7 @@ namespace Controller
 
 	void PhysicsController::Draw()
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor( 81.0f / 255.0f, 168.0f / 255.0f, 186.0f / 255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);  

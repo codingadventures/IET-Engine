@@ -84,6 +84,11 @@ namespace Rendering
 
 		} 
 
+		Model(const Model  &aCopy): m_animation_matrix(aCopy.m_animation_matrix), m_skeleton(aCopy.m_skeleton), d_bone_location(aCopy.d_bone_location), d_numberOfBone(0)
+		{
+			d_meshes = aCopy.d_meshes;
+			d_textures_loaded = aCopy.d_textures_loaded; 
+		}
 
 		glm::vec3		Position() const { return decomposeT(d_position); } 
 
