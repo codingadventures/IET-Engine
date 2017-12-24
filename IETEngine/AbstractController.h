@@ -10,7 +10,7 @@
 
 namespace Controller
 {
-	extern "C" static void drawCallback();
+	extern "C" void drawCallback();
 
 	using namespace placeholders;
 	namespace Cam = Camera;
@@ -130,8 +130,7 @@ namespace Controller
 
 	static AbstractController* g_CurrentControllerInstance;
 
-	static void drawCallback()
-	{
+	void drawCallback() {
 		g_CurrentControllerInstance->Draw();
 	}
 }

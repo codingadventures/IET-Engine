@@ -1,7 +1,7 @@
 #ifndef Cube_h__
 #define Cube_h__
 
-#include "glm\detail\type_vec.hpp"
+#include "glm/detail/type_vec.hpp"
 #include <vector>
 
 namespace Rendering

@@ -134,7 +134,7 @@ EXIT:
 
 	void setMaxNumIterations(int maxIterations)
 	{
-		this->maxNumIterations = maxNumIterations;
+		this->maxNumIterations = maxIterations;
 	}
 
 	void setDistanceThreshold(float distanceThreshold)
@@ -220,7 +220,7 @@ EXIT:
 		}
 	}
 
-	virtual void Animate(glm::mat4 model,float animationTime, glm::mat4* animationSequence){ throw new exception("not implemented");};
+	virtual void Animate(glm::mat4 model,float animationTime, glm::mat4* animationSequence){ };
 private:
 	void checkAngleRestrictions (Bone* bone)
 	{ 

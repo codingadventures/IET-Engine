@@ -26,7 +26,7 @@ namespace Physics
 		BoundingBox(const BoundingBox& bounding_box);
 		BoundingBox(vector<Vertex> vertices);
 		
-		void operator+=(BoundingBox& const other_bbox){
+		void operator+=(const BoundingBox& other_bbox){
 			*this = Calculate(*this,  other_bbox);
 		} 
 		glm::vec4 Color() const;
@@ -35,7 +35,7 @@ namespace Physics
 
 		bool Is_Colliding() const;
 
-		void Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation);
+		void Recalculate_Bounding_Box(glm::vec3& translation,glm::quat& rotation);
 		void Recalculate_Vertices(glm::mat4* model_matrix);
 
 		EndPoint Get_EndPoint_X();
@@ -48,8 +48,8 @@ namespace Physics
 		glm::vec3 Get_Min_Coordinate_World_Space();
 		glm::vec3 Get_Max_Coordinate_World_Space();
 
-		static BoundingBox Calculate(BoundingBox& b1, BoundingBox& b2);
-		void calculate(glm::vec3* translation ,glm::quat* rotation  );
+		static BoundingBox Calculate(BoundingBox& b1, const BoundingBox& b2);
+		void calculate(glm::vec3& translation ,glm::quat& rotation  );
 	};
 
 	BoundingBox::BoundingBox(vector<Vertex> vertices) 
@@ -60,8 +60,9 @@ namespace Physics
 		m_depth(0.0f),
 		m_height(0.0f)
 	{
-
-		calculate(&glm::vec3(0.0f),&glm::quat());
+        glm::vec3 temp(0.0f);
+        glm::quat quat1;
+		calculate(temp,quat1);
 		d_initial_wdh.x = m_width;
 		d_initial_wdh.y = m_height;
 		d_initial_wdh.z = m_depth;
@@ -73,20 +74,22 @@ namespace Physics
 		m_model_space_vertices(bounding_box.m_model_space_vertices)
 
 	{
-		calculate(&glm::vec3(0.0f),&glm::quat());
+        glm::vec3 temp(0.0f);
+        glm::quat quat1;
+        calculate(temp,quat1);
 		d_initial_wdh.x = m_width;
 		d_initial_wdh.y = m_height;
 		d_initial_wdh.z = m_depth;
 	}
 
-	void BoundingBox::calculate(glm::vec3* translation,glm::quat* rotation)
+	void BoundingBox::calculate(glm::vec3& translation,glm::quat& rotation)
 	{
 		glm::vec3	min_coordinate;
 		glm::vec3   max_coordinate;
 		size_t		vert_size = m_vertices.size(); 
 		for (int i = 0; i < vert_size; i++)
 		{
-			glm::vec3 newPos  = glm::vec3(*rotation * glm::vec4(m_vertices[i].Position,1.0f));
+			glm::vec3 newPos  = glm::vec3(rotation * glm::vec4(m_vertices[i].Position,1.0f));
 
 			if(newPos.x < min_coordinate.x) min_coordinate.x = newPos.x;
 			if(newPos.x > max_coordinate.x) max_coordinate.x = newPos.x;
@@ -112,14 +115,14 @@ namespace Physics
 
 		m_scale_factor = glm::vec3(m_width,m_height,m_depth) / d_initial_wdh;
 
-		m_center =  (min_coordinate + max_coordinate) * 0.5f + *translation;
+		m_center =  (min_coordinate + max_coordinate) * 0.5f + translation;
 
 
 		m_min_coordinate = min_coordinate;
 		m_max_coordinate = max_coordinate;
 	}
 
-	Physics::BoundingBox BoundingBox::Calculate(BoundingBox& b1, BoundingBox& b2)
+	Physics::BoundingBox BoundingBox::Calculate(BoundingBox& b1, const BoundingBox& b2)
 	{
 		BoundingBox temp(b1.m_vertices);
 		temp.m_min_coordinate.x = glm::min(b1.m_min_coordinate.x,b2.m_min_coordinate.x);
@@ -173,7 +176,7 @@ namespace Physics
 		return  is_colliding ? glm::vec4(1.0f,0.0f,0.0f,0.3f) : glm::vec4(0.0f,1.0f,0.0f,1.0f);
 	}
 
-	void BoundingBox::Recalculate_Bounding_Box(glm::vec3* translation,glm::quat* rotation)
+	void BoundingBox::Recalculate_Bounding_Box(glm::vec3& translation,glm::quat& rotation)
 	{
 		calculate(translation, rotation);
 	}

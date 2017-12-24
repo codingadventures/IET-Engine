@@ -1,7 +1,7 @@
 #ifndef Material_h__
 #define Material_h__
 
-#include "glm\detail\type_vec3.hpp"
+#include "glm/detail/type_vec3.hpp"
 
 namespace Rendering
 {

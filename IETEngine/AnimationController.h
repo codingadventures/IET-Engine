@@ -67,7 +67,7 @@ namespace Controller
 
 		AnimationClip* d_idle_animation_clip;
 
-		void AnimationController::setupCurrentInstance();
+		void setupCurrentInstance();
 		void loadPlayer();
 		void textToScreen();
 		void loadEnemies();
@@ -132,10 +132,10 @@ namespace Controller
 
 		d_simulation_iteration = 0;
 		d_bone_index = 0;
-		vector<string> v_shader				= ArrayConversion<string>(2,string("vertex.vert"),string("common.vert")); 
-		vector<string> v_shaderBone				= ArrayConversion<string>(2,string("vertex_bone.vert"),string("common.vert")); 
+		vector<const char*> v_shader				= ArrayConversion<const char*>(2,"vertex.vert","common.vert");
+		vector<const char*> v_shaderBone				= ArrayConversion<const char*>(2,"vertex_bone.vert","common.vert");
 
-		vector<string> f_shader_texture		= ArrayConversion<string>(2,string("fragment.frag"),string("common.frag"));
+		vector<const char*> f_shader_texture		= ArrayConversion<const char*>(2,"fragment.frag","common.frag");
 
 		d_shader = new Shader(v_shader, f_shader_texture);
 		d_shader_bones = new Shader(v_shaderBone, "fragment_bone.frag");
@@ -482,31 +482,31 @@ namespace Controller
 
 
 		char pos[100];
-		sprintf_s(pos, "Dart Maul Position - (%f,%f,%f)", d_darth_maul_world_pos.x, d_darth_maul_world_pos.y, d_darth_maul_world_pos.z);
+		sprintf(pos, "Dart Maul Position - (%f,%f,%f)", d_darth_maul_world_pos.x, d_darth_maul_world_pos.y, d_darth_maul_world_pos.z);
 		screen_output(600.0f,VIEWPORT_HEIGHT - 30, pos);
 
 
 		char playerState[200];
 		if (d_player->m_walkingState != nullptr)
 		{
-			sprintf_s(playerState, "FSM 1: Player Walk State %s ", d_player->m_walkingState->GetCurrentAnimationName().c_str());
+			sprintf(playerState, "FSM 1: Player Walk State %s ", d_player->m_walkingState->GetCurrentAnimationName().c_str());
 			screen_output(600.0f,VIEWPORT_HEIGHT - 50, playerState);
 		}
 
 		char playerFightState[200];
 		if (d_player->m_swordState != nullptr)
 		{
-			sprintf_s(playerFightState, "FSM 2: Player Fight State %s ", d_player->m_swordState->GetCurrentAnimationName().c_str());
+			sprintf(playerFightState, "FSM 2: Player Fight State %s ", d_player->m_swordState->GetCurrentAnimationName().c_str());
 			screen_output(600.0f,VIEWPORT_HEIGHT - 70, playerFightState);
 		}
 
 
 		char splineTime[100];
-		sprintf_s(splineTime, "Spline Time %f", d_spline.timer);
+		sprintf(splineTime, "Spline Time %f", d_spline.timer);
 		screen_output(600.0f,VIEWPORT_HEIGHT - 150, splineTime);
 
 		char animationTime[100];
-		sprintf_s(animationTime, "Animation Time %f", d_global_clock);
+		sprintf(animationTime, "Animation Time %f", d_global_clock);
 		screen_output(600.0f,VIEWPORT_HEIGHT - 170, animationTime);
 
 		/*char loadTime[100];

@@ -1,7 +1,7 @@
 #ifndef Plane_h__
 #define Plane_h__
 
-#include "glm\glm.hpp"
+#include "glm/glm.hpp"
 #include "SupportPoint.h"
 
 

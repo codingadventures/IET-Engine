@@ -12,7 +12,7 @@ public:
 	explicit Idle(string transitionClipName);
 
 
-	virtual PlayerState* Idle::handleInput(bool* inputKeys) override;
+	virtual PlayerState* handleInput(bool* inputKeys) override;
 
 	virtual void Update(Player* player, double deltaTime) override;
 

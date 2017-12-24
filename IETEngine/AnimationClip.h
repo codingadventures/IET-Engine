@@ -4,10 +4,10 @@
 
 #include <string>
 #include "AnimationPose.h"
-#include "assimp\scene.h"
+#include "assimp/scene.h"
 #include "Skeleton.h"
-#include "assimp\Importer.hpp"
-#include "assimp\postprocess.h"
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
 
 class AnimationClip
 {

@@ -2,7 +2,7 @@
 #define Blender_h__
 
 #include "AnimationClip.h"
-#include "glm\glm.hpp"
+#include "glm/glm.hpp"
 
 class Blender
 {

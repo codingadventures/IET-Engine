@@ -3,7 +3,7 @@
 
 #include "Vertex.h"
 #include <vector>
-#include "glm\detail\type_vec3.hpp"
+#include "glm/detail/type_vec3.hpp"
 
 namespace Physics
 {

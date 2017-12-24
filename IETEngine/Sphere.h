@@ -1,12 +1,12 @@
 #ifndef Sphere_h__
 #define Sphere_h__
 
-#include "GL\glew.h"
+#include "GL/glew.h"
 #include <vector>
 #include "Vertex.h"
 #include <glm/glm.hpp>
 
-#include "glm\gtc\random.hpp"
+#include "glm/gtc/random.hpp"
 namespace Rendering
 {
 #define PI glm::pi<float>()

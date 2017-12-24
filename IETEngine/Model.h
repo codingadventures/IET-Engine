@@ -252,7 +252,7 @@ namespace Rendering
 					//IKMatrices[i] = glm::mat4(1); 
 
 					memset(Name, 0, sizeof(Name));
-					sprintf_s(Name, sizeof(Name), "bones[%d]", i);
+					//sprintf(Name, sizeof(Name), "bones[%d]", i);
 					//	GLint location = glGetUniformLocation(d_shader->Program, Name);
 					//					if (location == INVALID_UNIFORM_LOCATION) {
 					//fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);

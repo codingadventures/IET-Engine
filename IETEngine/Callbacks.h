@@ -24,12 +24,12 @@ class Callbacks{
 
 public: 
 
-	static void Callbacks::specialUpFunction(int key,int x, int y) 
+	static void specialUpFunction(int key,int x, int y)
 	{
 
 	}
 
-	static void Callbacks::mouseCallback( int xpos, int ypos)
+	static void mouseCallback( int xpos, int ypos)
 	{
 		/*MOUSE mouse = GLUTMouseToMouse(Button);
 		KEY_STATE OgldevKeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;
@@ -77,11 +77,11 @@ public:
 		just_warped = true;
 	}	
 
-	static void Callbacks::keyboardUpCallback(unsigned char key , int x, int y)
+	static void keyboardUpCallback(unsigned char key , int x, int y)
 	{
 		handleKeyboardInput(KEY_STATE_RELEASE,(KEY)key);
 	}
-	static void Callbacks::keyboardCallback(unsigned char key , int x, int y)
+	static void keyboardCallback(unsigned char key , int x, int y)
 	{
 		handleKeyboardInput(KEY_STATE_PRESS,(KEY)key);
 
@@ -109,7 +109,7 @@ public:
 		UserKeyboardCallback();
 	}   
 
-	static void Callbacks::mouseClickCallback(int Button, int State, int x, int y){
+	static void mouseClickCallback(int Button, int State, int x, int y){
 		TwEventMouseButtonGLUT(Button,State, x, y);
 		MOUSE mouse = GLUTMouseToMouse(Button);
 		KEY_STATE KeyState = (State == GLUT_DOWN) ?  KEY_STATE_PRESS :  KEY_STATE_RELEASE;

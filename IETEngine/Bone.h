@@ -48,17 +48,17 @@ struct Bone {
 	glm::mat4 localTransform;
 	glm::mat4 getParentTransform();
 
-	glm::mat4 Bone::getGlobalTransform(){
+	glm::mat4 getGlobalTransform(){
 		return getParentTransform() * glm::inverse(this->boneOffset);
 	}
 
-	glm::mat4 Bone::getWorldSpace (glm::mat4 const& model)
+	glm::mat4 getWorldSpace (glm::mat4 const& model)
 	{
 		auto position = model * this->finalTransform * glm::inverse(this->boneOffset);  
 		return position;
 	}
 
-	glm::vec3 Bone::getWorldSpacePosition(glm::mat4 const& model)
+	glm::vec3 getWorldSpacePosition(glm::mat4 const& model)
 	{
 		auto position = model * this->finalTransform * glm::inverse(this->boneOffset);  //all this is how i do it
 		return decomposeT(position);

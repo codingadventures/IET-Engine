@@ -13,12 +13,12 @@ namespace Rendering
 
 	public:
 
-		Point(Vertex position) : vertices(vector<Vertex>()){ 
+		Point(Vertex position) {
 			//vertices.push_back(position); 
 			Init();
 		}
-		Point(glm::vec3 position, glm::vec4 color) :vertices(vector<Vertex>()) 
-		{ 
+		Point(glm::vec3 position, glm::vec4 color)
+		{
 			Vertex  v;
 			v.Color = color;
 			v.Position = position;
@@ -96,7 +96,7 @@ namespace Rendering
 		}
 
 	private:
-		vector<Vertex>& vertices;
+		vector<Vertex> vertices;
 		GLuint VAO,VBO; 
 		size_t vertices_size;
 	};

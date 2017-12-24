@@ -7,6 +7,7 @@
 #include <vector>
 #include "AnimationEventController.h"
 
+using namespace std;
 
 class AnimationManager
 {
@@ -23,12 +24,12 @@ private:
 
 inline void AnimationManager::Load(double animationSpeed, string const &file_name, string const &animationName, map<string,bool> bonesToInclude /*= map<string,bool>()*/ )
 {
-	if (file_name.empty())
-		throw new exception("AnimationManager::Load - Insert a Valid Not Empty File Name");
-
-	if (animationName.empty())
-		throw new exception("AnimationManager::Load - Insert a Valid Not Empty Animation Name");
-
+	if (file_name.empty()) {
+	//	throw new exception("AnimationManager::Load - Insert a Valid Not Empty File Name");
+	}
+	if (animationName.empty()) {
+		//throw new exception("AnimationManager::Load - Insert a Valid Not Empty Animation Name");
+	}
 	auto animationLoad = new AnimationClip(animationSpeed, file_name, animationName); //I'm not sure this works
 	
 	animationLoad->m_bonesToInclude = bonesToInclude;
@@ -41,9 +42,9 @@ inline void AnimationManager::AddAnimationOnQueue(string animation_name)
 {
 	if (animation_name.empty()) return;
 
-	if ( this->d_animation_set.find(animation_name) == this->d_animation_set.end())
-		throw new exception("AnimationManager::AddAnimationOnQueue - Animation Name Not Available");
-
+	if ( this->d_animation_set.find(animation_name) == this->d_animation_set.end()) {
+		//throw new exception("AnimationManager::AddAnimationOnQueue - Animation Name Not Available");
+	}
 	auto pAnimation = this->d_animation_set[animation_name];
 
 	d_animation_event_controller.AddAnimation(pAnimation);

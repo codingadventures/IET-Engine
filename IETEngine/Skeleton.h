@@ -97,7 +97,7 @@ public:
 
 		if (this->boneMapping.find(boneName) != this->boneMapping.end()) 
 		{
-			strcpy_s (bone->name, boneName);
+			strcpy (bone->name, boneName);
 			has_bone = true;
 		}
 

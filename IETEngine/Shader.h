@@ -18,9 +18,9 @@ namespace Shaders
 		GLuint m_program;
 
 	private:
-		vector<string> d_vertex_source_path;
-		vector<string> d_fragment_source_path;
-		vector<string> d_geometry_source_path;
+		vector<const char*> d_vertex_source_path;
+		vector<const char*> d_fragment_source_path;
+		vector<const char*> d_geometry_source_path;
 
 		GLchar** d_vertex_code;
 
@@ -42,11 +42,12 @@ namespace Shaders
 		GLint d_geometry_shader;
 	public:
 		// Constructor reads and builds our shader
-		Shader(string vertexSourcePath, string fragmentSourcePath, string geometrySourcePath = "");
+		Shader(const char *vertexSourcePath, const char *fragmentSourcePath, const char *geometrySourcePath = "");
 
-		Shader(vector<string> vertex_source_paths, string fragmentSourcePath, string geometrySourcePath = "");
+		Shader(vector<const char *> vertex_source_paths, const char *fragmentSourcePath, const char *geometrySourcePath = "");
 
-		Shader(vector<string> vertex_source_paths, vector<string> fragment_source_paths, string geometrySourcePath = "");
+		Shader(vector<const char *> vertex_source_paths, vector<const char *> fragment_source_paths,
+			   const char *geometrySourcePath = "");
 
 		~Shader();
 
@@ -86,41 +87,44 @@ namespace Shaders
 		}
 	};
 
-	inline Shader::Shader(string vertexSourcePath, string fragmentSourcePath, string geometrySourcePath): d_n_vertex(1),d_n_fragment(1), d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
+	inline Shader::Shader(const char *vertexSourcePath, const char *fragmentSourcePath, const char *geometrySourcePath): d_n_vertex(1), d_n_fragment(1), d_n_geometry(geometrySourcePath ==
+																																											  nullptr ? 0 : 1)
 	{
 		d_vertex_source_path.push_back(vertexSourcePath);
 		d_fragment_source_path.push_back(fragmentSourcePath);
 
-		if (!geometrySourcePath.empty())
+		if (geometrySourcePath != nullptr)
 			d_geometry_source_path.push_back(geometrySourcePath);
 
 		init();
 	}
 
-	inline Shader::Shader(vector<string> vertex_source_paths, string fragmentSourcePath, string geometrySourcePath):
+	inline Shader::Shader(vector<const char*> vertex_source_paths, const char *fragmentSourcePath,
+						  const char *geometrySourcePath):
 		d_vertex_source_path(vertex_source_paths),
 		d_n_vertex(vertex_source_paths.size()),
 		d_n_fragment(1),
-		d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
+		d_n_geometry(geometrySourcePath == nullptr ? 0 : 1)
 	{
 		d_fragment_source_path.push_back(fragmentSourcePath);
 
-		if (!geometrySourcePath.empty())
+		if (geometrySourcePath != nullptr)
 			d_geometry_source_path.push_back(geometrySourcePath);
 
 
 		init();
 	}
 
-	inline Shader::Shader(vector<string> vertex_source_paths, vector<string> fragment_source_paths, string geometrySourcePath):
+	inline Shader::Shader(vector<const char*> vertex_source_paths, vector<const char*> fragment_source_paths,
+						  const char *geometrySourcePath):
 		d_vertex_source_path(vertex_source_paths),
 		d_fragment_source_path(fragment_source_paths),
 
 		d_n_vertex(vertex_source_paths.size()),
 		d_n_fragment(fragment_source_paths.size()) ,
-		d_n_geometry(geometrySourcePath.empty() ? 0 : 1)
+		d_n_geometry(geometrySourcePath != nullptr ? 0 : 1)
 	{
-		if (!geometrySourcePath.empty())
+		if (geometrySourcePath != nullptr)
 			d_geometry_source_path.push_back(geometrySourcePath);
 
 		init();
@@ -350,12 +354,12 @@ namespace Shaders
 			cout << "File names: \n";
 			for (auto vertex : d_vertex_source_path)
 			{
-				cout << vertex + "\n";
+				//cout << strcat(vertex, "\n");
 			}
 
 			for (auto fragment : d_fragment_source_path)
 			{
-				cout << fragment + "\n";
+				//cout << fragment + "\n";
 			}
 
 			cout << infoLog << endl;

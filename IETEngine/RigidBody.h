@@ -164,8 +164,9 @@ namespace Physics
 		d_bounding_sphere->center += m_position;
 		d_bounding_box->m_center += m_position;
 
-		d_bounding_box->Recalculate_Bounding_Box(&position,&orientation);
-		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
+		d_bounding_box->Recalculate_Bounding_Box(position,orientation);
+		auto mat = m_model.GetModelMatrix();
+		d_bounding_box->Recalculate_Vertices(&mat);
 		m_model.Rotate(orientation);
 		m_model.Translate(m_position);
 
@@ -225,8 +226,8 @@ namespace Physics
 
 		d_inverse_inertial_tensor	= glm::inverse(d_inertial_tensor);
 		d_inverse_polyhedral_tensor = glm::inverse(d_polyhedral_tensor);
-
-		d_bounding_box->Recalculate_Vertices(&m_model.GetModelMatrix());
+		auto mat = m_model.GetModelMatrix();
+		d_bounding_box->Recalculate_Vertices(&mat);
 	} 
 
 	float RigidBody::Calculate_Collision_Response(const RigidBody& other, glm::vec3 contact_point_a, glm::vec3 contact_point_b, glm::vec3 normal, bool use_polyhedral)
